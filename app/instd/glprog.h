@@ -28,6 +28,7 @@ private:
     alo::XArrow m_logo;
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_logoVbo;
+    QOpenGLBuffer m_offsetVbo;
     QOpenGLShaderProgram *m_program;
     int m_projMatrixLoc;
     int m_mvMatrixLoc;

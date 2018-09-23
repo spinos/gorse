@@ -2,7 +2,7 @@
  * XArrow.h
  * aloe
  *
- * triangle array of x-pointing arrow of lenght 10
+ * triangle array of x-pointing arrow of lenght 1
  * position|normal
  */
 

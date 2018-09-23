@@ -25,7 +25,7 @@ QSize View3DWidget::minimumSizeHint() const
 
 QSize View3DWidget::sizeHint() const
 {
-    return QSize(400, 400);
+    return QSize(500, 500);
 }
 
 void View3DWidget::initializeGL()

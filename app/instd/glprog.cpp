@@ -18,6 +18,7 @@ void GLProg::cleanup()
         return;
     
     m_logoVbo.destroy();
+    m_offsetVbo.destroy();
     delete m_program;
     m_program = 0;
 }
@@ -25,6 +26,7 @@ void GLProg::cleanup()
 static const char *vertexShaderSource =
     "attribute vec4 vertex;\n"
     "attribute vec3 normal;\n"
+    "attribute mat4 voffset;\n"
     "varying vec3 vert;\n"
     "varying vec3 vertNormal;\n"
     "uniform mat4 projMatrix;\n"
@@ -33,7 +35,7 @@ static const char *vertexShaderSource =
     "void main() {\n"
     "   vert = vertex.xyz;\n"
     "   vertNormal = normalMatrix * normal;\n"
-    "   gl_Position = projMatrix * mvMatrix * vertex;\n"
+    "   gl_Position = projMatrix * mvMatrix * voffset * vertex;\n"
     "}\n";
 
 static const char *fragmentShaderSource =
@@ -57,6 +59,7 @@ void GLProg::initializeGL()
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
     m_program->bindAttributeLocation("vertex", 0);
     m_program->bindAttributeLocation("normal", 1);
+    m_program->bindAttributeLocation("voffset", 2);
     m_program->link();
 
     m_program->bind();
@@ -65,42 +68,66 @@ void GLProg::initializeGL()
     m_normalMatrixLoc = m_program->uniformLocation("normalMatrix");
     m_lightPosLoc = m_program->uniformLocation("lightPos");
 
-    // Create a vertex array object. In OpenGL ES 2.0 and OpenGL 2.x
-    // implementations this is optional and support may not be present
-    // at all. Nonetheless the below code works in all cases and makes
-    // sure there is a VAO when one is needed.
+/// a vao can have multiple vertex buffer objects
     m_vao.create();
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
 
-    // Setup our vertex buffer object.
-    m_logoVbo.create();
-    m_logoVbo.bind();
-    m_logoVbo.allocate((const GLfloat *)m_logo.c_data(), m_logo.count() * sizeof(GLfloat));
-
-    // Store the vertex attribute bindings for the program.
     setupVertexAttribs();
 
     // Light position is fixed.
-    m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 30, 70));
+    m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 40, 70));
 
     m_program->release();
+    
 }
 
 void GLProg::setupVertexAttribs()
 {
+/// vertex buffer object for geometry once
+    m_logoVbo.create();
     m_logoVbo.bind();
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    m_logoVbo.allocate((const GLfloat *)m_logo.c_data(), m_logo.count() * sizeof(GLfloat));
+
+    QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
     f->glEnableVertexAttribArray(0);
     f->glEnableVertexAttribArray(1);
     f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
     f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
     m_logoVbo.release();
+    
+    QMatrix4x4 aoffset;
+    QVector<QMatrix4x4> offsetMats;
+    for(int i=0;i<1024;++i) {
+        aoffset.setToIdentity();
+        aoffset.translate(256 - 0.5 * i, 0,0);
+        aoffset.rotate(7.0f * i, 0, 0, 1); /// why rotate after translate?
+        offsetMats<<aoffset;
+    }
+/// vertex buffer object for instance matrices 
+    m_offsetVbo.create();
+    m_offsetVbo.bind();
+    m_offsetVbo.allocate(offsetMats.constData(), 1024 * sizeof(QMatrix4x4));
+
+/// http://www.informit.com/articles/article.aspx?p=2033340&seqNum=5
+/// each location can only have 4 floats
+/// mat4 needs 4 locations
+    for (int i = 0; i < 4; i++) {
+        f->glEnableVertexAttribArray(2 + i);
+    
+        f->glVertexAttribPointer(2 + i, 4, GL_FLOAT, GL_FALSE, /// 4 floats
+            sizeof(QMatrix4x4), /// stride
+            (void *)(sizeof(QVector4D) * i) ); /// offset
+        
+/// attribute will advance once every instance 
+        f->glVertexAttribDivisor(2 + i, 1);
+    }
+    m_offsetVbo.release();
 }
 
 void GLProg::paintGL(const QMatrix4x4 &projectionMat, const QMatrix4x4 &cameraMat)
 { 
     m_world.setToIdentity();
-    //m_world.rotate(220.0f, 1, 0, 0);
+    m_world.rotate(40.0f, 0, 0, 1);
 
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
     m_program->bind();
@@ -109,7 +136,7 @@ void GLProg::paintGL(const QMatrix4x4 &projectionMat, const QMatrix4x4 &cameraMa
     QMatrix3x3 normalMatrix = m_world.normalMatrix();
     m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
 
-    glDrawArrays(GL_TRIANGLES, 0, m_logo.vertexCount());
-
+    glDrawArraysInstanced(GL_TRIANGLES, 0, m_logo.vertexCount(), 1024);
+    
     m_program->release();
 }
