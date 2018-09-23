@@ -93,7 +93,7 @@ bool GLSLBase::diagnose(std::string& log)
 	int supported = 1;
 	int j = sizeof(entriesNeeded)/sizeof(glExtensionEntry);
 	
-#ifdef WIN32
+#ifdef XWIN32
 	gExtensionInit();
      char sbuf[64];
 	 for (int i = 0; i < j; i++) {
@@ -111,7 +111,7 @@ bool GLSLBase::diagnose(std::string& log)
 #else
     glewInit();
 #endif
-
+/*
 	const GLubyte *strExt = glGetString(GL_EXTENSIONS);
 	for (int i = 0; i < j; i++) {
 		entriesNeeded[i].supported = gluCheckExtension((GLubyte*)entriesNeeded[i].name, strExt) |
@@ -121,7 +121,7 @@ bool GLSLBase::diagnose(std::string& log)
 		sst<<"\n "<<entriesNeeded[i].name<<" "<<(int)entriesNeeded[i].supported;
 		log += sst.str();
 		supported &= entriesNeeded[i].supported;
-	}
+	}*/
 #endif	
 	
 	if(supported != 1) return 0;

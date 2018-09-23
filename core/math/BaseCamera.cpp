@@ -13,7 +13,7 @@ namespace alo {
 
 BaseCamera::BaseCamera() 
 {
-    m_nearClipPlane = 2.f;
+    m_nearClipPlane = 0.1f;
     m_farClipPlane = 1000.f;
 	fPortWidth = 400;
 	fPortHeight = 300;

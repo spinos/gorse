@@ -11,7 +11,26 @@
 #define ALO_GL_HEADS_H
 
 #ifdef WIN32
-#include <ogl/gExtension.h>
+//#include <ogl/gExtension.h>
+//#include <windows.h>
+//#include <GL/gl.h>
+//#include <GL/glu.h>
+#include <GL/glew.h>
+
+//#include <QtANGLE/KHR/khrplatform.h>
+//#include <QtANGLE/GLES2/gl2.h>
+//#include <QtANGLE/GLES2/gl2ext.h>
+/*
+#include <cstdint>
+#ifndef GL_HEADER_HAS_GLINT64
+
+    typedef int64_t khronos_int64_t;
+#endif
+#ifndef GL_HEADER_HAS_GLUINT64
+
+    typedef uint64_t khronos_uint64_t;
+#endif
+*/
 #endif
 
 #ifdef __APPLE__

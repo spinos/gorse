@@ -5,7 +5,7 @@ SET (ZLIB_INCLUDE_DIR "D:/usr/zlib-1.2.5")
 SET (ZLIB_LIBRARY "D:/usr/zlib-1.2.5/zlib.lib")
 else ()
 
-FIND_PACKAGE (ZLIB REQUIRED)
+FIND_PACKAGE (ZLIB)
 MESSAGE (" zlib version major is " ${ZLIB_VERSION_MAJOR})
 MESSAGE (" zlib version minor is " ${ZLIB_VERSION_MINOR})
 
@@ -27,7 +27,7 @@ set (SZIP_LIBRARY "/usr/local/lib/libszip.a")
 ENDIF ()
 
 IF (WIN32)
-FIND_PACKAGE (SZIP REQUIRED)
+FIND_PACKAGE (SZIP)
 MESSAGE (" szip version major is " ${SZIP_VERSION_MAJOR})
 MESSAGE (" szip version minor is " ${SZIP_VERSION_MINOR})
 MESSAGE (" szip include is " ${SZIP_INCLUDE_DIR})
