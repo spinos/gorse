@@ -34,6 +34,9 @@ void View3DWidget::initializeGL()
     initializeOpenGLFunctions();
     qDebug()<<(char *)glGetString(GL_VERSION);
     qDebug()<<(char *)glGetString(GL_SHADING_LANGUAGE_VERSION );
+    QOpenGLContext * ctx = context();
+    //qDebug()<<" "<<ctx->extensions();
+    //qDebug()<<(char *)getExtension("OES_standard_derivatives");
     
     glClearColor(0.37, 0.37, 0.37, 1);
 	glEnable(GL_DEPTH_TEST);

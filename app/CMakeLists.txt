@@ -1,1 +1,2 @@
 ADD_SUBDIRECTORY (instd)
+ADD_SUBDIRECTORY (wiref)

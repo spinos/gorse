@@ -11,9 +11,3 @@ ${GORS_RNG_SRC}
 )
 
 target_link_libraries (instd Qt5::OpenGL)
-target_link_libraries (instd ${Boost_SYSTEM_LIBRARY})
-target_link_libraries (instd ${Boost_DATE_TIME_LIBRARY})
-target_link_libraries (instd ${Boost_REGEX_LIBRARY})
-target_link_libraries (instd ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries (instd ${Boost_THREAD_LIBRARY})
-target_link_libraries (instd ${Boost_CHRONO_LIBRARY})
