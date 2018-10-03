@@ -2,7 +2,6 @@
  * YCylinder.cpp
  * aloe
  *
- *
  */
 
 #include "YCylinder.h"

@@ -46,6 +46,24 @@ Vector3F* ATriangleMesh::positions()
 Vector3F* ATriangleMesh::normals()
 { return m_normals.data(); }
 
+void ATriangleMesh::setNumVertices(int x)
+{ m_numVertices = x; }
+
+void ATriangleMesh::setNumTriangles(int x)
+{
+    m_numTriangles = x;
+    m_numIndices = x * 3;
+}
+
+SimpleBuffer<Vector3F>& ATriangleMesh::positionBuffer()
+{ return m_positions; }
+
+SimpleBuffer<Vector3F>& ATriangleMesh::normalBuffer()
+{ return m_normals; }
+
+SimpleBuffer<unsigned>& ATriangleMesh::indexBuffer()
+{ return m_indices; }
+
 void ATriangleMesh::createTriangleMesh(int vertexCount, int triangleCount)
 {
     m_numVertices = vertexCount;

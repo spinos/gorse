@@ -41,18 +41,25 @@ public:
     void createNormalArray(SimpleBuffer<Vector3F>& nml) const;
     void createBarycentricCoordinates(SimpleBuffer<Vector3F>& baryc) const;
     
+    void reverseTriangleNormals();
+    void calculateVertexNormals();
+    Vector3F getTriangleNormal(int i) const;
+    float getTriangleArea(int i) const;
+    
 protected:
 	
     void createTriangleMesh(int vertexCount, int triangleCount);
 	
-	void reverseTriangleNormals();
-    void calculateVertexNormals();
-    Vector3F getTriangleNormal(int i) const;
-    float getTriangleArea(int i) const;
-	
     unsigned* indices();
     Vector3F* positions();
     Vector3F* normals();
+    
+    void setNumVertices(int x);
+    void setNumTriangles(int x);
+    
+    SimpleBuffer<Vector3F>& positionBuffer();
+    SimpleBuffer<Vector3F>& normalBuffer();
+    SimpleBuffer<unsigned>& indexBuffer();
     
 private:
     

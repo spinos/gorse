@@ -30,7 +30,6 @@ public:
     ~SimpleBuffer();
     
     void createBuffer(int count);
-    void extendBuffer(int count);
     
     T* data();
     const T* c_data() const;
@@ -41,6 +40,7 @@ public:
 private:
 
     int calcCap(int count) const;
+    void extendBuffer(int count);
     
 };
 
@@ -61,8 +61,7 @@ void SimpleBuffer<T>::createBuffer(int count)
 {
     if(m_cap < count)
         extendBuffer(count);
-    else
-        m_count = count;
+    m_count = count;
 }
 
 template<typename T>
@@ -75,7 +74,6 @@ void SimpleBuffer<T>::extendBuffer(int count)
         delete[] m_data;
     }
     m_data = d;
-    m_count = count;
 }
 
 template<typename T>
