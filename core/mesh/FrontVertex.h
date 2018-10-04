@@ -15,23 +15,27 @@ namespace alo {
      
 class FrontVertex {
   
-/// direction of front
+/// move in local space
     Vector3F m_dir;
     int m_id;
     Vector3F* m_pos;
+    float m_curvature;
     
 public:
     FrontVertex();
-    FrontVertex(Vector3F* pos, const Vector3F& dir, int id);
+    FrontVertex(Vector3F* pos, int id);
     
+    Vector3F& dir();
     Vector3F* &pos();
     int& id();
+    float& curvature();
     
     const Vector3F* pos() const;
     const Vector3F& dir() const;
     const int& id() const;
-/// pos + dir
-    Vector3F getPos1() const;
+    const float& curvature() const;
+
+    void modifyDir(const Vector3F& v);
 
 /// same id
     bool operator==(const FrontVertex& b) const;

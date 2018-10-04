@@ -10,7 +10,7 @@
 namespace alo {
  
 EllipseFunc::EllipseFunc() :
-    m_a(1.f), m_e(.9f)
+    m_a(1.f), m_e(.1f)
 {}
     
 void EllipseFunc::setA(float a)

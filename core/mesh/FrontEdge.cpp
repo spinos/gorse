@@ -9,16 +9,23 @@
 namespace alo {
     
 FrontEdge::FrontEdge() : 
-    m_v0(0), m_v1(0),
-    m_f0(-1), m_f1(-1),
-    m_e0(0), m_e1(0)
+    m_v0(0), 
+    m_v1(0),
+    m_f0(-1), 
+    m_f1(-1),
+    m_e0(0), 
+    m_e1(0)
 {}
 
 FrontEdge::FrontEdge(FrontVertex* v0, FrontVertex* v1) : 
-    m_v0(v0), m_v1(v1),
-    m_f0(-1), m_f1(-1),
-    m_e0(0), m_e1(0)
-{}
+    m_f0(-1), 
+    m_f1(-1),
+    m_e0(0), 
+    m_e1(0)
+{
+    m_v0 = v0;
+    m_v1 = v1;
+}
 
 FrontVertex* &FrontEdge::v0()
 { return m_v0; }
@@ -62,6 +69,40 @@ bool FrontEdge::connectBack(FrontEdge* another)
         return true;
     }
     return false;
+}
+
+Vector3F FrontEdge::getCenter() const
+{ return (*v0()->pos() + *v1()->pos() ) * .5f; }
+
+float FrontEdge::angleToE1(const Vector3F& nml) const
+{
+    if(!e1()) return 0.f;
+
+    const FrontVertex* vc = e1()->v1();
+
+    const Vector3F ab = *v1()->pos() - *v0()->pos();
+    const Vector3F bc = *vc->pos() - *v1()->pos();
+    const Vector3F ac = *vc->pos() - *v0()->pos();
+    Vector3F abxbc = ab.cross(bc);
+    const float labxbc = abxbc.length();
+    if(labxbc < 1e-6f) return 0.f;
+
+    float theta = acos(ab.normal().dot(bc.normal()));
+
+    if(nml.dot(abxbc) < 0.f) theta = -theta;
+    return theta;
+}
+
+float FrontEdge::getLength() const
+{ return getDv().length(); }
+
+Vector3F FrontEdge::getDv() const
+{ return *v1()->pos() - *v0()->pos(); }
+
+std::ostream& operator<<(std::ostream &output, const FrontEdge & p) 
+{
+    output << " (" << p.v0()->id() <<"," << p.v1()->id() <<")";
+    return output;
 }
 
 }

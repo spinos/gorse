@@ -18,16 +18,25 @@ class FrontLine {
     
     std::deque<FrontEdge> m_edges;
     std::deque<FrontVertex> m_vertices;
-    
+    Vector3F m_dir;
+    float m_shrink;
+    Vector3F m_center;
+/// rotate around
+    Vector3F m_normal;
+
 public:
     FrontLine();
     ~FrontLine();
     
+    void setDirection(const Vector3F& v);
+    void setShrinking(float x);
 
-    void addVertex(Vector3F* pos, const Vector3F& dir, int id);
+    void addVertex(Vector3F* pos, int id);
     void closeLine();
     void clearLine();
     
+    void preAdvance();
+
     int numVertices() const;
     int numEdges() const;
     const FrontEdge& getEdge(int i) const;
@@ -36,12 +45,18 @@ public:
     const FrontVertex* head() const;
 /// v1 of last edge
     const FrontVertex* tail() const;
+
+    Vector3F getAdvanceToPos(const FrontVertex* vert) const;
     
     friend std::ostream& operator<<(std::ostream &output, const FrontLine & p);
     
 private:
     void addEdge(FrontVertex* v0, FrontVertex* v1);
-    
+    void calcCenter();
+    void calcNormal();
+    void calcVertexDirection();
+/// change of tangent direction at each vertex
+    void calcVertexCurvature();
 };
 
 }

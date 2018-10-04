@@ -2,7 +2,7 @@
  * FrontMesher.h
  * aloe
  *
- * create triangle mesh by advancing front
+ * create triangle mesh by advancing edge front
  *
  */
  
@@ -28,12 +28,12 @@ public:
     
     void setFrontId(int x);
 /// a --> b
-    void advanceFront(FrontLine& b, const FrontLine& a);
+    void advanceFront(FrontLine& b, FrontLine& a);
     
 private:
 
     void advanceEdge(FrontLine& b, int idx, const FrontLine& a );
-    int addVertex(FrontLine& b, const Vector3F& pos, const Vector3F& dir);
+    int addVertex(FrontLine& b, const Vector3F& pos);
 
 };
 

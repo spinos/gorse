@@ -10,7 +10,7 @@
 #define ALO_MISC_FUNCS_H
 
 #include <stdlib.h>
-#include <cmath>
+#include <math.h>
 
 namespace alo {
 

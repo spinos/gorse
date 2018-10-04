@@ -46,6 +46,15 @@ public:
     const FrontEdge* e0() const;
     const FrontEdge* e1() const;
     
+    Vector3F getCenter() const;
+    Vector3F getDv() const;
+    float getLength() const;
+
+    float angleToE1(const Vector3F& nml) const;
+
+    friend std::ostream& operator<<(std::ostream &output, const FrontEdge & p);
+    
+    
 private:
 
 };
