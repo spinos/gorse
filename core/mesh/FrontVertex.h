@@ -36,6 +36,7 @@ public:
     const float& curvature() const;
 
     void modifyDir(const Vector3F& v);
+    void modifyPos(const Vector3F& v, const float& wei);
 
 /// same id
     bool operator==(const FrontVertex& b) const;

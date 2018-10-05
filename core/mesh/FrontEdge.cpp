@@ -5,27 +5,25 @@
  */
  
 #include "FrontEdge.h"
+#include <math/miscfuncs.h>
 
 namespace alo {
     
 FrontEdge::FrontEdge() : 
     m_v0(0), 
     m_v1(0),
-    m_f0(-1), 
-    m_f1(-1),
     m_e0(0), 
-    m_e1(0)
+    m_e1(0),
+    m_advanceType(GenQuad)
 {}
 
 FrontEdge::FrontEdge(FrontVertex* v0, FrontVertex* v1) : 
-    m_f0(-1), 
-    m_f1(-1),
+    m_v0(v0), 
+    m_v1(v1),
     m_e0(0), 
-    m_e1(0)
-{
-    m_v0 = v0;
-    m_v1 = v1;
-}
+    m_e1(0),
+    m_advanceType(GenQuad)
+{}
 
 FrontVertex* &FrontEdge::v0()
 { return m_v0; }
@@ -39,6 +37,14 @@ FrontEdge* &FrontEdge::e0()
 FrontEdge* &FrontEdge::e1()
 { return m_e1; }
 
+void FrontEdge::setAdvanceType(GenType x)
+{ 
+    if(e0()) {
+        if(e0()->advanceType() == x) return;
+    }
+    m_advanceType = x; 
+}
+
 const FrontVertex* FrontEdge::v0() const
 { return m_v0; }
 
@@ -50,6 +56,9 @@ const FrontEdge* FrontEdge::e0() const
 
 const FrontEdge* FrontEdge::e1() const
 { return m_e1; }
+
+const FrontEdge::GenType& FrontEdge::advanceType() const
+{ return m_advanceType; }
 
 bool FrontEdge::connect(FrontEdge* another)
 {
@@ -98,6 +107,18 @@ float FrontEdge::getLength() const
 
 Vector3F FrontEdge::getDv() const
 { return *v1()->pos() - *v0()->pos(); }
+
+bool FrontEdge::isFlat() const
+{ return (  Absolute<float>(v0()->curvature()) < 0.18f && Absolute<float>(v1()->curvature()) < 0.18f) ; }
+
+void FrontEdge::averagePosition(const float& wei)
+{
+    if(e0())
+        v0()->modifyPos((*e0()->v0()->pos() + *v1()->pos() ) * .5f, wei);
+
+    if(e1())
+        v1()->modifyPos((*e1()->v1()->pos() + *v0()->pos() ) * .5f, wei);
+}
 
 std::ostream& operator<<(std::ostream &output, const FrontEdge & p) 
 {

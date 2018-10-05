@@ -22,12 +22,19 @@ class FrontEdge {
 /// connected to vertices and faces
     FrontVertex* m_v0;
     FrontVertex* m_v1;
-    int m_f0, m_f1;
 /// incoming and outgoing edge
     FrontEdge* m_e0;
     FrontEdge* m_e1;
     
 public:
+
+    enum GenType {
+        GenNone = 0,
+        GenTriangle,
+        GenQuad,
+        GenPentagon
+    };
+
     FrontEdge();
     FrontEdge(FrontVertex* v0, FrontVertex* v1);
     
@@ -39,23 +46,32 @@ public:
     
     FrontEdge* &e0();
     FrontEdge* &e1();
+
+    void setAdvanceType(GenType x);
     
     const FrontVertex* v0() const;
     const FrontVertex* v1() const;
     
     const FrontEdge* e0() const;
     const FrontEdge* e1() const;
+
+    const GenType& advanceType() const;
     
     Vector3F getCenter() const;
     Vector3F getDv() const;
     float getLength() const;
 
     float angleToE1(const Vector3F& nml) const;
+    bool isFlat() const;
+
+    void averagePosition(const float& wei);
 
     friend std::ostream& operator<<(std::ostream &output, const FrontEdge & p);
     
     
 private:
+
+    GenType m_advanceType; 
 
 };
 

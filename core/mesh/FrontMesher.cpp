@@ -35,6 +35,43 @@ void FrontMesher::advanceFront(FrontLine& b, FrontLine& a)
 void FrontMesher::advanceEdge(FrontLine& b, int idx, const FrontLine& a)
 {
     const FrontEdge& ea = a.getEdge(idx);
+
+    if(ea.advanceType() == FrontEdge::GenTriangle )
+        advanceTriangleEdge(b, ea, idx, a);
+    else
+        advanceQuadEdge(b, ea, idx, a);
+}
+
+void FrontMesher::advanceTriangleEdge(FrontLine& b, const FrontEdge& ea, int idx, const FrontLine& a)
+{
+    const FrontVertex* va0 = ea.v0();
+    const FrontVertex* va1 = ea.v1();
+    Vector3F pvb0 = (a.getAdvanceToPos(va0)
+                    + a.getAdvanceToPos(va1) ) * .5f;
+    int ivb0;
+    if(idx < 1) {  
+/// first one
+        ivb0 = addVertex(b, pvb0);
+        
+    } else if(idx == a.numEdges() - 1) {
+/// last edge is closed
+        if(ea.e1()) {
+            const FrontVertex* bhead = b.head();
+            ivb0 = bhead->id();
+            b.closeLine();
+        } else
+            ivb0 = addVertex(b, pvb0);
+    } else {
+        ivb0 = b.tail()->id();
+        Vector3F* p0 = b.tail()->pos();
+        *p0 = *p0 * .5f + pvb0 * .5f;
+    }
+
+    m_msh->addTriangle(va0->id(), va1->id(), ivb0);
+}
+
+void FrontMesher::advanceQuadEdge(FrontLine& b, const FrontEdge& ea, int idx, const FrontLine& a)
+{
     const FrontVertex* va0 = ea.v0();
     const FrontVertex* va1 = ea.v1();
     Vector3F pvb0 = a.getAdvanceToPos(va0);

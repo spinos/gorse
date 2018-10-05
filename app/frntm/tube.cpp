@@ -19,16 +19,16 @@ void Tube::createTube()
     
     EllipseFunc ellip;
     ellip.setA(10.f);
-    ellip.setE(.3f);
+    ellip.setE(.34f);
     
-    const int nu = 64;
+    const int nu = 72;
     const float da = 6.28318531f / (float)nu;
     
     for(int i=0;i<nu;++i) {
         float phi = da * i;
-        float wr = ScaledSin(phi * 8.f + ur.randf1(), .1f, .6f)
-                    + ScaledSin(phi * 4.3 + ur.randf1(), .0f, .2f)
-                    + ScaledSin(phi * 1.7 + ur.randf1(), .0f, .1f);
+        float wr = ScaledSin(phi * 7.f + ur.randf1() * .9f, .13f, .65f)
+                    + ScaledSin(phi * 4.1 + ur.randf1(), .0f, .4f)
+                    + ScaledSin(phi * 1.7 + ur.randf1(), .0f, .2f);
 
         float radius = ellip.polarForm(phi) +  2.f * wr;
         addVertex(Vector3F(radius * cos(phi), 0.f, -radius * sin(phi) ));
@@ -42,21 +42,25 @@ void Tube::createTube()
     }
     
     l[0].closeLine();
+    l[0].smooth(.1f);
+    l[0].setMinEdgeLength(.43f);
     //std::cout<<" front a "<<l[0];
     
-    l[0].setShrinking(.16f);
-    l[1].setShrinking(.17f);
+    constexpr float cshrinking = .23f;
+    l[0].setShrinking(cshrinking);
+    l[1].setShrinking(cshrinking);
     
     l[0].setDirection(up);
     l[1].setDirection(up);
     
     msher.attachMesh(this);
 
-    for(int i=0;i<5;++i) {
+    for(int i=0;i<6;++i) {
         msher.setFrontId(i);
         FrontLine& la = l[i & 1];
         FrontLine& lb = l[(i+1) & 1];
         msher.advanceFront(lb, la);
+        lb.smooth();
         //std::cout<<" front b "<<lb;
         la.clearLine();
     }

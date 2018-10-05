@@ -44,6 +44,9 @@ const float& FrontVertex::curvature() const
 void FrontVertex::modifyDir(const Vector3F& v)
 { m_dir = m_dir * .5f + v * .5f; }
 
+void FrontVertex::modifyPos(const Vector3F& v, const float& wei)
+{ *m_pos = *m_pos * (1.f - wei) + v * wei; }
+
 bool FrontVertex::operator==(const FrontVertex& b) const
 { return b.id() == id(); }
 

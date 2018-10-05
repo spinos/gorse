@@ -7,6 +7,8 @@
 #include "FrontLine.h"
 
 namespace alo {
+
+float FrontLine::MinEdgeLength = 0.f;
     
 FrontLine::FrontLine() : 
 m_dir(0,1,0), m_shrink(.07f)
@@ -73,10 +75,25 @@ const FrontVertex& FrontLine::getVertex(int i) const
 { return m_vertices[i]; }
 
 const FrontVertex* FrontLine::head() const
-{ return m_edges.front().v0(); }
+{ 
+    if(m_edges.size() < 1)
+        return &m_vertices[0];
+    return m_edges.front().v0(); 
+}
 
 const FrontVertex* FrontLine::tail() const
-{ return m_edges.back().v1(); }
+{ 
+    if(m_edges.size() < 1)
+        return &m_vertices[0];
+    return m_edges.back().v1(); 
+}
+
+FrontVertex* FrontLine::tail()
+{ 
+    if(m_edges.size() < 1)
+        return &m_vertices[0];
+    return m_edges.back().v1(); 
+}
 
 void FrontLine::calcCenter()
 {
@@ -140,6 +157,43 @@ void FrontLine::calcVertexCurvature()
     }
 }
 
+void FrontLine::calcLength()
+{
+    m_length = 0.f;
+    std::deque<FrontEdge>::const_iterator it = m_edges.begin();
+    for(;it != m_edges.end();++it) {
+
+        m_length += it->getDv().length();
+    }
+}
+
+void FrontLine::calcEdgeAdvanceType()
+{
+    if(m_edges.size() < 8) return;
+    std::deque<FrontEdge>::iterator it = m_edges.begin();
+    for(;it != m_edges.end();++it) {
+
+        float el = it->getDv().length() * (1.f + m_shrink);
+        const FrontVertex* va0 = it->v0();
+        const FrontVertex* va1 = it->v1();
+        Vector3F pvb0 = getAdvanceToPos(va0);
+        Vector3F pvb1 = getAdvanceToPos(va1);
+
+        if(pvb0.distanceTo(pvb1) < MinEdgeLength || it->isFlat() )
+            it->setAdvanceType(FrontEdge::GenTriangle);
+            
+    }
+#if 1
+    int nt = 0;
+    it = m_edges.begin();
+    for(;it != m_edges.end();++it) {
+        if(it->advanceType() == FrontEdge::GenTriangle) 
+            nt++;
+    }
+    std::cout<<"\n triangle e "<<nt<<" out of "<<m_edges.size();
+#endif
+}
+
 Vector3F FrontLine::getAdvanceToPos(const FrontVertex* vert) const
 {
     return *vert->pos() + m_dir + vert->dir();
@@ -149,7 +203,21 @@ void FrontLine::preAdvance()
 {
     calcVertexDirection();
     calcVertexCurvature();
+    calcEdgeAdvanceType();
 }
+
+void FrontLine::smooth(const float& wei)
+{
+    std::deque<FrontEdge>::iterator it = m_edges.begin();
+    for(;it != m_edges.end();++it) {
+
+        it->averagePosition(wei);
+            
+    }
+}
+
+void FrontLine::setMinEdgeLength(const float& x)
+{ MinEdgeLength = x; }
 
 std::ostream& operator<<(std::ostream &output, const FrontLine & p) 
 {

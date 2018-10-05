@@ -21,8 +21,10 @@ class FrontLine {
     Vector3F m_dir;
     float m_shrink;
     Vector3F m_center;
+    float m_length;
 /// rotate around
     Vector3F m_normal;
+    static float MinEdgeLength;
 
 public:
     FrontLine();
@@ -46,7 +48,13 @@ public:
 /// v1 of last edge
     const FrontVertex* tail() const;
 
+    FrontVertex* tail();
+
     Vector3F getAdvanceToPos(const FrontVertex* vert) const;
+
+    void smooth(const float& wei = .07f);
+
+    void setMinEdgeLength(const float& x);
     
     friend std::ostream& operator<<(std::ostream &output, const FrontLine & p);
     
@@ -57,6 +65,8 @@ private:
     void calcVertexDirection();
 /// change of tangent direction at each vertex
     void calcVertexCurvature();
+    void calcLength();
+    void calcEdgeAdvanceType();
 };
 
 }
