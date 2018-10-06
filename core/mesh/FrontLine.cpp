@@ -25,6 +25,18 @@ void FrontLine::clearLine()
     m_edges.clear();
 }
 
+void FrontLine::setWorldSpace(const Matrix33F& mat)
+{
+    m_invmat = m_mat = mat;
+    m_invmat.inverse();
+}
+
+void FrontLine::setLocalRotation(const Matrix33F& mat)
+{ m_rot = mat; }
+
+void FrontLine::rotateLocalBy(const Quaternion& q)
+{ m_rot *= Matrix33F(q); }
+
 void FrontLine::setDirection(const Vector3F& v)
 { m_dir = v; }
 
@@ -130,14 +142,14 @@ void FrontLine::calcVertexDirection()
     std::deque<FrontVertex>::iterator vit = m_vertices.begin();
     for(;vit != m_vertices.end();++vit) {
         
-        Vector3F v2c = m_center - *vit->pos();
-        vit->dir() = v2c * m_shrink;
+        Vector3F v2c = toLocal(m_center - *vit->pos()) * m_shrink;
+        vit->dir() = v2c;
     }
 
     std::deque<FrontEdge>::iterator eit = m_edges.begin();
     for(;eit != m_edges.end();++eit) {
         
-        Vector3F v2c = (m_center - eit->getCenter() ) * m_shrink;
+        Vector3F v2c = toLocal(m_center - eit->getCenter() ) * m_shrink;
         eit->v0()->modifyDir(v2c);
         eit->v1()->modifyDir(v2c);
     }
@@ -173,7 +185,6 @@ void FrontLine::calcEdgeAdvanceType()
     std::deque<FrontEdge>::iterator it = m_edges.begin();
     for(;it != m_edges.end();++it) {
 
-        float el = it->getDv().length() * (1.f + m_shrink);
         const FrontVertex* va0 = it->v0();
         const FrontVertex* va1 = it->v1();
         Vector3F pvb0 = getAdvanceToPos(va0);
@@ -196,7 +207,8 @@ void FrontLine::calcEdgeAdvanceType()
 
 Vector3F FrontLine::getAdvanceToPos(const FrontVertex* vert) const
 {
-    return *vert->pos() + m_dir + vert->dir();
+    Vector3F vloc = toLocal(*vert->pos() - m_center) + vert->dir() + m_dir;
+    return  m_center + toWorld(m_rot.transform(vloc) );
 }
 
 void FrontLine::preAdvance()
@@ -218,6 +230,18 @@ void FrontLine::smooth(const float& wei)
 
 void FrontLine::setMinEdgeLength(const float& x)
 { MinEdgeLength = x; }
+
+void FrontLine::rotateTo(FrontLine& b) const
+{ b.setWorldSpace(m_mat * m_rot); }
+
+Vector3F FrontLine::toWorld(const Vector3F& v) const
+{ return m_mat.transform(v); }
+
+Vector3F FrontLine::toLocal(const Vector3F& v) const
+{ return m_invmat.transform(v); }
+
+const Matrix33F& FrontLine::worldRotation() const
+{ return m_mat; }
 
 std::ostream& operator<<(std::ostream &output, const FrontLine & p) 
 {

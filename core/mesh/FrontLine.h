@@ -10,6 +10,7 @@
 #define ALO_FRONT_LINE_H
 
 #include "FrontEdge.h"
+#include <math/Matrix33F.h>
 #include <deque>
 
 namespace alo {
@@ -18,18 +19,27 @@ class FrontLine {
     
     std::deque<FrontEdge> m_edges;
     std::deque<FrontVertex> m_vertices;
+/// world space
+    Matrix33F m_mat;
+    Matrix33F m_invmat;
+/// rotation translation scaling in local space
+    Matrix33F m_rot;
     Vector3F m_dir;
     float m_shrink;
     Vector3F m_center;
     float m_length;
-/// rotate around
+/// facing of area surrounded 
     Vector3F m_normal;
+
     static float MinEdgeLength;
 
 public:
     FrontLine();
     ~FrontLine();
-    
+
+    void setWorldSpace(const Matrix33F& mat);
+    void setLocalRotation(const Matrix33F& mat);
+    void rotateLocalBy(const Quaternion& q);
     void setDirection(const Vector3F& v);
     void setShrinking(float x);
 
@@ -47,16 +57,24 @@ public:
     const FrontVertex* head() const;
 /// v1 of last edge
     const FrontVertex* tail() const;
-
     FrontVertex* tail();
-
+/// to local, transform, to world
     Vector3F getAdvanceToPos(const FrontVertex* vert) const;
 
     void smooth(const float& wei = .07f);
 
     void setMinEdgeLength(const float& x);
+
+    void rotateTo(FrontLine& b) const;
+
+    const Matrix33F& worldRotation() const;
     
     friend std::ostream& operator<<(std::ostream &output, const FrontLine & p);
+
+protected:
+    Vector3F toWorld(const Vector3F& v) const;
+    Vector3F toLocal(const Vector3F& v) const;
+
     
 private:
     void addEdge(FrontVertex* v0, FrontVertex* v1);

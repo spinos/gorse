@@ -29,7 +29,7 @@ void FrontMesher::advanceFront(FrontLine& b, FrontLine& a)
     for(int i=0;i<ne;++i) {
         advanceEdge(b, i, a);
     }
-    
+    a.rotateTo(b);
 }
 
 void FrontMesher::advanceEdge(FrontLine& b, int idx, const FrontLine& a)

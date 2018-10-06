@@ -35,7 +35,9 @@ void Tube::createTube()
     }
 
     FrontLine l[2];
-    Vector3F up(.1f, 3.f, 0.f);
+    const Vector3F up(0.f, 2.3f, 0.f);
+    const Quaternion lq(-.25f, Vector3F::ZAxis);
+    constexpr float cshrinking = .09f;
     
     for(int i=0;i<nu;++i) {
         l[0].addVertex(vertexPositionR(i), i);
@@ -44,18 +46,20 @@ void Tube::createTube()
     l[0].closeLine();
     l[0].smooth(.1f);
     l[0].setMinEdgeLength(.43f);
+    l[0].setWorldSpace(Matrix33F::IdentityMatrix);
+    l[0].rotateLocalBy(lq);
     //std::cout<<" front a "<<l[0];
     
-    constexpr float cshrinking = .23f;
     l[0].setShrinking(cshrinking);
     l[1].setShrinking(cshrinking);
     
     l[0].setDirection(up);
     l[1].setDirection(up);
-    
+    l[1].rotateLocalBy(lq);
+
     msher.attachMesh(this);
 
-    for(int i=0;i<6;++i) {
+    for(int i=0;i<7;++i) {
         msher.setFrontId(i);
         FrontLine& la = l[i & 1];
         FrontLine& lb = l[(i+1) & 1];
