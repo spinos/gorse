@@ -74,6 +74,15 @@ void FrontLine::closeLine()
     m_edges.front().connectBack(&m_edges.back());
 }
 
+void FrontLine::closeLine1()
+{
+    FrontVertex* v0 = m_edges.back().v1();
+    FrontVertex* v1 = m_edges.front().v0();
+    v0->pos()->mixWith(*v1->pos(), .5f);
+    m_edges.back().v1() = m_edges.front().v0();
+    m_edges.front().connectBack(&m_edges.back());
+}
+
 int FrontLine::numVertices() const
 { return m_vertices.size(); }
 
@@ -106,6 +115,9 @@ FrontVertex* FrontLine::tail()
         return &m_vertices[0];
     return m_edges.back().v1(); 
 }
+
+FrontEdge& FrontLine::lastEdge()
+{ return m_edges.back(); }
 
 void FrontLine::calcCenter()
 {
@@ -181,7 +193,8 @@ void FrontLine::calcLength()
 
 void FrontLine::calcEdgeAdvanceType()
 {
-    if(m_edges.size() < 8) return;
+    const float mergeL = length() / (float)numEdges() * 1.4f;
+    const bool canConverge = m_edges.size() > 8;
     std::deque<FrontEdge>::iterator it = m_edges.begin();
     for(;it != m_edges.end();++it) {
 
@@ -190,18 +203,70 @@ void FrontLine::calcEdgeAdvanceType()
         Vector3F pvb0 = getAdvanceToPos(va0);
         Vector3F pvb1 = getAdvanceToPos(va1);
 
-        if(pvb0.distanceTo(pvb1) < MinEdgeLength || it->isFlat() )
-            it->setAdvanceType(FrontEdge::GenTriangle);
-            
+        const float ml = pvb0.distanceTo(*va0->pos()) * .5f 
+                        + pvb1.distanceTo(*va1->pos()) * .5f;
+
+        if(ml < mergeL && it->historyType() != FrontEdge::EhMerge)
+            it->setAdvanceType(FrontEdge::GenNone);
+
+/// latitude merge has the priority 
+        if(canConverge && it->advanceType() > FrontEdge::GenNone) {
+            if(pvb0.distanceTo(pvb1) < MinEdgeLength || it->isFlat() )
+                it->setAdvanceType(FrontEdge::GenTriangle);
+        }
+
     }
+
+/// latitude merge line is stradlled by triangles
+    it = m_edges.begin();
+    for(;it != m_edges.end();++it) {
+
+        bool be0non = false;
+        bool be1non = false;
+
+        if(it->e0())
+            be0non = it->e0()->advanceType() == FrontEdge::GenNone;
+
+         if(it->e1())
+            be1non = it->e1()->advanceType() == FrontEdge::GenNone;
+
+        if(be0non) {
+            if(be1non)
+                it->setAdvanceType(FrontEdge::GenNone);
+            else
+                it->setAdvanceType(FrontEdge::GenTriangle);
+        }
+
+        if(be1non) {
+            if(be0non)
+                it->setAdvanceType(FrontEdge::GenNone);
+            else
+                it->setAdvanceType(FrontEdge::GenTriangle);
+        }
+
+    }
+
+/// cannot have continuous triangles
+    it = m_edges.begin();
+    for(;it != m_edges.end();++it) {
+        if(it->advanceType() == FrontEdge::GenTriangle) {
+            if(it->e0()) {
+                if(it->e0()->advanceType() == FrontEdge::GenTriangle)
+                    it->setAdvanceType(FrontEdge::GenQuad);
+            }
+        }
+    }
+
 #if 1
-    int nt = 0;
+    int nt = 0, nn = 0;
     it = m_edges.begin();
     for(;it != m_edges.end();++it) {
         if(it->advanceType() == FrontEdge::GenTriangle) 
             nt++;
+        if(it->advanceType() == FrontEdge::GenNone) 
+            nn++;
     }
-    std::cout<<"\n triangle e "<<nt<<" out of "<<m_edges.size();
+    std::cout<<"\n triangle "<<nt<<" none "<<nn<<" out of "<<m_edges.size();
 #endif
 }
 
@@ -215,6 +280,7 @@ void FrontLine::preAdvance()
 {
     calcVertexDirection();
     calcVertexCurvature();
+    calcLength();
     calcEdgeAdvanceType();
 }
 
@@ -243,6 +309,9 @@ Vector3F FrontLine::toLocal(const Vector3F& v) const
 const Matrix33F& FrontLine::worldRotation() const
 { return m_mat; }
 
+const float& FrontLine::length() const
+{ return m_length; }
+
 std::ostream& operator<<(std::ostream &output, const FrontLine & p) 
 {
     const int nv = p.numVertices();
@@ -255,7 +324,7 @@ std::ostream& operator<<(std::ostream &output, const FrontLine & p)
     output <<" ne: "<<ne<<" [";
     for(int i=0;i<ne;++i) {
         const FrontEdge& ei = p.getEdge(i);
-        output << " " << ei;
+        if(ei.advanceType() < FrontEdge::GenQuad) output << " " << ei;
     }
     output << " ] ";
     return output;

@@ -21,12 +21,12 @@ void Tube::createTube()
     ellip.setA(10.f);
     ellip.setE(.34f);
     
-    const int nu = 72;
+    const int nu = 71;
     const float da = 6.28318531f / (float)nu;
     
     for(int i=0;i<nu;++i) {
         float phi = da * i;
-        float wr = ScaledSin(phi * 7.f + ur.randf1() * .9f, .13f, .65f)
+        float wr = ScaledSin(phi * 8.8f + ur.randf1() * .8f, .3f, .65f)
                     + ScaledSin(phi * 4.1 + ur.randf1(), .0f, .4f)
                     + ScaledSin(phi * 1.7 + ur.randf1(), .0f, .2f);
 
@@ -36,19 +36,20 @@ void Tube::createTube()
 
     FrontLine l[2];
     const Vector3F up(0.f, 2.3f, 0.f);
-    const Quaternion lq(-.25f, Vector3F::ZAxis);
-    constexpr float cshrinking = .09f;
+    const Quaternion lq(.169f, Vector3F::ZAxis);
+    const Quaternion tq(.019f, Vector3F::YAxis);
+    constexpr float cshrinking = .08f;
     
     for(int i=0;i<nu;++i) {
         l[0].addVertex(vertexPositionR(i), i);
     }
     
     l[0].closeLine();
-    l[0].smooth(.1f);
+    l[0].smooth(.14f);
     l[0].setMinEdgeLength(.43f);
     l[0].setWorldSpace(Matrix33F::IdentityMatrix);
     l[0].rotateLocalBy(lq);
-    //std::cout<<" front a "<<l[0];
+    l[0].rotateLocalBy(tq);
     
     l[0].setShrinking(cshrinking);
     l[1].setShrinking(cshrinking);
@@ -56,18 +57,26 @@ void Tube::createTube()
     l[0].setDirection(up);
     l[1].setDirection(up);
     l[1].rotateLocalBy(lq);
+    l[1].rotateLocalBy(tq);
 
     msher.attachMesh(this);
 
-    for(int i=0;i<7;++i) {
+    for(int i=0;i<9;++i) {
         msher.setFrontId(i);
         FrontLine& la = l[i & 1];
         FrontLine& lb = l[(i+1) & 1];
         msher.advanceFront(lb, la);
+
+        //std::cout<<" front a "<<la;
+
         lb.smooth();
+
+        //lb.preAdvance();
+
         //std::cout<<" front b "<<lb;
+        
         la.clearLine();
     }
-    
+
     calculateVertexNormals();
 }

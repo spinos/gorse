@@ -45,12 +45,16 @@ public:
 
     void addVertex(Vector3F* pos, int id);
     void closeLine();
+/// no edge added
+    void closeLine1();
     void clearLine();
     
     void preAdvance();
 
     int numVertices() const;
     int numEdges() const;
+    FrontEdge& lastEdge();
+    
     const FrontEdge& getEdge(int i) const;
     const FrontVertex& getVertex(int i) const;
 /// v0 of first edge
@@ -60,6 +64,7 @@ public:
     FrontVertex* tail();
 /// to local, transform, to world
     Vector3F getAdvanceToPos(const FrontVertex* vert) const;
+    const float& length() const;
 
     void smooth(const float& wei = .07f);
 

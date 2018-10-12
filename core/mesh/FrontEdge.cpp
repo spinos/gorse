@@ -14,7 +14,8 @@ FrontEdge::FrontEdge() :
     m_v1(0),
     m_e0(0), 
     m_e1(0),
-    m_advanceType(GenQuad)
+    m_advanceType(GenQuad),
+    m_history(EhNone)
 {}
 
 FrontEdge::FrontEdge(FrontVertex* v0, FrontVertex* v1) : 
@@ -22,7 +23,8 @@ FrontEdge::FrontEdge(FrontVertex* v0, FrontVertex* v1) :
     m_v1(v1),
     m_e0(0), 
     m_e1(0),
-    m_advanceType(GenQuad)
+    m_advanceType(GenQuad),
+    m_history(EhNone)
 {}
 
 FrontVertex* &FrontEdge::v0()
@@ -39,11 +41,19 @@ FrontEdge* &FrontEdge::e1()
 
 void FrontEdge::setAdvanceType(GenType x)
 { 
-    if(e0()) {
-        if(e0()->advanceType() == x) return;
+    if(x == GenTriangle) {
+        if(e0()) {
+            if(e0()->advanceType() == x) return;
+        }
+    }
+    if(x == GenNone) {
+        if(historyType() == EhMerge) return;
     }
     m_advanceType = x; 
 }
+
+void FrontEdge::setHistoryType(EdgeHistory x)
+{ m_history = x; }
 
 const FrontVertex* FrontEdge::v0() const
 { return m_v0; }
@@ -59,6 +69,9 @@ const FrontEdge* FrontEdge::e1() const
 
 const FrontEdge::GenType& FrontEdge::advanceType() const
 { return m_advanceType; }
+
+const FrontEdge::EdgeHistory& FrontEdge::historyType() const
+{ return m_history; }
 
 bool FrontEdge::connect(FrontEdge* another)
 {
@@ -109,7 +122,7 @@ Vector3F FrontEdge::getDv() const
 { return *v1()->pos() - *v0()->pos(); }
 
 bool FrontEdge::isFlat() const
-{ return (  Absolute<float>(v0()->curvature()) < 0.18f && Absolute<float>(v1()->curvature()) < 0.18f) ; }
+{ return (  Absolute<float>(v0()->curvature()) < 0.17f && Absolute<float>(v1()->curvature()) < 0.17f) ; }
 
 void FrontEdge::averagePosition(const float& wei)
 {
@@ -122,7 +135,8 @@ void FrontEdge::averagePosition(const float& wei)
 
 std::ostream& operator<<(std::ostream &output, const FrontEdge & p) 
 {
-    output << " (" << p.v0()->id() <<"," << p.v1()->id() <<")";
+    output << " (" << p.v0()->id() <<"," << p.v1()->id() <<") ";
+    if(p.advanceType() != 2) output<<p.advanceType();
     return output;
 }
 

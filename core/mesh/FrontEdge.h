@@ -19,13 +19,6 @@ namespace alo {
 
 class FrontEdge {
 
-/// connected to vertices and faces
-    FrontVertex* m_v0;
-    FrontVertex* m_v1;
-/// incoming and outgoing edge
-    FrontEdge* m_e0;
-    FrontEdge* m_e1;
-    
 public:
 
     enum GenType {
@@ -34,6 +27,26 @@ public:
         GenQuad,
         GenPentagon
     };
+
+    enum EdgeHistory {
+        EhNone = 8,
+        EhMerge,
+        EhSplit
+    };
+
+private:
+
+    GenType m_advanceType; 
+    EdgeHistory m_history;
+
+/// connected to vertices and faces
+    FrontVertex* m_v0;
+    FrontVertex* m_v1;
+/// incoming and outgoing edge
+    FrontEdge* m_e0;
+    FrontEdge* m_e1;
+    
+public:
 
     FrontEdge();
     FrontEdge(FrontVertex* v0, FrontVertex* v1);
@@ -48,6 +61,7 @@ public:
     FrontEdge* &e1();
 
     void setAdvanceType(GenType x);
+    void setHistoryType(EdgeHistory x);
     
     const FrontVertex* v0() const;
     const FrontVertex* v1() const;
@@ -56,6 +70,7 @@ public:
     const FrontEdge* e1() const;
 
     const GenType& advanceType() const;
+    const EdgeHistory& historyType() const;
     
     Vector3F getCenter() const;
     Vector3F getDv() const;
@@ -70,8 +85,6 @@ public:
     
     
 private:
-
-    GenType m_advanceType; 
 
 };
 

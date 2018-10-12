@@ -394,5 +394,8 @@ void Vector3F::saturate()
     if(z < 0.f) z = 0.f;
     if(z > 1.f) z = 1.f;
 }
+
+void Vector3F::mixWith(const Vector3F& b, const float& alpha)
+{ *this = *this * (1.f - alpha) + b * alpha; }
     
 }

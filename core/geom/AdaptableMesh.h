@@ -24,12 +24,13 @@ public:
     
     int addVertex(const Vector3F& pos);
     void addTriangle(int v0, int v1, int v2);
+
 /// v3 - v2
-/// |  \ |
+/// |  / |
 /// v0 - v1
 /// or flipped
 /// v3 - v2
-/// |  / |
+/// |  \ |
 /// v0 - v1
     void addQuad(int v0, int v1, int v2, int v3,
                 bool flipped = false);

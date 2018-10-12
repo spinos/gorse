@@ -92,6 +92,8 @@ public:
 	
 	void saturate();
 
+	void mixWith(const Vector3F& b, const float& alpha);
+
     static Vector3F FromPolarXYZ(float phi, float theta, float zdir=-1.f);
 	static Vector3F XAxis;
 	static Vector3F YAxis;

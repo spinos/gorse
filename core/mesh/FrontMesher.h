@@ -33,6 +33,7 @@ public:
 private:
 
     void advanceEdge(FrontLine& b, int idx, const FrontLine& a );
+    void advanceNoneEdge(FrontLine& b, const FrontEdge& ea, int idx, const FrontLine& a);
     void advanceQuadEdge(FrontLine& b, const FrontEdge& ea, int idx, const FrontLine& a);
     void advanceTriangleEdge(FrontLine& b, const FrontEdge& ea, int idx, const FrontLine& a);
 
