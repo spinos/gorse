@@ -1,0 +1,52 @@
+{
+    "id": 0,
+    "name": "world",
+    "label": "All Assets",
+    "children": [
+        {
+            "id": 135109,
+            "name": "mesher",
+            "label": "Meshers",
+            "children": [
+                {
+                    "id": 694285,
+                    "name": "static_mesher",
+                    "label": "Static Meshers",
+                    "children": [
+                        {
+                            "id": 769952,
+                            "name": "leaf",
+                            "label": "Leaf",
+                            "is_element": true
+                        },
+                        {
+                            "id": 126650,
+                            "name": "branch",
+                            "label": "Branch",
+                            "is_element": true
+                        }
+                    ]
+                },
+                {
+                    "id": 703426,
+                    "name": "adaptive_mesher",
+                    "label": "Adaptive Meshers",
+                    "children": [
+                        {
+                            "id": 872960,
+                            "name": "tree_root",
+                            "label": "Root",
+                            "is_element": true
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 513556,
+            "name": "texture",
+            "label": "Textures",
+            "children": []
+        }
+    ]
+}
