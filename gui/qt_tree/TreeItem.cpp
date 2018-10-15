@@ -1,8 +1,14 @@
+/*
+ * TreeItem.cpp
+ *
+ */
+
 #include <QStringList>
 #include <QIcon>
-#include "treeitem.h"
+#include "TreeItem.h"
 
-//! [0]
+namespace alo {
+
 TreeItem::TreeItem(const QJsonObject &obj, TreeItem *parent)
 {
     m_parentItem = parent;
@@ -71,4 +77,5 @@ int TreeItem::row() const
 
     return 0;
 }
-//! [8]
+
+}

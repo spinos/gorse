@@ -1,8 +1,10 @@
-#include "treeitem.h"
-#include "treemodel.h"
+#include "TreeItem.h"
+#include "TreeModel.h"
 
 #include <QJsonArray>
 //#include <QDebug>
+
+namespace alo {
 
 TreeModel::TreeModel(const QJsonObject &content, QObject *parent)
     : QAbstractItemModel(parent)
@@ -163,3 +165,5 @@ void TreeModel::updateElementMap(const QJsonObject &elem, TreeItem *parent)
 
 const QList<QJsonObject> TreeModel::listElements(int k) const
 { return m_elementMap.value(k); }
+
+}

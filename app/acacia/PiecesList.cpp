@@ -11,7 +11,9 @@
 #include "PiecesList.h"
 #include <QPixmap>
 #include <QVariant>
-#include "widgets/treemodel.h"
+#include <qt_tree/treemodel.h>
+
+using namespace alo;
 
 PiecesList::PiecesList(TreeModel *model, QWidget *parent)
     : QListWidget(parent)

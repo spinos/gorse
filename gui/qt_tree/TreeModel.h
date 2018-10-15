@@ -1,5 +1,5 @@
 /*
- *  treemodel.h
+ *  TreeModel.h
  *  tree model by json
  */
 
@@ -12,6 +12,8 @@
 #include <QJsonObject>
 #include <QMap>
 #include <QList>
+
+namespace alo {
 
 class TreeItem;
 
@@ -43,5 +45,7 @@ private:
     QMap<int, QList<QJsonObject> > m_elementMap;
 
 };
+
+}
 
 #endif // TREEMODEL_H

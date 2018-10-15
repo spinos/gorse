@@ -12,7 +12,9 @@
 
 #include <QWidget>
 
+namespace alo {
 class TreeModel;
+}
 
 class AssetPalette : public QWidget
 {
@@ -31,7 +33,7 @@ private slots:
 	
 private:
 	
-	TreeModel *m_model;
+	alo::TreeModel *m_model;
 
 };
 #endif

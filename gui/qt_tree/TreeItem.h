@@ -1,5 +1,5 @@
 /*
- *  treeitem.h
+ *  TreeItem.h
  *  tree item holds a json object
  */
 
@@ -9,6 +9,8 @@
 #include <QList>
 #include <QVariant>
 #include <QJsonObject>
+
+namespace alo {
 
 class TreeItem
 {
@@ -31,6 +33,8 @@ private:
     TreeItem *m_parentItem;
     QJsonObject m_obj;
 };
+
+}
 
 
 #endif // TREEITEM_H

@@ -16,6 +16,8 @@ INCLUDE (${GORS_DIR}/core/math/config.cmake)
 INCLUDE (${GORS_DIR}/core/geom/config.cmake)
 INCLUDE (${GORS_DIR}/core/mesh/config.cmake)
 INCLUDE (${GORS_DIR}/core/rng/config.cmake)
+INCLUDE (${GORS_DIR}/gui/qt_graph/config.cmake)
+INCLUDE (${GORS_DIR}/gui/qt_tree/config.cmake)
 INCLUDE (${GORS_DIR}/gui/qt_ogl/config.cmake)
 INCLUDE (${GORS_DIR}/gui/ogl/config.cmake)
 

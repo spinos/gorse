@@ -10,8 +10,10 @@
 #include <QtWidgets>
 #include "AssetPalette.h"
 #include "PiecesList.h"
-#include "widgets/TreeView.h"
-#include "widgets/treemodel.h"
+#include <qt_tree/TreeView.h>
+#include <qt_tree/treemodel.h>
+
+using namespace alo;
 
 AssetPalette::AssetPalette(QWidget *parent) : QWidget(parent)
 {

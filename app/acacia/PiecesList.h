@@ -13,14 +13,16 @@
 
 #include <QListWidget>
 
+namespace alo {
 class TreeModel;
+}
 
 class PiecesList : public QListWidget
 {
     Q_OBJECT
 
 public:
-    PiecesList(TreeModel *model, QWidget *parent = 0);
+    PiecesList(alo::TreeModel *model, QWidget *parent = 0);
 
 public slots:
     void selectItem(int id);
@@ -32,7 +34,7 @@ protected:
 	
 private:
 
-	TreeModel *m_model;
+	alo::TreeModel *m_model;
 };
 
 #endif
