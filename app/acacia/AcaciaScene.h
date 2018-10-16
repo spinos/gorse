@@ -21,7 +21,7 @@ class AcaciaScene : public alo::GlyphScene
     Q_OBJECT
 
 public:
-	AcaciaScene(QObject *parent = 0);
+	AcaciaScene(alo::GroupCollection<QJsonObject> *collector, QObject *parent = 0);
 	virtual ~AcaciaScene();
 
 signals:

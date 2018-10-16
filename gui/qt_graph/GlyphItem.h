@@ -23,6 +23,7 @@ namespace alo {
 class GlyphPort;
 class GlyphHalo;
 class GlyphOps;
+struct Connectable;
 
 class GlyphItem : public QGraphicsPathItem
 {
@@ -33,16 +34,11 @@ public:
 	
 	GlyphItem(const QPixmap & iconPix, int gtyp,
 			QGraphicsItem * parent = 0 );
-	
-	GlyphPort * addPort(const QString & name, 
-							bool isOutgoing);
 							
-	void finalizeShape();
 	void moveBlockBy(const QPointF & dp);
 	
 	int type() const { return Type; }
 	
-	void setGlyphType(int x);
 	const int & glyphType() const;
 	
 	void setOps(GlyphOps *ops);
@@ -62,13 +58,15 @@ public:
 	void postSelection();
 	
 protected:
+	GlyphPort *addPort(const QString & name, 
+							bool isOutgoing);
 	void resizeBlock(int bx, int by);
 	virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
 	virtual void mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event );
 	
 private:
 	void centerIcon();
-	void movePorts(int n, bool downSide);
+	void movePort(GlyphPort *pt, const Connectable *c);
 	
 private:
 	QGraphicsPixmapItem * m_icon;

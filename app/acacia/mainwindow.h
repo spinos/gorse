@@ -15,6 +15,7 @@ namespace alo {
 class SceneGraph;
 }
 class AcaciaScene;
+class AssetPalette;
 
 class MainWindow : public QMainWindow
 {
@@ -38,6 +39,7 @@ private:
     
     alo::SceneGraph *m_graphView;
     AcaciaScene *m_scene;
+    AssetPalette *m_palette;
     
 };
 //! [0]

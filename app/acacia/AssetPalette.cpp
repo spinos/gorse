@@ -47,3 +47,6 @@ AssetPalette::AssetPalette(QWidget *parent) : QWidget(parent)
 		pieces, SLOT(selectItem(int) ) );
 
 }
+
+GroupCollection<QJsonObject> *AssetPalette::assetCollector()
+{ return m_model; }

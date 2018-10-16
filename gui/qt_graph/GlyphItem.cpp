@@ -13,6 +13,7 @@
 #include "GlyphPort.h"
 #include "GlyphHalo.h"
 #include "GlyphOps.h"
+#include "Attrib.h"
 
 namespace alo {
 
@@ -20,13 +21,13 @@ GlyphItem::GlyphItem(const QPixmap & iconPix, int gtyp,
 			QGraphicsItem * parent) : QGraphicsPathItem(parent)
 {
 	//setFlag(QGraphicsItem::ItemIsSelectable);
-	resizeBlock(120, 36);
+	resizeBlock(120, 40);
 	setPen(QPen(Qt::darkGray));
 	setBrush(Qt::lightGray);
 	setZValue(1);
 	//m_halo->setPos(60-50, 18-50);
 	m_icon = new QGraphicsPixmapItem(iconPix.scaled(32,32), this);
-	m_icon->setPos(60-16, 18-16);
+	m_icon->setPos(4, 4);
 	m_glyphType = gtyp;
 	m_ops = 0;
 }
@@ -43,37 +44,6 @@ void GlyphItem::resizeBlock(int bx, int by)
 void GlyphItem::centerIcon()
 {
 	m_icon->setPos(m_blockWidth/2 - 16, m_blockHeight/2 - 16);
-}
-
-void GlyphItem::movePorts(int n, bool downSide)
-{
-	if(n < 1) {
-		return;
-	}
-	
-	int py = -7;
-	if(downSide) {
-		py = m_blockHeight + 7;
-	}
-	
-	int px = m_blockWidth / 2 - 30 * (n / 2);
-	if((n & 1) == 0) {
-		px += 15;
-	}
-	
-	foreach(QGraphicsItem *port_, childItems()) {
-		if (port_->type() != GlyphPort::Type) {
-			continue;
-		}
-
-		GlyphPort *port = (GlyphPort*) port_;
-		
-		if(port->isOutgoing() == downSide ) {
-			
-			port->setPos(px, py);
-			px += 30;
-		}
-	}
 }	
 
 GlyphPort * GlyphItem::addPort(const QString & name, 
@@ -83,39 +53,6 @@ GlyphPort * GlyphItem::addPort(const QString & name,
 	pt->setPortName(name);
 	pt->setIsOutgoing(isOutgoing);
 	return pt;
-}
-
-void GlyphItem::finalizeShape()
-{
-	int nincoming = 0;
-	int noutgoing = 0;
-	foreach(QGraphicsItem *port_, childItems()) {
-		if (port_->type() != GlyphPort::Type) {
-			continue;
-		}
-
-		GlyphPort *port = (GlyphPort*) port_;
-		
-		if(port->isOutgoing() ) {
-			noutgoing++;
-		} else {
-			nincoming++;
-		}
-	}
-
-	int wup = nincoming * 30;
-	int wdown = noutgoing * 30;
-	if(wup > wdown) {
-		wup = wdown;
-	}
-	if(wup > 120) {
-		resizeBlock(wup, 36);
-		centerIcon();
-	}
-	
-	movePorts(nincoming, false);
-	movePorts(noutgoing, true);
-	
 }
 
 void GlyphItem::moveBlockBy(const QPointF & dp)
@@ -133,15 +70,8 @@ void GlyphItem::moveBlockBy(const QPointF & dp)
 	m_halo->moveBy(dp.x(), dp.y() );
 }
 
-void GlyphItem::setGlyphType(int x)
-{
-	m_glyphType = x;
-}
-
 const int & GlyphItem::glyphType() const
-{
-	return m_glyphType;
-}
+{ return m_glyphType; }
 
 void GlyphItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 { event->ignore(); }
@@ -165,7 +95,44 @@ QPointF GlyphItem::localCenter() const
 { return QPointF(m_blockWidth / 2, m_blockHeight / 2); }
 
 void GlyphItem::setOps(GlyphOps *ops)
-{ m_ops = ops; }
+{ 
+	m_ops = ops;
+	std::map<std::string, QAttrib * >::iterator it = ops->attribBegin();
+	for(;it != ops->attribEnd();++it) {
+		const Connectable *c = it->second->connection();
+		if(c) {
+			GlyphPort *pt = addPort(QString(it->first.c_str()), c->_isOutgoing );
+			movePort(pt, c);
+		}
+	}
+}
+
+void GlyphItem::movePort(GlyphPort *pt, const Connectable *c)
+{
+	int px, py;
+	switch(c->_side) {
+		case ConnectLeft :
+			px = c->_px - 8;
+			py = c->_py;
+			break;
+		case ConnectRight :
+			px = m_blockWidth + c->_px + 8;
+			py = c->_py;
+			break;
+		case ConnectTop :
+			px = c->_px;
+			py = c->_py - 8;
+			break;
+		case ConnectBottom :
+			px = c->_px;
+			py = m_blockHeight + 8;
+			break;
+		default :
+			break;
+	}
+
+	pt->setPos(px, py);
+}
 
 const std::string& GlyphItem::glyphName() const
 { return "";//m_ops->glyphName(); 

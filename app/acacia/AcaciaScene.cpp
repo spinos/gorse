@@ -12,8 +12,8 @@
 
 using namespace alo;
 
-AcaciaScene::AcaciaScene(QObject *parent)
-    : GlyphScene(parent)
+AcaciaScene::AcaciaScene(GroupCollection<QJsonObject> *collector, QObject *parent)
+    : GlyphScene(collector, parent)
 {}
 
 AcaciaScene::~AcaciaScene()

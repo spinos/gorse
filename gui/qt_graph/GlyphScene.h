@@ -11,6 +11,7 @@
 #define ALO_GLYPH_SCENE_H
 
 #include <QGraphicsScene>
+#include <QJsonObject>
 
 QT_BEGIN_NAMESPACE
 class QGraphicsSceneMouseEvent;
@@ -20,13 +21,18 @@ QT_END_NAMESPACE
 namespace alo {
 
 class GlyphItem;
+class GlyphOps;
+
+template<typename T>
+class GroupCollection;
 
 class GlyphScene : public QGraphicsScene
 {
     Q_OBJECT
 
 public:
-	GlyphScene(QObject *parent = 0);
+	GlyphScene(GroupCollection<QJsonObject> *collector, 
+				QObject *parent = 0);
 	virtual ~GlyphScene();
 
 	void createGlyph(const QPixmap &pix, int typ, const QPointF & pos);
@@ -41,7 +47,7 @@ signals:
 	void sendSelectGlyph(bool x);
 		
 protected:
-	virtual void buildItem(GlyphItem *item);
+	virtual GlyphOps *createOps(const QJsonObject &content);
 /// first (selected) ground piece
 	//virtual GardenGlyph* getGround();
 	
@@ -50,7 +56,7 @@ private:
 private:
 	//QList<GardenGlyph *> m_selectedGlyph;
 	//GardenGlyph* m_lastSelectedGlyph;
-	
+	GroupCollection<QJsonObject> *m_collector;
 };
 
 }

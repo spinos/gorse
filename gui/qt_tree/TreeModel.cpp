@@ -1,6 +1,7 @@
 #include "TreeItem.h"
 #include "TreeModel.h"
 
+#include <iostream>
 #include <QJsonArray>
 //#include <QDebug>
 
@@ -18,7 +19,6 @@ TreeModel::TreeModel(const QJsonObject &content, QObject *parent)
 TreeModel::~TreeModel()
 {
     delete m_rootItem;
-    m_elementMap.clear();
 }
 //! [1]
 
@@ -148,22 +148,32 @@ void TreeModel::setupModelData(const QJsonObject &content, TreeItem *parent)
             parent->appendChild(leaf);
             setupModelData(childObject, leaf);
         }
-
-        
     }
 }
 
 void TreeModel::updateElementMap(const QJsonObject &elem, TreeItem *parent)
 {
-    QList<QJsonObject> &elems = m_elementMap[parent->data(2).toInt()];
-    elems<<elem;
+    int k = elem["id"].toInt();
+    addToCollection(elem, k);
+
+    addToGroup(parent->data(2).toInt(), k);
 
     TreeItem *grandParent = parent->parentItem();
     if(grandParent)
         updateElementMap(elem, grandParent);
 }
 
-const QList<QJsonObject> TreeModel::listElements(int k) const
-{ return m_elementMap.value(k); }
+QList<QJsonObject> TreeModel::listElements(int k) const
+{ 
+    QList<QJsonObject> b;
+    try {
+    const std::vector<int> &inds = group(k);
+    for (int i = 0; i < inds.size(); ++i)
+        b << element(inds[i]);
+    } catch (...) {
+        std::cout<<" group is empty "<<k;
+    }
+    return b;
+}
 
 }

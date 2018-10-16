@@ -10,14 +10,13 @@
 #include <QModelIndex>
 #include <QVariant>
 #include <QJsonObject>
-#include <QMap>
-#include <QList>
+#include <math/GroupCollection.h>
 
 namespace alo {
 
 class TreeItem;
 
-class TreeModel : public QAbstractItemModel
+class TreeModel : public QAbstractItemModel, public GroupCollection<QJsonObject>
 {
     Q_OBJECT
 
@@ -35,14 +34,13 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    const QList<QJsonObject> listElements(int k) const;
+    QList<QJsonObject> listElements(int k) const;
 
 private:
     void setupModelData(const QJsonObject &content, TreeItem *parent);
     void updateElementMap(const QJsonObject &elem, TreeItem *parent);
 
     TreeItem * m_rootItem;
-    QMap<int, QList<QJsonObject> > m_elementMap;
 
 };
 

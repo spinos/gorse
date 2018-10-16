@@ -36,7 +36,33 @@
                             "id": 872960,
                             "name": "tree_root",
                             "label": "Root",
-                            "is_element": true
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "a",
+                                    "typ": 3,
+                                    "value": 10.41,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "b",
+                                    "typ": 3,
+                                    "value": 10.0,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "out_mesh",
+                                    "typ": 11,
+                                    "port": {
+                                        "outgoing": true,
+                                        "side": 3,
+                                        "px": 18,
+                                        "py": -2
+                                    }
+                                }
+                            ]
                         }
                     ]
                 }

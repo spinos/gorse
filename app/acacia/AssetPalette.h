@@ -12,8 +12,16 @@
 
 #include <QWidget>
 
+QT_BEGIN_NAMESPACE
+class QJsonObject;
+QT_END_NAMESPACE
+
 namespace alo {
 class TreeModel;
+
+template<typename T>
+class GroupCollection;
+
 }
 
 class AssetPalette : public QWidget
@@ -22,6 +30,8 @@ class AssetPalette : public QWidget
 	
 public:
 	AssetPalette(QWidget *parent = 0);
+
+	alo::GroupCollection<QJsonObject> *assetCollector();
 	
 protected:
 

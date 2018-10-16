@@ -8,13 +8,13 @@
 
 MainWindow::MainWindow()
 {
-    m_scene = new AcaciaScene;
-    m_graphView = new alo::SceneGraph(m_scene, this);
-    setCentralWidget(m_graphView);
-
     createActions();
     //createStatusBar();
     createDockWindows();
+
+    m_scene = new AcaciaScene(m_palette->assetCollector());
+    m_graphView = new alo::SceneGraph(m_scene, this);
+    setCentralWidget(m_graphView);
 
     setWindowTitle(tr("Acacia"));
 
@@ -78,7 +78,8 @@ void MainWindow::createDockWindows()
 {
     QDockWidget *dock = new QDockWidget(tr("Assets"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock->setWidget(new AssetPalette(dock));
+    m_palette = new AssetPalette(dock);
+    dock->setWidget(m_palette);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
     viewMenu->addAction(dock->toggleViewAction());
 
