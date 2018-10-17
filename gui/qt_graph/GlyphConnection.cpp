@@ -11,6 +11,7 @@
 
 #include "GlyphConnection.h"
 #include "GlyphPort.h"
+#include "GlyphItem.h"
 
 namespace alo {
 
@@ -122,5 +123,14 @@ void GlyphConnection::breakUp()
 	m_port1->removeConnection(this);
 	m_port0->removeConnection(this);
 }
+
+GlyphItem *GlyphConnection::node0() const
+{ return PortToNode(port0()); }
+
+GlyphItem *GlyphConnection::node1() const
+{ return PortToNode(port1()); }
+
+GlyphItem *GlyphConnection::PortToNode(const GlyphPort *pt)
+{ return static_cast<GlyphItem *>(pt->parentItem() ); }
 
 }

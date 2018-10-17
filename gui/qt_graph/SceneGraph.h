@@ -22,6 +22,8 @@ QT_END_NAMESPACE
 namespace alo {
 
 class GlyphScene;
+class GlyphItem;
+class GlyphConnection;
 
 class SceneGraph : public QGraphicsView
 {
@@ -64,7 +66,9 @@ private:
 	}; 
 	
 	Mode m_mode;
-	QGraphicsItem * m_selectedItem;
+/// only one can be selected
+	GlyphItem *m_selectedItem;
+	GlyphConnection *m_selectedConnection;
 	QPoint m_lastMosePos;
 /// changed after pan
 	QPoint m_sceneOrigin;

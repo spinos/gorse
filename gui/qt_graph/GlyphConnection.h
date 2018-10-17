@@ -16,6 +16,7 @@
 namespace alo {
 
 class GlyphPort;
+class GlyphItem;
 
 class GlyphConnection : public QGraphicsPathItem
 {
@@ -37,6 +38,8 @@ public:
 	
 	const GlyphPort * port0() const;
 	const GlyphPort * port1() const;
+	GlyphItem *node0() const;
+	GlyphItem *node1() const;
 	
 	virtual bool canConnectTo(GlyphPort* p1) const;
 	virtual void breakUp();
@@ -46,9 +49,10 @@ public:
 	static bool IsItemConnection(const QGraphicsItem *item);
 	
 protected:
-	GlyphPort * port0();
-	GlyphPort * port1();
-
+	GlyphPort *port0();
+	GlyphPort *port1();
+	static GlyphItem *PortToNode(const GlyphPort *pt);
+	
 private:
 	QPointF m_pos0;
 	QPointF m_pos1;

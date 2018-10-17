@@ -9,14 +9,16 @@ ELSE()
     set (QT_HOME D:/usr/qt4.8.6)
 ENDIF()
 
-set (QT_QMAKE_EXECUTABLE ${QT_HOME}/bin/qmake.exe)
+message ("Qt home is " ${QT_HOME})
+
+SET(CMAKE_PREFIX_PATH ${QT_HOME})
+## set (QT_QMAKE_EXECUTABLE ${QT_HOME}/bin/qmake.exe)
 
 endif()
 
 IF (HAVE_QT5)
 find_package (Qt5 COMPONENTS Core Widgets OpenGL)
 get_target_property(QtGui_location Qt5::Widgets LOCATION)
-
 
 MESSAGE ("Qt5 Core Version" ${Qt5Core_VERSION})
 MESSAGE ("Qt5 Gui Location" ${QtGui_location})

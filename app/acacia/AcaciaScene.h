@@ -16,6 +16,10 @@ QT_BEGIN_NAMESPACE
 class QGraphicsSceneMouseEvent;
 QT_END_NAMESPACE
 
+namespace alo {
+class GlyphOps;
+}
+
 class AcaciaScene : public alo::GlyphScene
 {
     Q_OBJECT
@@ -25,10 +29,10 @@ public:
 	virtual ~AcaciaScene();
 
 signals:
-	void sendSelectGlyph(bool x);
 		
 protected:
-
+    virtual alo::GlyphOps *createOps(const QJsonObject &content);
+	
 private:
 
 };

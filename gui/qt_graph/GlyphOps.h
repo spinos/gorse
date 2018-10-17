@@ -23,11 +23,10 @@ public:
 	virtual ~GlyphOps();
 
 	void addAttributes(const QJsonObject &content);
-	
-	virtual void update();
-
 	std::map<std::string, QAttrib * >::iterator attribBegin();
 	std::map<std::string, QAttrib * >::iterator attribEnd();
+	
+	virtual void update();
 
 protected:
 	void addAttribute(const QJsonObject &content);

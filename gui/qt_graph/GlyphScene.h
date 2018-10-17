@@ -36,26 +36,19 @@ public:
 	virtual ~GlyphScene();
 
 	void createGlyph(const QPixmap &pix, int typ, const QPointF & pos);
-	
-	//GardenGlyph* lastSelectedGlyph();
-	//const GardenGlyph* lastSelectedGlyph() const;
-	//const aphid::ATriangleMesh* lastSelectedGeom() const;
-	//void selectGlyph(GardenGlyph* gl);
-	//void deselectGlyph();
+	void selectGlyph(GlyphItem *item);
+	void deselectGlyph();
 
 signals:
 	void sendSelectGlyph(bool x);
 		
 protected:
 	virtual GlyphOps *createOps(const QJsonObject &content);
-/// first (selected) ground piece
-	//virtual GardenGlyph* getGround();
 	
 private:
 	
 private:
-	//QList<GardenGlyph *> m_selectedGlyph;
-	//GardenGlyph* m_lastSelectedGlyph;
+	QList<GlyphItem *> m_selectedGlyph;;
 	GroupCollection<QJsonObject> *m_collector;
 };
 

@@ -29,7 +29,6 @@ GlyphScene::~GlyphScene()
 
 void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
 {
-	qDebug()<<"GlyphScene::createGlyph"<< pix << " id " << typ;
 	GlyphItem * g = new GlyphItem(pix, typ);
 	addItem(g);
 
@@ -50,5 +49,22 @@ void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
 
 GlyphOps *GlyphScene::createOps(const QJsonObject &content)
 { return new GlyphOps; }
+
+void GlyphScene::selectGlyph(GlyphItem *item)
+{
+	if(!m_selectedGlyph.contains(item) )
+		m_selectedGlyph<<item; 
+	item->postSelection();
+	emit sendSelectGlyph(true);
+}
+
+void GlyphScene::deselectGlyph()
+{
+	foreach(GlyphItem * gl, m_selectedGlyph) {
+		gl->hideHalo();
+	}
+	m_selectedGlyph.clear();
+	emit sendSelectGlyph(false);
+}
 
 }

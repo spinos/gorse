@@ -8,12 +8,12 @@
  */
 
 #include <QtGui>
-
 #include "SceneGraph.h"
 #include "GlyphScene.h"
 #include "GlyphConnection.h"
 #include "GlyphHalo.h"
 #include "GlyphPort.h"
+#include "GlyphItem.h"
 
 namespace alo {
 
@@ -23,6 +23,8 @@ SceneGraph::SceneGraph(GlyphScene *scene, QWidget * parent) : QGraphicsView(scen
 	setMinimumSize(400, 300);
 	setRenderHint(QPainter::Antialiasing);
 	setSceneRect(	frameRect() );
+	m_selectedItem = 0;
+	m_selectedConnection = 0;
 }
 
 GlyphScene *SceneGraph::asGlyphScene()
@@ -125,8 +127,6 @@ void SceneGraph::dragMoveEvent(QDragMoveEvent *event)
 
 void SceneGraph::dropEvent(QDropEvent *event)
 {
-	qDebug()<<"SceneGraph::dropEvent"<<event->pos();
-    
     if (event->mimeData()->hasFormat("application/x-dndpiecedata") ) {
 
 		QByteArray pieceData = event->mimeData()->data("application/x-dndpiecedata");
@@ -159,27 +159,27 @@ void SceneGraph::processSelect(const QPoint & pos)
 	if (item) {
          if(GlyphPort::IsItemOutgoingPort(item) ) {
 			m_mode = mConnectItems;
-			//m_selectedConnection = new GardenConnection;
-			//m_selectedConnection->setPos0(item->scenePos() );
+/// todo different connections
+			m_selectedConnection = new GlyphConnection;
+			m_selectedConnection->setPos0(item->scenePos() );
 			
-			GlyphPort * pt = (GlyphPort *)item;
-			//m_selectedConnection->setPort0(pt);
+			GlyphPort * pt = static_cast<GlyphPort *>(item);
+			m_selectedConnection->setPort0(pt);
 			
-			//scene()->addItem(m_selectedConnection);
+			scene()->addItem(m_selectedConnection);
 			
 		 } else {
-			m_selectedItem = item->topLevelItem();
-			//if(m_selectedItem->type() == GardenGlyph::Type ) {
-			//	m_mode = mMoveItem;
-				//GardenGlyph * gl = (GardenGlyph *)m_selectedItem;
-				//gl->postSelection();
-				//ShrubScene* ssc = (ShrubScene* )scene();
-				//ssc->selectGlyph(gl);				
-			//}
+		     QGraphicsItem *ti = item->topLevelItem();
+			
+			if(ti->type() == GlyphItem::Type ) {
+				m_mode = mMoveItem;
+				m_selectedItem = static_cast<GlyphItem *>(ti);
+				asGlyphScene()->selectGlyph(m_selectedItem);				
+			}
 		 }
      } else {
-		//ShrubScene* ssc = (ShrubScene* )scene();
-		//ssc->deselectGlyph();
+         m_selectedItem = 0;
+         asGlyphScene()->deselectGlyph();
 	 }
 	 m_lastMosePos = pos;
 }
@@ -207,59 +207,56 @@ void SceneGraph::doMoveItem(const QPoint& mousePos)
 {
 	QPointF dv(mousePos.x() - m_lastMosePos.x(),
 					mousePos.y() - m_lastMosePos.y() );
-	//GardenGlyph * gl = (GardenGlyph *)m_selectedItem;
-	//gl->moveBlockBy(dv);
+	m_selectedItem->moveBlockBy(dv);
 }
 
 void SceneGraph::doMoveConnection(const QPoint& mousePos)
 {
-	//if(!m_selectedConnection)
-	//	return;
+	if(!m_selectedConnection)
+		return;
 		
 	QPointF pf(mousePos.x(), mousePos.y() );
 	pf.rx() -= m_sceneOrigin.x();
 	pf.ry() -= m_sceneOrigin.y();
-	//m_selectedConnection->setPos1(pf );
-	//m_selectedConnection->updatePath();
+	m_selectedConnection->setPos1(pf );
+	m_selectedConnection->updatePath();
 }
 
 void SceneGraph::doConnectItem(QGraphicsItem* item)
 {
-	//if(!m_selectedConnection)
-	//	return;
+	if(!m_selectedConnection)
+		return;
 		
 	if(GlyphPort::IsItemIncomingPort(item)) {
 		QPointF pf = item->scenePos();
-		//m_selectedConnection->setPos1(pf );
+		m_selectedConnection->setPos1(pf );
 		GlyphPort * p1 = (GlyphPort *)item;
-		/*if(m_selectedConnection->canConnectTo(p1) ) {
+		if(m_selectedConnection->canConnectTo(p1) ) {
 			m_selectedConnection->setPort1(p1);
 			m_selectedConnection->updatePath();
 			
-			GardenGlyph * srcNode = m_selectedConnection->node0();
-			GardenGlyph * destNode = m_selectedConnection->node1();
+			GlyphItem * srcNode = m_selectedConnection->node0();
+			GlyphItem * destNode = m_selectedConnection->node1();
 			destNode->postConnection(srcNode, p1);
 			//qDebug()<<" made connection "<<m_selectedConnection->port0()->portName()
-			//    <<" -> "<<pt->portName();
-				
-		} else {
-			
+			//    <<" -> "<<pt->portName();				
+		} else {		
 			//qDebug()<<" rejects connection "<<m_selectedConnection->port0()->parentItem()
 			//<<" -> "<<pt->parentItem();
-		}*/
+		}
 	}
 	
-	//if(!m_selectedConnection->isComplete() ) {
-	//	scene()->removeItem( m_selectedConnection );
-	//	delete m_selectedConnection;
-	//}
-	//m_selectedConnection = NULL;
+	if(!m_selectedConnection->isComplete() ) {
+		scene()->removeItem( m_selectedConnection );
+		delete m_selectedConnection;
+	}
+	m_selectedConnection = NULL;
 }
 
 void SceneGraph::doRemoveConnection(QGraphicsItem* item)
 {
-	//GardenConnection* conn = static_cast<GardenConnection*>(item);
-	//conn->breakUp();
+	GlyphConnection *conn = static_cast<GlyphConnection *>(item);
+	conn->breakUp();
 	scene()->removeItem( item );
 	delete item;
 }

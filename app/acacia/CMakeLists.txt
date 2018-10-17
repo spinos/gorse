@@ -1,13 +1,13 @@
-file (GLOB ACAC_WIDGETS_SRC
-widgets/*.h
-widgets/*.cpp)
+file (GLOB ACAC_OPS_SRC
+ops/*.h
+ops/*.cpp)
 
 set (ACAC_SOURCE_FILES main.cpp 
 mainwindow.cpp
 AssetPalette.cpp
 PiecesList.cpp
 AcaciaScene.cpp 
-${ACAC_WIDGETS_SRC}
+${ACAC_OPS_SRC}
 ${GORS_QT_TREE_SRC}
 ${GORS_QT_GRAPH_SRC})
 
