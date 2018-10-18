@@ -39,6 +39,8 @@ public:
 	void selectGlyph(GlyphItem *item);
 	void deselectGlyph();
 
+	GlyphOps *getActiveOps() const;
+
 signals:
 	void sendSelectGlyph(bool x);
 		
@@ -48,6 +50,7 @@ protected:
 private:
 	
 private:
+	GlyphItem *m_activeGlyph;
 	QList<GlyphItem *> m_selectedGlyph;;
 	GroupCollection<QJsonObject> *m_collector;
 };

@@ -16,6 +16,7 @@ class SceneGraph;
 }
 class AcaciaScene;
 class AssetPalette;
+class AttribEditor;
 
 class MainWindow : public QMainWindow
 {
@@ -31,15 +32,13 @@ private slots:
 private:
     void createActions();
     void createStatusBar();
-    void createDockWindows();
-
-    QListWidget *paragraphsList;
 
     QMenu *viewMenu;
     
     alo::SceneGraph *m_graphView;
     AcaciaScene *m_scene;
     AssetPalette *m_palette;
+    AttribEditor *m_editor;
     
 };
 //! [0]

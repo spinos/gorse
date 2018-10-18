@@ -10,7 +10,7 @@ class RootOps : public GlyphOps {
 public:
     RootOps();
     
-    virtual void update();
+    virtual void update() override;
  
 protected:
     

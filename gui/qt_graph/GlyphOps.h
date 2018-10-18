@@ -25,6 +25,8 @@ public:
 	void addAttributes(const QJsonObject &content);
 	std::map<std::string, QAttrib * >::iterator attribBegin();
 	std::map<std::string, QAttrib * >::iterator attribEnd();
+	QAttrib *findAttrib(const std::string &attrName);
+	bool setFloatAttrValue(const std::string &attrName, const float &x);
 	
 	virtual void update();
 

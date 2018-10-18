@@ -21,7 +21,8 @@ namespace alo {
 GlyphScene::GlyphScene(GroupCollection<QJsonObject> *collector,
 					QObject *parent) :
 	QGraphicsScene(parent), 
-	m_collector(collector)
+	m_collector(collector),
+	m_activeGlyph(0)
 {}
 
 GlyphScene::~GlyphScene()
@@ -43,7 +44,6 @@ void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
 	QJsonObject content = m_collector->element(typ);
 	GlyphOps *ops = createOps(content);
 	ops->addAttributes(content);
-
 	g->setOps(ops);
 }
 
@@ -54,8 +54,11 @@ void GlyphScene::selectGlyph(GlyphItem *item)
 {
 	if(!m_selectedGlyph.contains(item) )
 		m_selectedGlyph<<item; 
-	item->postSelection();
-	emit sendSelectGlyph(true);
+	if(m_activeGlyph != item) {
+		m_activeGlyph = item;
+		item->postSelection();
+		emit sendSelectGlyph(true);
+	}
 }
 
 void GlyphScene::deselectGlyph()
@@ -63,8 +66,15 @@ void GlyphScene::deselectGlyph()
 	foreach(GlyphItem * gl, m_selectedGlyph) {
 		gl->hideHalo();
 	}
+	m_activeGlyph = 0;
 	m_selectedGlyph.clear();
 	emit sendSelectGlyph(false);
+}
+
+GlyphOps *GlyphScene::getActiveOps() const
+{
+	if(!m_activeGlyph) return 0;
+	return m_activeGlyph->getOps();
 }
 
 }

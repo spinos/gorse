@@ -28,28 +28,38 @@ const float FieldSlider::SFSteps[] = {
 FieldSlider::FieldSlider(QWidget *parent)
    : QWidget(parent)
 { 
-    m_var = 42.f; 
+    m_preVar = m_var = 1.f; 
+    m_limit[0] = -1e10f;
+    m_limit[1] = 1e10f;
     m_lastPos = -1;
     m_startPos = -1;
     m_stepInd = 1;
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
     this, SLOT(ShowContextMenu(const QPoint&)));
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 }
 
 FieldSlider::~FieldSlider()
 {}
 
+void FieldSlider::setValue(float x)
+{ m_var = x; }
+
+void FieldSlider::setLimit(float mn, float mx)
+{ m_limit[0] = mn; m_limit[1] = mx; }
+
+void FieldSlider::setName(const std::string &name)
+{ m_name = name; }
+
 QSize FieldSlider::minimumSizeHint() const
 {
-    return QSize(72, 24);
+    return QSize(36, 24);
 }
-//! [1]
 
-//! [2]
 QSize FieldSlider::sizeHint() const
 {
-    return QSize(120, 24);
+    return QSize(72, 24);
 }
 /*
 QPixmap cached1(const QString &img)
@@ -71,10 +81,10 @@ void FieldSlider::paintEvent(QPaintEvent *e)
     QPainter painter(this);
     painter.setPen(Qt::black);
                 //painter.setBrush(QColor(191, 215, 255));
-    QPixmap headpix("field_head.png");
-	QPixmap bodypix("field_body.png");
-	QPixmap tailpix("field_tail.png");
-    QPixmap groovepix("field_groove.png");        
+    QPixmap headpix(":images/field_head.png");
+	QPixmap bodypix(":images/field_body.png");
+	QPixmap tailpix(":images/field_tail.png");
+    QPixmap groovepix(":images/field_groove.png");        
     
     painter.drawPixmap(QRect(13, 0, width() - 26, 24), bodypix);
     
@@ -114,6 +124,9 @@ void FieldSlider::mouseMoveEvent(QMouseEvent *e)
         m_var = r * ir;
     }
 
+    if(m_var < m_limit[0]) m_var = m_limit[0];
+    if(m_var > m_limit[1]) m_var = m_limit[1];
+    
     m_lastPos = px;
     update();
 }
@@ -122,6 +135,11 @@ void FieldSlider::mouseReleaseEvent(QMouseEvent *)
 {
     m_startPos = m_lastPos = -1;
     update();
+    if(m_preVar != m_var) {
+        m_preVar = m_var;
+        QPair<std::string, float> sigv(m_name, m_var);
+        emit valueChanged(sigv);
+    }
 }
 
 void FieldSlider::ShowContextMenu(const QPoint& pos)
@@ -142,7 +160,6 @@ void FieldSlider::ShowContextMenu(const QPoint& pos)
     if (selectedItem) {
         m_stepInd = selectedItem->data().toInt();
     }
-
 }
 
 }

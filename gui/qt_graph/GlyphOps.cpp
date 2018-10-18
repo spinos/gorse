@@ -15,8 +15,8 @@ GlyphOps::~GlyphOps()
 	m_attribs.clear();
 }
 
-void GlyphOps::update() 
-{}
+void GlyphOps::update()
+{ qDebug()<<"GlyphOps::update"; }
 
 void GlyphOps::addAttributes(const QJsonObject &content)
 {
@@ -48,8 +48,10 @@ void GlyphOps::addAttribute(const QJsonObject &content)
 			break;
 	}
 
-	if(b)
+	if(b) {
+		b->setLabel(content["label"].toString().toStdString());
 		addConnection(b, content);
+	}
 }
 
 QAttrib *GlyphOps::addBoolAttribute(const QJsonObject &content)
@@ -117,5 +119,27 @@ std::map<std::string, QAttrib * >::iterator GlyphOps::attribBegin()
 
 std::map<std::string, QAttrib * >::iterator GlyphOps::attribEnd()
 { return m_attribs.end(); }
+
+QAttrib *GlyphOps::findAttrib(const std::string &attrName)
+{
+	std::map<std::string, QAttrib * >::iterator it = m_attribs.find(attrName);
+	if(it == m_attribs.end()) {
+		qDebug()<<"GlyphOps::setFloatAttrValue cannot find named attrib "<<attrName.c_str();
+		return 0;
+	}
+	return it->second;
+}
+
+bool GlyphOps::setFloatAttrValue(const std::string &attrName, const float &x)
+{
+	QAttrib *attr = findAttrib(attrName);
+	if(!attr) return false;
+
+	FloatAttrib *fattr = static_cast<FloatAttrib *>(attr);
+	fattr->setValue(x);
+
+	update();
+	return true;
+}
 
 }

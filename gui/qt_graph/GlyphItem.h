@@ -46,6 +46,7 @@ public:
 	void showHalo();
 	void hideHalo();
 	GlyphHalo* halo();
+	GlyphOps *getOps() const;
 	
 	QPointF localCenter() const;
 	const std::string& glyphName() const;

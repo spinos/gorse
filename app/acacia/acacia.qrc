@@ -5,6 +5,10 @@
     <file>images/save.png</file>
     <file>images/undo.png</file>
     <file>images/unknown.png</file>
+    <file>images/field_body.png</file>
+    <file>images/field_head.png</file>
+    <file>images/field_tail.png</file>
+    <file>images/field_groove.png</file>
     <file>mimes/assettree.json</file>
 </qresource>
 </RCC>

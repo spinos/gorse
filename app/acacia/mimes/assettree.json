@@ -40,16 +40,18 @@
                             "attribs" : [
                                 {
                                     "name": "a",
+                                    "label": "A Semi Major Axis",
                                     "typ": 3,
                                     "value": 10.41,
-                                    "min": 0.01,
+                                    "min": 0.1,
                                     "max": 1000.0
                                 },
                                 {
                                     "name": "b",
+                                    "label": "B Semi Minor Axis",
                                     "typ": 3,
                                     "value": 10.0,
-                                    "min": 0.01,
+                                    "min": 0.1,
                                     "max": 1000.0
                                 },
                                 {

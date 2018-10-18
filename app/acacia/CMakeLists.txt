@@ -7,7 +7,9 @@ mainwindow.cpp
 AssetPalette.cpp
 PiecesList.cpp
 AcaciaScene.cpp 
+AttribEditor.cpp
 ${ACAC_OPS_SRC}
+${GORS_QT_BASE_SRC}
 ${GORS_QT_TREE_SRC}
 ${GORS_QT_GRAPH_SRC})
 

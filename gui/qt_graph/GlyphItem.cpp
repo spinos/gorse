@@ -91,6 +91,9 @@ void GlyphItem::hideHalo()
 GlyphHalo* GlyphItem::halo()
 { return m_halo; }
 
+GlyphOps *GlyphItem::getOps() const
+{ return m_ops; }
+
 QPointF GlyphItem::localCenter() const
 { return QPointF(m_blockWidth / 2, m_blockHeight / 2); }
 
@@ -146,7 +149,6 @@ void GlyphItem::postConnection(GlyphItem* another, GlyphPort* viaPort)
 
 void GlyphItem::postSelection()
 { 
-    m_ops->update(); 
     showHalo();
 }
 
