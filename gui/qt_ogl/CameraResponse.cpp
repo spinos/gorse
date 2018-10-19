@@ -65,7 +65,8 @@ const QMatrix4x4 &CameraResponse::calcProjectionMatrix()
 const QMatrix4x4 &CameraResponse::calcCameraMatrix()
 { 
     const Matrix44F &invmat = m_persp->fInverseSpace;
-    m_camera = QMatrix4x4(invmat.v); 
+    m_camera = QMatrix4x4(invmat.v);
+    m_camera = m_camera.transposed();
     return m_camera;
 }
 
@@ -73,6 +74,6 @@ const QMatrix4x4 &CameraResponse::projectionMatrix() const
 { return m_proj; }
 
 const QMatrix4x4 &CameraResponse::cameraMatrix() const
-{ return m_camera.transposed(); }
+{ return m_camera; }
     
 }

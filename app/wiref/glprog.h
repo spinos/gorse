@@ -5,11 +5,12 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
+#include <qt_ogl/WireframeProgram.h>
 #include <geom/YCylinder.h>
 
 QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
 
-class GLProg : protected QOpenGLExtraFunctions
+class GLProg// : protected QOpenGLExtraFunctions
 {
 
 public:
@@ -33,12 +34,9 @@ private:
     QOpenGLBuffer m_posVbo;
     QOpenGLBuffer m_nmlVbo;
     QOpenGLBuffer m_barVbo;
-    QOpenGLShaderProgram *m_program;
-    int m_projMatrixLoc;
-    int m_mvMatrixLoc;
-    int m_normalMatrixLoc;
-    int m_lightPosLoc;
+    alo::WireframeProgram *m_program1;
     QMatrix4x4 m_world;
+
 
 };
 

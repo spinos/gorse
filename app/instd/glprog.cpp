@@ -127,7 +127,7 @@ void GLProg::setupVertexAttribs()
 void GLProg::paintGL(const QMatrix4x4 &projectionMat, const QMatrix4x4 &cameraMat)
 { 
     m_world.setToIdentity();
-    m_world.rotate(40.0f, 0, 0, 1);
+    m_world.rotate(-40.0f, 0, 0, 1);
 
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
     m_program->bind();

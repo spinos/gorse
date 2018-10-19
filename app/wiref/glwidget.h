@@ -24,7 +24,7 @@ protected:
 
 private:
 
-    GLProg m_logo;
+    GLProg *m_logo;
 
 };
 

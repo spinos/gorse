@@ -16,20 +16,21 @@ GLWidget::~GLWidget()
 void GLWidget::cleanup()
 {
     makeCurrent();
-    m_logo.cleanup();
+    m_logo->cleanup();
     doneCurrent();
 }
 
 void GLWidget::clientInit()
 {
     //connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLWidget::cleanup);
+	//initializeOpenGLFunctions();
 
-    //initializeOpenGLFunctions();
+    m_logo = new GLProg;
+    m_logo->initializeGL();
     
-    m_logo.initializeGL();
 }
 
 void GLWidget::clientDraw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
 {
-    m_logo.paintGL(proj, cam);
+    m_logo->paintGL(proj, cam);
 }
