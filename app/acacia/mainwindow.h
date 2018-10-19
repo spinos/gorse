@@ -17,6 +17,7 @@ class SceneGraph;
 class AcaciaScene;
 class AssetPalette;
 class AttribEditor;
+class GLWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -39,6 +40,7 @@ private:
     AcaciaScene *m_scene;
     AssetPalette *m_palette;
     AttribEditor *m_editor;
+    GLWidget *m_glview;
     
 };
 //! [0]

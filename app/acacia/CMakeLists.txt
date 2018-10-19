@@ -8,10 +8,13 @@ AssetPalette.cpp
 PiecesList.cpp
 AcaciaScene.cpp 
 AttribEditor.cpp
+GLWidget.cpp
 ${ACAC_OPS_SRC}
 ${GORS_QT_BASE_SRC}
 ${GORS_QT_TREE_SRC}
-${GORS_QT_GRAPH_SRC})
+${GORS_QT_GRAPH_SRC}
+${GORS_QT_OGL_SRC}
+${GORS_MATH_SRC})
 
 QT5_ADD_RESOURCES(ACAC_RES_SOURCES acacia.qrc)
 

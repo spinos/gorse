@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QSplitter>
 #include <QSpacerItem>
+#include <QScrollArea>
 #include <qt_graph/GlyphOps.h>
 #include <qt_base/SimpleLabel.h>
 #include <qt_base/FieldSlider.h>
@@ -21,8 +22,8 @@ AttribEditor::AttribEditor(AcaciaScene *scene, QWidget *parent) : QWidget(parent
     rightBox->setContentsMargins(2,2,2,2);
     QWidget *leftWiget = new QWidget;
     QWidget *rightWiget = new QWidget;
-    m_leftSpace = new QSpacerItem(24,8, QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-    m_rightSpace = new QSpacerItem(36,8, QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    m_leftSpace = new QSpacerItem(36,8, QSizePolicy::Preferred, QSizePolicy::Expanding);
+    m_rightSpace = new QSpacerItem(36,8, QSizePolicy::Preferred, QSizePolicy::Expanding);
     leftBox->addItem(m_leftSpace);
     rightBox->addItem(m_rightSpace);
     
@@ -33,10 +34,15 @@ AttribEditor::AttribEditor(AcaciaScene *scene, QWidget *parent) : QWidget(parent
     splt->addWidget(leftWiget);
     splt->addWidget(rightWiget);
 
+    QScrollArea *scroll = new QScrollArea;
+	scroll->setWidgetResizable(true);
+	
+	scroll->setWidget(splt);
+
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->setSpacing(2);
     mainLayout->setContentsMargins(2,2,2,2);
-    mainLayout->addWidget(splt);
+    mainLayout->addWidget(scroll);
 	setLayout(mainLayout);
 }
 

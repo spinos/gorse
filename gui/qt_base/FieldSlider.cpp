@@ -2,7 +2,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QMenu>
-#include <QPixmapCache>
+#include "ImageCollector.h"
 
 namespace alo {
 
@@ -61,30 +61,16 @@ QSize FieldSlider::sizeHint() const
 {
     return QSize(72, 24);
 }
-/*
-QPixmap cached1(const QString &img)
-{
-    if (QPixmap *p = QPixmapCache::find(img))
-        return *p;
-
-    QPixmap pm;
-    pm = QPixmap::fromImage(QImage(img), Qt::OrderedDither | Qt::OrderedAlphaDither);
-    if (pm.isNull())
-        return QPixmap();
-
-    QPixmapCache::insert(img, pm);
-    return pm;
-}*/
 
 void FieldSlider::paintEvent(QPaintEvent *e)
 {
     QPainter painter(this);
     painter.setPen(Qt::black);
                 //painter.setBrush(QColor(191, 215, 255));
-    QPixmap headpix(":images/field_head.png");
-	QPixmap bodypix(":images/field_body.png");
-	QPixmap tailpix(":images/field_tail.png");
-    QPixmap groovepix(":images/field_groove.png");        
+    QPixmap headpix = ImageCollector::CollectPixmap(":images/field_head.png");
+	QPixmap bodypix = ImageCollector::CollectPixmap(":images/field_body.png");
+	QPixmap tailpix = ImageCollector::CollectPixmap(":images/field_tail.png");
+    QPixmap groovepix = ImageCollector::CollectPixmap(":images/field_groove.png");        
     
     painter.drawPixmap(QRect(13, 0, width() - 26, 24), bodypix);
     

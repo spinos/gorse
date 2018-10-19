@@ -5,32 +5,44 @@
 #include "AssetPalette.h"
 #include "AcaciaScene.h"
 #include "AttribEditor.h"
+#include "GLWidget.h"
 #include <qt_graph/SceneGraph.h>
 
 MainWindow::MainWindow()
 {
     createActions();
     //createStatusBar();
-    QDockWidget *dock = new QDockWidget(tr("Assets"), this);
-    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    m_palette = new AssetPalette(dock);
-    dock->setWidget(m_palette);
-    addDockWidget(Qt::LeftDockWidgetArea, dock);
-    viewMenu->addAction(dock->toggleViewAction());
+    QDockWidget *assetDock = new QDockWidget(tr("Assets"), this);
+    assetDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    m_palette = new AssetPalette(assetDock);
+    assetDock->setWidget(m_palette);
+    addDockWidget(Qt::LeftDockWidgetArea, assetDock);
+    viewMenu->addAction(assetDock->toggleViewAction());
 
     m_scene = new AcaciaScene(m_palette->assetCollector());
     m_graphView = new alo::SceneGraph(m_scene, this);
     setCentralWidget(m_graphView);
 
-    m_editor = new AttribEditor(m_scene, dock);
-    dock = new QDockWidget(tr("Attributes"), this);
-    dock->setWidget(m_editor);
-    addDockWidget(Qt::LeftDockWidgetArea, dock);
-    //dock->setFloating(true);
-    viewMenu->addAction(dock->toggleViewAction());
+    QDockWidget *attrDock = new QDockWidget(tr("Attributes"), this);
+    attrDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    m_editor = new AttribEditor(m_scene, attrDock);
+    attrDock->setWidget(m_editor);
+    addDockWidget(Qt::RightDockWidgetArea, attrDock);
+    viewMenu->addAction(attrDock->toggleViewAction());
+
+    QDockWidget *glDock = new QDockWidget(tr("3D View"), this);
+    glDock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    m_glview = new GLWidget(glDock);
+    glDock->setWidget(m_glview);
+    addDockWidget(Qt::TopDockWidgetArea, glDock);
+    //glDock->setFloating(true);
+    viewMenu->addAction(glDock->toggleViewAction());
 
     connect(m_scene, SIGNAL(sendSelectGlyph(bool)), 
     m_editor, SLOT(recvSelectGlyph(bool)));
+
+    connect(m_editor, SIGNAL(sendAttribChanged()), 
+    m_glview, SLOT(recvAttribChanged()));
 
     setWindowTitle(tr("Acacia"));
 
