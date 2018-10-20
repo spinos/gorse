@@ -20,8 +20,8 @@ MainWindow::MainWindow()
     viewMenu->addAction(assetDock->toggleViewAction());
 
     m_scene = new AcaciaScene(m_palette->assetCollector());
-    m_graphView = new alo::SceneGraph(m_scene, this);
-    setCentralWidget(m_graphView);
+    m_glview = new GLWidget(m_scene, this);
+    setCentralWidget(m_glview);
 
     QDockWidget *attrDock = new QDockWidget(tr("Attributes"), this);
     attrDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -30,13 +30,13 @@ MainWindow::MainWindow()
     addDockWidget(Qt::RightDockWidgetArea, attrDock);
     viewMenu->addAction(attrDock->toggleViewAction());
 
-    QDockWidget *glDock = new QDockWidget(tr("3D View"), this);
-    glDock->setAllowedAreas(Qt::AllDockWidgetAreas);
-    m_glview = new GLWidget(glDock);
-    glDock->setWidget(m_glview);
-    addDockWidget(Qt::TopDockWidgetArea, glDock);
-    //glDock->setFloating(true);
-    viewMenu->addAction(glDock->toggleViewAction());
+    QDockWidget *grDock = new QDockWidget(tr("Graph Editor"), this);
+    grDock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    m_graphView = new alo::SceneGraph(m_scene, grDock);
+    grDock->setWidget(m_graphView);
+    addDockWidget(Qt::BottomDockWidgetArea, grDock);
+    //grDock->setFloating(true);
+    viewMenu->addAction(grDock->toggleViewAction());
 
     connect(m_scene, SIGNAL(sendSelectGlyph(bool)), 
     m_editor, SLOT(recvSelectGlyph(bool)));
@@ -94,7 +94,6 @@ void MainWindow::createActions()
 
 }
 
-//! [8]
 void MainWindow::createStatusBar()
 {
     statusBar()->showMessage(tr("Ready"));

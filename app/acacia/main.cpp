@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     fmt.setProfile(QSurfaceFormat::CompatibilityProfile);
 
     QSurfaceFormat::setDefaultFormat(fmt);
-    
+    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QApplication app(argc, argv);
     Q_INIT_RESOURCE(acacia);
     MainWindow mainWin;

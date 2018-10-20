@@ -45,10 +45,14 @@ void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
 	GlyphOps *ops = createOps(content);
 	ops->addAttributes(content);
 	g->setOps(ops);
+	postCreation(g);
 }
 
 GlyphOps *GlyphScene::createOps(const QJsonObject &content)
 { return new GlyphOps; }
+
+void GlyphScene::postCreation(GlyphItem *item)
+{}
 
 void GlyphScene::selectGlyph(GlyphItem *item)
 {

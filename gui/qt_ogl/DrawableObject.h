@@ -14,12 +14,14 @@ class DrawableObject
 public:
     DrawableObject();
     ~DrawableObject();
-    
-    void create(const float *position,
+
+    void setData(const float *position,
                 const float *normal,
                 const float *barycoord,
                 int count);
-    void draw();
+/// must have context
+    void create(QOpenGLContext *ctx);
+    void draw(QOpenGLContext *ctx);
     void cleanup();
 
     const QMatrix4x4 &worldMatrix() const;
@@ -38,6 +40,7 @@ private:
     QOpenGLBuffer m_barVbo;
     QMatrix4x4 m_world;
     int m_drawArraySize;
+    const float *m_data[3];
 
 };
 

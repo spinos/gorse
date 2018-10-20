@@ -46,6 +46,7 @@ signals:
 		
 protected:
 	virtual GlyphOps *createOps(const QJsonObject &content);
+	virtual void postCreation(GlyphItem *item);
 	
 private:
 	

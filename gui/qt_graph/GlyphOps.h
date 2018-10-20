@@ -29,6 +29,7 @@ public:
 	bool setFloatAttrValue(const std::string &attrName, const float &x);
 	
 	virtual void update();
+	virtual bool hasDrawable() const;
 
 protected:
 	void addAttribute(const QJsonObject &content);

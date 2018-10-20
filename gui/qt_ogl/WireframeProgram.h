@@ -23,7 +23,7 @@ public:
     ~WireframeProgram();
     
     void cleanup();
-    void initializeProgram();
+    void initializeProgram(QOpenGLContext *ctx);
     void beginProgram(const QMatrix4x4 &projectionMat);
     void beginProgram(const QMatrix4x4 &projectionMat, 
                     const QMatrix4x4 &modelMat,

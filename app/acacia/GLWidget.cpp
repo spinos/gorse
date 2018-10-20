@@ -2,10 +2,15 @@
 #include <QMouseEvent>
 #include <QOpenGLShaderProgram>
 #include <QCoreApplication>
+#include <qt_ogl/DrawableScene.h>
+#include <qt_ogl/DrawableObject.h>
 
-GLWidget::GLWidget(QWidget *parent)
-    : alo::View3DWidget(parent)
+using namespace alo;
+
+GLWidget::GLWidget(DrawableScene *scene, QWidget *parent)
+    : View3DWidget(parent)
 {
+	m_scene = scene;
 }
 
 GLWidget::~GLWidget()
@@ -16,7 +21,7 @@ GLWidget::~GLWidget()
 void GLWidget::cleanup()
 {
     makeCurrent();
-    //m_logo.cleanup();
+
     doneCurrent();
 }
 
@@ -26,13 +31,11 @@ void GLWidget::recvAttribChanged()
 void GLWidget::clientInit()
 {
     //connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLWidget::cleanup);
-
-    //initializeOpenGLFunctions();
-    
-    //m_logo.initializeGL();
+	m_scene->setContext(QOpenGLContext::globalShareContext());
+    m_scene->initializeScene();
 }
 
 void GLWidget::clientDraw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
 {
-    //m_logo.paintGL(proj, cam);
+    m_scene->draw(proj, cam);
 }

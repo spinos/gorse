@@ -1,10 +1,12 @@
 #include "RootOps.h"
+#include <qt_ogl/DrawableScene.h>
+#include <qt_ogl/DrawableObject.h>
+#include <geom/YCylinder.h>
 
 namespace alo {
    
 RootOps::RootOps()
 {
-	std::cout<<" root ops init";
 }
     
 void RootOps::update()
@@ -18,6 +20,22 @@ void RootOps::update()
     float b;
     fb->getValue(b);
     std::cout<<" root ops update "<<a<<" "<<b;
+}
+
+void RootOps::addDrawableTo(DrawableScene *scene)
+{ 
+    YCylinder c;
+    c.createCylinder(16, 8, 7.f, 31.f);
+
+    c.createPositionArray(posarr);
+    c.createNormalArray(nmlarr);
+    c.createBarycentricCoordinates(baryc);
+
+    DrawableObject *cly = scene->createDrawable();
+    cly->setData((const float *)posarr.c_data(),
+                (const float *)nmlarr.c_data(),
+                (const float *)baryc.c_data(),
+                c.numIndices());
 }
 
 }

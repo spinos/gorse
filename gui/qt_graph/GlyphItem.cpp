@@ -94,6 +94,9 @@ GlyphHalo* GlyphItem::halo()
 GlyphOps *GlyphItem::getOps() const
 { return m_ops; }
 
+GlyphOps *GlyphItem::ops()
+{ return m_ops; }
+
 QPointF GlyphItem::localCenter() const
 { return QPointF(m_blockWidth / 2, m_blockHeight / 2); }
 

@@ -11,16 +11,13 @@
 #define ACACIA_SCENE_H
 
 #include <qt_graph/GlyphScene.h>
-
-QT_BEGIN_NAMESPACE
-class QGraphicsSceneMouseEvent;
-QT_END_NAMESPACE
+#include <qt_ogl/DrawableScene.h>
 
 namespace alo {
 class GlyphOps;
 }
 
-class AcaciaScene : public alo::GlyphScene
+class AcaciaScene : public alo::GlyphScene, public alo::DrawableScene
 {
     Q_OBJECT
 
@@ -31,7 +28,8 @@ public:
 signals:
 		
 protected:
-    virtual alo::GlyphOps *createOps(const QJsonObject &content);
+    virtual alo::GlyphOps *createOps(const QJsonObject &content) override;
+    virtual void postCreation(alo::GlyphItem *item) override;
 	
 private:
 

@@ -67,9 +67,9 @@ static const char *wfrm_fragmentShaderSource =
     "   gl_FragColor = mix(vec4(0.0, 0.0, 0.0, 1.0), vec4(col, 1.0), edgeFactor());\n"
     "}\n";
 
-void WireframeProgram::initializeProgram()
+void WireframeProgram::initializeProgram(QOpenGLContext *ctx)
 {
-    m_program = new QOpenGLShaderProgram;
+    m_program = new QOpenGLShaderProgram(ctx);
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, wfrm_vertexShaderSource );
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, wfrm_fragmentShaderSource);
     m_program->bindAttributeLocation("vertex", 0);

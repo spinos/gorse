@@ -43,8 +43,6 @@ protected:
     
 private:
 
-private:
-    
 };
 
 }

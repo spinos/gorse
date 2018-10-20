@@ -10,6 +10,7 @@
 //#include <QtGui>
 #include "AcaciaScene.h"
 #include "ops/AllOps.h"
+#include <qt_graph/GlyphItem.h>
 
 using namespace alo;
 
@@ -32,3 +33,11 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
     return new GlyphOps; 
 }
 
+void AcaciaScene::postCreation(GlyphItem *item)
+{
+	GlyphOps *op = item->ops();
+	if(op->hasDrawable()) { 
+		DrawableOps *dop = static_cast<DrawableOps *>(op);
+		dop->addDrawableTo(this);
+	}
+}

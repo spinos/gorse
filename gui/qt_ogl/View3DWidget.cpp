@@ -16,7 +16,9 @@ View3DWidget::View3DWidget(QWidget *parent)
 }
 
 View3DWidget::~View3DWidget() 
-{}
+{
+    qDebug()<<"~View3DWidget";
+}
 
 QSize View3DWidget::minimumSizeHint() const
 {
@@ -31,11 +33,13 @@ QSize View3DWidget::sizeHint() const
 void View3DWidget::initializeGL()
 {
     resetCamera();
+    //qDebug()<<(char *)getExtension("OES_standard_derivatives");
+/// must QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+/// before QApplication
+    qDebug()<<" glb ogl ctx"<<QOpenGLContext::globalShareContext();
     initializeOpenGLFunctions();
     qDebug()<<(char *)glGetString(GL_VERSION);
     qDebug()<<(char *)glGetString(GL_SHADING_LANGUAGE_VERSION );
-    QOpenGLContext * ctx = context();
-    //qDebug()<<(char *)getExtension("OES_standard_derivatives");
     
     glClearColor(0.37, 0.37, 0.37, 1);
 	glEnable(GL_DEPTH_TEST);

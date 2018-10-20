@@ -3,14 +3,17 @@
 
 #include <qt_ogl/View3DWidget.h>
 #include <QMatrix4x4>
-//#include "glprog.h"
+
+namespace alo {
+class DrawableScene;
+}
 
 class GLWidget : public alo::View3DWidget
 {
     Q_OBJECT
 
 public:
-    GLWidget(QWidget *parent = 0);
+    GLWidget(alo::DrawableScene *scene, QWidget *parent = 0);
     ~GLWidget();
 
 public slots:
@@ -25,6 +28,7 @@ protected:
 
 private:
 
+	alo::DrawableScene *m_scene;
 };
 
 #endif
