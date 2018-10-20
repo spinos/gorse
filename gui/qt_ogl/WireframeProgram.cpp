@@ -88,6 +88,12 @@ void WireframeProgram::initializeProgram()
     m_program->release();
 }
 
+void WireframeProgram::beginProgram(const QMatrix4x4 &projectionMat)
+{ 
+    m_program->bind();
+    m_program->setUniformValue(m_projMatrixLoc, projectionMat);
+}
+
 void WireframeProgram::beginProgram(const QMatrix4x4 &projectionMat, 
                                 const QMatrix4x4 &modelMat,
                                 const QMatrix4x4 &modelViewMat)
@@ -96,8 +102,15 @@ void WireframeProgram::beginProgram(const QMatrix4x4 &projectionMat,
     m_program->setUniformValue(m_projMatrixLoc, projectionMat);
     m_program->setUniformValue(m_mvMatrixLoc, modelViewMat);
     QMatrix3x3 normalMatrix = modelMat.normalMatrix();
+    m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);   
+}
+
+void WireframeProgram::setModelView(const QMatrix4x4 &modelMat,
+                                const QMatrix4x4 &modelViewMat)
+{ 
+    m_program->setUniformValue(m_mvMatrixLoc, modelViewMat);
+    QMatrix3x3 normalMatrix = modelMat.normalMatrix();
     m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
-    
 }
 
 void WireframeProgram::endProgram()

@@ -24,9 +24,12 @@ public:
     
     void cleanup();
     void initializeProgram();
+    void beginProgram(const QMatrix4x4 &projectionMat);
     void beginProgram(const QMatrix4x4 &projectionMat, 
                     const QMatrix4x4 &modelMat,
                     const QMatrix4x4 &modelViewMat);
+    void setModelView(const QMatrix4x4 &modelMat,
+                                const QMatrix4x4 &modelViewMat);
     void endProgram();
     
 protected:

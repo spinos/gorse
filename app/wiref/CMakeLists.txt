@@ -1,5 +1,4 @@
 set (WIREF_SOURCE_FILES main.cpp
-glprog.cpp
 glwidget.cpp
 mainwindow.cpp)
 

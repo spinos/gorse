@@ -2,8 +2,7 @@
 #define GLWIDGET_H
 
 #include <qt_ogl/View3DWidget.h>
-#include <QMatrix4x4>
-#include "glprog.h"
+#include <qt_ogl/DrawableScene.h>
 
 class GLWidget : public alo::View3DWidget
 {
@@ -24,7 +23,7 @@ protected:
 
 private:
 
-    GLProg *m_logo;
+	alo::DrawableScene *m_scene;
 
 };
 
