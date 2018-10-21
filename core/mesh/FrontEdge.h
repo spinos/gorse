@@ -24,7 +24,7 @@ public:
     enum GenType {
         GenNone = 0,
         GenTriangle,
-        GenQuad,
+        GenQuad = 2,
         GenPentagon
     };
 

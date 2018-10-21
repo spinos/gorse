@@ -1,3 +1,11 @@
+/*
+ *  DrawableObject.h
+ *
+ *  PN (interleaved position and normal)
+ *  B (barycentric coordinate)
+ *
+ */
+
 #ifndef DRAWABLE_OBJECT_H
 #define DRAWABLE_OBJECT_H
 
@@ -15,33 +23,34 @@ public:
     DrawableObject();
     ~DrawableObject();
 
-    void setData(const float *position,
-                const float *normal,
-                const float *barycoord,
-                int count);
+/// entry to data
+    void setPosnml(const float *posnml, int count);
+    void setBarycentric(const float *barycoord, int count);
+    
 /// must have context
     void create(QOpenGLContext *ctx);
+    void update(QOpenGLContext *ctx);
     void draw(QOpenGLContext *ctx);
     void cleanup();
+
+    void setDrawArrayLength(int x);
+    const int &drawArrayLength() const;
 
     const QMatrix4x4 &worldMatrix() const;
 
 protected:
-    void setDrawArraySize(int x);
-    QOpenGLBuffer &posVbo();
-    QOpenGLBuffer &nmlVbo();
+    QOpenGLBuffer &posnmlVbo();
     QOpenGLBuffer &barVbo();
 
 private:
     
     QOpenGLVertexArrayObject m_vao;
-    QOpenGLBuffer m_posVbo;
-    QOpenGLBuffer m_nmlVbo;
+    QOpenGLBuffer m_posnmlVbo;
     QOpenGLBuffer m_barVbo;
     QMatrix4x4 m_world;
+    const float *m_data[2];
+    int m_count[2];
     int m_drawArraySize;
-    const float *m_data[3];
-
 };
 
 }

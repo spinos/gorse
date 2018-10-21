@@ -68,9 +68,9 @@ void FrontMesher::advanceTriangleEdge(FrontLine& b, const FrontEdge& ea, int idx
         } else
             ivb0 = addVertex(b, pvb0);
     } else {
-        if(ea.e0()->advanceType() == FrontEdge::GenNone)
+        if(ea.e0()->advanceType() == FrontEdge::GenNone) {
             ivb0 = addVertex(b, pvb0);
-        else {
+        } else {
             ivb0 = b.tail()->id();
             Vector3F* p0 = b.tail()->pos();
             p0->mixWith(pvb0, .5f);
@@ -110,7 +110,7 @@ void FrontMesher::advanceQuadEdge(FrontLine& b, const FrontEdge& ea, int idx, co
     const float l02 = va0->pos()->distanceTo(pvb1);
     const float l13 = va1->pos()->distanceTo(pvb0);
     const float r23 = l02 / l13;
-    if(r23 < .5f || r23 > 2.f) {
+    if(r23 < .6f || r23 > 1.9f) {
         flipped = l02 > l13;
     }
     m_msh->addQuad(va0->id(), va1->id(), ivb1, ivb0, flipped);

@@ -37,8 +37,11 @@ public:
 
 	void createGlyph(const QPixmap &pix, int typ, const QPointF & pos);
 	void selectGlyph(GlyphItem *item);
-	void deselectGlyph();
+	void deselectGlyph(GlyphItem *item);
+	void deselectAllGlyph();
+	void removeActiveItem();
 
+	GlyphItem *getActiveGlyph() const;
 	GlyphOps *getActiveOps() const;
 
 signals:
@@ -46,11 +49,13 @@ signals:
 		
 protected:
 	virtual GlyphOps *createOps(const QJsonObject &content);
-	virtual void postCreation(GlyphItem *item);
+	virtual void postCreation(GlyphItem *item) = 0;
+	virtual void preDestruction(GlyphItem *item) = 0;
 	
 private:
 	
 private:
+/// only one can be active
 	GlyphItem *m_activeGlyph;
 	QList<GlyphItem *> m_selectedGlyph;;
 	GroupCollection<QJsonObject> *m_collector;

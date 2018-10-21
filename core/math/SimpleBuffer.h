@@ -36,6 +36,9 @@ public:
     
     T& operator[](int i);
     const T& operator[](int i) const;
+/// max num of elements
+    const int &capacity() const;
+    int capacityByteSize() const;
     
 private:
 
@@ -99,6 +102,14 @@ T& SimpleBuffer<T>::operator[](int i)
 template<typename T>
 const T& SimpleBuffer<T>::operator[](int i) const
 { return m_data[i]; }
+
+template<typename T>
+const int &SimpleBuffer<T>::capacity() const
+{ return m_cap; }
+
+template<typename T>
+int SimpleBuffer<T>::capacityByteSize() const
+{ return m_cap * sizeof(T); }
 
 }
 

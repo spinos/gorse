@@ -14,68 +14,66 @@ void Tube::createTube()
 {
     Uniform<Lehmer> ur(7999999);
 
-    FrontMesher msher;
-    initAdaptableMesh();
-    
     EllipseFunc ellip;
     ellip.setA(10.f);
     ellip.setE(.34f);
     
-    const int nu = 71;
+    const int nu = 60;
     const float da = 6.28318531f / (float)nu;
-    
+
     for(int i=0;i<nu;++i) {
         float phi = da * i;
-        float wr = ScaledSin(phi * 8.8f + ur.randf1() * .8f, .3f, .65f)
-                    + ScaledSin(phi * 4.1 + ur.randf1(), .0f, .4f)
+        float wr = ScaledSin(phi * 9.8f + ur.randf1() * .8f, .3f, .6f)
+                    + ScaledSin(phi * 4.1 + ur.randf1(), .0f, .3f)
                     + ScaledSin(phi * 1.7 + ur.randf1(), .0f, .2f);
 
         float radius = ellip.polarForm(phi) +  2.f * wr;
         addVertex(Vector3F(radius * cos(phi), 0.f, -radius * sin(phi) ));
     }
 
-    FrontLine l[2];
-    const Vector3F up(0.f, 2.3f, 0.f);
-    const Quaternion lq(.169f, Vector3F::ZAxis);
-    const Quaternion tq(.019f, Vector3F::YAxis);
-    constexpr float cshrinking = .08f;
+    FrontLine originLine;
+    
+    const Vector3F up(0.f, 1.9f, 0.f);
+    const Quaternion lq(.139f, Vector3F::XAxis);
+    const Quaternion tq(.059f, Vector3F::YAxis);
+    constexpr float cshrinking = .05f;
     
     for(int i=0;i<nu;++i) {
-        l[0].addVertex(vertexPositionR(i), i);
+        originLine.addVertex(vertexPositionR(i), i);
     }
-    
-    l[0].closeLine();
-    l[0].smooth(.14f);
-    l[0].setMinEdgeLength(.43f);
-    l[0].setWorldSpace(Matrix33F::IdentityMatrix);
-    l[0].rotateLocalBy(lq);
-    l[0].rotateLocalBy(tq);
-    
-    l[0].setShrinking(cshrinking);
-    l[1].setShrinking(cshrinking);
-    
-    l[0].setDirection(up);
-    l[1].setDirection(up);
-    l[1].rotateLocalBy(lq);
-    l[1].rotateLocalBy(tq);
+    originLine.closeLine();
 
+    originLine.smooth(.14f);
+
+    originLine.setWorldSpace(Matrix33F::IdentityMatrix);
+    originLine.rotateLocalBy(lq);
+    originLine.rotateLocalBy(tq);
+    originLine.setShrinking(cshrinking);
+    originLine.setDirection(up);
+    originLine.setMinEdgeLength(.4f);
+    
+    FrontLine *la = &originLine;
+    FrontLine l[12];
+
+    FrontMesher msher;
     msher.attachMesh(this);
 
-    for(int i=0;i<9;++i) {
-        msher.setFrontId(i);
-        FrontLine& la = l[i & 1];
-        FrontLine& lb = l[(i+1) & 1];
-        msher.advanceFront(lb, la);
+    for(int i=0;i<12;++i) {
+        msher.setFrontId(i+1);
 
-        //std::cout<<" front a "<<la;
+        l[i].rotateLocalBy(lq);
+        l[i].rotateLocalBy(tq);
+        l[i].setShrinking(cshrinking);
+        l[i].setDirection(up);
+        l[i].setMinEdgeLength(.4f);
 
-        lb.smooth();
+        msher.advanceFront(l[i], *la);
 
-        //lb.preAdvance();
+        std::cout<<"\n front "<<*la;
 
-        //std::cout<<" front b "<<lb;
-        
-        la.clearLine();
+        l[i].smooth(.02f);
+
+        la = &l[i];
     }
 
     calculateVertexNormals();

@@ -50,14 +50,12 @@ void GLWidget::addCylinder()
 {
     YCylinder c;
     c.createCylinder(16, 8, 7.f, 31.f);
-    c.createPositionArray(posarr);
-    c.createNormalArray(nmlarr);
+    c.createPositionNormalArray(posnml);
     c.createBarycentricCoordinates(baryc);
 
     DrawableObject *cly = m_scene->createDrawable();
-    cly->setData((const float *)posarr.c_data(),
-                (const float *)nmlarr.c_data(),
-                (const float *)baryc.c_data(),
-                c.numIndices());
+    cly->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
+    cly->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
+    cly->setDrawArrayLength(c.numIndices());
 
 }

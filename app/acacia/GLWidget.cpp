@@ -26,7 +26,7 @@ void GLWidget::cleanup()
 }
 
 void GLWidget::recvAttribChanged()
-{}
+{ update(); }
 
 void GLWidget::clientInit()
 {

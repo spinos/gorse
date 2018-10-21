@@ -31,7 +31,6 @@ PiecesList::PiecesList(TreeModel *model, QWidget *parent)
 
 void PiecesList::dragEnterEvent(QDragEnterEvent *event)
 {
-	qDebug()<<"PiecesList::dragEnterEvent";
 	if (event->mimeData()->hasFormat("application/x-dndpiecedata")) {
         event->setDropAction(Qt::MoveAction);
         event->accept();
@@ -41,7 +40,6 @@ void PiecesList::dragEnterEvent(QDragEnterEvent *event)
 
 void PiecesList::dragMoveEvent(QDragMoveEvent *event)
 {
-	qDebug()<<"PiecesList::dragMoveEvent";
 	if (event->mimeData()->hasFormat("application/x-dndpiecedata"))
         event->accept();
     else
@@ -68,7 +66,7 @@ void PiecesList::startDrag(Qt::DropActions /*supportedActions*/)
     drag->setHotSpot(QPoint(pixmap.width()/2, pixmap.height()/2));
     drag->setPixmap(pixmap);
 
-	qDebug()<<"PiecesList::startDrag"<<"pixmap"<<pixmap<<" id "<<pieceTyp;
+	//qDebug()<<"PiecesList::startDrag"<<"pixmap"<<pixmap<<" id "<<pieceTyp;
 	
 	drag->exec(Qt::MoveAction);
 	setCursor(Qt::OpenHandCursor);

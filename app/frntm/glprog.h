@@ -26,12 +26,10 @@ private:
     void setupVertexAttribs();
 
     Tube m_logo;
-    alo::SimpleBuffer<alo::Vector3F> m_posarr;
-    alo::SimpleBuffer<alo::Vector3F> m_nmlarr;
+    alo::SimpleBuffer<alo::Vector3F> m_posnml;
     alo::SimpleBuffer<alo::Vector3F> m_baryc;
     QOpenGLVertexArrayObject m_vao;
-    QOpenGLBuffer m_posVbo;
-    QOpenGLBuffer m_nmlVbo;
+    QOpenGLBuffer m_posnmlVbo;
     QOpenGLBuffer m_barVbo;
     QOpenGLShaderProgram *m_program;
     int m_projMatrixLoc;

@@ -26,10 +26,12 @@ public:
 	virtual ~AcaciaScene();
 
 signals:
+	void sendUpdateDrawable();
 		
 protected:
     virtual alo::GlyphOps *createOps(const QJsonObject &content) override;
     virtual void postCreation(alo::GlyphItem *item) override;
+    virtual void preDestruction(alo::GlyphItem *item) override;
 	
 private:
 

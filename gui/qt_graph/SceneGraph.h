@@ -40,6 +40,7 @@ protected:
     void dragMoveEvent(QDragMoveEvent *event);
     void dropEvent(QDropEvent *event);
 	virtual void resizeEvent ( QResizeEvent * event );
+	virtual void keyPressEvent(QKeyEvent *event);
 
 	GlyphScene * asGlyphScene();
 	
@@ -56,6 +57,7 @@ private:
 	void doMoveConnection(const QPoint& mousePos);
 	void doConnectItem(QGraphicsItem* item);
 	void doRemoveConnection(QGraphicsItem* item);
+	void removeActiveItem();
 	
 	enum Mode {
 		mNone = 0,
@@ -66,8 +68,6 @@ private:
 	}; 
 	
 	Mode m_mode;
-/// only one can be selected
-	GlyphItem *m_selectedItem;
 	GlyphConnection *m_selectedConnection;
 	QPoint m_lastMosePos;
 /// changed after pan

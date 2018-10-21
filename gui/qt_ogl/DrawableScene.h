@@ -16,6 +16,8 @@ class DrawableScene
 {
 	WireframeProgram *m_program1;
     std::deque<DrawableObject *> m_createQueue;
+    std::deque<DrawableObject *> m_editQueue;
+    std::deque<DrawableObject *> m_removeQueue;
     std::vector<DrawableObject *> m_drawables;
     QOpenGLContext *m_ctx;
 
@@ -31,11 +33,13 @@ public:
     void draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam);
 
     DrawableObject *createDrawable();
-    bool removeDrawable(DrawableObject *k);
+    void enqueueEditDrawable(DrawableObject *d);
+    void enqueueRemoveDrawable(DrawableObject *d);
 
     QOpenGLContext *context();
 
 private:
+    bool removeDrawable(DrawableObject *k);
 
 };
 

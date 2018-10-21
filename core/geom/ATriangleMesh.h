@@ -37,8 +37,7 @@ public:
     const Vector3F* c_normals() const;
     
 /// face-varying vertex
-    void createPositionArray(SimpleBuffer<Vector3F>& pos) const;
-    void createNormalArray(SimpleBuffer<Vector3F>& nml) const;
+    void createPositionNormalArray(SimpleBuffer<Vector3F>& posnml) const;
     void createBarycentricCoordinates(SimpleBuffer<Vector3F>& baryc) const;
     
     void reverseTriangleNormals();

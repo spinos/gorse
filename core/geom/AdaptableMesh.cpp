@@ -12,7 +12,7 @@
 namespace alo {
 
 AdaptableMesh::AdaptableMesh() 
-{}
+{ initAdaptableMesh(); }
 
 AdaptableMesh::~AdaptableMesh() 
 {}

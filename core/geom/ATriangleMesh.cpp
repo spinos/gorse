@@ -142,34 +142,28 @@ float ATriangleMesh::getTriangleArea(int i) const
     return sqrt(s * (s - la) * (s - lb) * (s - lc));
 }
 
-void ATriangleMesh::createPositionArray(SimpleBuffer<Vector3F>& pos) const
+void ATriangleMesh::createPositionNormalArray(SimpleBuffer<Vector3F>& posnml) const
 {
     const Vector3F* p = c_positions();
-	pos.createBuffer(m_numIndices);
+    const Vector3F* n = c_normals();
+    posnml.createBuffer(m_numIndices * 2);
     for(int i=0;i<m_numTriangles;++i) {
         const unsigned* v = &c_indices()[i*3];
-        pos[i*3] = p[v[0]];
-        pos[i*3+1] = p[v[1]];
-        pos[i*3+2] = p[v[2]];
-    }
-}
-
-void ATriangleMesh::createNormalArray(SimpleBuffer<Vector3F>& nml) const
-{
-    const Vector3F* p = c_normals();
-	nml.createBuffer(m_numIndices);
-    for(int i=0;i<m_numTriangles;++i) {
-        const unsigned* v = &c_indices()[i*3];
-        nml[i*3] = p[v[0]];
-        nml[i*3+1] = p[v[1]];
-        nml[i*3+2] = p[v[2]];
+        const int i6 = i * 6;
+        posnml[i6]   = p[v[0]];
+        posnml[i6+1] = n[v[0]];
+        posnml[i6+2] = p[v[1]];
+        posnml[i6+3] = n[v[1]];
+        posnml[i6+4] = p[v[2]];
+        posnml[i6+5] = n[v[2]];
     }
 }
 
 void ATriangleMesh::createBarycentricCoordinates(SimpleBuffer<Vector3F>& baryc) const
 {
     baryc.createBuffer(m_numIndices);
-    for(int i=0;i<m_numTriangles;++i) {
+    const int n = baryc.capacity() / 3;
+    for(int i=0;i<n;++i) {
         baryc[i*3].set(1.f, 0.f, 0.f);
         baryc[i*3+1].set(0.f, 1.f, 0.f);
         baryc[i*3+2].set(0.f, 0.f, 1.f);

@@ -44,6 +44,9 @@ MainWindow::MainWindow()
     connect(m_editor, SIGNAL(sendAttribChanged()), 
     m_glview, SLOT(recvAttribChanged()));
 
+    connect(m_scene, SIGNAL(sendUpdateDrawable()),
+    m_glview, SLOT(recvAttribChanged()));
+
     setWindowTitle(tr("Acacia"));
 
     setUnifiedTitleAndToolBarOnMac(true);

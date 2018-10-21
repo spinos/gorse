@@ -45,6 +45,18 @@ void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
         m_createQueue.erase(m_createQueue.begin());
     }
 
+    while(m_editQueue.size() > 0) {
+        DrawableObject *i = m_editQueue.front();
+        i->update(m_ctx);
+        m_editQueue.erase(m_editQueue.begin());
+    }
+
+    while(m_removeQueue.size() > 0) {
+        DrawableObject *i = m_removeQueue.front();
+        removeDrawable(i);
+        m_removeQueue.erase(m_removeQueue.begin());
+    }
+
     m_program1->beginProgram(proj);
 
 	for (DrawableObject *i : m_drawables) {
@@ -64,8 +76,14 @@ DrawableObject *DrawableScene::createDrawable()
 	return o;
 }
 
+void DrawableScene::enqueueEditDrawable(DrawableObject *d)
+{ m_editQueue.push_back(d); }
+
+void DrawableScene::enqueueRemoveDrawable(DrawableObject *d)
+{ m_removeQueue.push_back(d); }
+
 bool DrawableScene::removeDrawable(DrawableObject *k)
-{/*
+{
 	std::vector<DrawableObject *>::iterator it = m_drawables.begin();
 	for (;it != m_drawables.end();++it) {
         if(*it == k) {
@@ -73,8 +91,8 @@ bool DrawableScene::removeDrawable(DrawableObject *k)
         	m_drawables.erase(it);
         	return true;
         }
-	}*/
-	return false;
+	}
+    return false;
 }
 
 }

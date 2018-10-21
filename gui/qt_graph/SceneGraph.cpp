@@ -23,7 +23,7 @@ SceneGraph::SceneGraph(GlyphScene *scene, QWidget * parent) : QGraphicsView(scen
 	setMinimumSize(400, 300);
 	setRenderHint(QPainter::Antialiasing);
 	setSceneRect(	frameRect() );
-	m_selectedItem = 0;
+	//m_selectedItem = 0;
 	m_selectedConnection = 0;
 }
 
@@ -173,13 +173,12 @@ void SceneGraph::processSelect(const QPoint & pos)
 			
 			if(ti->type() == GlyphItem::Type ) {
 				m_mode = mMoveItem;
-				m_selectedItem = static_cast<GlyphItem *>(ti);
-				asGlyphScene()->selectGlyph(m_selectedItem);				
+				GlyphItem *selectedItem = static_cast<GlyphItem *>(ti);
+				asGlyphScene()->selectGlyph(selectedItem);				
 			}
 		 }
      } else {
-         m_selectedItem = 0;
-         asGlyphScene()->deselectGlyph();
+         asGlyphScene()->deselectAllGlyph();
 	 }
 	 m_lastMosePos = pos;
 }
@@ -207,7 +206,8 @@ void SceneGraph::doMoveItem(const QPoint& mousePos)
 {
 	QPointF dv(mousePos.x() - m_lastMosePos.x(),
 					mousePos.y() - m_lastMosePos.y() );
-	m_selectedItem->moveBlockBy(dv);
+	GlyphItem *g = asGlyphScene()->getActiveGlyph();
+	if(g) g->moveBlockBy(dv);
 }
 
 void SceneGraph::doMoveConnection(const QPoint& mousePos)
@@ -274,6 +274,20 @@ void SceneGraph::beginProcessItem(QMouseEvent *event)
 		default:
 		;
 	}
+}
+
+void SceneGraph::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Delete) 
+    	asGlyphScene()->removeActiveItem();
+}
+
+void SceneGraph::removeActiveItem()
+{
+	GlyphItem *g = asGlyphScene()->getActiveGlyph();
+	if(!g) return;
+	scene()->removeItem(g);
+	delete g;
 }
 
 }

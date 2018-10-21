@@ -51,9 +51,6 @@ void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
 GlyphOps *GlyphScene::createOps(const QJsonObject &content)
 { return new GlyphOps; }
 
-void GlyphScene::postCreation(GlyphItem *item)
-{}
-
 void GlyphScene::selectGlyph(GlyphItem *item)
 {
 	if(!m_selectedGlyph.contains(item) )
@@ -65,7 +62,7 @@ void GlyphScene::selectGlyph(GlyphItem *item)
 	}
 }
 
-void GlyphScene::deselectGlyph()
+void GlyphScene::deselectAllGlyph()
 {
 	foreach(GlyphItem * gl, m_selectedGlyph) {
 		gl->hideHalo();
@@ -79,6 +76,40 @@ GlyphOps *GlyphScene::getActiveOps() const
 {
 	if(!m_activeGlyph) return 0;
 	return m_activeGlyph->getOps();
+}
+
+GlyphItem *GlyphScene::getActiveGlyph() const
+{ return m_activeGlyph; }
+
+void GlyphScene::deselectGlyph(GlyphItem *item)
+{
+	QList<GlyphItem *>::iterator it = m_selectedGlyph.begin();
+	for(;it!=m_selectedGlyph.end();++it) {
+		if(*it == item) break;
+	}
+
+	if(it != m_selectedGlyph.end()) {
+		(*it)->hideHalo();
+		m_selectedGlyph.erase(it);
+	}
+}
+
+void GlyphScene::removeActiveItem()
+{
+	if(!m_activeGlyph) return;
+
+	deselectGlyph(m_activeGlyph);
+
+	GlyphHalo* h = m_activeGlyph->halo();
+	QGraphicsScene::removeItem(h);
+	delete h;
+
+	preDestruction(m_activeGlyph);
+
+	QGraphicsScene::removeItem(m_activeGlyph);
+	delete m_activeGlyph;
+	m_activeGlyph = 0;
+	emit sendSelectGlyph(false);
 }
 
 }

@@ -29,8 +29,7 @@ private:
 	void addCylinder();
 
 	alo::DrawableScene *m_scene;
-	alo::SimpleBuffer<alo::Vector3F> posarr;
-    alo::SimpleBuffer<alo::Vector3F> nmlarr;
+	alo::SimpleBuffer<alo::Vector3F> posnml;
     alo::SimpleBuffer<alo::Vector3F> baryc;
 };
 

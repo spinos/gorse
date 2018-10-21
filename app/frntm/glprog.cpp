@@ -13,8 +13,7 @@ GLProg::GLProg() :
 {
     m_logo.createTube();
     
-    m_logo.createPositionArray(m_posarr);
-    m_logo.createNormalArray(m_nmlarr);
+    m_logo.createPositionNormalArray(m_posnml);
     m_logo.createBarycentricCoordinates(m_baryc);
 }
 
@@ -28,8 +27,8 @@ void GLProg::cleanup()
     if (m_program == nullptr)
         return;
     
-    m_posVbo.destroy();
-    m_nmlVbo.destroy();
+    m_posnmlVbo.destroy();
+    m_barVbo.destroy();
     delete m_program;
     m_program = 0;
 }
@@ -104,22 +103,17 @@ void GLProg::initializeGL()
 void GLProg::setupVertexAttribs()
 {
 /// vertex buffer object for geometry once
-    m_posVbo.create();
-    m_posVbo.bind();
-    m_posVbo.allocate((const GLfloat *)m_posarr.c_data(), m_logo.numIndices() * sizeof(Vector3F));
+    m_posnmlVbo.create();
+    m_posnmlVbo.bind();
+    m_posnmlVbo.allocate((const GLfloat *)m_posnml.c_data(), m_logo.numIndices() * sizeof(Vector3F) * 2);
 
     QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
     f->glEnableVertexAttribArray(0);
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, 0);
-    m_posVbo.release();
-    
-    m_nmlVbo.create();
-    m_nmlVbo.bind();
-    m_nmlVbo.allocate((const GLfloat *)m_nmlarr.c_data(), m_logo.numIndices() * sizeof(Vector3F));
+    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24, 0);
 
     f->glEnableVertexAttribArray(1);
-    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 12, 0);
-    m_nmlVbo.release();
+    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, reinterpret_cast<void *>(12));
+    m_posnmlVbo.release();
     
     m_barVbo.create();
     m_barVbo.bind();

@@ -9,8 +9,7 @@ namespace alo {
 
 class RootOps : public DrawableOps {
     
-    SimpleBuffer<Vector3F> posarr;
-    SimpleBuffer<Vector3F> nmlarr;
+    SimpleBuffer<Vector3F> posnml;
     SimpleBuffer<Vector3F> baryc;
     
 public:

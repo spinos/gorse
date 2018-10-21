@@ -39,5 +39,17 @@ void AcaciaScene::postCreation(GlyphItem *item)
 	if(op->hasDrawable()) { 
 		DrawableOps *dop = static_cast<DrawableOps *>(op);
 		dop->addDrawableTo(this);
+        emit sendUpdateDrawable();
 	}
+}
+
+void AcaciaScene::preDestruction(GlyphItem *item)
+{
+    GlyphOps *op = item->ops();
+    if(op->hasDrawable()) { 
+        DrawableOps *dop = static_cast<DrawableOps *>(op);
+        dop->removeDrawableFromScene();
+        emit sendUpdateDrawable();
+    }
+    delete op;
 }

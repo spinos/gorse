@@ -122,7 +122,7 @@ Vector3F FrontEdge::getDv() const
 { return *v1()->pos() - *v0()->pos(); }
 
 bool FrontEdge::isFlat() const
-{ return (  Absolute<float>(v0()->curvature()) < 0.17f && Absolute<float>(v1()->curvature()) < 0.17f) ; }
+{ return (  Absolute<float>(v0()->curvature()) < 0.16f && Absolute<float>(v1()->curvature()) < 0.16f) ; }
 
 void FrontEdge::averagePosition(const float& wei)
 {
@@ -135,8 +135,9 @@ void FrontEdge::averagePosition(const float& wei)
 
 std::ostream& operator<<(std::ostream &output, const FrontEdge & p) 
 {
-    output << " (" << p.v0()->id() <<"," << p.v1()->id() <<") ";
-    if(p.advanceType() != 2) output<<p.advanceType();
+    output << " (" << p.v0()->id() <<"," << p.v1()->id() <<")";
+    if(p.advanceType() != FrontEdge::GenQuad) 
+        output<<" "<<p.advanceType();
     return output;
 }
 

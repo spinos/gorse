@@ -71,9 +71,9 @@ private:
 	void movePort(GlyphPort *pt, const Connectable *c);
 	
 private:
-	QGraphicsPixmapItem * m_icon;
+	QGraphicsPixmapItem *m_icon;
 	GlyphOps *m_ops;
-	GlyphHalo* m_halo;
+	GlyphHalo *m_halo;
 	int m_blockWidth, m_blockHeight;
 	
 };

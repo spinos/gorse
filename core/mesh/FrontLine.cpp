@@ -227,18 +227,11 @@ void FrontLine::calcEdgeAdvanceType()
         if(it->e0())
             be0non = it->e0()->advanceType() == FrontEdge::GenNone;
 
-         if(it->e1())
+        if(it->e1())
             be1non = it->e1()->advanceType() == FrontEdge::GenNone;
 
-        if(be0non) {
-            if(be1non)
-                it->setAdvanceType(FrontEdge::GenNone);
-            else
-                it->setAdvanceType(FrontEdge::GenTriangle);
-        }
-
-        if(be1non) {
-            if(be0non)
+        if (be0non || be1non) {
+            if(be0non && be1non)
                 it->setAdvanceType(FrontEdge::GenNone);
             else
                 it->setAdvanceType(FrontEdge::GenTriangle);
@@ -257,7 +250,7 @@ void FrontLine::calcEdgeAdvanceType()
         }
     }
 
-#if 1
+#if 0
     int nt = 0, nn = 0;
     it = m_edges.begin();
     for(;it != m_edges.end();++it) {
@@ -315,16 +308,17 @@ const float& FrontLine::length() const
 std::ostream& operator<<(std::ostream &output, const FrontLine & p) 
 {
     const int nv = p.numVertices();
-    output << " nv: "<<nv<<" [";
+    output << "\n nv: "<<nv<<" [";
     for(int i=0;i<nv;++i) {
         output << " " << p.getVertex(i).id();
     }
     output << " ] ";
     const int ne = p.numEdges();
-    output <<" ne: "<<ne<<" [";
+    output <<"\n ne: "<<ne<<" [";
     for(int i=0;i<ne;++i) {
         const FrontEdge& ei = p.getEdge(i);
-        if(ei.advanceType() < FrontEdge::GenQuad) output << " " << ei;
+        if(ei.advanceType() < FrontEdge::GenQuad) 
+            output << ei;
     }
     output << " ] ";
     return output;
