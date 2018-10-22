@@ -63,6 +63,7 @@ public:
 	void setLabel(const std::string &lb);
 	void setConnectable(Connectable *x);
 
+	static void SeparateAttrComponent(std::string &attrName, int &attrComponent);
 
 protected:
 
@@ -127,8 +128,16 @@ class Float2Attrib : public QAttrib {
 public:
 	Float2Attrib(const std::string &name);
 
+	void setValue(const float &x, int component);
+
 	void setValue(const float *x);
 	void getValue(float *y) const;
+
+	void setMin(const float* x);
+	void setMax(const float* x);
+	
+	void getMin(float* y) const;
+	void getMax(float* y) const;
 	
 private:
 };

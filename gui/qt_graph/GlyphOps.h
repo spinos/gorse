@@ -36,10 +36,12 @@ protected:
 	QAttrib *addBoolAttribute(const QJsonObject &content);
 	QAttrib *addIntAttribute(const QJsonObject &content);
 	QAttrib *addFloatAttribute(const QJsonObject &content);
+	QAttrib *addFloat2Attribute(const QJsonObject &content);
 	QAttrib *addMeshAttribute(const QJsonObject &content);
 
 private:
 	void addConnection(QAttrib *b, const QJsonObject &content);
+	void setFloatComponentAttrValue(QAttrib *attr, const int &component, const float &x);
 
 };
 

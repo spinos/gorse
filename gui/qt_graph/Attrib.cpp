@@ -49,6 +49,29 @@ void QAttrib::setLabel(const std::string &lb)
 void QAttrib::setConnectable(Connectable *x)
 { m_connectable = x; }
 
+void QAttrib::SeparateAttrComponent(std::string &attrName, int &attrComponent)
+{
+	size_t found = attrName.find(".x"); 
+	if(found != std::string::npos) {
+		attrName.erase(found);
+		attrComponent = 0;
+		return;
+	}
+	found = attrName.find(".y"); 
+	if(found != std::string::npos) {
+		attrName.erase(found);
+		attrComponent = 1;
+		return;
+	}
+	found = attrName.find(".z"); 
+	if(found != std::string::npos) {
+		attrName.erase(found);
+		attrComponent = 2;
+		return;
+	}
+	attrComponent = -1;
+}
+
 BoolAttrib::BoolAttrib(const std::string &name) : QAttrib(name, AtBool)
 { value()<<false; }
 
@@ -101,7 +124,10 @@ void FloatAttrib::getMax(float& y) const
 { y = c_value()[2].toFloat(); }
 
 Float2Attrib::Float2Attrib(const std::string &name) : QAttrib(name, AtFloat2)
-{ value()<<0.f<<0.f; }
+{ value()<<0.f<<0.f<<-999999.f<<-999999.f<<999999.f<<999999.f; }
+
+void Float2Attrib::setValue(const float &x, int component)
+{ value()[component] = x; }
 
 void Float2Attrib::setValue(const float *x)
 { 
@@ -113,6 +139,30 @@ void Float2Attrib::getValue(float *y) const
 { 
 	y[0] = c_value()[0].toFloat(); 
 	y[1] = c_value()[1].toFloat(); 
+}
+
+void Float2Attrib::setMin(const float* x)
+{
+	value()[2] = x[0];
+	value()[3] = x[1];
+}
+
+void Float2Attrib::setMax(const float* x)
+{
+	value()[4] = x[0];
+	value()[5] = x[1];
+}
+	
+void Float2Attrib::getMin(float* y) const
+{ 
+	y[0] = c_value()[2].toFloat(); 
+	y[1] = c_value()[3].toFloat(); 
+}
+
+void Float2Attrib::getMax(float* y) const
+{ 
+	y[0] = c_value()[4].toFloat(); 
+	y[1] = c_value()[5].toFloat(); 
 }
 
 Float3Attrib::Float3Attrib(const std::string &name) : QAttrib(name, AtFloat3)

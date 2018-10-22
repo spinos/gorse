@@ -122,7 +122,7 @@ Vector3F FrontEdge::getDv() const
 { return *v1()->pos() - *v0()->pos(); }
 
 bool FrontEdge::isFlat() const
-{ return (  Absolute<float>(v0()->curvature()) < 0.16f && Absolute<float>(v1()->curvature()) < 0.16f) ; }
+{ return (  Absolute<float>(v0()->curvature()) < 0.13f && Absolute<float>(v1()->curvature()) < 0.13f) ; }
 
 void FrontEdge::averagePosition(const float& wei)
 {

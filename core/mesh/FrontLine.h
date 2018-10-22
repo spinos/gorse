@@ -65,6 +65,7 @@ public:
 /// to local, transform, to world
     Vector3F getAdvanceToPos(const FrontVertex* vert) const;
     const float& length() const;
+    float getAverageEdgeLength();
 
     void smooth(const float& wei = .07f);
 

@@ -44,6 +44,9 @@ void GlyphOps::addAttribute(const QJsonObject &content)
 		case QAttrib::AtFloat :
 			b = addFloatAttribute(content);
 			break;
+		case QAttrib::AtFloat2 :
+			b = addFloat2Attribute(content);
+			break;
 		case QAttrib::AtMesh :
 			b = addMeshAttribute(content);
 			break;
@@ -94,6 +97,28 @@ QAttrib *GlyphOps::addFloatAttribute(const QJsonObject &content)
 	return b;
 }
 
+QAttrib *GlyphOps::addFloat2Attribute(const QJsonObject &content)
+{
+	QString name = content["name"].toString();
+	std::string snm = name.toStdString();
+	Float2Attrib *b = new Float2Attrib(snm);
+	float tmp[2];
+	QJsonArray &fv = content["value"].toArray();
+	tmp[0] = fv[0].toDouble();
+	tmp[1] = fv[1].toDouble();
+	b->setValue(tmp);
+	QJsonArray &fm = content["min"].toArray();
+	tmp[0] = fm[0].toDouble();
+	tmp[1] = fm[1].toDouble();
+	b->setMin(tmp);
+	QJsonArray &fx = content["max"].toArray();
+	tmp[0] = fx[0].toDouble();
+	tmp[1] = fx[1].toDouble();
+	b->setMax(tmp);
+	m_attribs[snm] = b;
+	return b;
+}
+
 QAttrib *GlyphOps::addMeshAttribute(const QJsonObject &content)
 {
 	QString name = content["name"].toString();
@@ -135,14 +160,30 @@ QAttrib *GlyphOps::findAttrib(const std::string &attrName)
 
 bool GlyphOps::setFloatAttrValue(const std::string &attrName, const float &x)
 {
-	QAttrib *attr = findAttrib(attrName);
+	std::string realAttrName = attrName;
+	int attrComponent;
+	QAttrib::SeparateAttrComponent(realAttrName, attrComponent);
+
+	QAttrib *attr = findAttrib(realAttrName);
 	if(!attr) return false;
 
-	FloatAttrib *fattr = static_cast<FloatAttrib *>(attr);
-	fattr->setValue(x);
+	if(attrComponent < 0) {
+		FloatAttrib *fattr = static_cast<FloatAttrib *>(attr);
+		fattr->setValue(x);
+		
+	} else
+		setFloatComponentAttrValue(attr, attrComponent, x);
 
 	update();
 	return true;
+}
+
+void GlyphOps::setFloatComponentAttrValue(QAttrib *attr, const int &component, const float &x)
+{
+	if(attr->attrType() == QAttrib::AtFloat2) {
+		Float2Attrib *fattr = static_cast<Float2Attrib *>(attr);
+		fattr->setValue(x, component);
+	}
 }
 
 }

@@ -102,6 +102,9 @@ void AttribEditor::lsAttr(QAttrib *attr)
 		case QAttrib::AtFloat :
 			lsFloatAttr(attr);
 		break;
+		case QAttrib::AtFloat2 :
+			lsFloat2Attr(attr);
+		break;
 		default :
 		break;
 	}
@@ -126,6 +129,36 @@ void AttribEditor::lsFloatAttr(alo::QAttrib *attr)
 	
 	connect(sld, SIGNAL(valueChanged(QPair<std::string, float>)),
             this, SLOT(recvFloatValue(QPair<std::string, float>)));
+			
+}
+
+void AttribEditor::lsFloat2Attr(alo::QAttrib *attr)
+{
+	SimpleLabel *lab = new SimpleLabel(QString(attr->label().c_str()));
+	FieldSlider* xsld = new FieldSlider();
+	FieldSlider* ysld = new FieldSlider();
+	
+    m_leftCollWigs.enqueue(lab);
+    m_leftCollWigs.enqueue(new SimpleLabel(tr("")));
+    m_rightCollWigs.enqueue(xsld);
+    m_rightCollWigs.enqueue(ysld);
+
+	Float2Attrib *fattr = static_cast<Float2Attrib *>(attr);
+	float val[2], val0[2], val1[2];
+	fattr->getValue(val);
+	fattr->getMin(val0);
+	fattr->getMax(val1);
+	xsld->setLimit(val0[0], val1[0]);
+	xsld->setValue(val[0]);
+	xsld->setName(attr->attrName() + ".x");
+	ysld->setLimit(val0[1], val1[1]);
+	ysld->setValue(val[1]);
+	ysld->setName(attr->attrName() + ".y");
+	
+	connect(xsld, SIGNAL(valueChanged(QPair<std::string, float>)),
+           this, SLOT(recvFloatValue(QPair<std::string, float>)));
+	connect(ysld, SIGNAL(valueChanged(QPair<std::string, float>)),
+           this, SLOT(recvFloatValue(QPair<std::string, float>)));
 			
 }
 

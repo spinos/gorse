@@ -38,6 +38,7 @@ private:
 	void lsAttribs(alo::GlyphOps *ops);
 	void lsAttr(alo::QAttrib *attr);
 	void lsFloatAttr(alo::QAttrib *attr);
+	void lsFloat2Attr(alo::QAttrib *attr);
 
 private:
 	AcaciaScene *m_scene;

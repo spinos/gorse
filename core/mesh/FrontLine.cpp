@@ -23,6 +23,7 @@ void FrontLine::clearLine()
 {
     m_vertices.clear();
     m_edges.clear();
+    m_rot.setIdentity();
 }
 
 void FrontLine::setWorldSpace(const Matrix33F& mat)
@@ -193,7 +194,8 @@ void FrontLine::calcLength()
 
 void FrontLine::calcEdgeAdvanceType()
 {
-    const float mergeL = length() / (float)numEdges() * 1.4f;
+/// latitude merge threshold
+    const float mergeL = m_dir.length() * .5f;
     const bool canConverge = m_edges.size() > 8;
     std::deque<FrontEdge>::iterator it = m_edges.begin();
     for(;it != m_edges.end();++it) {
@@ -206,7 +208,7 @@ void FrontLine::calcEdgeAdvanceType()
         const float ml = pvb0.distanceTo(*va0->pos()) * .5f 
                         + pvb1.distanceTo(*va1->pos()) * .5f;
 
-        if(ml < mergeL && it->historyType() != FrontEdge::EhMerge)
+        if(ml < mergeL && it->historyType())// != FrontEdge::EhMerge)
             it->setAdvanceType(FrontEdge::GenNone);
 
 /// latitude merge has the priority 
@@ -304,6 +306,12 @@ const Matrix33F& FrontLine::worldRotation() const
 
 const float& FrontLine::length() const
 { return m_length; }
+
+float FrontLine::getAverageEdgeLength()
+{
+    calcLength();
+    return m_length / (float)numEdges();
+}
 
 std::ostream& operator<<(std::ostream &output, const FrontLine & p) 
 {
