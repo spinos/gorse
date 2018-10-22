@@ -15,6 +15,7 @@ class EllipseFunc {
     float m_a;
 /// eccentricity 0 < e < 1
     float m_e;
+    bool m_aasx;
     
 public:
 
@@ -22,6 +23,7 @@ public:
     
     void setA(float a);
     void setE(float e);
+    void setB(float b);
 
 /// r by angular coordinate theta 
     float polarForm(float theta) const;

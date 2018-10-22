@@ -42,7 +42,7 @@
                                     "name": "a",
                                     "label": "A Semi Major Axis",
                                     "typ": 3,
-                                    "value": 10.41,
+                                    "value": 10.0,
                                     "min": 0.1,
                                     "max": 1000.0
                                 },
