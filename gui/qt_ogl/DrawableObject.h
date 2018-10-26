@@ -26,6 +26,7 @@ public:
 /// entry to data
     void setPosnml(const float *posnml, int count);
     void setBarycentric(const float *barycoord, int count);
+    void move(float x, float y, float z);
     
 /// must have context
     void create(QOpenGLContext *ctx);

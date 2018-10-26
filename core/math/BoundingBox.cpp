@@ -118,8 +118,8 @@ const int BoundingBox::getLongestAxis() const
 const float BoundingBox::getLongestDistance() const
 {
     Vector3F d(m_data[3] - m_data[0], m_data[4] - m_data[1], m_data[5] - m_data[2]);
-	if(d.y >= d.x && d.y >= d.z) return d.y;
-	if(d.z >= d.x && d.z >= d.y) return d.z;
+	if(d.y > d.x && d.y > d.z) return d.y;
+	if(d.z > d.x && d.z > d.y) return d.z;
 	return d.x;
 }
 

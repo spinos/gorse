@@ -38,6 +38,7 @@ void DrawableScene::initializeScene()
 
 void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
 {
+    lock();
     while(m_createQueue.size() > 0) {
         DrawableObject *i = m_createQueue.front();
         i->create(m_ctx);
@@ -56,14 +57,16 @@ void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
         removeDrawable(i);
         m_removeQueue.erase(m_removeQueue.begin());
     }
+    unlock();
 
     m_program1->beginProgram(proj);
 
-	for (DrawableObject *i : m_drawables) {
-		const QMatrix4x4 &world = i->worldMatrix();
+    std::vector<DrawableObject *>::iterator it = m_drawables.begin();
+	for (;it!=m_drawables.end();++it) { 
+		const QMatrix4x4 &world = (*it)->worldMatrix();
     	const QMatrix4x4 modelView = cam * world;
     	m_program1->setModelView(world, modelView);
-        i->draw(m_ctx);
+        (*it)->draw(m_ctx);
 	}
 
     m_program1->endProgram();
@@ -94,5 +97,11 @@ bool DrawableScene::removeDrawable(DrawableObject *k)
 	}
     return false;
 }
+
+void DrawableScene::lock()
+{ m_mutex.lock(); }
+
+void DrawableScene::unlock()
+{ m_mutex.unlock(); }
 
 }

@@ -99,4 +99,7 @@ void DrawableObject::draw(QOpenGLContext *ctx)
 const QMatrix4x4 &DrawableObject::worldMatrix() const
 { return m_world; }
 
+void DrawableObject::move(float x, float y, float z)
+{ m_world.translate(x, y, z); }
+
 }

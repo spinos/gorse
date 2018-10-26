@@ -1,6 +1,7 @@
 #ifndef DRAWABLE_SCENE_H
 #define DRAWABLE_SCENE_H
 
+#include <QMutex>
 #include <QMatrix4x4>
 #include <vector>
 #include <deque>
@@ -20,7 +21,8 @@ class DrawableScene
     std::deque<DrawableObject *> m_removeQueue;
     std::vector<DrawableObject *> m_drawables;
     QOpenGLContext *m_ctx;
-
+    QMutex m_mutex;
+    
 public:
     DrawableScene();
     ~DrawableScene();
@@ -37,6 +39,9 @@ public:
     void enqueueRemoveDrawable(DrawableObject *d);
 
     QOpenGLContext *context();
+    
+    void lock();
+    void unlock();
 
 private:
     bool removeDrawable(DrawableObject *k);

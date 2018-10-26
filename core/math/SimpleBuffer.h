@@ -30,15 +30,19 @@ public:
     ~SimpleBuffer();
     
     void createBuffer(int count);
+    void resetBuffer(int count);
     
     T* data();
     const T* c_data() const;
     
     T& operator[](int i);
     const T& operator[](int i) const;
+    const int &count() const;
 /// max num of elements
     const int &capacity() const;
     int capacityByteSize() const;
+
+    void operator<<(const T& x);
     
 private:
 
@@ -57,6 +61,17 @@ template<typename T>
 SimpleBuffer<T>::~SimpleBuffer()
 {
     if(m_data) delete[] m_data;
+}
+
+template<typename T>
+void SimpleBuffer<T>::resetBuffer(int count)
+{
+    if(m_data)
+        delete[] m_data;
+
+    m_cap = 4096;
+    m_data = new T[m_cap];
+    m_count = count;
 }
 
 template<typename T>
@@ -104,12 +119,26 @@ const T& SimpleBuffer<T>::operator[](int i) const
 { return m_data[i]; }
 
 template<typename T>
+const int &SimpleBuffer<T>::count() const
+{ return m_count; }
+
+template<typename T>
 const int &SimpleBuffer<T>::capacity() const
 { return m_cap; }
 
 template<typename T>
 int SimpleBuffer<T>::capacityByteSize() const
 { return m_cap * sizeof(T); }
+
+template<typename T>
+void SimpleBuffer<T>::operator<<(const T& x)
+{
+    int c1 = m_count + 1;
+    if(m_cap < c1)
+        extendBuffer(c1);
+    m_data[m_count] = x;
+    m_count = c1;
+}
 
 }
 
