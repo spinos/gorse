@@ -9,12 +9,7 @@
 namespace alo {
 
 YCylinder::YCylinder()
-{
-}
-
-YCylinder::~YCylinder()
-{
-}
+{}
 
 void YCylinder::createCylinder(int nu, int nv, float radius, float height)
 {

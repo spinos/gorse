@@ -1,6 +1,3 @@
-#ifndef ALO_GEOM_TRIANGLE_MESH_H
-#define ALO_GEOM_TRIANGLE_MESH_H
-
 /*
  *  ATriangleMesh.h
  *  aloe
@@ -9,9 +6,12 @@
  *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
+
+#ifndef ALO_GEOM_TRIANGLE_MESH_H
+#define ALO_GEOM_TRIANGLE_MESH_H
  
 #include <math/SimpleBuffer.h>
-#include <math/Vector3F.h>
+#include <math/BoundingBox.h>
 
 namespace alo {
 

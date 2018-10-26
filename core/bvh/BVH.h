@@ -22,12 +22,19 @@ public:
 	~BVH();
 
 	void clear();
-	void addNode(const BVHNode &x);
+	void splitNode(int i);
 	void addPrimitive(const BVHPrimitive &x);
+	void setRootLeaf();
 
+	const int &numNodes() const;
 	const int &numPrimitives() const;
-
+	const BoundingBox &aabb() const;
+	BVHNode *rootNode();
+	BVHNode *lastNode();
+	BVHNode *nodes();
 	BVHPrimitive *primitives();
+
+	friend std::ostream& operator<<(std::ostream &output, const BVH & p);
 
 };
 

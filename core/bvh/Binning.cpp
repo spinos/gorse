@@ -2,19 +2,32 @@
 
 namespace alo {
 
-Binning::Binning() : m_numSplits(0)
+Binning::Binning() : m_numSplits(0),
+m_splitPos(0),
+m_objectInBin(0),
+m_aabbInBin(0),
+m_countLeft(0),
+m_countRight(0),
+m_aabbLeft(0),
+m_aabbRight(0)
 {}
 
 Binning::~Binning()
 {
-	if(m_numSplits > 0) {
+	if(m_splitPos)
+		delete[] m_splitPos;
+	if(m_objectInBin)
 		delete[] m_objectInBin;
-		delete[] m_countLeft;
-		delete[] m_countRight;
+	if(m_aabbInBin)
 		delete[] m_aabbInBin;
+	if(m_countLeft)
+		delete[] m_countLeft;
+	if(m_countRight)
+		delete[] m_countRight;
+	if(m_aabbLeft)
 		delete[] m_aabbLeft;
+	if(m_aabbRight)
 		delete[] m_aabbRight;
-	}
 }
 
 void Binning::setEmpty()
@@ -57,14 +70,11 @@ int Binning::getBin(float x) const
 	float fm;
 	while(rgt > lft+1) {
 		fm = m_splitPos[mid];
-		if(x == fm) 
-			return mid;
-
 		if(x < fm) rgt = mid;
-		if(x > fm) lft = mid;
+		else lft = mid;
 		mid = (lft + rgt)/2;
 	}
-	return lft;
+	return rgt;
 }
 
 void Binning::scan()
@@ -73,27 +83,30 @@ void Binning::scan()
 	m_aabbLeft[0] = m_aabbInBin[0];
 	for(int i=1;i<m_numSplits;++i) {
 		m_countLeft[i] = m_objectInBin[i] + m_countLeft[i-1];
-		m_aabbLeft[i] = m_aabbInBin[i-1];
+		m_aabbLeft[i] = m_aabbLeft[i-1];
 		m_aabbLeft[i].expandBy(m_aabbInBin[i]);
 	}
 
 	m_countRight[m_numSplits-1] = m_objectInBin[m_numSplits];
 	m_aabbRight[m_numSplits-1] = m_aabbInBin[m_numSplits];
 	for(int i=m_numSplits-2;i>=0;--i) {
-		m_countRight[i] = m_objectInBin[i] + m_countRight[i+1];
-		m_aabbRight[i] = m_aabbInBin[i+1];
-		m_aabbRight[i].expandBy(m_aabbInBin[i]);
+		m_countRight[i] = m_objectInBin[i+1] + m_countRight[i+1];
+		m_aabbRight[i] = m_aabbRight[i+1];
+		m_aabbRight[i].expandBy(m_aabbInBin[i+1]);
 	}
 }
 
 bool Binning::isEmpty() const
-{ return m_numSplits == 0; }
+{ return m_numSplits < 1; }
 
 const int &Binning::numSplits() const
 { return m_numSplits; }
 
 const float &Binning::splitPos(int i) const
 { return m_splitPos[i]; }
+
+const int &Binning::countInBin(int i) const
+{ return m_objectInBin[i]; }
 
 const int &Binning::countLeft(int i) const
 { return m_countLeft[i]; }
@@ -109,11 +122,15 @@ const BoundingBox &Binning::aabbRight(int i) const
 
 std::ostream& operator<<(std::ostream &output, const Binning & p) 
 {
-    output << "[";
+	output << "\n [";
+    for(int i=0; i<=p.numSplits();++i) {
+    	output << " " << p.countInBin(i);
+    }
+    output << "] \n   [";
     for(int i=0; i<p.numSplits();++i) {
     	output << " " << p.countLeft(i);
     }
-    output << "] \n [";
+    output << "] \n   [";
     for(int i=0; i<p.numSplits();++i) {
     	output << " " << p.countRight(i);
     }

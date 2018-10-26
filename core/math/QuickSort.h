@@ -17,10 +17,10 @@ class QuickSort1
 {
 public:
 
-	template <typename KeyType, typename ValueType>
-	static void SortByKey(ValueType* kv, int first, int last)
-	{
-		if(last < first) return;
+    template <typename KeyType, typename ValueType>
+    static void SortByKey(ValueType* kv, int first, int last)
+    {
+        if(last < first) return;
         int low, high;
         ValueType temp;
         low = first;
@@ -41,6 +41,32 @@ public:
         
         if(first<high) SortByKey<KeyType, ValueType >(kv,first,high);
         if(low<last) SortByKey<KeyType, ValueType >(kv,low,last);
+    }
+
+	template <typename KeyType, typename ValueType>
+	static void SortByKeyF(ValueType* kv, int first, int last)
+	{
+		if(last < first) return;
+        int low, high;
+        ValueType temp;
+        low = first;
+        high = last;
+        KeyType list_separator = kv[(first+last)/2].key();
+        do
+        {
+            while(kv[low].key() < list_separator) low++;
+            while(kv[high].key() > list_separator) high--;
+    
+            if(low<=high)
+            {
+                temp = kv[low];
+                kv[low++] = kv[high];
+                kv[high--]=temp;
+            }
+        } while(low<=high);
+        
+        if(first<high) SortByKeyF<KeyType, ValueType >(kv,first,high);
+        if(low<last) SortByKeyF<KeyType, ValueType >(kv,low,last);
 	}
 	
 	template <typename KeyType, typename ValueType>

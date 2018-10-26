@@ -34,6 +34,7 @@ public:
 	int leafBegin() const;
 	const int &leafEnd() const;
 	const int &leftChild() const;
+	const BoundingBox &aabb() const;
 
 private:
 

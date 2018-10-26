@@ -34,6 +34,8 @@ public:
     
     T* data();
     const T* c_data() const;
+
+    T &last();
     
     T& operator[](int i);
     const T& operator[](int i) const;
@@ -129,6 +131,10 @@ const int &SimpleBuffer<T>::capacity() const
 template<typename T>
 int SimpleBuffer<T>::capacityByteSize() const
 { return m_cap * sizeof(T); }
+
+template<typename T>
+T &SimpleBuffer<T>::last()
+{ return m_data[m_count - 1]; }
 
 template<typename T>
 void SimpleBuffer<T>::operator<<(const T& x)

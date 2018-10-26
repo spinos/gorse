@@ -1,27 +1,41 @@
 #include "BVHSplit.h"
+#include "BVHNode.h"
+#include "Binning.h"
+#include <math/QuickSort.h>
 
 namespace alo {
 
-BVHSplit::BVHSplit(const BoundingBox &parentAABB, 
-				BVHPrimitive *primtives, int begin, int end)
+BVHSplit::BVHSplit(int ind, BVHNode *nodes, BVHPrimitive *primtives)
 { 
-	m_aabb = parentAABB;
+	m_nodeIndex = ind;
+	BVHNode *parentNode = &nodes[ind];
+	m_aabb = parentNode->aabb();
 	m_primitives = primtives;
-	m_begin = begin;
-	m_end = end;
+	m_begin = parentNode->leafBegin();
+	m_end = parentNode->leafEnd();
+	m_bins = new Binning[3];
 }
+
+BVHSplit::~BVHSplit()
+{ delete[] m_bins; }
+
+const int &BVHSplit::nodeIndex() const
+{ return m_nodeIndex; }
 
 bool BVHSplit::compute()
 {
-	const float dl = m_aabb.getLongestDistance() / 32.f;
+	int n = m_end - m_begin;
+	if(n < 5) return false;
+	if(n > 32) n = 32;
+	const float dl = m_aabb.getLongestDistance() / (float)n;
 
 	splitDim(0, dl);
 	splitDim(1, dl);
 	splitDim(2, dl);
 
-	float costSplit = computeLowestCostSplit();
+	m_splitCost = computeLowestCostSplit();
 
-	return costSplit < (m_end - m_begin);
+	return m_splitCost < getNonSplitCost();
 }
 
 void BVHSplit::splitDim(int dim, float dx)
@@ -30,7 +44,7 @@ void BVHSplit::splitDim(int dim, float dx)
 	float a = m_aabb.getMin(dim);
 	int n = (b - a) / dx;
 	Binning &bi = m_bins[dim];
-	if(n < 3) {
+	if(n < 5) {
 		bi.setEmpty();
 		return;
 	}
@@ -45,7 +59,6 @@ void BVHSplit::splitDim(int dim, float dx)
 	}
 
 	bi.scan();
-
 }
 
 float BVHSplit::computeLowestCostSplit()
@@ -82,6 +95,65 @@ float BVHSplit::computeCost(const int &nl,
 	if(nl < 1 || nr < 1) 
 		return 1e28f;
 	return 1.f + bl.area() / abp * nl + br.area() / abp * nr;
+}
+
+float BVHSplit::getNonSplitCost() const
+{ return (float)(m_end - m_begin); }
+
+const float &BVHSplit::splitCost() const
+{ return m_splitCost; }
+
+const int &BVHSplit::splitAxis() const
+{ return m_splitDim; }
+
+const float &BVHSplit::splitPos() const
+{ return m_bins[m_splitDim].splitPos(m_splitInd); }
+
+const BoundingBox &BVHSplit::splitLeftBox() const
+{ return m_bins[m_splitDim].aabbLeft(m_splitInd); }
+
+const BoundingBox &BVHSplit::splitRightBox() const
+{ return m_bins[m_splitDim].aabbRight(m_splitInd); }
+
+void BVHSplit::sortPrimitives()
+{
+	const float thre = splitPos();
+	for(int i=m_begin;i<m_end;++i) {
+		const BoundingBox &box = m_primitives[i].aabb();
+		if(box.getMin(m_splitDim) < thre) 
+			m_primitives[i].setKey(0);
+		else
+			m_primitives[i].setKey(1);
+	}
+
+	QuickSort1::SortByKeyF<int, BVHPrimitive >(m_primitives, m_begin, m_end - 1);
+}
+
+void BVHSplit::setChildren(BVHNode *leftChild, BVHNode *rightChild)
+{
+	const int leftEnd = m_begin + m_bins[m_splitDim].countLeft(m_splitInd);
+	leftChild->setAABB(splitLeftBox());
+	leftChild->setLeaf(m_begin, leftEnd);
+	rightChild->setAABB(splitRightBox());
+	rightChild->setLeaf(leftEnd, m_end);
+}
+
+const int &BVHSplit::begin() const
+{ return m_begin; }
+
+const int &BVHSplit::end() const
+{ return m_end; }
+
+std::ostream& operator<<(std::ostream &output, const BVHSplit & p) 
+{
+	output << " split range [" << p.begin() << " " << p.end()
+			<< "] non-split cost "<< p.getNonSplitCost()
+			<< " split cost " << p.splitCost()
+			<< " split axis "<< p.splitAxis()
+			<< " split pos " << p.splitPos()
+			<< "\n split left box " << p.splitLeftBox()
+			<< "\n split right box " << p.splitRightBox();
+    return output;
 }
 
 }

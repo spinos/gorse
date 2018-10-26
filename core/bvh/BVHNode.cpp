@@ -38,4 +38,7 @@ const int &BVHNode::leafEnd() const
 const int &BVHNode::leftChild() const
 { return m_aabb.m_padding0; } 
 
+const BoundingBox &BVHNode::aabb() const
+{ return m_aabb; }
+
 }

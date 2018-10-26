@@ -43,6 +43,7 @@ public:
 	bool isEmpty() const;
 	const int &numSplits() const;
 	const float &splitPos(int i) const;
+	const int &countInBin(int i) const;
 	const int &countLeft(int i) const;
 	const int &countRight(int i) const;
 	const BoundingBox &aabbLeft(int i) const;

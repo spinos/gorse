@@ -21,7 +21,6 @@ class YCylinder : public ATriangleMesh {
 
 public:
     YCylinder();
-    ~YCylinder();
     
     void createCylinder(int nu, int nv, float radius, float height);
     

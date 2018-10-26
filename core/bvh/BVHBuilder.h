@@ -11,9 +11,8 @@
 
 namespace alo {
 
-class BoundingBox;
+class BVH;
 class BVHSplit;
-class BVHPrimitive;
 
 class BVHBuilder {
 
@@ -24,8 +23,7 @@ public:
 	BVHBuilder();
 	~BVHBuilder();
 
-	void build(const BoundingBox &parentAABB, 
-				BVHPrimitive *primtives, int begin, int end);
+	void build(BVH *hierarchy);
 
 private:
 

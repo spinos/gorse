@@ -15,9 +15,11 @@ public:
 
 	void setAABB(const BoundingBox &box);
 	void setIndex(int x);
+	void setKey(int x);
 
 	const BoundingBox &aabb() const;
 	const int &index() const;
+	const int &key() const;
 
 };
 

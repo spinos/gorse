@@ -11,10 +11,16 @@ void BVHPrimitive::setAABB(const BoundingBox &box)
 void BVHPrimitive::setIndex(int x)
 { m_aabb.m_padding0 = x; }
 
+void BVHPrimitive::setKey(int x)
+{ m_aabb.m_padding1 = x; }
+
 const BoundingBox &BVHPrimitive::aabb() const
 { return m_aabb; }
 
 const int &BVHPrimitive::index() const
 { return m_aabb.m_padding0; }
+
+const int &BVHPrimitive::key() const
+{ return m_aabb.m_padding1; }
 
 }
