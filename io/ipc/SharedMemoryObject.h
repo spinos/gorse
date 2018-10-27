@@ -3,29 +3,33 @@
  *  aloe
  */
 
-#ifndef KLP_IPC_SHARED_MEMORY_OBJECT_H
-#define KLP_IPC_SHARED_MEMORY_OBJECT_H
+#ifndef ALO_IPC_SHARED_MEMORY_OBJECT_H
+#define ALO_IPC_SHARED_MEMORY_OBJECT_H
+
+#include <boost/interprocess/mapped_region.hpp>
+#include <map>
+#include <string>
 
 namespace boost {
 namespace interprocess {
-class windows_shared_memory;   
-class mapped_region;
+//class shared_memory_object;   
+class windows_shared_memory;
 }
 }
 
 namespace alo {
 
 class SharedMemoryObject {
-    
+
 public:
+
+	SharedMemoryObject();
+	~SharedMemoryObject();
     
-    static void CreateShareMem();
-    static boost::interprocess::mapped_region GetMappedRegion();
-    static void DestroySharedMem();
-    
+    boost::interprocess::mapped_region *createRegion(const char *name, int size);
+    boost::interprocess::mapped_region readRegion(const char *name);
+
 private:
-    
-    static boost::interprocess::windows_shared_memory* Shmem;
     
 };
 

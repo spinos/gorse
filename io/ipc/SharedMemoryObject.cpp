@@ -4,30 +4,43 @@
  */
  
 #include "SharedMemoryObject.h"
+#include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/windows_shared_memory.hpp>
-#include <boost/interprocess/mapped_region.hpp>
+#include <iostream>
 
 using namespace boost::interprocess;
 
 namespace alo {
+
+SharedMemoryObject::SharedMemoryObject()
+{}
+
+SharedMemoryObject::~SharedMemoryObject()
+{}
  
-windows_shared_memory* SharedMemoryObject::Shmem;
- 
-void SharedMemoryObject::CreateShareMem()
+mapped_region *SharedMemoryObject::createRegion(const char *name, int size)
 {
-     Shmem = new windows_shared_memory  (create_only, "MySharedMemory", read_write, 262144);
+	std::cout<<" create shared memory object " << name;
+	try {
+    	windows_shared_memory shm(create_only, name, read_write, size);
+    	return new mapped_region(shm, read_write);
+    } catch (...) {
+    	std::cout << " named region " << name << " already exists ";
+    	windows_shared_memory shm(open_only, name, read_write);
+    	return new mapped_region(shm, read_write);
+    }
 }
 
-mapped_region SharedMemoryObject::GetMappedRegion()
+mapped_region SharedMemoryObject::readRegion(const char *name)
 {
-     mapped_region region(*Shmem, read_write);
-     return region;
+	std::cout<<" open shared memory object " << name;
+	try {
+		windows_shared_memory shm(open_only, name, read_only);
+      	return mapped_region(shm, read_only);
+	} catch (...) {
+		std::cout << " named region " << name << " doesn't exist ";
+		return mapped_region();
+	}
 }
 
-void SharedMemoryObject::DestroySharedMem()
-{
-     delete Shmem;
 }
-
-}
-

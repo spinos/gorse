@@ -19,6 +19,7 @@ QT_END_NAMESPACE
 namespace alo {
 class DrawableScene;
 class DrawableObject;
+class BVH;
 }
 
 class CylinderThread : public QThread
@@ -26,13 +27,13 @@ class CylinderThread : public QThread
     Q_OBJECT
 
 public:
-    CylinderThread(alo::DrawableScene *scene, QObject *parent = 0);
+    CylinderThread(alo::DrawableScene *scene, alo::BVH *mbvh, QObject *parent = 0);
     ~CylinderThread();
 
-    void render(double centerX, double centerY, double scaleFactor, QSize resultSize);
-
+public slots:
+    void recvCameraChange();
+    
 signals:
-    //void renderedImage(const QImage &image, double scaleFactor);
 
 protected:
     void run() override;
@@ -40,7 +41,6 @@ protected:
 private:
     void addCylinder(int it);
 
-    QMutex mutex;
     QWaitCondition condition;
     
     bool restart;
@@ -54,6 +54,7 @@ private:
     };
     std::vector<CylHostD *> m_hostData;
     alo::Uniform<alo::Lehmer> *m_rng;
+    alo::BVH *m_bvh;
     
 };
 //! [0]

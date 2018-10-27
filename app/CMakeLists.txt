@@ -1,3 +1,4 @@
+ADD_SUBDIRECTORY (echm)
 ADD_SUBDIRECTORY (hostipc)
 ADD_SUBDIRECTORY (clientipc)
 ADD_SUBDIRECTORY (queueddraw)

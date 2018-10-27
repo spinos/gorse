@@ -1,5 +1,5 @@
-file (GLOB GORSE_IPC_SRC
-${GORSE_DIR}/io/ipc/*.h
-${GORSE_DIR}/io/ipc/*.cpp
+file (GLOB GORS_IPC_SOURCE
+${GORS_DIR}/io/ipc/*.h
+${GORS_DIR}/io/ipc/*.cpp
 )
 

@@ -24,6 +24,11 @@ public:
 
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
+    
+signals:
+    void beginCameraChange();
+    void progressCameraChange();
+    void endCameraChange();
 
 public slots:
 	
@@ -35,6 +40,7 @@ protected:
     
     void mousePressEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent* event);
+	void mouseReleaseEvent(QMouseEvent* event);
 	
 	virtual void processCamera(QMouseEvent *event);
 	virtual void clientInit();

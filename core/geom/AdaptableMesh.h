@@ -11,6 +11,7 @@
 #define ALO_GEOM_ADAPTABLE_MESH_H
 
 #include "ATriangleMesh.h"
+#include <vector>
 
 namespace alo {
 
@@ -36,6 +37,15 @@ public:
                 bool flipped = false);
     
     Vector3F* vertexPositionR(int i);
+/// swap vertex position and normal
+/// updated connected faces to both
+    void swapVertex(int va, int vb,
+    			const std::vector<int> &facesa,
+    			const std::vector<int> &facesb);
+    void removeLastVertices(int x);
+    void removeLastFaces(int x);
+    void swapFace(int fromFace, int toFace);
+    void insertFaces(const std::vector<int> &faceVertices, int toFirstFace);
  
 protected:
     

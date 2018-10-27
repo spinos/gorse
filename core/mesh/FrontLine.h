@@ -75,6 +75,8 @@ public:
 
     const Matrix33F& worldRotation() const;
     
+    static bool EnableMerging;
+    
     friend std::ostream& operator<<(std::ostream &output, const FrontLine & p);
 
 protected:

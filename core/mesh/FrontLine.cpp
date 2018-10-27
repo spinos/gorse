@@ -9,6 +9,7 @@
 namespace alo {
 
 float FrontLine::MinEdgeLength = 0.f;
+bool FrontLine::EnableMerging = true;
     
 FrontLine::FrontLine() : 
 m_dir(0,1,0), m_shrink(.07f)
@@ -194,6 +195,7 @@ void FrontLine::calcLength()
 
 void FrontLine::calcEdgeAdvanceType()
 {
+    if(!EnableMerging) return;
 /// latitude merge threshold
     const float mergeL = m_dir.length() * .5f;
     const bool canConverge = m_edges.size() > 8;

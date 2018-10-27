@@ -31,6 +31,10 @@ public:
     
     void createBuffer(int count);
     void resetBuffer(int count);
+/// insert n elements at loc
+    void insert(const T *b, int n, int loc);
+/// swap n elements between location a and b
+    void swap(int a, int b, int n);
     
     T* data();
     const T* c_data() const;
@@ -144,6 +148,40 @@ void SimpleBuffer<T>::operator<<(const T& x)
         extendBuffer(c1);
     m_data[m_count] = x;
     m_count = c1;
+}
+
+template<typename T>
+void SimpleBuffer<T>::insert(const T *b, int n, int loc)
+{
+    int c1 = m_count + n;
+    if(m_cap < c1)
+        extendBuffer(c1);
+
+    T *c = new T[n];
+    const size_t cz = sizeof(T) * n;
+
+    memcpy(c, &m_data[loc], cz);
+
+    memcpy(&m_data[loc], b, cz);
+
+    memcpy(&m_data[loc + n], c, cz);
+
+    delete[] c;
+}
+
+template<typename T>
+void SimpleBuffer<T>::swap(int a, int b, int n)
+{
+    T *c = new T[n];
+    const int cz = n * sizeof(T);
+
+    memcpy(c, &m_data[a], cz);
+
+    memcpy(&m_data[a], &m_data[b], cz);
+
+    memcpy(&m_data[b], c, cz);
+
+    delete[] c;
 }
 
 }

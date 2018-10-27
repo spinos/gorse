@@ -8,6 +8,7 @@
  */
 
 #include "AdaptableMesh.h"
+#include <map>
 
 namespace alo {
 
@@ -72,6 +73,66 @@ void AdaptableMesh::addQuad(int v0, int v1, int v2, int v3,
 
 Vector3F* AdaptableMesh::vertexPositionR(int i)
 { return &positions()[i]; }
+
+void AdaptableMesh::swapVertex(int va, int vb,
+                const std::vector<int> &facesa,
+                const std::vector<int> &facesb)
+{
+    positionBuffer().swap(va, vb, 1);
+    normalBuffer().swap(va, vb, 1);
+
+    std::vector<int>::const_iterator it = facesa.begin();
+    for(;it!=facesa.end();++it) {
+        unsigned *v = &indices()[*it * 3];
+        std::cout<<"\n b4 " << va << " ("<<v[0]<<" "<<v[1]<<" "<<v[2]<<") ";
+        if(v[0] == va) v[0] = vb;
+        if(v[1] == va) v[1] = vb;
+        if(v[2] == va) v[2] = vb;
+        std::cout<<" aft ("<<v[0]<<" "<<v[1]<<" "<<v[2]<<") ";
+    }
+
+    it = facesb.begin();
+    for(;it!=facesb.end();++it) {
+        unsigned *v = &indices()[*it * 3];
+        std::cout<<"\n b4 " << vb << " ("<<v[0]<<" "<<v[1]<<" "<<v[2]<<") ";
+        if(v[0] == vb) v[0] = va;
+        if(v[1] == vb) v[1] = va;
+        if(v[2] == vb) v[2] = va;
+        std::cout<<" aft ("<<v[0]<<" "<<v[1]<<" "<<v[2]<<") ";
+    }
+}
+
+void AdaptableMesh::removeLastVertices(int x)
+{ 
+    int nv = numVertices() - x;
+    setNumVertices(nv); 
+}
+
+void AdaptableMesh::removeLastFaces(int x)
+{ 
+    int nt = numTriangles() - x;
+    setNumTriangles(nt); 
+}
+
+void AdaptableMesh::swapFace(int fromFace, int toFace)
+{
+    indexBuffer().swap(fromFace * 3, toFace * 3, 3);
+}
+
+void AdaptableMesh::insertFaces(const std::vector<int> &faceVertices, int toFirstFace)
+{
+    const int nv = faceVertices.size();
+    unsigned *b = new unsigned[nv];
+    for(int i=0;i<nv;++i) {
+        b[i] = faceVertices[i];
+    }
+    indexBuffer().insert(b, nv, toFirstFace * 3);
+    delete[] b;
+
+    const int nf = nv / 3;
+    int nt = numTriangles() + nf;
+    setNumTriangles(nt); 
+}
 
 }
 //:~

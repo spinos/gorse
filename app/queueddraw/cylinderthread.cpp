@@ -3,16 +3,18 @@
 #include <qt_ogl/DrawableObject.h>
 #include <geom/YCylinder.h>
 #include <geom/ABox.h>
+#include <bvh/BVH.h>
 #include <ctime>
 
 using namespace alo;
 
-CylinderThread::CylinderThread(DrawableScene *scene, QObject *parent)
+CylinderThread::CylinderThread(DrawableScene *scene, BVH *mbvh, QObject *parent)
     : QThread(parent)
 {
     restart = false;
     abort = false;
     m_scene = scene;
+    m_bvh = mbvh;
     
     std::time_t secs = std::time(nullptr);
     m_rng = new Uniform<Lehmer>(secs);
@@ -20,20 +22,17 @@ CylinderThread::CylinderThread(DrawableScene *scene, QObject *parent)
 
 CylinderThread::~CylinderThread()
 {
-    mutex.lock();
+    m_scene->lock();
     abort = true;
     condition.wakeOne();
-    mutex.unlock();
+    m_scene->unlock();
 
     wait();
 }
-//! [1]
 
-//! [2]
-void CylinderThread::render(double centerX, double centerY, double scaleFactor,
-                          QSize resultSize)
+void CylinderThread::recvCameraChange()
 {
-    QMutexLocker locker(&mutex);
+    //QMutexLocker locker(&mutex);
 
     if (!isRunning()) {
         start(LowPriority);
@@ -42,9 +41,7 @@ void CylinderThread::render(double centerX, double centerY, double scaleFactor,
         condition.wakeOne();
     }
 }
-//! [2]
 
-//! [3]
 void CylinderThread::run()
 {
     int i = 0;
@@ -52,8 +49,8 @@ void CylinderThread::run()
         addCylinder(i++);
         msleep(10);
         
-        if (restart)
-            break;
+        //if (restart)
+        //    break;
         if (abort)
             return;
     }

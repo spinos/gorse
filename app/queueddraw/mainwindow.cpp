@@ -15,8 +15,8 @@ MainWindow::MainWindow()
     std::time_t secs = std::time(nullptr);
     Uniform<Lehmer> mrng(secs);
     
-    BVH mbvh;
-    mbvh.clear();
+    BVH *mbvh = new BVH;
+    mbvh->clear();
 
     BoundingBox box;
     Vector3F pmin;
@@ -33,19 +33,22 @@ MainWindow::MainWindow()
         ap.setAABB(box);
         ap.setIndex(i);
 
-        mbvh.addPrimitive(ap);
+        mbvh->addPrimitive(ap);
     }
 
-    mbvh.setRootLeaf();
+    mbvh->setRootLeaf();
 
     BVHBuilder builder;
-    builder.build(&mbvh);
+    builder.build(mbvh);
 
-    std::cout<<" bvh "<<mbvh;
+    std::cout<<" bvh "<<*mbvh;
     
     GLWidget *wig = new GLWidget(this);
-    m_thread = new CylinderThread(wig->scene(), this);
+    m_thread = new CylinderThread(wig->scene(), mbvh, this);
     setCentralWidget(wig);
+    
+    connect(wig, SIGNAL(progressCameraChange()), 
+            m_thread, SLOT(recvCameraChange()));
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
