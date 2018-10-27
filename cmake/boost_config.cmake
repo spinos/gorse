@@ -1,11 +1,15 @@
 MESSAGE (" find boost ")
 if(WIN32)
 
-IF (EXISTS d:/usr/boost_1_66_0)
+IF (EXISTS d:/usr/boost_1_68_0)
+    SET (BOOST_ROOT d:/usr/boost_1_68_0)
+ELSEIF (EXISTS d:/usr/boost_1_66_0)
     SET (BOOST_ROOT d:/usr/boost_1_66_0)
 ELSE()
     SET (BOOST_ROOT d:/usr/boost_1_51_0)
 ENDIF()
+
+MESSAGE ("BOOST_ROOT is" ${BOOST_ROOT})
 
 set (Boost_INCLUDE_DIR ${BOOST_ROOT})
 set (Boost_LIBRARY_DIR ${BOOST_ROOT}/stage/lib)
@@ -19,15 +23,13 @@ set (Boost_INCLUDE_DIR ${APPLE_HOME}/Library/boost_1_55_0)
 	include_directories (${APPLE_HOME}/Library/boost_1_55_0)
 	set (Boost_USE_STATIC_LIBS ON)
 	
-
 ELSEIF (UNIX)
 	set (Boost_INCLUDE_DIR /home/td21/usr/boost_1_51_0)
 	set (BOOST_LIBRARY_DIR /home/td21/usr/boost_1_51_0/stage/lib)
 endif()
 
 if(WIN32)
-    find_package(Boost COMPONENTS system filesystem date_time regex thread chrono 
-iostreams)
+    find_package(Boost COMPONENTS system filesystem date_time regex thread chrono)
 ELSEIF (APPLE)
     find_package(Boost COMPONENTS system filesystem date_time regex thread)
 else()
