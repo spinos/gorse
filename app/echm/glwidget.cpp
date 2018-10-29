@@ -74,12 +74,12 @@ void GLWidget::addPatch()
     originLine.setMinEdgeLength(.1f);
     
     FrontLine *la = &originLine;
-    FrontLine l[24];
+    FrontLine l[25];
 
     FrontMesher msher;
     msher.attachMesh(&p);
 
-    for(int i=0;i<24;++i) {
+    for(int i=0;i<25;++i) {
         msher.setFrontId(i+1);
 
         l[i].rotateLocalBy(lq);

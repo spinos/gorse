@@ -11,7 +11,8 @@
 #ifndef ALO_VERTEX_VALUE_H
 #define ALO_VERTEX_VALUE_H
 
-#include <vector>
+#include <deque>
+#include "FaceIndex.h"
 
 namespace alo {
 
@@ -19,7 +20,7 @@ class Vector3F;
 
 class VertexValue
 {
-	std::vector<int> m_faceIndices;
+	std::deque<FaceIndex> m_faceInds;
 	float m_cost;
 
 public:
@@ -27,28 +28,32 @@ public:
 	VertexValue();
 	~VertexValue();
 
-	void connectToFace(int i);
-	void removeFaceConnectedTo(const int &vi,
-					const unsigned *indices);
-	void swapFace(int a, int b);
-
-	float computeCost(const int &vi,
-					const unsigned *indices,
-					const Vector3F *normals);
-
 	const float &cost() const;
-	const std::vector<int> &faceIndices() const;
-	int numFaces() const;
 
-	void getConnectedVertices(std::vector<int> &vs,
-			int vi, const unsigned *indices) const;
+	void connectToFace(const FaceIndex &x);
+	void disconnectFace(const FaceIndex &x);
+	void clearFaces();
 
-	void operator=(const VertexValue &b);
+	float computeCost(const int &vi, const Vector3F *normals);
+
+	void getConnectedVertices(std::deque<int> &vs,
+			int vi) const;
+/// faces created by collapesing from va to vb
+	void getCollapsedFaces(std::deque<FaceIndex> &faces, int va, int vb) const;
+/// reform vi to vb
+	void getReformedFaces(std::deque<FaceIndex> &faces, int vi, int vb) const;
+
+	bool check(int vi) const;
+
+	const std::deque<FaceIndex> &connectedFaces() const;
+	int lastConnectedVertex() const;
+
+	friend std::ostream& operator<<(std::ostream &output, const VertexValue & p);
 
 private:
 	void higherCost(const Vector3F &Na,
 					const Vector3F &Nb);
-	void addToVector(std::vector<int> &vs, int x) const;
+	void addToVector(std::deque<int> &vs, int x) const;
 
 };
 

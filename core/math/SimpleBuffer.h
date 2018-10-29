@@ -157,15 +157,17 @@ void SimpleBuffer<T>::insert(const T *b, int n, int loc)
     if(m_cap < c1)
         extendBuffer(c1);
 
-    T *c = new T[n];
-    const size_t cz = sizeof(T) * n;
+    int bn = m_count - loc;
+    T *c = new T[bn];
+    const size_t cz = sizeof(T) * bn;
 
     memcpy(c, &m_data[loc], cz);
 
-    memcpy(&m_data[loc], b, cz);
+    memcpy(&m_data[loc], b, sizeof(T) * n);
 
     memcpy(&m_data[loc + n], c, cz);
 
+    m_count += n;
     delete[] c;
 }
 

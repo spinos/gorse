@@ -2,18 +2,19 @@
 #define ALO_EDGE_VALUE_H
 
 #include <iostream>
+#include "FaceIndex.h"
 
 namespace alo {
 	
 class EdgeValue
 {
 	float m_cost;
-	int m_face0, m_face1;
+	FaceIndex m_face0, m_face1;
 
 public:
 	EdgeValue();
 
-	void connectToFace(int i);
+	void connectToFace(const FaceIndex &x);
 	bool isOnBorder() const;
 	
 	float &cost();

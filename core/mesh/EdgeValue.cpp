@@ -2,19 +2,17 @@
 
 namespace alo {
 
-EdgeValue::EdgeValue() : m_cost(1e28f),
-m_face0(-1),
-m_face1(-1)
+EdgeValue::EdgeValue() : m_cost(1e28f)
 {}
 
-void EdgeValue::connectToFace(int i)
+void EdgeValue::connectToFace(const FaceIndex &x)
 {
-	if(m_face0 < 0) m_face0 = i;
-	else m_face1 = i;
+	if(!m_face0.isValid() ) m_face0 = x;
+	else m_face1 = x;
 }
 
 bool EdgeValue::isOnBorder() const
-{ return m_face1 < 0; }
+{ return !m_face1.isValid(); }
 
 float &EdgeValue::cost()
 { return m_cost; }

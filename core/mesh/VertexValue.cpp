@@ -8,118 +8,159 @@ VertexValue::VertexValue() : m_cost(1e28f)
 {}
 	
 VertexValue::~VertexValue()
-{ m_faceIndices.clear(); }
+{ m_faceInds.clear(); }
 
-void VertexValue::connectToFace(int x)
-{ m_faceIndices.push_back(x); }
+void VertexValue::connectToFace(const FaceIndex &x)
+{ m_faceInds.push_back(x); }
+
+void VertexValue::disconnectFace(const FaceIndex &x)
+{
+	std::deque<FaceIndex>::iterator it = m_faceInds.begin();
+	for(;it!=m_faceInds.end();++it) {
+
+		if(*it == x)  {
+			m_faceInds.erase(it);
+			return;
+		}
+	}
+}
+
+void VertexValue::clearFaces()
+{ m_faceInds.clear(); }
 
 float VertexValue::computeCost(const int &vi,
-					const unsigned *indices,
 					const Vector3F *normals)
 { 
 	m_cost = 0.f;
 	const Vector3F &vn = normals[vi];
 
-	std::vector<int>::const_iterator it = m_faceIndices.begin();
-	for(;it != m_faceIndices.end(); ++it) {
-		const int j = *it;
-		int v0 = indices[j * 3];
-		if(v0 != vi) 
-			higherCost(vn, normals[v0]);
+	std::deque<FaceIndex>::const_iterator it = m_faceInds.begin();
+	for(;it != m_faceInds.end(); ++it) {
+		const FaceIndex &fi = *it;
+		if(fi.v0() != vi) 
+			higherCost(vn, normals[fi.v0()]);
 
-		int v1 = indices[j * 3 + 1];
-		if(v1 != vi)
-			higherCost(vn, normals[v1]);
+		if(fi.v1() != vi)
+			higherCost(vn, normals[fi.v1()]);
 		
-		int v2 = indices[j * 3 + 2];
-		if(v2 != vi)
-			higherCost(vn, normals[v2]);
+		if(fi.v2() != vi)
+			higherCost(vn, normals[fi.v2()]);
 	}
+	m_cost *= m_faceInds.size();
 	return m_cost; 
 }
 
 void VertexValue::higherCost(const Vector3F &Na,
 					const Vector3F &Nb)
 {
-	float c = 1.f - Na.dot(Nb);
+	float c = 1.0001f - Na.dot(Nb);
 	if(m_cost < c) m_cost = c;
 }
 
 const float &VertexValue::cost() const
 { return m_cost; }
 
-const std::vector<int> &VertexValue::faceIndices() const
-{ return m_faceIndices; }
-
-int VertexValue::numFaces() const
-{ return m_faceIndices.size(); }
-
-void VertexValue::getConnectedVertices(std::vector<int> &vs,
-			int vi, const unsigned *indices) const
+void VertexValue::getConnectedVertices(std::deque<int> &vs,
+			int vi) const
 {
-	std::vector<int>::const_iterator it = m_faceIndices.begin();
-	for(;it!=m_faceIndices.end();++it) {
-		const unsigned *fj = &indices[*it * 3];
-		int v0 = fj[0];
-		if(v0 != vi) 
-			addToVector(vs, v0);
+	std::deque<FaceIndex>::const_iterator it = m_faceInds.begin();
+	for(;it!=m_faceInds.end();++it) {
+		const FaceIndex &fi = *it;
 
-		int v1 = fj[1];
-		if(v1 != vi)
-			addToVector(vs, v1);
+		if(fi.v0() != vi) 
+			addToVector(vs, fi.v0());
+
+		if(fi.v1() != vi)
+			addToVector(vs, fi.v1());
 		
-		int v2 = fj[2];
-		if(v2 != vi)
-			addToVector(vs, v2);
+		if(fi.v2() != vi)
+			addToVector(vs, fi.v2());
 	}
 }
 
-void VertexValue::addToVector(std::vector<int> &vs, int x) const
+void VertexValue::getReformedFaces(std::deque<FaceIndex> &faces, int vi, int vb) const
+{
+	std::deque<FaceIndex>::const_iterator it = m_faceInds.begin();
+	for(;it!=m_faceInds.end();++it) {
+		const FaceIndex &fi = *it;
+		int b[3];
+		b[0] = fi.v0() == vi ? vb : fi.v0();
+		b[1] = fi.v1() == vi ? vb : fi.v1();
+		b[2] = fi.v2() == vi ? vb : fi.v2();
+
+		faces.push_back(FaceIndex(b[0], b[1], b[2]));
+	}
+}
+
+void VertexValue::addToVector(std::deque<int> &vs, int x) const
 {
 	if(std::find(vs.begin(), vs.end(), x) == vs.end()) 
 		vs.push_back(x);
 }
 
-void VertexValue::removeFaceConnectedTo(const int &vi,
-					const unsigned *indices)
+bool VertexValue::check(int vi) const
 {
-	std::vector<int>::iterator it = m_faceIndices.begin();
-	for(;it!=m_faceIndices.end();++it) {
-		const unsigned *fj = &indices[*it * 3];
-		if(fj[0] == vi ||  fj[1] == vi || fj[2] == vi) {
-
-			m_faceIndices.erase(it);
-			std::cout << " remove face " << fj[0] <<","<< fj[1] <<","<< fj[2];
-			
-			return;
+	std::deque<FaceIndex>::const_iterator it = m_faceInds.begin();
+	for(;it!=m_faceInds.end();++it) {
+		const FaceIndex &fi = *it;
+		if(!fi.hasV(vi) ) {
+			std::cout<<"\n\n ERROR face"<<fi<< " not connected to vert "<<vi;
+			return false;
 		}
+	}
+	return true;
+}
+
+void VertexValue::getCollapsedFaces(std::deque<FaceIndex> &faces,
+			int va, int vb) const
+{
+	std::deque<FaceIndex>::const_iterator it = m_faceInds.begin();
+	for(;it!=m_faceInds.end();++it) {
+		const FaceIndex &fi = *it;
+
+		if(!fi.hasV(va)) 
+			continue;
+
+		if(fi.hasV(vb)) 
+			continue;
+
+		int fv[3];
+		fv[0] = fi.v0();
+		fv[1] = fi.v1();
+		fv[2] = fi.v2();
+
+		if(fv[0] == va) fv[0] = vb;
+		if(fv[1] == va) fv[1] = vb;
+		if(fv[2] == va) fv[2] = vb;
+
+		faces.push_back(FaceIndex(fv[0], fv[1], fv[2]) );
 	}
 }
 
-void VertexValue::swapFace(int a, int b)
-{
-	std::vector<int>::iterator it = m_faceIndices.begin();
-	//for(;it!=m_faceIndices.end();++it) {
-	//	std::cout<<" "<<*it;
-	//}
+const std::deque<FaceIndex> &VertexValue::connectedFaces() const
+{ return m_faceInds; }
 
-	//it = m_faceIndices.begin();
-	for(;it!=m_faceIndices.end();++it) {
-		if(*it == a) {
-			*it = b;
-			std::cout<<" "<<a<<" to "<<b;
-		}
+int VertexValue::lastConnectedVertex() const
+{
+	int r = 0;
+	std::deque<FaceIndex>::const_iterator it = m_faceInds.begin();
+	for(;it!=m_faceInds.end();++it) {
+		const FaceIndex &fi = *it;
+
+		if(r < fi.v2()) r = fi.v2();
 	}
+	return r;
 }
 
-void VertexValue::operator=(const VertexValue &b)
+std::ostream& operator<<(std::ostream &output, const VertexValue & p)
 {
-	m_cost = b.m_cost;
-	m_faceIndices.clear();
-	std::vector<int>::const_iterator it = b.faceIndices().begin();
-	for(;it!=b.faceIndices().end();++it) {
-		m_faceIndices.push_back(*it);
-	}
+	output << " f [";
+	std::deque<FaceIndex>::const_iterator it = p.connectedFaces().begin();
+	for(;it!=p.connectedFaces().end();++it) {
+    	output << " " << *it;
+    }
+    output << "] ";
+    return output;
 }
 
 }
