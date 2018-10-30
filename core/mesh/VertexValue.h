@@ -22,6 +22,7 @@ class VertexValue
 {
 	std::deque<FaceIndex> m_faceInds;
 	float m_cost;
+	bool m_locked;
 
 public:
 
@@ -33,16 +34,15 @@ public:
 	void connectToFace(const FaceIndex &x);
 	void disconnectFace(const FaceIndex &x);
 	void clearFaces();
-
+	void lock();
 	float computeCost(const int &vi, const Vector3F *normals);
-
 	void getConnectedVertices(std::deque<int> &vs,
 			int vi) const;
 /// faces created by collapesing from va to vb
 	void getCollapsedFaces(std::deque<FaceIndex> &faces, int va, int vb) const;
 /// reform vi to vb
 	void getReformedFaces(std::deque<FaceIndex> &faces, int vi, int vb) const;
-
+	const bool &isLocked() const;
 	bool check(int vi) const;
 
 	const std::deque<FaceIndex> &connectedFaces() const;

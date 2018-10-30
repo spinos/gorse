@@ -14,17 +14,16 @@ class EdgeValue
 public:
 	EdgeValue();
 
-	void connectToFace(const FaceIndex &x);
+	bool connectToFace(const FaceIndex &x);
+	bool disconnectFace(const FaceIndex &x);
 	bool isOnBorder() const;
 	
 	float &cost();
 	const float &cost() const;
+	const FaceIndex &face0() const;
+	const FaceIndex &face1() const;
 
-	friend std::ostream& operator<<(std::ostream &output, const EdgeValue & p)
-    {
-        output << " " << p.cost();
-        return output;
-    }
+	friend std::ostream& operator<<(std::ostream &output, const EdgeValue & p);
 	
 };
 

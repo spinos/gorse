@@ -50,7 +50,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 void GLWidget::addPatch()
 {
     AdaptableMesh p;
-    const int nu = 20;
+    const int nu = 24;
     for(int i=0;i<nu;++i) {
         float phi = .21f * i;
         p.addVertex(Vector3F(-47.f + 5.3f * i + RandomFn11(), -40.f + 7.f * sin(phi), -30.f -11.f * sin(phi) ));
@@ -62,8 +62,8 @@ void GLWidget::addPatch()
     for(int i=0;i<nu;++i)
         originLine.addVertex(p.vertexPositionR(i), i);
     
-    Vector3F up(0.f, 4.9f, 0.1f);
-    const Quaternion lq(.029f, Vector3F::ZAxis);
+    Vector3F up(0.f, 5.3f, 0.1f);
+    const Quaternion lq(-.031f, Vector3F::ZAxis);
     const Quaternion tq(.011f, Vector3F::YAxis);
     constexpr float cshrinking = .0f;
     originLine.setWorldSpace(Matrix33F::IdentityMatrix);
@@ -84,9 +84,9 @@ void GLWidget::addPatch()
 
         l[i].rotateLocalBy(lq);
         l[i].rotateLocalBy(tq);
-        l[i].setShrinking(cshrinking + RandomFn11() * .03f);
-        up.y += RandomFn11() * .3f;
-        up.z += RandomFn11() * .9f;
+        l[i].setShrinking(cshrinking + RandomFn11() * .033f);
+        up.y += RandomFn11() * .47f;
+        up.z += RandomFn11() * .93f;
         l[i].setDirection(up);
         l[i].setMinEdgeLength(.1f);
 

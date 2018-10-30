@@ -53,20 +53,26 @@ private:
     bool isVertexOnBorder(int vi, const VertexValue &vert);
     bool removeFaces(const VertexValue &vert, int vi);
     void removeEdge(const EdgeIndex &ei);
-    bool removeFace(const FaceIndex &fi);
-    void addFaces(const std::deque<FaceIndex> &faces);
+    void addFaces(const std::deque<FaceIndex> &faces,
+                int lastV = 1<<30);
     void addEdge(const EdgeIndex &e);
     void getConnectedFaceInds(std::vector<int> &faceInds,
                 const VertexValue &vert);
+    bool lastConnectedFaceOor(const VertexValue &vert);
     void relocateVertices(int va, int vb,
                 const std::vector<int> &vaFaces,
                 const std::vector<int> &vbFaces);
     void setFaceInd(int i);
     bool checkTopology();
     void updateCost(const std::deque<FaceIndex> &faces);
+    void lockVertices(const std::deque<FaceIndex> &faces);
     void relocateFacesTo(const std::vector<int> &faces, int toLastFace);
     void insertFacesAt(const std::deque<FaceIndex> &faces, 
                         int location);
+    
+    static void PrintUnmanifoldEdgeWarning(const FaceIndex &fi, 
+                const EdgeValue &e,
+                bool stat);
 };
 	
 }

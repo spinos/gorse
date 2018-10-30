@@ -4,7 +4,8 @@
 
 namespace alo {
 
-VertexValue::VertexValue() : m_cost(1e28f)
+VertexValue::VertexValue() : m_cost(1e28f),
+m_locked(false)
 {}
 	
 VertexValue::~VertexValue()
@@ -53,7 +54,7 @@ float VertexValue::computeCost(const int &vi,
 void VertexValue::higherCost(const Vector3F &Na,
 					const Vector3F &Nb)
 {
-	float c = 1.0001f - Na.dot(Nb);
+	float c = 1.01f - Na.dot(Nb);
 	if(m_cost < c) m_cost = c;
 }
 
@@ -151,6 +152,12 @@ int VertexValue::lastConnectedVertex() const
 	}
 	return r;
 }
+
+void VertexValue::lock()
+{ m_locked = true; }
+
+const bool &VertexValue::isLocked() const
+{ return m_locked; }
 
 std::ostream& operator<<(std::ostream &output, const VertexValue & p)
 {

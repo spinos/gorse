@@ -14,7 +14,7 @@ public:
 	EdgeIndex(int a, int b);
 
 	bool isValid() const;
-
+	bool hasV(int x) const;
 	unsigned &v0();
 	unsigned &v1();
 	const unsigned &v0() const;

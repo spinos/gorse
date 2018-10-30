@@ -84,21 +84,21 @@ void AdaptableMesh::swapVertex(int va, int vb,
     std::vector<int>::const_iterator it = facesa.begin();
     for(;it!=facesa.end();++it) {
         unsigned *v = &indices()[*it * 3];
-        std::cout<<"\n b4 " << va << " ("<<v[0]<<" "<<v[1]<<" "<<v[2]<<") ";
+        //std::cout<<"\n b4 " << va << " ("<<v[0]<<" "<<v[1]<<" "<<v[2]<<") ";
         if(v[0] == va) v[0] = vb;
         if(v[1] == va) v[1] = vb;
         if(v[2] == va) v[2] = vb;
-        std::cout<<" aft ("<<v[0]<<" "<<v[1]<<" "<<v[2]<<") ";
+        //std::cout<<" aft ("<<v[0]<<" "<<v[1]<<" "<<v[2]<<") ";
     }
 
     it = facesb.begin();
     for(;it!=facesb.end();++it) {
         unsigned *v = &indices()[*it * 3];
-        std::cout<<"\n b4 " << vb << " ("<<v[0]<<" "<<v[1]<<" "<<v[2]<<") ";
+        //std::cout<<"\n b4 " << vb << " ("<<v[0]<<" "<<v[1]<<" "<<v[2]<<") ";
         if(v[0] == vb) v[0] = va;
         if(v[1] == vb) v[1] = va;
         if(v[2] == vb) v[2] = va;
-        std::cout<<" aft ("<<v[0]<<" "<<v[1]<<" "<<v[2]<<") ";
+        //std::cout<<" aft ("<<v[0]<<" "<<v[1]<<" "<<v[2]<<") ";
     }
 }
 
