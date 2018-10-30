@@ -1,4 +1,5 @@
 #include "EdgeValue.h"
+#include "EdgeIndex.h"
 
 namespace alo {
 
@@ -7,6 +8,8 @@ EdgeValue::EdgeValue() : m_cost(1e28f)
 
 bool EdgeValue::connectToFace(const FaceIndex &x)
 {
+    if(x == m_face0 || x == m_face1) return true;
+    
 	if(!m_face0.isValid() ) {
 	    m_face0 = x;
 	    return true;

@@ -15,21 +15,24 @@
 
 namespace alo {
 
-class AdaptableMesh;
+class HistoryMesh;
 class VertexValue;
 class EdgeIndex;
 class EdgeValue;
 class FaceIndex;
 class FaceValue;
 class Vector3F;
+class PolygonTriangulation;
 
 class EdgeCollapse {
 
-    AdaptableMesh *m_mesh;
+    HistoryMesh *m_mesh;
+    PolygonTriangulation *m_triangulate;
 /// no vertex will be added or removed, they just shuffle
     VertexValue *m_vertices;
     int m_numVertices;
     int m_numFaces;
+    int m_numBorderVertices;
     std::map<EdgeIndex, EdgeValue> m_edges;
     std::map<FaceIndex, FaceValue> m_tris;
     
@@ -38,22 +41,20 @@ public:
 	EdgeCollapse();
     ~EdgeCollapse();
 
-	void simplify(AdaptableMesh *msh);
+	void simplify(HistoryMesh *msh);
 
 private:
     void buildTopology();
-    void computeVertexCost();
     void computeEdgeCost();
+    bool processStage();
     EdgeIndex findEdgeToCollapse();
 /// remove a keep b
     void getVertexToRemove(int &a, int &b, const EdgeIndex &ei);
-/// ||va - vb|| max (ca, cb)
-	float computeEdgeCost(const EdgeIndex &ei) const;
 /// connected to edge on border
     bool isVertexOnBorder(int vi, const VertexValue &vert);
     bool removeFaces(const VertexValue &vert, int vi);
     void removeEdge(const EdgeIndex &ei);
-    void addFaces(const std::deque<FaceIndex> &faces,
+    bool addFaces(const std::deque<FaceIndex> &faces,
                 int lastV = 1<<30);
     void addEdge(const EdgeIndex &e);
     void getConnectedFaceInds(std::vector<int> &faceInds,
@@ -66,13 +67,27 @@ private:
     bool checkTopology();
     void updateCost(const std::deque<FaceIndex> &faces);
     void lockVertices(const std::deque<FaceIndex> &faces);
+    void unlockAllVertices();
     void relocateFacesTo(const std::vector<int> &faces, int toLastFace);
     void insertFacesAt(const std::deque<FaceIndex> &faces, 
                         int location);
-    
+/// area max (1 - dotN)
+    void computeVertexCost(VertexValue &vert, int vi);
+/// ||va - vb|| max (ca, cb)
+    void computeEdgeCost(EdgeValue &e, const EdgeIndex &ei) const;
+    bool canEdgeCollapse(const EdgeIndex &ei);
+
     static void PrintUnmanifoldEdgeWarning(const FaceIndex &fi, 
                 const EdgeValue &e,
                 bool stat);
+
+    static void PrintAddFaceWarning(const std::deque<FaceIndex> &faces, 
+                bool stat);
+
+    static void PrintCollapseEdgeError(int va, int vb,
+        const VertexValue &a,
+            const VertexValue &b);
+
 };
 	
 }

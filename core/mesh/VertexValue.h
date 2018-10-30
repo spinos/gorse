@@ -11,6 +11,7 @@
 #ifndef ALO_VERTEX_VALUE_H
 #define ALO_VERTEX_VALUE_H
 
+#include <vector>
 #include <deque>
 #include "FaceIndex.h"
 
@@ -30,12 +31,13 @@ public:
 	~VertexValue();
 
 	const float &cost() const;
-
+	float &cost();
 	void connectToFace(const FaceIndex &x);
 	void disconnectFace(const FaceIndex &x);
 	void clearFaces();
 	void lock();
-	float computeCost(const int &vi, const Vector3F *normals);
+	void unlock();
+	//float computeCost(const int &vi, const Vector3F *normals);
 	void getConnectedVertices(std::deque<int> &vs,
 			int vi) const;
 /// faces created by collapesing from va to vb
@@ -47,13 +49,18 @@ public:
 
 	const std::deque<FaceIndex> &connectedFaces() const;
 	int lastConnectedVertex() const;
+	bool getOneRing(std::vector<int> &vertInds, int vi,
+		const Vector3F *pos, const Vector3F &nv) const;
+
+	void higherCost(const Vector3F &Na,
+					const Vector3F &Nb);
 
 	friend std::ostream& operator<<(std::ostream &output, const VertexValue & p);
 
 private:
-	void higherCost(const Vector3F &Na,
-					const Vector3F &Nb);
 	void addToVector(std::deque<int> &vs, int x) const;
+/// opposite to (b, vi) but not a
+	bool findNextVertex(int &c, const int &a, const int &b, const int &vi) const;
 
 };
 

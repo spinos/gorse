@@ -12,7 +12,14 @@ VertexValue::~VertexValue()
 { m_faceInds.clear(); }
 
 void VertexValue::connectToFace(const FaceIndex &x)
-{ m_faceInds.push_back(x); }
+{ 
+	std::deque<FaceIndex>::iterator it = m_faceInds.begin();
+	for(;it!=m_faceInds.end();++it) {
+		if(*it == x)
+			return;
+	}
+	m_faceInds.push_back(x); 
+}
 
 void VertexValue::disconnectFace(const FaceIndex &x)
 {
@@ -29,34 +36,15 @@ void VertexValue::disconnectFace(const FaceIndex &x)
 void VertexValue::clearFaces()
 { m_faceInds.clear(); }
 
-float VertexValue::computeCost(const int &vi,
-					const Vector3F *normals)
-{ 
-	m_cost = 0.f;
-	const Vector3F &vn = normals[vi];
-
-	std::deque<FaceIndex>::const_iterator it = m_faceInds.begin();
-	for(;it != m_faceInds.end(); ++it) {
-		const FaceIndex &fi = *it;
-		if(fi.v0() != vi) 
-			higherCost(vn, normals[fi.v0()]);
-
-		if(fi.v1() != vi)
-			higherCost(vn, normals[fi.v1()]);
-		
-		if(fi.v2() != vi)
-			higherCost(vn, normals[fi.v2()]);
-	}
-	m_cost *= m_faceInds.size();
-	return m_cost; 
-}
-
 void VertexValue::higherCost(const Vector3F &Na,
 					const Vector3F &Nb)
 {
-	float c = 1.01f - Na.dot(Nb);
+	float c = 1.f - Na.dot(Nb);
 	if(m_cost < c) m_cost = c;
 }
+
+float &VertexValue::cost()
+{ return m_cost; }
 
 const float &VertexValue::cost() const
 { return m_cost; }
@@ -156,8 +144,59 @@ int VertexValue::lastConnectedVertex() const
 void VertexValue::lock()
 { m_locked = true; }
 
+void VertexValue::unlock()
+{ m_locked = false; }
+
 const bool &VertexValue::isLocked() const
 { return m_locked; }
+
+bool VertexValue::getOneRing(std::vector<int> &vertInds, int vi,
+		const Vector3F *pos, const Vector3F &nv) const
+{
+	const int nf = m_faceInds.size();
+	if(nf < 3) return false;
+	int va, vb, vc;
+	if(!m_faceInds[0].getOppositeEdge(va, vb, vi) )
+		return false;
+
+	const Vector3F &pv = pos[vi];
+	const Vector3F nab = (pos[va] - pv).cross(pos[vb] - pv);
+	if(nab.dot(nv) < 0.f) {
+		vc = vb;
+		vb = va;
+		va = vc;
+	}
+	vertInds.push_back(va); 
+	vertInds.push_back(vb);
+
+	const int endv = va;
+	for(;;) {
+		if(!findNextVertex(vc, va, vb, vi))
+			return false;
+
+		if(vc == endv)
+			break;
+
+		vertInds.push_back(vc);
+
+		va = vb;
+		vb = vc;
+	}
+
+	return vertInds.size() == nf;
+}
+
+bool VertexValue::findNextVertex(int &c, const int &a, const int &b, const int &vi) const
+{
+	for(int i=0;i<m_faceInds.size();++i) {
+		const FaceIndex &fi = m_faceInds[i];
+		if(!fi.hasV(b)) continue;
+		c = fi.getOpposite(b, vi);
+		if(c > -1 && c != a)
+			return true;
+	}
+	return false;
+}
 
 std::ostream& operator<<(std::ostream &output, const VertexValue & p)
 {

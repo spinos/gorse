@@ -5,6 +5,8 @@
 #include "FaceIndex.h"
 
 namespace alo {
+
+class EdgeIndex;
 	
 class EdgeValue
 {

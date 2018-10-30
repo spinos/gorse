@@ -21,6 +21,10 @@ public:
 	int &v0();
 	int &v1();
 	int &v2();
+/// vertex opposite to edge (a,b)
+	int getOpposite(const int &a, const int &b) const;
+/// edge opposite to vertex c
+	bool getOppositeEdge(int &a, int &b, const int &c) const;
 
 	const bool operator==(const FaceIndex & another) const;
 	const bool operator<(const FaceIndex & another) const;

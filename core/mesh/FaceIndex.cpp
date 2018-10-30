@@ -80,4 +80,47 @@ const bool FaceIndex::operator>(const FaceIndex & another) const {
 bool FaceIndex::hasV(int x) const
 { return (v0() == x || v1() == x || v2() == x); }
 
+int FaceIndex::getOpposite(const int &a, const int &b) const
+{
+	if(v0() == a && v1() == b)
+		return v2();
+
+	if(v1() == a && v2() == b)
+		return v0();
+
+	if(v2() == a && v0() == b)
+		return v1();
+
+	if(v0() == b && v1() == a)
+		return v2();
+
+	if(v1() == b && v2() == a)
+		return v0();
+
+	if(v2() == b && v0() == a)
+		return v1();
+
+	return -1;
+}
+
+bool FaceIndex::getOppositeEdge(int &a, int &b, const int &c) const
+{
+	if(v0() == c) {
+		a = v1(); b = v2();
+		return true;
+	}
+
+	if(v1() == c) {
+		a = v0(); b = v2();
+		return true;
+	}
+
+	if(v2() == c) {
+		a = v1(); b = v0();
+		return true;
+	}
+	
+	return false;
+}
+
 }

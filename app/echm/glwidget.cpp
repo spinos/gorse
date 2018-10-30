@@ -3,7 +3,7 @@
 #include <QCoreApplication>
 #include <qt_ogl/DrawableObject.h>
 #include <mesh/FrontMesher.h>
-#include <geom/AdaptableMesh.h>
+#include <geom/HistoryMesh.h>
 #include <math/miscfuncs.h>
 #include <mesh/EdgeCollapse.h>
 
@@ -49,11 +49,11 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 
 void GLWidget::addPatch()
 {
-    AdaptableMesh p;
-    const int nu = 24;
+    HistoryMesh p;
+    const int nu = 35;
     for(int i=0;i<nu;++i) {
         float phi = .21f * i;
-        p.addVertex(Vector3F(-47.f + 5.3f * i + RandomFn11(), -40.f + 7.f * sin(phi), -30.f -11.f * sin(phi) ));
+        p.addVertex(Vector3F(-67.f + 3.9f * i + RandomFn11() * 1.4f, -40.f + 11.f * sin(phi), -30.f -13.f * sin(phi) ));
     }
     
     FrontLine originLine;
@@ -62,9 +62,9 @@ void GLWidget::addPatch()
     for(int i=0;i<nu;++i)
         originLine.addVertex(p.vertexPositionR(i), i);
     
-    Vector3F up(0.f, 5.3f, 0.1f);
-    const Quaternion lq(-.031f, Vector3F::ZAxis);
-    const Quaternion tq(.011f, Vector3F::YAxis);
+    Vector3F up(0.f, 4.9f, 0.1f);
+    const Quaternion lq(-.029f, Vector3F::ZAxis);
+    const Quaternion tq(.015f, Vector3F::YAxis);
     constexpr float cshrinking = .0f;
     originLine.setWorldSpace(Matrix33F::IdentityMatrix);
     originLine.rotateLocalBy(lq);
@@ -74,19 +74,19 @@ void GLWidget::addPatch()
     originLine.setMinEdgeLength(.1f);
     
     FrontLine *la = &originLine;
-    FrontLine l[25];
+    FrontLine l[24];
 
     FrontMesher msher;
     msher.attachMesh(&p);
 
-    for(int i=0;i<25;++i) {
+    for(int i=0;i<24;++i) {
         msher.setFrontId(i+1);
 
         l[i].rotateLocalBy(lq);
         l[i].rotateLocalBy(tq);
-        l[i].setShrinking(cshrinking + RandomFn11() * .033f);
-        up.y += RandomFn11() * .47f;
-        up.z += RandomFn11() * .93f;
+        l[i].setShrinking(cshrinking + RandomFn11() * .02f);
+        up.y += RandomFn11() * 1.97f;
+        up.z += RandomFn11() * 1.99f;
         l[i].setDirection(up);
         l[i].setMinEdgeLength(.1f);
 
