@@ -47,6 +47,8 @@ public:
 /// max num of elements
     const int &capacity() const;
     int capacityByteSize() const;
+/// copy n element to data at loc
+    void copyFrom(const T *b, int n, int loc=0);
 
     void operator<<(const T& x);
     
@@ -184,6 +186,12 @@ void SimpleBuffer<T>::swap(int a, int b, int n)
     memcpy(&m_data[b], c, cz);
 
     delete[] c;
+}
+
+template<typename T>
+void SimpleBuffer<T>::copyFrom(const T *b, int n, int loc)
+{
+    memcpy(&m_data[loc], b, sizeof(T) * n);
 }
 
 }

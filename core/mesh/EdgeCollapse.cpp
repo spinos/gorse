@@ -5,7 +5,7 @@
 #include "FaceValue.h"
 #include "VertexValue.h"
 #include "PolygonTriangulation.h"
-#include <geom/HistoryMesh.h>
+#include "HistoryMesh.h"
 
 namespace alo {
 
@@ -30,21 +30,20 @@ void EdgeCollapse::simplify(HistoryMesh *msh)
 	buildTopology();
 
 	computeEdgeCost();
-	int lastStage = 0;
-	int istage = 0;
-	for(;;++istage) {
-		if(canEndProcess()) break;
-		if(istage > lastStage) break;
-		if(!processStage()) break;
+
+	for(int istage = 0;istage < m_mesh->maxNumStages();++istage) {
+		m_mesh->addHistoryStage();
+		int ncoarse = 0, nfine = 0;
+		int dnf = processStage(ncoarse, nfine);
+		m_mesh->finishHistoryStage(ncoarse, nfine);
+		if(dnf < 1 || canEndProcess()) break;
 		unlockAllVertices();
-		m_mesh->setHistoryBegin(m_mesh->numTriangles(), istage);
 	}
-	std::cout<<"\n stage " << istage << " reduce to nv "<<m_mesh->numVertices()
-				<<" nf "<<m_mesh->numTriangles();
-	m_mesh->printHistory();
+
+	m_mesh->finishHistory(m_numVertices, m_numFaces);
 }
 
-bool EdgeCollapse::processStage()
+int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 {
 	int nvStageBegin = m_mesh->numVertices();
 	const int nsteps = nvStageBegin>>1;
@@ -66,12 +65,15 @@ bool EdgeCollapse::processStage()
 			m_mesh->c_normals()[vert2Remove])) {
 
 			std::cout << "\n\n ERROR not one ring v" << vert2Remove << vrm;
-			return false;
+			return -1;
 		}
 
-		/// collapsed faces to be created
+/// collapsed faces to be created
 		std::deque<FaceIndex> collapsedFaces;
-		m_triangulate->getTriangles(collapsedFaces);
+		if(!m_triangulate->getTriangles(collapsedFaces)) {
+			std::cout << "\n\n ERROR wrong triangulate n face" << collapsedFaces.size();
+			return -1;
+		}
 
 		std::deque<FaceIndex> lastFaces;
 		std::deque<FaceIndex> reducedFaces;
@@ -89,7 +91,7 @@ bool EdgeCollapse::processStage()
 		if(!removeFaces(vrm, vert2Remove)) {
 			PrintCollapseEdgeError(vert2Remove, lastV,
 				m_vertices[vert2Remove], m_vertices[lastV]);
-			return false;
+			return -1;
 		}
 		m_vertices[vert2Remove].clearFaces();
 
@@ -97,26 +99,26 @@ bool EdgeCollapse::processStage()
 		if(!removeFaces(m_vertices[lastV], lastV)) {
 			PrintCollapseEdgeError(vert2Remove, lastV,
 				m_vertices[vert2Remove], m_vertices[lastV]);
-			return false;
+			return -1;
 		} 
 		m_vertices[lastV].clearFaces();
 	
 		if(!addFaces(collapsedFaces) ) {
 			std::cout << "\n when add collapsed faces";
 			PrintAddFaceWarning(collapsedFaces, false);
-			return false;
+			return -1;
 		}
 /// no connection to fine faces
 		if(!addFaces(reducedFaces, m_mesh->numVertices() - 1 ) ) {
 			std::cout << "\n when add reduced faces";
 			PrintAddFaceWarning(reducedFaces, false);
-			return false;
+			return -1;
 		}
 
 		if(!addFaces(lastFaces) ) {
 			std::cout << "\n when add last faces";
 			PrintAddFaceWarning(lastFaces, false);
-			return false;
+			return -1;
 		}
 
 		relocateVertices(vert2Remove, lastV, vaFaceInds, vbFaceInds);
@@ -130,18 +132,21 @@ bool EdgeCollapse::processStage()
 /// to the end but before faces to be reduced
 		insertFacesAt(collapsedFaces, ntri - nfRemove);
 
-/// hide
+/// hide last vertex and fine faces
 		m_mesh->removeLastVertices(1);
 		m_mesh->removeLastFaces(nfRemove);
+
+		numCoarseFaces += collapsedFaces.size();
+		numFineFaces += nfRemove;
 
 		updateCost(collapsedFaces);
 		lockVertices(collapsedFaces);
 		updateCost(lastFaces);
 		
-		if(!checkTopology() ) return false;
+		if(!checkTopology() ) return -1;
 
 	}
-	return nvStageBegin > m_mesh->numVertices();
+	return nvStageBegin - m_mesh->numVertices();
 }
 
 void EdgeCollapse::buildTopology()
@@ -185,8 +190,8 @@ void EdgeCollapse::buildTopology()
 	}
 
 	std::cout<<"\n n vert "<<m_numVertices
-		<<" n edge "<<m_edges.size()
-		<<" n face "<<m_tris.size();
+		<<" n face "<<m_tris.size()
+		<<" n edge "<<m_edges.size();
 }
 
 void EdgeCollapse::computeEdgeCost()
@@ -433,9 +438,10 @@ void EdgeCollapse::relocateVertices(int va, int vb,
                 const std::vector<int> &vaFaces,
                 const std::vector<int> &vbFaces)
 {
-	//std::cout<<"\n swap v " << va << " to "<<vb;
+	bool isVbLocked = m_vertices[vb].isLocked();
 	m_mesh->swapVertex(va, vb,
 				vaFaces, vbFaces);
+	m_vertices[va].lock();
 	std::vector<int>::const_iterator it = vaFaces.begin();
 	for(;it!=vaFaces.end();++it)
 		setFaceInd(*it);
@@ -554,7 +560,7 @@ void EdgeCollapse::relocateFacesTo(const std::vector<int> &faces, int toLastFace
 
     	m_mesh->swapFace(*it, toFace);
     	m_mesh->swapHistory(*it, toFace);
-    	m_mesh->setFineHistory(toFace);
+    	m_mesh->setHistory(toFace);
     	
 /// move forward
     	toFace--;
@@ -588,18 +594,15 @@ void EdgeCollapse::insertFacesAt(const std::deque<FaceIndex> &faces,
 		//std::cout<<" insert " << fi;
 	}
 
-	m_numFaces += faces.size(); 
-	//std::cout << "\n history length "<< m_numFaces;
-
 	m_mesh->insertFaces(cfv, location);
 	m_mesh->insertHistory(faces.size(), location);
 
-	for(int i=location;i<m_numFaces;++i) {
+	for(int i=location;i<m_mesh->numTriangles();++i) {
 		const unsigned *fv = &m_mesh->c_indices()[i * 3];
 		const FaceIndex fi(fv[0], fv[1], fv[2]);
 
 		if(m_tris.find(fi) == m_tris.end() ) {
-			std::cout << "\n\n ERROR nonexistent face" <<fi;
+			std::cout << "\n\n WARNING nonexistent face" <<fi;
 		} else {
 			m_tris[fi].ind() = i;
 			//std::cout<< "\n f "<<i<<fi;
@@ -719,7 +722,9 @@ bool EdgeCollapse::checkTopology()
 }
 
 bool EdgeCollapse::canEndProcess() const
-{ return m_mesh->numVertices() < (m_numBorderVertices + (m_numVertices >> 3) ); }
+{ 
+	return m_mesh->numVertices() < (m_numBorderVertices + (m_numVertices >> 3) ); 
+}
 
 void EdgeCollapse::PrintUnmanifoldEdgeWarning(const FaceIndex &fi, const EdgeValue &e,
                 bool stat)

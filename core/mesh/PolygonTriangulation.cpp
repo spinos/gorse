@@ -32,7 +32,7 @@ bool PolygonTriangulation::getTriangles(std::deque<FaceIndex> &faces)
 		m_vertices.erase(m_vertices.begin() + c);
 	}
 
-	return true;
+	return faces.size() == ntri;
 }
 
 int PolygonTriangulation::selectCorner() const

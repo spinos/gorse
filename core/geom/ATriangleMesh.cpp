@@ -74,6 +74,16 @@ void ATriangleMesh::createTriangleMesh(int vertexCount, int triangleCount)
     m_indices.createBuffer(m_numIndices);
 }
 
+void ATriangleMesh::createTriangleMesh(const unsigned *inds,
+        const Vector3F *pos, const Vector3F *nml,
+        int vertexCount, int triangleCount)
+{
+    createTriangleMesh(vertexCount, triangleCount);
+    m_indices.copyFrom(inds, triangleCount * 3);
+    m_positions.copyFrom(pos, vertexCount);
+    m_normals.copyFrom(nml, vertexCount);
+}
+
 void ATriangleMesh::reverseTriangleNormals()
 {
 	const int& n = numTriangles();

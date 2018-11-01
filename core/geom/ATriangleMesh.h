@@ -27,7 +27,12 @@ class ATriangleMesh {
 public:
 	ATriangleMesh();
 	virtual ~ATriangleMesh();
-	
+
+    void createTriangleMesh(int vertexCount, int triangleCount);
+    void createTriangleMesh(const unsigned *inds,
+        const Vector3F *pos, const Vector3F *nml,
+        int vertexCount, int triangleCount);
+    
     const int& numVertices() const;
     const int& numTriangles() const;
     const int& numIndices() const;
@@ -46,9 +51,6 @@ public:
     float getTriangleArea(int i) const;
     
 protected:
-	
-    void createTriangleMesh(int vertexCount, int triangleCount);
-	
     unsigned* indices();
     Vector3F* positions();
     Vector3F* normals();

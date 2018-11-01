@@ -3,9 +3,10 @@
 #include <QCoreApplication>
 #include <qt_ogl/DrawableObject.h>
 #include <mesh/FrontMesher.h>
-#include <geom/HistoryMesh.h>
+#include <mesh/HistoryMesh.h>
 #include <math/miscfuncs.h>
 #include <mesh/EdgeCollapse.h>
+#include <mesh/HistoryReform.h>
 
 using namespace alo;
 
@@ -50,10 +51,10 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 void GLWidget::addPatch()
 {
     HistoryMesh p;
-    const int nu = 37;
+    const int nu = 34;
     for(int i=0;i<nu;++i) {
         float phi = .21f * i;
-        p.addVertex(Vector3F(-67.f + 3.9f * i + RandomFn11() * 1.4f, -40.f + 11.f * sin(phi), -30.f -13.f * sin(phi) ));
+        p.addVertex(Vector3F(-67.f + 3.53f * i + RandomFn11() * 1.41f, -40.f + 11.f * sin(phi), -30.f -13.f * sin(phi) ));
     }
     
     FrontLine originLine;
@@ -63,7 +64,7 @@ void GLWidget::addPatch()
         originLine.addVertex(p.vertexPositionR(i), i);
     
     Vector3F up(0.f, 4.9f, 0.1f);
-    const Quaternion lq(-.029f, Vector3F::ZAxis);
+    const Quaternion lq(-.039f, Vector3F::ZAxis);
     const Quaternion tq(.015f, Vector3F::YAxis);
     constexpr float cshrinking = .0f;
     originLine.setWorldSpace(Matrix33F::IdentityMatrix);
@@ -99,13 +100,18 @@ void GLWidget::addPatch()
 
     EdgeCollapse ech;
     ech.simplify(&p);
+
+    AdaptableMesh om;
+
+    HistoryReform his;
+    his.reform(&om, .333f, &p);
     
-    p.createPositionNormalArray(posnml);
-    p.createBarycentricCoordinates(baryc);
+    om.createPositionNormalArray(posnml);
+    om.createBarycentricCoordinates(baryc);
 
     DrawableObject *cly = m_scene->createDrawable();
     cly->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
     cly->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
-    cly->setDrawArrayLength(p.numIndices());
+    cly->setDrawArrayLength(om.numIndices());
 
 }

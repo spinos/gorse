@@ -30,6 +30,7 @@ class EdgeCollapse {
     PolygonTriangulation *m_triangulate;
 /// no vertex will be added or removed, they just shuffle
     VertexValue *m_vertices;
+/// origin nv nf
     int m_numVertices;
     int m_numFaces;
     int m_numBorderVertices;
@@ -46,7 +47,8 @@ public:
 private:
     void buildTopology();
     void computeEdgeCost();
-    bool processStage();
+/// -1: failed 
+    int processStage(int &numCoarseFaces, int &numFineFaces);
     EdgeIndex findEdgeToCollapse();
 /// remove a keep b
     void getVertexToRemove(int &a, int &b, const EdgeIndex &ei);
@@ -77,7 +79,7 @@ private:
     void computeEdgeCost(EdgeValue &e, const EdgeIndex &ei) const;
     bool canEdgeCollapse(const EdgeIndex &ei);
     bool canEndProcess() const;
-
+    
     static void PrintUnmanifoldEdgeWarning(const FaceIndex &fi, 
                 const EdgeValue &e,
                 bool stat);
