@@ -30,18 +30,18 @@ void EdgeCollapse::simplify(HistoryMesh *msh)
 	buildTopology();
 
 	computeEdgeCost();
-
+	int lastStage = 0;
 	int istage = 0;
 	for(;;++istage) {
-		if(istage > 2) break;
+		if(canEndProcess()) break;
+		if(istage > lastStage) break;
 		if(!processStage()) break;
 		unlockAllVertices();
+		m_mesh->setHistoryBegin(m_mesh->numTriangles(), istage);
 	}
 	std::cout<<"\n stage " << istage << " reduce to nv "<<m_mesh->numVertices()
 				<<" nf "<<m_mesh->numTriangles();
-
-	m_mesh->sortFaces();
-	//m_mesh->printHistory();
+	m_mesh->printHistory();
 }
 
 bool EdgeCollapse::processStage()
@@ -251,6 +251,7 @@ void EdgeCollapse::getVertexToRemove(int &a, int &b, const EdgeIndex &ei)
 
 bool EdgeCollapse::isVertexOnBorder(int vi, const VertexValue &vert)
 { 
+    if(vert.connectedFaces().size() < 3) return true;
 	std::deque<FaceIndex>::const_iterator it = vert.connectedFaces().begin();
 	for(;it!=vert.connectedFaces().end();++it) {
 		const FaceIndex &fi = *it;
@@ -553,7 +554,8 @@ void EdgeCollapse::relocateFacesTo(const std::vector<int> &faces, int toLastFace
 
     	m_mesh->swapFace(*it, toFace);
     	m_mesh->swapHistory(*it, toFace);
-
+    	m_mesh->setFineHistory(toFace);
+    	
 /// move forward
     	toFace--;
     }
@@ -715,6 +717,9 @@ bool EdgeCollapse::checkTopology()
 	//std::cout<< "\n passed checkTopology ";
 	return true;
 }
+
+bool EdgeCollapse::canEndProcess() const
+{ return m_mesh->numVertices() < (m_numBorderVertices + (m_numVertices >> 3) ); }
 
 void EdgeCollapse::PrintUnmanifoldEdgeWarning(const FaceIndex &fi, const EdgeValue &e,
                 bool stat)

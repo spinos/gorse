@@ -76,6 +76,7 @@ private:
 /// ||va - vb|| max (ca, cb)
     void computeEdgeCost(EdgeValue &e, const EdgeIndex &ei) const;
     bool canEdgeCollapse(const EdgeIndex &ei);
+    bool canEndProcess() const;
 
     static void PrintUnmanifoldEdgeWarning(const FaceIndex &fi, 
                 const EdgeValue &e,

@@ -50,7 +50,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 void GLWidget::addPatch()
 {
     HistoryMesh p;
-    const int nu = 35;
+    const int nu = 37;
     for(int i=0;i<nu;++i) {
         float phi = .21f * i;
         p.addVertex(Vector3F(-67.f + 3.9f * i + RandomFn11() * 1.4f, -40.f + 11.f * sin(phi), -30.f -13.f * sin(phi) ));
