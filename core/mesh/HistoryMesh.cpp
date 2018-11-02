@@ -8,7 +8,7 @@
 
 namespace alo {
 	
-HistoryMesh::HistoryMesh() : m_selectedStage(-1)
+HistoryMesh::HistoryMesh()
 {}
 
 HistoryMesh::~HistoryMesh()
@@ -131,8 +131,8 @@ CoarseFineHistory &HistoryMesh::stage(int i)
 int HistoryMesh::maxNumStages() const
 { return 8; }
 
-const CoarseFineHistory &HistoryMesh::selectStage(int &istage, int &stageChanged, int &nv,
-                const float &lod)
+const CoarseFineHistory &HistoryMesh::selectStage(int &istage, int &nv,
+                const float &lod) const
 {
 	if(lod <= 0.f) {
 		istage = 0;
@@ -146,8 +146,6 @@ const CoarseFineHistory &HistoryMesh::selectStage(int &istage, int &stageChanged
 		nv = vmin + (float)(vmax - vmin + 1) * lod;
 		istage = findStage(nv);
 	}
-	stageChanged = istage - m_selectedStage;
-	m_selectedStage = istage;
 	return m_stages[istage];
 }
 
@@ -166,11 +164,22 @@ int HistoryMesh::findStage(const int &nv) const
 	return low;
 }
 
-void HistoryMesh::copyTo(AdaptableMesh *b, const int &nv, const int &nf)
+void HistoryMesh::copyTo(AdaptableMesh *b, const int &nv, const int &nf) const
 {
 	b->createTriangleMesh(c_indices(), 
 		c_positions(), c_normals(),
 		 nv, nf);
+}
+
+void HistoryMesh::copyStageTo(HistoryMesh *b, int i) const
+{
+	int nv = m_stages[i].vend();
+	int nf = m_stages[i].fend();
+	copyTo(b, nv, nf);
+//	b->initHistory();
+/// only 1 stage
+//	b->addHistoryStage();
+	b->stage(0) = m_stages[i];
 }
 
 void HistoryMesh::printHistoryStage(int i) const

@@ -65,6 +65,7 @@ public:
 
 	void printDetail() const;
 
+	void operator=(const CoarseFineHistory &b);
 	friend std::ostream& operator<<(std::ostream &output, const CoarseFineHistory & p);
 
 };

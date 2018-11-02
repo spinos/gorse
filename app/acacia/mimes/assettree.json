@@ -33,6 +33,23 @@
                     "label": "Adaptive Meshers",
                     "children": [
                         {
+                            "id": 828635,
+                            "name": "edge_collapse_test",
+                            "label": "Edge Collapse Test",
+                            "icon": ":images/edgeCollapseTest.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "lod",
+                                    "label": "Level of Detail",
+                                    "typ": 3,
+                                    "value": 0.5,
+                                    "min": 0.0,
+                                    "max": 1.0
+                                }
+                            ]
+                        },
+                        {
                             "id": 872960,
                             "name": "tree_root",
                             "label": "Root",

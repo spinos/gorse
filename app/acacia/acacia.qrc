@@ -9,6 +9,7 @@
     <file>images/field_head.png</file>
     <file>images/field_tail.png</file>
     <file>images/field_groove.png</file>
+    <file>images/edgeCollapseTest.png</file>
     <file>mimes/assettree.json</file>
 </qresource>
 </RCC>

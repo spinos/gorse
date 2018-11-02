@@ -9,11 +9,13 @@ class AdaptableMesh;
 class HistoryReform {
 
 	HistoryMesh *m_mesh;
+	int m_selectedStage;
 
 public:
 	HistoryReform();
+	~HistoryReform();
 
-	void reform(AdaptableMesh *outMesh, const float &lod, HistoryMesh *mesh);
+	void reform(AdaptableMesh *outMesh, const float &lod, const HistoryMesh *sourceMesh);
 
 private:
 /// hight to low

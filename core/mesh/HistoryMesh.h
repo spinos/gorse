@@ -18,8 +18,7 @@ namespace alo {
 class HistoryMesh : public AdaptableMesh {
 
     std::deque<CoarseFineHistory> m_stages;
-    int m_selectedStage;
-    
+
 public:
 	HistoryMesh();
 	virtual ~HistoryMesh();
@@ -49,11 +48,11 @@ public:
     CoarseFineHistory &stage(int i);
 
 /// lod [0,1]
-/// stageChanged > 0 increase buffer size
-    const CoarseFineHistory &selectStage(int &istage, int &stageChanged, int &nv,
-                const float &lod);
+    const CoarseFineHistory &selectStage(int &istage, int &nv,
+                const float &lod) const;
 
-    void copyTo(AdaptableMesh *b, const int &nv, const int &nf);
+    void copyTo(AdaptableMesh *b, const int &nv, const int &nf) const;
+    void copyStageTo(HistoryMesh *b, int i) const;
 
 	void printHistoryStage(int i) const;
 

@@ -438,10 +438,10 @@ void EdgeCollapse::relocateVertices(int va, int vb,
                 const std::vector<int> &vaFaces,
                 const std::vector<int> &vbFaces)
 {
-	bool isVbLocked = m_vertices[vb].isLocked();
 	m_mesh->swapVertex(va, vb,
 				vaFaces, vbFaces);
 	m_vertices[va].lock();
+	
 	std::vector<int>::const_iterator it = vaFaces.begin();
 	for(;it!=vaFaces.end();++it)
 		setFaceInd(*it);

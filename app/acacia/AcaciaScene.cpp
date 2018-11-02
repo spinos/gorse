@@ -27,6 +27,8 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
     switch(k) {
     case AcaciaOpsType::AoRoot :
         return new RootOps;
+    case AcaciaOpsType::AoEdgeCollapseTest :
+        return new EdgeCollapseTest;
     default:
         break;
     }

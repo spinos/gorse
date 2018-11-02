@@ -85,7 +85,13 @@ void PiecesList::selectItem(int id)
 
 		int pieceId = elemObj["id"].toInt(); ;
 		QString pieceLabel = elemObj["label"].toString();
-		QPixmap pixm(":/images/unknown.png");
+        QJsonValue iconNameVal = elemObj["icon"];
+        QString iconName;
+        if(elemObj.find("icon") == elemObj.end()) 
+            iconName = ":/images/unknown.png";
+        else 
+            iconName = elemObj["icon"].toString();
+		QPixmap pixm(iconName);
 
 		QIcon cloverIcon(pixm);
 		pieceItem->setIcon(cloverIcon);

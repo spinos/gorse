@@ -87,6 +87,19 @@ int CoarseFineHistory::coarseMax() const
 int CoarseFineHistory::fineMax() const
 { return m_fend - 1; }
 
+void CoarseFineHistory::operator=(const CoarseFineHistory &b)
+{
+	m_length = b.m_length;
+	m_vbegin = b.m_vbegin;
+    m_vend = b.m_vend;
+    m_ncoarse = b.m_ncoarse;
+    m_nfine = b.m_nfine;
+    m_fbegin = b.m_fbegin;
+    m_fend = b.m_fend;
+    m_history.createBuffer(m_length);
+	memcpy(m_history.data(), b.c_value(), m_length<<2);
+}
+
 void CoarseFineHistory::printDetail() const
 {
 	static const int unn = 1<<29;

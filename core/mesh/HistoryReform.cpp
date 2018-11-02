@@ -3,32 +3,42 @@
 
 namespace alo {
 
-HistoryReform::HistoryReform()
-{}
+HistoryReform::HistoryReform() : m_selectedStage(-1)
+{ 
+	m_mesh = new HistoryMesh; 
+	m_mesh->createTriangleMesh(1024, 1024);
+	m_mesh->addHistoryStage();
+}
 
-void HistoryReform::reform(AdaptableMesh *outMesh, const float &lod, HistoryMesh *mesh)
+HistoryReform::~HistoryReform()
+{ delete m_mesh; }
+
+void HistoryReform::reform(AdaptableMesh *outMesh, const float &lod, const HistoryMesh *sourceMesh)
 {
-	m_mesh = mesh;
-
 	int istage;
-	int stageChanged;
 	int selV;
 
-	const CoarseFineHistory &stage = m_mesh->selectStage(istage, stageChanged, selV, lod);
-	std::cout<< "\n select v"<<selV << " stage "<<istage
-		<< " stage changed " <<stageChanged;
+	sourceMesh->selectStage(istage, selV, lod);
+	std::cout<< "\n select nv "<<selV << " stage "<<istage;
 
-	if(stageChanged != 0) sortCoarseFaces(0, stage.coarseMax(), stage.c_value() );
-	//m_mesh->printHistoryStage(istage);
+	const CoarseFineHistory &stage = m_mesh->stage(0);
+	
+	if(istage != m_selectedStage) {
+		sourceMesh->copyStageTo(m_mesh, istage);
+		sortCoarseFaces(0, stage.coarseMax(), stage.c_value() );
+		//m_mesh->printHistoryStage(0); 
+		m_selectedStage = istage;
+	}
+
 	m_mesh->copyTo(outMesh, selV, stage.fbegin());
 
 	if(selV > stage.vbegin() || istage > 0) {
 
 		int nc = searchCoarseBegin(selV, 0, stage.coarseMax(), stage.c_value() );
-		std::cout<<"\n coarse at " <<nc;
+		//std::cout<<"\n coarse at " <<nc;
 
 		int nf = searchFineEnd(selV, stage.fbegin(), stage.fineMax(), stage.c_value() );
-		std::cout<<" fine at " <<nf;
+		//std::cout<<" fine at " <<nf;
 
 		int coarseL = stage.coarseMax() - nc;
 		int fineL = nf - stage.fbegin();
@@ -37,12 +47,9 @@ void HistoryReform::reform(AdaptableMesh *outMesh, const float &lod, HistoryMesh
 		
 		const unsigned *b = &m_mesh->c_indices()[stage.fbegin() * 3];
 		outMesh->appendFaces(b, fineL);
-
-		std::cout<< "\n reform stage"<<istage<<" remove " << coarseL << " coarse faces"
-		<< " append " << fineL << " fine faces";
 	}
 
-	std::cout<< "\n reformed nv "<<outMesh->numVertices()<<" nf "<<outMesh->numTriangles();
+	std::cout<< "\n reformed nf "<<outMesh->numTriangles();
 
 }
 
