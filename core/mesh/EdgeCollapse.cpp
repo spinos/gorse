@@ -109,7 +109,7 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 			return -1;
 		}
 /// no connection to fine faces
-		if(!addFaces(reducedFaces, m_mesh->numVertices() - 1 ) ) {
+		if(!addFaces(reducedFaces, lastV ) ) {
 			std::cout << "\n when add reduced faces";
 			PrintAddFaceWarning(reducedFaces, false);
 			return -1;
@@ -198,10 +198,15 @@ void EdgeCollapse::computeEdgeCost()
 {
 	m_numBorderVertices = 0;
 	for(int i=0;i<m_mesh->numVertices();++i) {
-		if(isVertexOnBorder(i, m_vertices[i]))
+		VertexValue &vi = m_vertices[i];
+		if(isVertexOnBorder(i, vi)) {
+/// always on border
+			vi.setOnBorder(true);
 			m_numBorderVertices++;
-		else
-			computeVertexCost(m_vertices[i], i);
+		} else {
+			computeVertexCost(vi, i);
+			vi.setOnBorder(false);
+		}
 	}
 
 	std::map<EdgeIndex, EdgeValue>::iterator it = m_edges.begin();
@@ -241,12 +246,6 @@ void EdgeCollapse::getVertexToRemove(int &a, int &b, const EdgeIndex &ei)
 	int c;
 /// lower cost
 	if(m_vertices[a].cost() > m_vertices[b].cost()) {
-		c = a;
-		a = b;
-		b = c;
-	}
-/// cannot on border
-	if(isVertexOnBorder(a, m_vertices[a])) {
 		c = a;
 		a = b;
 		b = c;
@@ -438,9 +437,13 @@ void EdgeCollapse::relocateVertices(int va, int vb,
                 const std::vector<int> &vaFaces,
                 const std::vector<int> &vbFaces)
 {
+	bool aonborder = m_vertices[va].isOnBorder();
+	bool bonborder = m_vertices[vb].isOnBorder();
 	m_mesh->swapVertex(va, vb,
 				vaFaces, vbFaces);
 	m_vertices[va].lock();
+	m_vertices[va].setOnBorder(bonborder);
+	m_vertices[vb].setOnBorder(aonborder);
 	
 	std::vector<int>::const_iterator it = vaFaces.begin();
 	for(;it!=vaFaces.end();++it)
@@ -655,6 +658,9 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 	if(va.isLocked() || vb.isLocked())
 		return false;
 
+	if(va.isOnBorder() || vb.isOnBorder())
+		return false;
+
 	if(va.connectedFaces().size() > 9 
 			|| vb.connectedFaces().size() > 9 )
 		return false;
@@ -677,9 +683,9 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
     if(lastConnectedFaceOor(vb))
         return false;
 
-	if(isVertexOnBorder(ei.v0(), va)
-			|| isVertexOnBorder(ei.v1(), vb))
-		return false;
+	//if(isVertexOnBorder(ei.v0(), va)
+	//		|| isVertexOnBorder(ei.v1(), vb))
+	//	return false;
 
 	return true;
 }
@@ -687,7 +693,8 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 bool EdgeCollapse::checkTopology()
 {
 	const unsigned *inds = m_mesh->c_indices();
-	for(int i=0;i<m_numVertices;++i) {
+	const int &nv = m_mesh->numVertices();
+	for(int i=0;i<nv;++i) {
 		if(!m_vertices[i].check(i)) return false;
 		std::deque<FaceIndex>::const_iterator it = m_vertices[i].connectedFaces().begin();
 		for(;it!=m_vertices[i].connectedFaces().end();++it) {

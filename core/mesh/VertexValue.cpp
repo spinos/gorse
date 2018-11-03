@@ -5,7 +5,8 @@
 namespace alo {
 
 VertexValue::VertexValue() : m_cost(1e28f),
-m_locked(false)
+m_locked(false),
+m_onborder(false)
 {}
 	
 VertexValue::~VertexValue()
@@ -48,6 +49,12 @@ float &VertexValue::cost()
 
 const float &VertexValue::cost() const
 { return m_cost; }
+
+void VertexValue::setOnBorder(bool x)
+{ m_onborder = x; }
+
+const bool &VertexValue::isOnBorder() const
+{ return m_onborder; }
 
 void VertexValue::getConnectedVertices(std::deque<int> &vs,
 			int vi) const
@@ -98,32 +105,6 @@ bool VertexValue::check(int vi) const
 		}
 	}
 	return true;
-}
-
-void VertexValue::getCollapsedFaces(std::deque<FaceIndex> &faces,
-			int va, int vb) const
-{
-	std::deque<FaceIndex>::const_iterator it = m_faceInds.begin();
-	for(;it!=m_faceInds.end();++it) {
-		const FaceIndex &fi = *it;
-
-		if(!fi.hasV(va)) 
-			continue;
-
-		if(fi.hasV(vb)) 
-			continue;
-
-		int fv[3];
-		fv[0] = fi.v0();
-		fv[1] = fi.v1();
-		fv[2] = fi.v2();
-
-		if(fv[0] == va) fv[0] = vb;
-		if(fv[1] == va) fv[1] = vb;
-		if(fv[2] == va) fv[2] = vb;
-
-		faces.push_back(FaceIndex(fv[0], fv[1], fv[2]) );
-	}
 }
 
 const std::deque<FaceIndex> &VertexValue::connectedFaces() const
