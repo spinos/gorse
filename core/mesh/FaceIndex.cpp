@@ -77,6 +77,9 @@ const bool FaceIndex::operator>(const FaceIndex & another) const {
 	return v0() > another.v0();
 }
 
+bool FaceIndex::isConnectedTo(const FaceIndex &b) const
+{ return (hasV(b.v0()) || hasV(b.v1()) || hasV(b.v2()) ); }
+
 bool FaceIndex::hasV(int x) const
 { return (v0() == x || v1() == x || v2() == x); }
 
@@ -121,6 +124,14 @@ bool FaceIndex::getOppositeEdge(int &a, int &b, const int &c) const
 	}
 	
 	return false;
+}
+
+FaceIndex FaceIndex::reformed(int a, int b) const
+{
+	if(a == v0()) return FaceIndex(b, v1(), v2());
+	if(a == v1()) return FaceIndex(v0(), b, v2());
+	if(a == v2()) return FaceIndex(v0(), v1(), b);
+	return FaceIndex();
 }
 
 }

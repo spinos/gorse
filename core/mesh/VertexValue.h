@@ -22,6 +22,7 @@ class Vector3F;
 class VertexValue
 {
 	std::deque<FaceIndex> m_faceInds;
+	std::deque<FaceIndex> m_pastFaceInds;
 	float m_cost;
 	bool m_locked;
 	bool m_onborder;
@@ -35,7 +36,10 @@ public:
 	float &cost();
 	void connectToFace(const FaceIndex &x);
 	void disconnectFace(const FaceIndex &x);
+	void connectToPastFace(const FaceIndex &x);
+	void disconnectPastFace(const FaceIndex &x);
 	void clearFaces();
+	void clearPastFaces();
 	void lock();
 	void unlock();
 	void setOnBorder(bool x);
@@ -47,13 +51,27 @@ public:
 	const bool &isLocked() const;
 	bool check(int vi) const;
 
-	const std::deque<FaceIndex> &connectedFaces() const;
-	int lastConnectedVertex() const;
 	bool getOneRing(std::vector<int> &vertInds, int vi,
 		const Vector3F *pos, const Vector3F &nv) const;
 
 	void higherCost(const Vector3F &Na,
 					const Vector3F &Nb);
+
+	void copyPastFacesTo(std::vector<FaceIndex> &faces) const;
+	
+	bool hasFaceConnected(const VertexValue &b) const;
+	bool hasFaceConnected(const FaceIndex &fi) const;
+
+	bool hasPastConnected(const VertexValue &b) const;
+	bool hasPastConnected(const FaceIndex &fi) const;
+
+	std::deque<FaceIndex>::const_iterator facesBegin() const;
+	std::deque<FaceIndex>::const_iterator facesEnd() const;
+	std::deque<FaceIndex>::const_iterator pastFacesBegin() const;
+	std::deque<FaceIndex>::const_iterator pastFacesEnd() const;
+
+	int numConnectedFaces() const;
+	int numConnectedPastFaces() const;
 
 	friend std::ostream& operator<<(std::ostream &output, const VertexValue & p);
 

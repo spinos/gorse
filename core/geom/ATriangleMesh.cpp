@@ -180,5 +180,43 @@ void ATriangleMesh::createBarycentricCoordinates(SimpleBuffer<Vector3F>& baryc) 
     }
 }
 
+bool ATriangleMesh::replaceFaceVertex(int i, int a, int b)
+{
+    unsigned *fv = &indices()[i*3];
+    if(fv[0] != a && fv[1] != a && fv[2] != a) {
+        std::cout<<"\n WARNING ATriangleMesh replaceFaceVertex face "<<i
+                <<" ("<<fv[0]<<","<<fv[1]<<","<<fv[2]<<") "
+                <<" cannot replace "<<a<<" to "<<b;
+        return false;
+    }
+    if(fv[0] == a) fv[0] = b;
+    if(fv[1] == a) fv[1] = b;
+    if(fv[2] == a) fv[2] = b;
+    return true;
+}
+
+bool ATriangleMesh::checkFaceVertex(int i, int a, int b, int c) const
+{
+    const unsigned *fv = &c_indices()[i*3];
+
+    int flo = fv[0];
+    if(flo > fv[1]) flo = fv[1];
+    if(flo > fv[2]) flo = fv[2];
+
+    if(a != flo) return false;
+
+    int fhi = fv[0];
+    if(fhi < fv[1]) fhi = fv[1];
+    if(fhi < fv[2]) fhi = fv[2];
+
+    if(c != fhi) return false;
+
+    int fmd = fv[0];
+    if(fv[1] > flo && fv[1] < fhi) fmd = fv[1];
+    if(fv[2] > flo && fv[2] < fhi) fmd = fv[2];
+
+    return b == fmd;
+}
+
 }
 //:~

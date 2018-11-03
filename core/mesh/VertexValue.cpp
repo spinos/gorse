@@ -10,16 +10,63 @@ m_onborder(false)
 {}
 	
 VertexValue::~VertexValue()
-{ m_faceInds.clear(); }
+{ 
+	m_faceInds.clear(); 
+	m_pastFaceInds.clear();
+}
 
 void VertexValue::connectToFace(const FaceIndex &x)
 { 
+	if(m_faceInds.size() < 1) {
+		m_faceInds.push_back(x); 
+		return;
+	}
+
+	if(m_faceInds.front() > x) {
+		m_faceInds.push_front(x); 
+		return;
+	}
+
+	if(m_faceInds.back() < x) {
+		m_faceInds.push_back(x); 
+		return;
+	}
+
 	std::deque<FaceIndex>::iterator it = m_faceInds.begin();
 	for(;it!=m_faceInds.end();++it) {
-		if(*it == x)
+		if(*it == x) return;
+		if(*it > x) {
+			m_faceInds.insert(it, x);
 			return;
+		}
 	}
-	m_faceInds.push_back(x); 
+}
+
+void VertexValue::connectToPastFace(const FaceIndex &x)
+{ 
+	if(m_pastFaceInds.size() < 1) {
+		m_pastFaceInds.push_back(x); 
+		return;
+	}
+
+	if(m_pastFaceInds.front() > x) {
+		m_pastFaceInds.push_front(x); 
+		return;
+	}
+
+	if(m_pastFaceInds.back() < x) {
+		m_pastFaceInds.push_back(x); 
+		return;
+	}
+
+	std::deque<FaceIndex>::iterator it = m_pastFaceInds.begin();
+	for(;it!=m_pastFaceInds.end();++it) {
+		if(*it == x) return;
+		if(*it > x) {
+			m_pastFaceInds.insert(it, x);
+			return;
+		}
+	}
 }
 
 void VertexValue::disconnectFace(const FaceIndex &x)
@@ -31,11 +78,30 @@ void VertexValue::disconnectFace(const FaceIndex &x)
 			m_faceInds.erase(it);
 			return;
 		}
+
+		if(*it > x) return;
+	}
+}
+
+void VertexValue::disconnectPastFace(const FaceIndex &x)
+{
+	std::deque<FaceIndex>::iterator it = m_pastFaceInds.begin();
+	for(;it!=m_pastFaceInds.end();++it) {
+
+		if(*it == x)  {
+			m_pastFaceInds.erase(it);
+			return;
+		}
+
+		if(*it > x) return;
 	}
 }
 
 void VertexValue::clearFaces()
 { m_faceInds.clear(); }
+
+void VertexValue::clearPastFaces()
+{ m_pastFaceInds.clear(); }
 
 void VertexValue::higherCost(const Vector3F &Na,
 					const Vector3F &Nb)
@@ -79,12 +145,8 @@ void VertexValue::getReformedFaces(std::deque<FaceIndex> &faces, int vi, int vb)
 	std::deque<FaceIndex>::const_iterator it = m_faceInds.begin();
 	for(;it!=m_faceInds.end();++it) {
 		const FaceIndex &fi = *it;
-		int b[3];
-		b[0] = fi.v0() == vi ? vb : fi.v0();
-		b[1] = fi.v1() == vi ? vb : fi.v1();
-		b[2] = fi.v2() == vi ? vb : fi.v2();
-
-		faces.push_back(FaceIndex(b[0], b[1], b[2]));
+		FaceIndex fr = fi.reformed(vi, vb);
+		faces.push_back(fr);
 	}
 }
 
@@ -105,21 +167,6 @@ bool VertexValue::check(int vi) const
 		}
 	}
 	return true;
-}
-
-const std::deque<FaceIndex> &VertexValue::connectedFaces() const
-{ return m_faceInds; }
-
-int VertexValue::lastConnectedVertex() const
-{
-	int r = 0;
-	std::deque<FaceIndex>::const_iterator it = m_faceInds.begin();
-	for(;it!=m_faceInds.end();++it) {
-		const FaceIndex &fi = *it;
-
-		if(r < fi.v2()) r = fi.v2();
-	}
-	return r;
 }
 
 void VertexValue::lock()
@@ -179,11 +226,78 @@ bool VertexValue::findNextVertex(int &c, const int &a, const int &b, const int &
 	return false;
 }
 
+void VertexValue::copyPastFacesTo(std::vector<FaceIndex> &faces) const
+{
+	for(int i=0;i<m_pastFaceInds.size();++i) 
+		faces.push_back(m_pastFaceInds[i]);
+}
+
+bool VertexValue::hasFaceConnected(const VertexValue &b) const
+{
+	std::deque<FaceIndex>::const_iterator it = b.facesBegin();
+	for(;it!=b.facesEnd();++it) 
+		if(hasFaceConnected(*it)) return true;
+	
+	return false;
+}
+
+bool VertexValue::hasFaceConnected(const FaceIndex &fi) const
+{
+	std::deque<FaceIndex>::const_iterator it = m_faceInds.begin();
+	for(;it!=m_faceInds.end();++it) {
+		if(it->isConnectedTo(fi)) return true;
+		if(*it > fi) return false;
+	}
+	return false;
+}
+
+bool VertexValue::hasPastConnected(const VertexValue &b) const
+{
+	std::deque<FaceIndex>::const_iterator it = b.pastFacesBegin();
+	for(;it!=b.pastFacesEnd();++it)
+		if(hasPastConnected(*it)) return true;
+	
+	return false;
+}
+
+bool VertexValue::hasPastConnected(const FaceIndex &fi) const
+{
+	std::deque<FaceIndex>::const_iterator it = m_pastFaceInds.begin();
+	for(;it!=m_pastFaceInds.end();++it) {
+		if(it->isConnectedTo(fi)) return true;
+		if(*it > fi) return false;
+	}
+	return false;
+}
+
+std::deque<FaceIndex>::const_iterator VertexValue::facesBegin() const
+{ return m_faceInds.begin(); }
+
+std::deque<FaceIndex>::const_iterator VertexValue::facesEnd() const
+{ return m_faceInds.end(); }
+
+std::deque<FaceIndex>::const_iterator VertexValue::pastFacesBegin() const
+{ return m_pastFaceInds.begin(); }
+
+std::deque<FaceIndex>::const_iterator VertexValue::pastFacesEnd() const
+{ return m_pastFaceInds.end(); }
+
+int VertexValue::numConnectedFaces() const
+{ return m_faceInds.size(); }
+
+int VertexValue::numConnectedPastFaces() const
+{ return m_pastFaceInds.size(); }
+
 std::ostream& operator<<(std::ostream &output, const VertexValue & p)
 {
 	output << " f [";
-	std::deque<FaceIndex>::const_iterator it = p.connectedFaces().begin();
-	for(;it!=p.connectedFaces().end();++it) {
+	std::deque<FaceIndex>::const_iterator it = p.facesBegin();
+	for(;it!=p.facesEnd();++it) {
+    	output << " " << *it;
+    }
+    output << "] past_f [";
+    it = p.pastFacesBegin();
+	for(;it!=p.pastFacesEnd();++it) {
     	output << " " << *it;
     }
     output << "] ";

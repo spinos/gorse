@@ -49,6 +49,9 @@ public:
     void calculateVertexNormals();
     Vector3F getTriangleNormal(int i) const;
     float getTriangleArea(int i) const;
+    bool replaceFaceVertex(int i, int a, int b);
+/// a < b < c
+    bool checkFaceVertex(int i, int a, int b, int c) const;
     
 protected:
     unsigned* indices();

@@ -30,8 +30,11 @@ public:
 	const bool operator<(const FaceIndex & another) const;
 	const bool operator>=(const FaceIndex & another) const;
 	const bool operator>(const FaceIndex & another) const;
-
+/// share v with b
+	bool isConnectedTo(const FaceIndex &b) const;
 	bool hasV(int x) const;
+/// replace a with b
+	FaceIndex reformed(int a, int b) const;
 	
 	friend std::ostream& operator<<(std::ostream &output, const FaceIndex & p)
     {

@@ -19,8 +19,7 @@ void HistoryReform::reform(AdaptableMesh *outMesh, const float &lod, const Histo
 	int selV;
 
 	sourceMesh->selectStage(istage, selV, lod);
-	std::cout<< "\n select nv "<<selV << " stage "<<istage;
-
+	
 	const CoarseFineHistory &stage = m_mesh->stage(0);
 	
 	if(istage != m_selectedStage) {
@@ -49,7 +48,8 @@ void HistoryReform::reform(AdaptableMesh *outMesh, const float &lod, const Histo
 		outMesh->appendFaces(b, fineL);
 	}
 
-	std::cout<< "\n reformed nf "<<outMesh->numTriangles();
+	std::cout<< "\n  stage "<<istage
+		<<" select nv "<<selV << " reformed nf "<<outMesh->numTriangles();
 
 }
 

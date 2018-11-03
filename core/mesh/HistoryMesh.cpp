@@ -67,9 +67,10 @@ void HistoryMesh::swapVertex(int va, int vb,
     			const std::vector<int> &facesa,
     			const std::vector<int> &facesb)
 {
+	AdaptableMesh::swapVertex(va, vb, facesa, facesb);
+#if 0
 /// last stage is the longest
 	const int nf = m_stages.back().length();
-	AdaptableMesh::swapVertex(va, vb, facesa, facesb);
 	for(int i=numTriangles(); i<nf;++i) {
 		unsigned *fi = &indices()[i*3];
 		if(fi[0] == vb) {
@@ -77,7 +78,6 @@ void HistoryMesh::swapVertex(int va, int vb,
 		} else if(fi[0] == va) {
 			fi[0] = vb;
 		}
-
 		if(fi[1] == vb) {
 			fi[1] = va;
 		} else if(fi[1] == va) {
@@ -89,6 +89,7 @@ void HistoryMesh::swapVertex(int va, int vb,
 			fi[2] = vb;
 		}
 	}
+#endif
 }
 
 void HistoryMesh::finishHistory(int nv, int nf)

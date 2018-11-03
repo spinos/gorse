@@ -51,9 +51,9 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 void GLWidget::addPatch()
 {
     HistoryMesh p;
-    const int nu = 34;
+    const int nu = 43;
     for(int i=0;i<nu;++i) {
-        float phi = .21f * i;
+        float phi = .213f * i;
         p.addVertex(Vector3F(-67.f + 3.53f * i + RandomFn11() * 1.41f, -40.f + 11.f * sin(phi), -30.f -13.f * sin(phi) ));
     }
     
@@ -75,12 +75,12 @@ void GLWidget::addPatch()
     originLine.setMinEdgeLength(.1f);
     
     FrontLine *la = &originLine;
-    FrontLine l[24];
+    FrontLine l[25];
 
     FrontMesher msher;
     msher.attachMesh(&p);
 
-    for(int i=0;i<24;++i) {
+    for(int i=0;i<25;++i) {
         msher.setFrontId(i+1);
 
         l[i].rotateLocalBy(lq);
@@ -104,7 +104,7 @@ void GLWidget::addPatch()
     AdaptableMesh om;
 
     HistoryReform his;
-    his.reform(&om, .333f, &p);
+    his.reform(&om, .313f, &p);
     
     om.createPositionNormalArray(posnml);
     om.createBarycentricCoordinates(baryc);

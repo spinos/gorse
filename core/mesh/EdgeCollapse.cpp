@@ -13,12 +13,7 @@ EdgeCollapse::EdgeCollapse()
 { m_triangulate = new PolygonTriangulation; }
 
 EdgeCollapse::~EdgeCollapse()
-{ 
-	delete[] m_vertices; 
-	delete m_triangulate;
-	m_edges.clear();
-	m_tris.clear();
-}
+{ delete m_triangulate; }
 
 void EdgeCollapse::simplify(HistoryMesh *msh)
 {
@@ -27,7 +22,7 @@ void EdgeCollapse::simplify(HistoryMesh *msh)
 
 	m_triangulate->setPositions(m_mesh->c_positions());
 	
-	buildTopology();
+	buildTopology(m_mesh);
 
 	computeEdgeCost();
 
@@ -37,10 +32,10 @@ void EdgeCollapse::simplify(HistoryMesh *msh)
 		int dnf = processStage(ncoarse, nfine);
 		m_mesh->finishHistoryStage(ncoarse, nfine);
 		if(dnf < 1 || canEndProcess()) break;
-		unlockAllVertices();
+		unlockVertices(m_mesh->numVertices());
 	}
 
-	m_mesh->finishHistory(m_numVertices, m_numFaces);
+	m_mesh->finishHistory(numVertices(), numFaces());
 }
 
 int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
@@ -56,7 +51,7 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		getVertexToRemove(vert2Remove, vert2Keep, collapseEdgeI);
 		const int lastV = m_mesh->numVertices() - 1;
 
-		const VertexValue &vrm = m_vertices[vert2Remove];
+		const VertexValue &vrm = vertex(vert2Remove);
 		
 		std::vector<int> &vring = m_triangulate->vertices();
 		vring.clear();
@@ -68,50 +63,57 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 			return -1;
 		}
 
-/// collapsed faces to be created
-		std::deque<FaceIndex> collapsedFaces;
-		if(!m_triangulate->getTriangles(collapsedFaces)) {
-			std::cout << "\n\n ERROR wrong triangulate n face" << collapsedFaces.size();
+/// coarse faces to be created
+		std::deque<FaceIndex> coarseFaces;
+		if(!m_triangulate->getTriangles(coarseFaces)) {
+			std::cout << "\n\n ERROR wrong triangulate n face" << coarseFaces.size();
 			return -1;
 		}
 
 		std::deque<FaceIndex> lastFaces;
-		std::deque<FaceIndex> reducedFaces;
+		std::deque<FaceIndex> fineFaces;
 		std::vector<int> vaFaceInds;
 		std::vector<int> vbFaceInds;
-		
-		vrm.getReformedFaces(reducedFaces, vert2Remove, lastV);
+/// relocated
+		vrm.getReformedFaces(fineFaces, vert2Remove, lastV);
 
 /// to be connected to relocated vertex
 		getConnectedFaceInds(vaFaceInds, vrm);
-		getConnectedFaceInds(vbFaceInds, m_vertices[lastV]);
-		m_vertices[lastV].getReformedFaces(lastFaces, lastV, vert2Remove);
+		getConnectedFaceInds(vbFaceInds, vertex(lastV));
+		vertex(lastV).getReformedFaces(lastFaces, lastV, vert2Remove);
+
+/// to relocate past face connections 
+		std::vector<FaceIndex> aPast;
+		vertex(vert2Remove).copyPastFacesTo(aPast);
+		vertex(vert2Remove).clearPastFaces();
+
+		std::vector<FaceIndex> bPast;
+		vertex(lastV).copyPastFacesTo(bPast);
+		vertex(lastV).clearPastFaces();
 
 /// remove faces connected to vertex 
-		if(!removeFaces(vrm, vert2Remove)) {
+		if(!removeVertexConnection(vert2Remove)) {
 			PrintCollapseEdgeError(vert2Remove, lastV,
-				m_vertices[vert2Remove], m_vertices[lastV]);
+				vertex(vert2Remove), vertex(lastV));
 			return -1;
 		}
-		m_vertices[vert2Remove].clearFaces();
 
 /// remove faces connected to last vertex
-		if(!removeFaces(m_vertices[lastV], lastV)) {
+		if(!removeVertexConnection(lastV)) {
 			PrintCollapseEdgeError(vert2Remove, lastV,
-				m_vertices[vert2Remove], m_vertices[lastV]);
+				vertex(vert2Remove), vertex(lastV));
 			return -1;
-		} 
-		m_vertices[lastV].clearFaces();
+		}
 	
-		if(!addFaces(collapsedFaces) ) {
+		if(!addFaces(coarseFaces) ) {
 			std::cout << "\n when add collapsed faces";
-			PrintAddFaceWarning(collapsedFaces, false);
+			PrintAddFaceWarning(coarseFaces, false);
 			return -1;
 		}
 /// no connection to fine faces
-		if(!addFaces(reducedFaces, lastV ) ) {
+		if(!addFaces(fineFaces, lastV ) ) {
 			std::cout << "\n when add reduced faces";
-			PrintAddFaceWarning(reducedFaces, false);
+			PrintAddFaceWarning(fineFaces, false);
 			return -1;
 		}
 
@@ -127,95 +129,66 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 /// to the very end
 		relocateFacesTo(vaFaceInds, ntri - 1);
 
-		const int nfRemove = reducedFaces.size();
+		const int nfRemove = fineFaces.size();
 
 /// to the end but before faces to be reduced
-		insertFacesAt(collapsedFaces, ntri - nfRemove);
+		insertFacesAt(coarseFaces, ntri - nfRemove);
+		indexPastFaces(m_mesh, ntri - nfRemove, ntri);
+
+		std::vector<FaceIndex>::const_iterator pit;
+		pit = aPast.begin();
+		for(;pit!=aPast.end();++pit) 
+			replaceMeshVertex(m_mesh, *pit, vert2Remove, lastV);
+				
+		aPast.clear();
+
+		pit = bPast.begin();
+		for(;pit!=bPast.end();++pit) 
+			replaceMeshVertex(m_mesh, *pit, lastV, vert2Remove);
+				
+		bPast.clear();
 
 /// hide last vertex and fine faces
 		m_mesh->removeLastVertices(1);
 		m_mesh->removeLastFaces(nfRemove);
 
-		numCoarseFaces += collapsedFaces.size();
+		numCoarseFaces += coarseFaces.size();
 		numFineFaces += nfRemove;
 
-		updateCost(collapsedFaces);
-		lockVertices(collapsedFaces);
+		updateCost(coarseFaces);
+		lockFaces(coarseFaces);
 		updateCost(lastFaces);
 		
-		if(!checkTopology() ) return -1;
+		if(!checkTopology(m_mesh) ) return -1;
 
 	}
 	return nvStageBegin - m_mesh->numVertices();
 }
 
-void EdgeCollapse::buildTopology()
-{
-	const Vector3F *pos = m_mesh->c_positions();
-
-	m_numFaces = m_mesh->numTriangles();
-	m_numVertices = m_mesh->numVertices();
-	m_vertices = new VertexValue[m_numVertices];
-
-	const unsigned *ind = m_mesh->c_indices();
-	for(int i=0;i<m_mesh->numIndices();i+=3) {
-		m_edges[EdgeIndex(ind[i], ind[i + 1])] = EdgeValue();
-		m_edges[EdgeIndex(ind[i + 1], ind[i + 2])] = EdgeValue();
-		m_edges[EdgeIndex(ind[i + 2], ind[i])] = EdgeValue();
-	}
-
-	bool stat;
-	for(int i=0;i<m_mesh->numIndices();i+=3) {
-		const int j = i/3;
-
-		FaceIndex fi(ind[i], ind[i + 1], ind[i+2]);
-		m_tris[fi] = FaceValue(j);
-		m_tris[fi].calculateArea(pos, fi);
-
-		EdgeValue &e0 = m_edges[EdgeIndex(ind[i], ind[i + 1])];
-		stat = e0.connectToFace(fi);
-		PrintUnmanifoldEdgeWarning(fi, e0, stat);
-	    
-		EdgeValue &e1 = m_edges[EdgeIndex(ind[i + 1], ind[i + 2])];
-		stat = e1.connectToFace(fi);
-		PrintUnmanifoldEdgeWarning(fi, e1, stat);
-		
-		EdgeValue &e2 = m_edges[EdgeIndex(ind[i + 2], ind[i])];
-		stat = e2.connectToFace(fi);
-		PrintUnmanifoldEdgeWarning(fi, e2, stat);
-		
-		m_vertices[ind[i]].connectToFace(fi);
-		m_vertices[ind[i + 1]].connectToFace(fi);
-		m_vertices[ind[i + 2]].connectToFace(fi);
-	}
-
-	std::cout<<"\n n vert "<<m_numVertices
-		<<" n face "<<m_tris.size()
-		<<" n edge "<<m_edges.size();
-}
-
 void EdgeCollapse::computeEdgeCost()
 {
-	m_numBorderVertices = 0;
+	int nbv = 0;
 	for(int i=0;i<m_mesh->numVertices();++i) {
-		VertexValue &vi = m_vertices[i];
+		VertexValue &vi = vertex(i);
 		if(isVertexOnBorder(i, vi)) {
 /// always on border
 			vi.setOnBorder(true);
-			m_numBorderVertices++;
+			nbv++;
 		} else {
 			computeVertexCost(vi, i);
 			vi.setOnBorder(false);
 		}
 	}
 
-	std::map<EdgeIndex, EdgeValue>::iterator it = m_edges.begin();
-	for(;it!=m_edges.end();++it) {
+	setNumBorderVertices(nbv);
+
+	std::map<EdgeIndex, EdgeValue>::iterator it = edgesBegin();
+	for(;it!=edgesEnd();++it) {
 		if(!it->second.isOnBorder()) {
 			computeEdgeCost(it->second, it->first);
 		}
 	}
-	std::cout << " nv on border " << m_numBorderVertices;
+
 }
 
 EdgeIndex EdgeCollapse::findEdgeToCollapse()
@@ -223,15 +196,16 @@ EdgeIndex EdgeCollapse::findEdgeToCollapse()
 	EdgeIndex collapseEdgeI;
 	float edgeCostMin = 1e28f;
 	
-	std::map<EdgeIndex, EdgeValue>::iterator it = m_edges.begin();
-	for(;it!=m_edges.end();++it) {
+	std::map<EdgeIndex, EdgeValue>::iterator it = edgesBegin();
+	for(;it!=edgesEnd();++it) {
 		const EdgeIndex &ei = it->first;
+		if(edgeCostMin <= it->second.cost()) continue;
+
 		if(!canEdgeCollapse(ei)) continue;
 
-		if(edgeCostMin > it->second.cost()) {
-			edgeCostMin = it->second.cost();
-			collapseEdgeI = it->first;
-		}
+		edgeCostMin = it->second.cost();
+		collapseEdgeI = it->first;
+
 	}
 	//std::cout<<"\n collapse edge "<<collapseEdgeI
 	//	<<" cost "<<edgeCostMin;
@@ -243,191 +217,25 @@ void EdgeCollapse::getVertexToRemove(int &a, int &b, const EdgeIndex &ei)
 {
 	a = ei.v0();
 	b = ei.v1();
-	int c;
 /// lower cost
-	if(m_vertices[a].cost() > m_vertices[b].cost()) {
-		c = a;
+	if(vertex(a).cost() > vertex(b).cost()) {
+		int c = a;
 		a = b;
 		b = c;
-	}
-	// std::cout<<" remove vert "<<a;
-}
-
-bool EdgeCollapse::isVertexOnBorder(int vi, const VertexValue &vert)
-{ 
-    if(vert.connectedFaces().size() < 3) return true;
-	std::deque<FaceIndex>::const_iterator it = vert.connectedFaces().begin();
-	for(;it!=vert.connectedFaces().end();++it) {
-		const FaceIndex &fi = *it;
-
-		if(fi.v0() == vi || fi.v1() == vi) {
-			EdgeIndex e0(fi.v0(), fi.v1());
-			if(m_edges[e0].isOnBorder()) 
-				return true;
-		}
-
-		if(fi.v1() == vi || fi.v2() == vi) {
-			EdgeIndex e1(fi.v1(), fi.v2());
-			if(m_edges[e1].isOnBorder()) 
-				return true;
-		}
-
-		if(fi.v2() == vi || fi.v0() == vi) {
-			EdgeIndex e2(fi.v2(), fi.v0());
-			if(m_edges[e2].isOnBorder()) 
-				return true;
-		}
-	}
-	return false; 
-}
-
-bool EdgeCollapse::removeFaces(const VertexValue &vert, int vi)
-{
-	std::deque<int> neivs;
-	vert.getConnectedVertices(neivs, vi);
-	std::deque<int>::const_iterator it = neivs.begin();
-	for(;it!=neivs.end();++it) {
-		std::map<EdgeIndex, EdgeValue>::iterator fe = m_edges.find(EdgeIndex(vi, *it));
-		if(fe == m_edges.end()) {
-			std::cout<< "\n\n ERROR cannot remove nonexistent edge "<<EdgeIndex(vi, *it);
-			return false;
-		}
-			
-		m_edges.erase(fe);
-
-	}
-
-	std::deque<FaceIndex>::const_iterator fit = vert.connectedFaces().begin();
-	for(;fit!= vert.connectedFaces().end();++fit) {
-		const FaceIndex &fi = *fit;
-
-		std::map<FaceIndex, FaceValue>::iterator ff = m_tris.find(fi);
-		if(ff == m_tris.end()) {
-			std::cout<< "\n\n ERROR cannot remove nonexistent face "<<fi;
-			return false;
-		}
-
-		//std::cout<<"\n remove face "<<fi;
-		m_tris.erase(ff);
-/// disconnect valence vertices
-		if(fi.v0() != vi)
-			m_vertices[fi.v0()].disconnectFace(fi);
-
-		if(fi.v1() != vi)
-			m_vertices[fi.v1()].disconnectFace(fi);
-
-		if(fi.v2() != vi)
-			m_vertices[fi.v2()].disconnectFace(fi);
-		
-/// disconnect valence edges
-        EdgeIndex ei0(fi.v0(), fi.v1());
-        if(!ei0.hasV(vi)) {
-            m_edges[ei0].disconnectFace(fi);
-        }
-        
-        EdgeIndex ei1(fi.v1(), fi.v2());
-        if(!ei1.hasV(vi)) {
-            m_edges[ei1].disconnectFace(fi);
-        }
-        
-        EdgeIndex ei2(fi.v2(), fi.v0());
-        if(!ei2.hasV(vi)) {
-            m_edges[ei2].disconnectFace(fi);
-        }
-	}
-	
-	return true;
-}
-
-void EdgeCollapse::removeEdge(const EdgeIndex &ei)
-{
-	std::map<EdgeIndex, EdgeValue>::iterator fe = m_edges.find(ei);
-	if(fe != m_edges.end())
-		m_edges.erase(fe);
-}
-
-bool EdgeCollapse::addFaces(const std::deque<FaceIndex> &faces, int lastV)
-{
-    bool stat;
-	std::deque<FaceIndex>::const_iterator it = faces.begin();
-	for(;it!=faces.end();++it) {
-		const FaceIndex &fi = *it;
-		//std::cout<<"\n add face "<<fi;
-/// skip connection
-		const bool isInRange = fi.v2() < lastV;
-		
-		EdgeIndex e0(fi.v0(), fi.v1());
-		addEdge(e0);
-		if(isInRange) {
-		    stat = m_edges[e0].connectToFace(fi);
-		    PrintUnmanifoldEdgeWarning(fi, m_edges[e0], stat);
-		    if(!stat) return false;
-		}
-		
-		EdgeIndex e1(fi.v1(), fi.v2());
-		addEdge(e1);
-		if(isInRange) {
-		    stat = m_edges[e1].connectToFace(fi);
-		    PrintUnmanifoldEdgeWarning(fi, m_edges[e1], stat);
-		    if(!stat) return false;
-		}
-		
-		EdgeIndex e2(fi.v2(), fi.v0());
-		addEdge(e2);
-		if(isInRange) {
-		    stat = m_edges[e2].connectToFace(fi);
-		    PrintUnmanifoldEdgeWarning(fi, m_edges[e2], stat);
-		    if(!stat) return false;
-		}
-		
-		m_tris[fi] = FaceValue();
-
-		if(isInRange) {
-		    m_vertices[fi.v0()].connectToFace(fi);
-		    m_vertices[fi.v1()].connectToFace(fi);
-		    m_vertices[fi.v2()].connectToFace(fi);
-		}
-	}
-	return true;
-}
-
-void EdgeCollapse::addEdge(const EdgeIndex &e)
-{
-	if(m_edges.find(e) == m_edges.end()) {
-		m_edges[e] = EdgeValue();
-		//std::cout << " add edge " << e;
-	}
-}
-
-void EdgeCollapse::getConnectedFaceInds(std::vector<int> &faceInds,
-                const VertexValue &vert)
-{
-	std::deque<FaceIndex>::const_iterator it = vert.connectedFaces().begin();
-	for(;it!=vert.connectedFaces().end();++it) {
-		const FaceIndex &fi = *it;
-
-		if(m_tris.find(fi) == m_tris.end()) {
-			std::cout << "\n\n ERROR nonexistent face " << fi;
-			return;
-		}
-
-		faceInds.push_back(m_tris[fi].ind());
 	}
 }
 
 bool EdgeCollapse::lastConnectedFaceOor(const VertexValue &vert)
 {
-    const int nf = vert.connectedFaces().size();
-    std::deque<FaceIndex>::const_iterator it = vert.connectedFaces().begin();
-	for(;it!=vert.connectedFaces().end();++it) {
+    const int nf = vert.numConnectedFaces();
+    std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
+	for(;it!=vert.facesEnd();++it) {
 		const FaceIndex &fi = *it;
 
-		if(m_tris.find(fi) == m_tris.end()) {
-			std::cout << "\n\n ERROR nonexistent face " << fi;
-			return true;
-		}
+		if(!faceExists(fi)) continue;
 
-		if(m_tris[fi].ind() + nf > m_mesh->numTriangles() - 2)
+/// cannot connect to face to be relocated
+		if(face(fi).ind() + nf > m_mesh->numTriangles() - 2)
 		    return true;
 	}
 	return false;
@@ -437,36 +245,23 @@ void EdgeCollapse::relocateVertices(int va, int vb,
                 const std::vector<int> &vaFaces,
                 const std::vector<int> &vbFaces)
 {
-	bool aonborder = m_vertices[va].isOnBorder();
-	bool bonborder = m_vertices[vb].isOnBorder();
+	bool aonborder = vertex(va).isOnBorder();
+	bool bonborder = vertex(vb).isOnBorder();
 	m_mesh->swapVertex(va, vb,
 				vaFaces, vbFaces);
-	m_vertices[va].lock();
-	m_vertices[va].setOnBorder(bonborder);
-	m_vertices[vb].setOnBorder(aonborder);
+	vertex(va).lock();
+	vertex(va).setOnBorder(bonborder);
+	vertex(vb).setOnBorder(aonborder);
 	
+/// re-index affected faces
 	std::vector<int>::const_iterator it = vaFaces.begin();
 	for(;it!=vaFaces.end();++it)
-		setFaceInd(*it);
+		setMeshFaceInd(m_mesh, *it);
 
 	it = vbFaces.begin();
 	for(;it!=vbFaces.end();++it)
-		setFaceInd(*it);
-}
+		setMeshFaceInd(m_mesh, *it);
 
-void EdgeCollapse::setFaceInd(int i)
-{
-	const unsigned *inds = m_mesh->c_indices();
-	int fv[3];
-	fv[0] = inds[i * 3];
-	fv[1] = inds[i * 3 + 1];
-	fv[2] = inds[i * 3 + 2];
-	FaceIndex fi(fv[0], fv[1], fv[2]);
-	if(m_tris.find(fi) == m_tris.end()) {
-		std::cout << "\n\n ERROR nonexistent face " << fi;
-		return;
-	}
-	m_tris[fi].ind() = i;
 }
 
 void EdgeCollapse::updateCost(const std::deque<FaceIndex> &faces)
@@ -479,52 +274,34 @@ void EdgeCollapse::updateCost(const std::deque<FaceIndex> &faces)
 
 	for(;it!=faces.end();++it) {
 		const FaceIndex &fi = *it;
-		m_tris[fi].calculateArea(pos, fi);
+		face(fi).calculateArea(pos, fi);
 	}
 
 	it = faces.begin();
 	for(;it!=faces.end();++it) {
 		const FaceIndex &fi = *it;
 
-		computeVertexCost(m_vertices[fi.v0()], fi.v0());
-		computeVertexCost(m_vertices[fi.v1()], fi.v1());
-		computeVertexCost(m_vertices[fi.v2()], fi.v2());
+		computeVertexCost(vertex(fi.v0()), fi.v0());
+		computeVertexCost(vertex(fi.v1()), fi.v1());
+		computeVertexCost(vertex(fi.v2()), fi.v2());
 	}
 
 	it = faces.begin();
 	for(;it!=faces.end();++it) {
 		const FaceIndex &fi = *it;
 		const EdgeIndex e0(fi.v0(), fi.v1());
-		if(!m_edges[e0].isOnBorder()) {
-			computeEdgeCost(m_edges[e0], e0);
+		if(!edge(e0).isOnBorder()) {
+			computeEdgeCost(edge(e0), e0);
 		}
 		const EdgeIndex e1(fi.v1(), fi.v2());
-		if(!m_edges[e1].isOnBorder()) {
-			computeEdgeCost(m_edges[e1], e1);
+		if(!edge(e1).isOnBorder()) {
+			computeEdgeCost(edge(e1), e1);
 		}
 		const EdgeIndex e2(fi.v2(), fi.v0());
-		if(!m_edges[e2].isOnBorder()) {
-			computeEdgeCost(m_edges[e2], e2);
+		if(!edge(e2).isOnBorder()) {
+			computeEdgeCost(edge(e2), e2);
 		}
 	}
-}
-
-void EdgeCollapse::lockVertices(const std::deque<FaceIndex> &faces)
-{
-    std::deque<FaceIndex>::const_iterator it = faces.begin();
-	for(;it!=faces.end();++it) {
-		const FaceIndex &fi = *it;
-
-		m_vertices[fi.v0()].lock();
-		m_vertices[fi.v1()].lock();
-		m_vertices[fi.v2()].lock();
-	}
-}
-
-void EdgeCollapse::unlockAllVertices()
-{
-	for(int i=0;i<m_mesh->numVertices();++i)
-		m_vertices[i].unlock();
 }
 
 void EdgeCollapse::relocateFacesTo(const std::vector<int> &faces, int toLastFace)
@@ -533,7 +310,6 @@ void EdgeCollapse::relocateFacesTo(const std::vector<int> &faces, int toLastFace
 	std::vector<int>::const_iterator it = faces.begin();
 
     for(;it!=faces.end();++it) {
-    	//std::cout<<"\n swap f " << *it << "  "<<toFace;
 
     	const unsigned *afv = &m_mesh->c_indices()[*it * 3];
     	int fv[3];
@@ -542,11 +318,7 @@ void EdgeCollapse::relocateFacesTo(const std::vector<int> &faces, int toLastFace
     	fv[2] = afv[2];
     	FaceIndex afi(fv[0], fv[1], fv[2]);
 
-    	if(m_tris.find(afi) == m_tris.end()) {
-    		std::cout << "\n\n ERROR nonexistent face "<<afi;
-    	} else {
-    		m_tris[afi].ind() = toFace;
-    	}
+    	setFaceInd(afi, toFace);
    	
     	const unsigned *bfv = &m_mesh->c_indices()[toFace * 3];
 
@@ -555,11 +327,7 @@ void EdgeCollapse::relocateFacesTo(const std::vector<int> &faces, int toLastFace
     	fv[2] = bfv[2];
     	FaceIndex bfi(fv[0], fv[1], fv[2]);
 
-    	if(m_tris.find(bfi) == m_tris.end()) {
-    		std::cout << "\n\n ERROR nonexistent face "<<bfi;
-    	} else {
-    		m_tris[bfi].ind() = *it;
-    	}
+    	setFaceInd(bfi, *it);
 
     	m_mesh->swapFace(*it, toFace);
     	m_mesh->swapHistory(*it, toFace);
@@ -594,23 +362,20 @@ void EdgeCollapse::insertFacesAt(const std::deque<FaceIndex> &faces,
 			cfv.push_back(fi.v1());
 		}
 
-		//std::cout<<" insert " << fi;
 	}
 
 	m_mesh->insertFaces(cfv, location);
 	m_mesh->insertHistory(faces.size(), location);
 
-	for(int i=location;i<m_mesh->numTriangles();++i) {
+	for(int i=location;i<location + faces.size();++i) {
 		const unsigned *fv = &m_mesh->c_indices()[i * 3];
 		const FaceIndex fi(fv[0], fv[1], fv[2]);
-
-		if(m_tris.find(fi) == m_tris.end() ) {
-			std::cout << "\n\n WARNING nonexistent face" <<fi;
-		} else {
-			m_tris[fi].ind() = i;
-			//std::cout<< "\n f "<<i<<fi;
-		}
+		if(!setFaceInd(fi, i) )
+            std::cout<<"\n WARNING set ind to nonexistent face "<<fi
+                    <<" insert "<<i<<" location "<<location;
 	}
+    
+    pushPastFaceIndex(faces.size());
 }
 
 void EdgeCollapse::computeVertexCost(VertexValue &vert, int vi)
@@ -620,8 +385,8 @@ void EdgeCollapse::computeVertexCost(VertexValue &vert, int vi)
 
 	float totalArea = 0.f;
 	vert.cost() = 0.f;
-	std::deque<FaceIndex>::const_iterator it = vert.connectedFaces().begin();
-	for(;it != vert.connectedFaces().end(); ++it) {
+	std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
+	for(;it != vert.facesEnd(); ++it) {
 		const FaceIndex &fi = *it;
 
 		if(fi.v0() != vi) 
@@ -633,7 +398,7 @@ void EdgeCollapse::computeVertexCost(VertexValue &vert, int vi)
 		if(fi.v2() != vi)
 			vert.higherCost(vn, nmls[fi.v2()]);
 
-		totalArea += m_tris[fi].area();
+		totalArea += face(fi).area();
 	}
 	vert.cost() *= totalArea;
 }
@@ -641,8 +406,8 @@ void EdgeCollapse::computeVertexCost(VertexValue &vert, int vi)
 void EdgeCollapse::computeEdgeCost(EdgeValue &e, const EdgeIndex &ei) const
 {
 	const Vector3F *pos = m_mesh->c_positions();
-	float c = m_vertices[ei.v0()].cost();
-	float cb = m_vertices[ei.v1()].cost();
+	float c = vertex(ei.v0()).cost();
+	float cb = vertex(ei.v1()).cost();
 	if(c < cb) c = cb;
 
 	e.cost() = pos[ei.v0()].distanceTo(pos[ei.v1()]) * c;
@@ -650,10 +415,11 @@ void EdgeCollapse::computeEdgeCost(EdgeValue &e, const EdgeIndex &ei) const
 
 bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 {
-	if(m_edges[ei].isOnBorder()) return false;
+	const EdgeValue &e = edge(ei);
+	if(e.isOnBorder()) return false;
 	
-	const VertexValue &va = m_vertices[ei.v0()];
-	const VertexValue &vb = m_vertices[ei.v1()];
+	const VertexValue &va = vertex(ei.v0());
+	const VertexValue &vb = vertex(ei.v1());
 	
 	if(va.isLocked() || vb.isLocked())
 		return false;
@@ -661,93 +427,44 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 	if(va.isOnBorder() || vb.isOnBorder())
 		return false;
 
-	if(va.connectedFaces().size() > 9 
-			|| vb.connectedFaces().size() > 9 )
+	if(va.numConnectedFaces() > 9 
+			|| vb.numConnectedFaces() > 9 )
 		return false;
 
-	int vci = m_edges[ei].face0().getOpposite(ei.v0(), ei.v1());
-	int vdi = m_edges[ei].face1().getOpposite(ei.v0(), ei.v1());
+	int vci = e.face0().getOpposite(ei.v0(), ei.v1());
+	int vdi = e.face1().getOpposite(ei.v0(), ei.v1());
 	
-	if(m_vertices[vci].connectedFaces().size() < 4 
-			|| m_vertices[vdi].connectedFaces().size() < 4 )
+	if(vertex(vci).numConnectedFaces() < 4 
+			|| vertex(vdi).numConnectedFaces() < 4 )
 		return false;
 
 	int lastVert = m_mesh->numVertices() - 2;
-	
-	if(va.lastConnectedVertex() > lastVert 
-			|| vb.lastConnectedVertex() > lastVert)
+	const VertexValue &vlast = vertex(m_mesh->numVertices() - 1);
+    
+/// cannot share faces with last v
+/// present or past
+	if(va.hasFaceConnected(vlast))
+		return false; 
+	if(vb.hasFaceConnected(vlast))
 		return false;
+
+    if(va.hasPastConnected(vlast))
+    	return false;
+    if(vb.hasPastConnected(vlast))
+    	return false;
+
 /// limite range of connected face for relocate
     if(lastConnectedFaceOor(va))
         return false;
     if(lastConnectedFaceOor(vb))
         return false;
 
-	//if(isVertexOnBorder(ei.v0(), va)
-	//		|| isVertexOnBorder(ei.v1(), vb))
-	//	return false;
-
-	return true;
-}
-
-bool EdgeCollapse::checkTopology()
-{
-	const unsigned *inds = m_mesh->c_indices();
-	const int &nv = m_mesh->numVertices();
-	for(int i=0;i<nv;++i) {
-		if(!m_vertices[i].check(i)) return false;
-		std::deque<FaceIndex>::const_iterator it = m_vertices[i].connectedFaces().begin();
-		for(;it!=m_vertices[i].connectedFaces().end();++it) {
-			const FaceIndex &fi = *it;
-			if(m_tris.find(fi) == m_tris.end()) {
-				std::cout << "\n\n ERROR v "<<i<<" nonexistent face " << fi;
-				return false;
-			}
-			int find = m_tris[fi].ind();
-			if(find < 0 || find > m_mesh->numTriangles() * 2) {
-				std::cout << "\n\n ERROR v "<<i<<" invalid face ind " << find;
-				return false;
-			}
-
-			int fv[3];
-			fv[0] = inds[find * 3];
-			fv[1] = inds[find * 3 + 1];
-			fv[2] = inds[find * 3 + 2];
-
-			if(!fi.hasV(fv[0]) 
-				|| !fi.hasV(fv[1])
-				|| !fi.hasV(fv[2])) {
-
-				std::cout << "\n\n ERROR v "<<i<<" mismatch face " << fi
-					<< " found "<<find<<" (" << fv[0] << " " << fv[1] << " " << fv[2] << ") ";
-				return false;
-			}
-		}
-	}
-	//std::cout<< "\n passed checkTopology ";
 	return true;
 }
 
 bool EdgeCollapse::canEndProcess() const
 { 
-	return m_mesh->numVertices() < (m_numBorderVertices + (m_numVertices >> 3) ); 
-}
-
-void EdgeCollapse::PrintUnmanifoldEdgeWarning(const FaceIndex &fi, const EdgeValue &e,
-                bool stat)
-{ 
-    if(!stat) 
-        std::cout << "\n\n WARNING avoid unmanifold edge " << e << " face " << fi; 
-}
-
-void EdgeCollapse::PrintAddFaceWarning(const std::deque<FaceIndex> &faces, 
-                bool stat)
-{
-	if(stat) return;
-	std::cout << "\n\n WARNING cannot add faces [";
-	for(int i=0;i<faces.size();++i)
-		std::cout << " " << faces[i];
-	std::cout << "] ";
+	return m_mesh->numVertices() < (numBorderVertices() + (numVertices() >> 3) ); 
 }
 
 void EdgeCollapse::PrintCollapseEdgeError(int va, int vb,
@@ -756,6 +473,23 @@ void EdgeCollapse::PrintCollapseEdgeError(int va, int vb,
 {
 	std::cout<<"\n\n ERROR collapsing edge from v" << va << a
 		<<"\n to v" << vb << b;
+}
+
+void EdgeCollapse::PrintConnectedPastWarning(int va, int vb,
+            const VertexValue &a,
+            const VertexValue &b)
+{
+	std::cout<<"\n\n WARNING connected past " << va <<" " << vb
+			<<"\n a past [";
+	std::deque<FaceIndex>::const_iterator it = a.pastFacesBegin();
+	for(;it!=a.pastFacesEnd();++it)
+		std::cout<<" "<<*it;
+	std::cout<<"]\n b past [";
+	it = b.pastFacesBegin();
+	for(;it!=b.pastFacesEnd();++it)
+		std::cout<<" "<<*it;
+	std::cout<<"] ";
+
 }
 
 }
