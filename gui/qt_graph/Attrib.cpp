@@ -320,4 +320,13 @@ void MeshAttrib::setValue(AdaptableMesh *x)
 AdaptableMesh *MeshAttrib::getValue() const
 { return c_value()[0].value<AdaptableMesh*>(); }
 
+ListAttrib::ListAttrib(const std::string &name) : QAttrib(name, AtList)
+{ value()<<0; }
+
+void ListAttrib::setWidget(QListWidget *wig)
+{ m_wig = wig; }
+
+QListWidget *ListAttrib::widget()
+{ return m_wig; }
+
 }

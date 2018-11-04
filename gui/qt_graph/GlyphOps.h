@@ -27,9 +27,12 @@ public:
 	std::map<std::string, QAttrib * >::iterator attribEnd();
 	QAttrib *findAttrib(const std::string &attrName);
 	bool setFloatAttrValue(const std::string &attrName, const float &x);
+    bool setListAttrValue(const std::string &attrName, const std::string &itemName);
 	
 	virtual void update();
 	virtual bool hasDrawable() const;
+	virtual void onSelection();
+	virtual void postUI();
 
 protected:
 	void addAttribute(const QJsonObject &content);
@@ -38,6 +41,7 @@ protected:
 	QAttrib *addFloatAttribute(const QJsonObject &content);
 	QAttrib *addFloat2Attribute(const QJsonObject &content);
 	QAttrib *addMeshAttribute(const QJsonObject &content);
+	QAttrib *addListAttribute(const QJsonObject &content);
 
 private:
 	void addConnection(QAttrib *b, const QJsonObject &content);

@@ -156,7 +156,7 @@ void VertexValue::addToVector(std::deque<int> &vs, int x) const
 		vs.push_back(x);
 }
 
-bool VertexValue::check(int vi) const
+bool VertexValue::checkFaces(int vi) const
 {
 	std::deque<FaceIndex>::const_iterator it = m_faceInds.begin();
 	for(;it!=m_faceInds.end();++it) {

@@ -7,7 +7,6 @@
  *
  */
 
-//#include <QtGui>
 #include "AcaciaScene.h"
 #include "ops/AllOps.h"
 #include <qt_graph/GlyphItem.h>
@@ -27,6 +26,8 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
     switch(k) {
     case AcaciaOpsType::AoRoot :
         return new RootOps;
+    case AcaciaOpsType::AoMeshListener :
+        return new MeshListenerOps;
     case AcaciaOpsType::AoEdgeCollapseTest :
         return new EdgeCollapseTest;
     default:

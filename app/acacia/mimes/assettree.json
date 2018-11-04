@@ -14,6 +14,28 @@
                     "label": "Static Meshers",
                     "children": [
                         {
+                            "id": 277635,
+                            "name": "listen_mesh",
+                            "label": "Listener",
+                            "icon": ":images/listener.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "ipc_mesh_list",
+                                    "label": "Meshes Available",
+                                    "typ": 12
+                                },
+                                {
+                                    "name": "lod",
+                                    "label": "Level of Detail",
+                                    "typ": 3,
+                                    "value": 0.5,
+                                    "min": 0.0,
+                                    "max": 1.0
+                                }
+                            ]
+                        },
+                        {
                             "id": 769952,
                             "name": "leaf",
                             "label": "Leaf",

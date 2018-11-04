@@ -50,6 +50,9 @@ void GlyphOps::addAttribute(const QJsonObject &content)
 		case QAttrib::AtMesh :
 			b = addMeshAttribute(content);
 			break;
+		case QAttrib::AtList :
+			b = addListAttribute(content);
+			break;
 		default:
 			break;
 	}
@@ -185,5 +188,25 @@ void GlyphOps::setFloatComponentAttrValue(QAttrib *attr, const int &component, c
 		fattr->setValue(x, component);
 	}
 }
+
+QAttrib *GlyphOps::addListAttribute(const QJsonObject &content)
+{
+	QString name = content["name"].toString();
+	std::string snm = name.toStdString();
+	ListAttrib *b = new ListAttrib(snm);
+	m_attribs[snm] = b;
+	return b;
+}
+
+bool GlyphOps::setListAttrValue(const std::string &attrName, const std::string &itemName)
+{ 
+qDebug() << "GlyphOps::setListAttrValue" << attrName.c_str() 
+		 << itemName.c_str();
+    return true; 
+}
+
+void GlyphOps::onSelection() {}
+
+void GlyphOps::postUI() {}
 
 }

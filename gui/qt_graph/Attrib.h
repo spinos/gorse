@@ -14,6 +14,10 @@
 #include <QVariant>
 #include <geom/AdaptableMesh.h>
 
+QT_BEGIN_NAMESPACE
+class QListWidget;
+QT_END_NAMESPACE
+
 namespace alo {
 
 enum ConnectableSide {
@@ -49,7 +53,8 @@ public:
 		AtSpline,
 		AtString,
 		AtAction,
-		AtMesh
+		AtMesh,
+		AtList
 	};
 
 	QAttrib(const std::string &anm, AttrType atyp);
@@ -205,7 +210,8 @@ class StringAttrib : public QAttrib {
 public:
 	enum StrAttrType {
 		SaUnknown = 256,
-		SaFileName
+		SaFileName,
+		SaNote
 	};
 
 	StringAttrib(const std::string &name, StrAttrType sat = SaUnknown);
@@ -241,6 +247,18 @@ public:
 	
 	void setValue(AdaptableMesh *x);
 	AdaptableMesh *getValue() const;
+	
+};
+
+class ListAttrib : public QAttrib {
+	
+	QListWidget *m_wig;
+
+public:
+	ListAttrib(const std::string &name);
+	
+	void setWidget(QListWidget *wig);
+    QListWidget *widget();
 	
 };
 

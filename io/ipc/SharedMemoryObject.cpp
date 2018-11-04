@@ -20,7 +20,7 @@ SharedMemoryObject::~SharedMemoryObject()
  
 mapped_region *SharedMemoryObject::createRegion(const char *name, int size)
 {
-	std::cout<<" create shared memory object " << name;
+	std::cout<<"\n create shared memory object " << name;
 	try {
     	windows_shared_memory shm(create_only, name, read_write, size);
     	return new mapped_region(shm, read_write);
@@ -33,12 +33,12 @@ mapped_region *SharedMemoryObject::createRegion(const char *name, int size)
 
 mapped_region SharedMemoryObject::readRegion(const char *name)
 {
-	std::cout<<" open shared memory object " << name;
+	std::cout<<"\n open shared memory object " << name;
 	try {
 		windows_shared_memory shm(open_only, name, read_only);
       	return mapped_region(shm, read_only);
 	} catch (...) {
-		std::cout << " named region " << name << " doesn't exist ";
+		std::cout << "\n WARNING named region " << name << " doesn't exist ";
 		return mapped_region();
 	}
 }

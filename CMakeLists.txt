@@ -23,6 +23,7 @@ INCLUDE (${GORS_DIR}/gui/qt_tree/config.cmake)
 INCLUDE (${GORS_DIR}/gui/qt_ogl/config.cmake)
 INCLUDE (${GORS_DIR}/gui/ogl/config.cmake)
 INCLUDE (${GORS_DIR}/io/ipc/config.cmake)
+INCLUDE (${GORS_DIR}/io/jsn/config.cmake)
 
 ADD_SUBDIRECTORY (app)
 

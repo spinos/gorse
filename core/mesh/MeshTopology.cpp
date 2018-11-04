@@ -81,31 +81,24 @@ bool MeshTopology::checkTopology(const ATriangleMesh *mesh)
 	const unsigned *inds = mesh->c_indices();
 	const int &nv = mesh->numVertices();
 	for(int i=0;i<nv;++i) {
-		if(!m_vertices[i].check(i)) return false;
+		if(!m_vertices[i].checkFaces(i)) return false;
 		std::deque<FaceIndex>::const_iterator it = m_vertices[i].facesBegin();
 		for(;it!=m_vertices[i].facesEnd();++it) {
 			const FaceIndex &fi = *it;
-			if(m_tris.find(fi) == m_tris.end()) {
+			if(!faceExists(fi)) {
 				std::cout << "\n\n ERROR v "<<i<<" nonexistent face " << fi;
 				return false;
 			}
 			int find = m_tris[fi].ind();
-			if(find < 0 || find > mesh->numTriangles() * 2) {
+			if(find < 0 || find >= mesh->numTriangles() ) {
 				std::cout << "\n\n ERROR v "<<i<<" invalid face ind " << find;
 				return false;
 			}
 
-			int fv[3];
-			fv[0] = inds[find * 3];
-			fv[1] = inds[find * 3 + 1];
-			fv[2] = inds[find * 3 + 2];
+			if(!mesh->checkFaceVertex(find, fi.v0(), fi.v1(), fi.v2())) {
 
-			if(!fi.hasV(fv[0]) 
-				|| !fi.hasV(fv[1])
-				|| !fi.hasV(fv[2])) {
-
-				std::cout << "\n\n ERROR v "<<i<<" mismatch face " << fi
-					<< " found "<<find<<" (" << fv[0] << " " << fv[1] << " " << fv[2] << ") ";
+				std::cout << "\n\n ERROR v "<<i<<" mismatch face " << fi;
+				mesh->printFace(find);
 				return false;
 			}
 		}
@@ -423,7 +416,7 @@ void MeshTopology::indexPastFaces(const ATriangleMesh *mesh, int begin, int end)
 		const unsigned *ind = &mesh->c_indices()[i*3];
 		FaceIndex fi(ind[0], ind[1], ind[2]);
 		if(!setPastFaceInd(fi, i) )
-			std::cout << " found " << fi;
+			std::cout << "\n\n WARNING nonexistent past face " << fi;
 	}
 }
 

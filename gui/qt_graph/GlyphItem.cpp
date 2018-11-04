@@ -153,6 +153,7 @@ void GlyphItem::postConnection(GlyphItem* another, GlyphPort* viaPort)
 void GlyphItem::postSelection()
 { 
     showHalo();
+    m_ops->onSelection();
 }
 
 void GlyphItem::preDisconnection(GlyphItem* another, GlyphPort* viaPort)

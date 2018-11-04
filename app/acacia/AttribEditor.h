@@ -8,6 +8,7 @@
 QT_BEGIN_NAMESPACE
 class QVBoxLayout;
 class QSpacerItem;
+class QListWidgetItem;
 QT_END_NAMESPACE
 
 namespace alo {
@@ -29,9 +30,10 @@ signals:
 
 public slots:
 	void recvSelectGlyph(bool isSelecting);
-
+	
 private slots:
 	void recvFloatValue(QPair<std::string, float> x);
+	void recvListItemSelection(QPair<std::string, std::string> x);
 
 private:
 	void clearAttribs();
@@ -39,6 +41,7 @@ private:
 	void lsAttr(alo::QAttrib *attr);
 	void lsFloatAttr(alo::QAttrib *attr);
 	void lsFloat2Attr(alo::QAttrib *attr);
+	void lsListAttr(alo::QAttrib *attr);
 
 private:
 	AcaciaScene *m_scene;

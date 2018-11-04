@@ -49,7 +49,8 @@ public:
 /// reform vi to vb
 	void getReformedFaces(std::deque<FaceIndex> &faces, int vi, int vb) const;
 	const bool &isLocked() const;
-	bool check(int vi) const;
+/// all faces has vi
+	bool checkFaces(int vi) const;
 
 	bool getOneRing(std::vector<int> &vertInds, int vi,
 		const Vector3F *pos, const Vector3F &nv) const;

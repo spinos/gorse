@@ -17,7 +17,9 @@ ${GORS_QT_OGL_SRC}
 ${GORS_MATH_SRC}
 ${GORS_MESH_SRC} 
 ${GORS_RNG_SRC}
-${GORS_GEOM_SRC})
+${GORS_GEOM_SRC}
+${GORS_JSN_SOURCE}
+${GORS_IPC_SOURCE})
 
 QT5_ADD_RESOURCES(ACAC_RES_SOURCES acacia.qrc)
 
@@ -25,3 +27,6 @@ add_executable (acacia ${ACAC_SOURCE_FILES}
 ${ACAC_RES_SOURCES})
 
 target_link_libraries (acacia Qt5::OpenGL)
+target_link_libraries (acacia ${Boost_SYSTEM_LIBRARY})
+target_link_libraries (acacia ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries (acacia ${Boost_THREAD_LIBRARY})

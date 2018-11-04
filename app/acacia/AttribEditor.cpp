@@ -5,9 +5,11 @@
 #include <QSplitter>
 #include <QSpacerItem>
 #include <QScrollArea>
+#include <QListWidget>
 #include <qt_graph/GlyphOps.h>
 #include <qt_base/SimpleLabel.h>
 #include <qt_base/FieldSlider.h>
+#include <qt_base/ListSelector.h>
 
 using namespace alo;
 
@@ -94,6 +96,8 @@ void AttribEditor::lsAttribs(GlyphOps *ops)
 
     leftBox->addItem(m_leftSpace);
     rightBox->addItem(m_rightSpace);
+
+    ops->postUI();
 }
 
 void AttribEditor::lsAttr(QAttrib *attr)
@@ -104,6 +108,9 @@ void AttribEditor::lsAttr(QAttrib *attr)
 		break;
 		case QAttrib::AtFloat2 :
 			lsFloat2Attr(attr);
+		break;
+		case QAttrib::AtList :
+			lsListAttr(attr);
 		break;
 		default :
 		break;
@@ -162,12 +169,39 @@ void AttribEditor::lsFloat2Attr(alo::QAttrib *attr)
 			
 }
 
+void AttribEditor::lsListAttr(alo::QAttrib *attr)
+{
+	SimpleLabel *lab = new SimpleLabel(QString(attr->label().c_str()));
+	
+	m_leftCollWigs.enqueue(lab);
+    m_leftCollWigs.enqueue(new SimpleLabel(tr("")));
+    m_leftCollWigs.enqueue(new SimpleLabel(tr("")));
+    
+    ListSelector *lg = new ListSelector();
+    lg->setName(attr->attrName() );
+    m_rightCollWigs.enqueue(lg);
+
+    ListAttrib *flist = static_cast<ListAttrib *>(attr);
+    flist->setWidget(lg);
+
+    connect(lg, SIGNAL(selectionChanged(QPair<std::string, std::string>)),
+           this, SLOT(recvListItemSelection(QPair<std::string, std::string>) ) );
+}
+
 void AttribEditor::recvFloatValue(QPair<std::string, float> x)
 {
 	GlyphOps *ops = m_scene->getActiveOps();
-	if(!ops)
-		return;
+	if(!ops) return;
 
 	if(ops->setFloatAttrValue(x.first, x.second) )
+		emit sendAttribChanged();
+}
+
+void AttribEditor::recvListItemSelection(QPair<std::string, std::string> x)
+{
+	GlyphOps *ops = m_scene->getActiveOps();
+	if(!ops) return;
+
+	if(ops->setListAttrValue(x.first, x.second) )
 		emit sendAttribChanged();
 }

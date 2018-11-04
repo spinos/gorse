@@ -218,5 +218,11 @@ bool ATriangleMesh::checkFaceVertex(int i, int a, int b, int c) const
     return b == fmd;
 }
 
+void ATriangleMesh::printFace(int i) const
+{
+    const unsigned *fv = &c_indices()[i*3];
+    std::cout << " face "<<i<<" (" << fv[0] << "," << fv[1] << "," << fv[2] << ") ";               
+}
+
 }
 //:~

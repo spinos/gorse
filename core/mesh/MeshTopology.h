@@ -2,6 +2,7 @@
  *  MeshTopology.h
  *
  *  M = (V,E,F)
+ *  past F has no edge connected
  *
  */
 

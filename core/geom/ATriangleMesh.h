@@ -52,6 +52,7 @@ public:
     bool replaceFaceVertex(int i, int a, int b);
 /// a < b < c
     bool checkFaceVertex(int i, int a, int b, int c) const;
+    void printFace(int i) const;
     
 protected:
     unsigned* indices();
