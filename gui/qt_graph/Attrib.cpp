@@ -321,7 +321,16 @@ AdaptableMesh *MeshAttrib::getValue() const
 { return c_value()[0].value<AdaptableMesh*>(); }
 
 ListAttrib::ListAttrib(const std::string &name) : QAttrib(name, AtList)
-{ value()<<0; }
+{ value()<<QString("unknown"); }
+
+void ListAttrib::setValue(const std::string& x)
+{ value()[0] = QString(x.c_str()); }
+
+void ListAttrib::getValue(std::string& y) const
+{ 
+    QString b = c_value()[0].toString();
+    y = b.toStdString(); 
+}
 
 void ListAttrib::setWidget(QListWidget *wig)
 { m_wig = wig; }

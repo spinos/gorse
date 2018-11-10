@@ -9,7 +9,7 @@ ELSE()
     SET (BOOST_ROOT d:/usr/boost_1_51_0)
 ENDIF()
 
-MESSAGE ("BOOST_ROOT is" ${BOOST_ROOT})
+MESSAGE (" BOOST_ROOT is " ${BOOST_ROOT})
 
 set (Boost_INCLUDE_DIR ${BOOST_ROOT})
 set (Boost_LIBRARY_DIR ${BOOST_ROOT}/stage/lib)

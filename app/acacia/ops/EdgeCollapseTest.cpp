@@ -74,6 +74,7 @@ EdgeCollapseTest::~EdgeCollapseTest()
 { 
     delete m_mesh; 
     delete m_sourceMesh;
+    delete m_reformer;
 }
     
 void EdgeCollapseTest::update()

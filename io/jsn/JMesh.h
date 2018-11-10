@@ -47,6 +47,10 @@ public:
 	const int &nt() const;
 	const int &pos() const;
 	const int &ind() const;
+/// data in bytes round to 65536
+	int getRegionSize() const;
+	int getPosLoc() const;
+	int getIndLoc() const;
 
 	boost::property_tree::ptree createPtree();
 	bool readPtree(const boost::property_tree::ptree & tree);

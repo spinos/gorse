@@ -202,6 +202,13 @@ bool GlyphOps::setListAttrValue(const std::string &attrName, const std::string &
 { 
 qDebug() << "GlyphOps::setListAttrValue" << attrName.c_str() 
 		 << itemName.c_str();
+	QAttrib *attr = findAttrib(attrName);
+	if(!attr) return false;
+	
+	ListAttrib *fattr = static_cast<ListAttrib *>(attr);
+	fattr->setValue(itemName);
+	
+	update();
     return true; 
 }
 

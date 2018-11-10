@@ -10,13 +10,21 @@ class QListWidget;
 QT_END_NAMESPACE
 
 namespace alo {
-
 class AdaptableMesh;
+class HistoryMesh;
+class HistoryReform;
+class JMesh;
 class MeshListenerOps : public DrawableOps {
     
+    std::map<std::string, JMesh> m_meshMap;
+    std::string m_meshName;
     SimpleBuffer<Vector3F> posnml;
     SimpleBuffer<Vector3F> baryc;
+    HistoryMesh *m_sourceMesh;
+    HistoryReform *m_reformer;
     AdaptableMesh *m_mesh;
+    unsigned m_upd;
+    float m_lod;
     bool m_toRelocate;
     
 public:
@@ -30,6 +38,9 @@ public:
 protected:
     
 private:
+    bool checkBroadcastTime();
+    bool loadMesh(bool dataChanged);
+    bool loadMeshMaster();
     void computeMesh();
     void setMeshDrawable(DrawableScene *scene);
     void listAvailableMeshes(QListWidget *wig);

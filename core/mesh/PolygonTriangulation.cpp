@@ -83,6 +83,11 @@ float PolygonTriangulation::getCircumRadius(const Vector3F &p1,
 	float a = p1.distanceTo(p2);
 	float b = p2.distanceTo(p3);
 	float c = p3.distanceTo(p1);
+	if(b+c-a < 1e-3f
+	    || c + a - b < 1e-3f
+	    || a + b - c < 1e-3f) 
+	return 1e29f;
+
 	return a * b * c / sqrt((a + b + c) * (b + c - a) * (c + a - b) * (a + b - c));
 }
 

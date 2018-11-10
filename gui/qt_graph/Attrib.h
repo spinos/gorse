@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef Q_ATTRIB_H
-#define Q_ATTRIB_H
+#ifndef ALO_Q_ATTRIB_H
+#define ALO_Q_ATTRIB_H
 
 #include <string>
 #include <QVariant>
@@ -256,6 +256,9 @@ class ListAttrib : public QAttrib {
 
 public:
 	ListAttrib(const std::string &name);
+	
+	void setValue(const std::string& x);
+	void getValue(std::string& y) const;
 	
 	void setWidget(QListWidget *wig);
     QListWidget *widget();

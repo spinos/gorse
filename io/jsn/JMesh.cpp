@@ -24,6 +24,27 @@ void JMesh::addUvSet(const std::string &name)
 	m_uvsets.back()._name = name;
 }
 
+int JMesh::getRegionSize() const
+{
+    int s = 0;
+    s += m_nv * 12;
+    s += m_nt * 12;
+    std::vector<UVSet>::const_iterator it = m_uvsets.begin();
+	for(;it!=m_uvsets.end();++it)
+		s += m_nt * 24;
+	
+	if(s & 65535) s += 65535;
+	s = s>>16;
+	s = s<<16;
+	return s;
+}
+
+int JMesh::getPosLoc() const
+{ return 0; }
+
+int JMesh::getIndLoc() const
+{ return m_nv * 12; }
+
 ptree JMesh::createPtree()
 {
 	ptree tree;

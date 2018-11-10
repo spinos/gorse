@@ -434,8 +434,8 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 	int vci = e.face0().getOpposite(ei.v0(), ei.v1());
 	int vdi = e.face1().getOpposite(ei.v0(), ei.v1());
 	
-	if(vertex(vci).numConnectedFaces() < 4 
-			|| vertex(vdi).numConnectedFaces() < 4 )
+	if(vertex(vci).numConnectedFaces() < 5 
+			|| vertex(vdi).numConnectedFaces() < 5 )
 		return false;
 
 	int lastVert = m_mesh->numVertices() - 2;

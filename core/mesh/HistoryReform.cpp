@@ -48,8 +48,8 @@ void HistoryReform::reform(AdaptableMesh *outMesh, const float &lod, const Histo
 		outMesh->appendFaces(b, fineL);
 	}
 
-	std::cout<< "\n  stage "<<istage
-		<<" select nv "<<selV << " reformed nf "<<outMesh->numTriangles();
+	//std::cout<< "\n  stage "<<istage
+	//	<<" select nv "<<selV << " reformed nf "<<outMesh->numTriangles();
 
 }
 

@@ -33,6 +33,9 @@ public:
         const Vector3F *pos, const Vector3F *nml,
         int vertexCount, int triangleCount);
     
+    void copyPositionsFrom(const Vector3F *x);
+    void copyIndicesFrom(const unsigned *x);
+    
     const int& numVertices() const;
     const int& numTriangles() const;
     const int& numIndices() const;
@@ -41,7 +44,7 @@ public:
     const Vector3F* c_positions() const;
     const Vector3F* c_normals() const;
     
-/// face-varying vertex
+/// face-varying vertex attribute
     void createPositionNormalArray(SimpleBuffer<Vector3F>& posnml) const;
     void createBarycentricCoordinates(SimpleBuffer<Vector3F>& baryc) const;
     
