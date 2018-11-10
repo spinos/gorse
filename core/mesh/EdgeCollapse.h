@@ -4,6 +4,8 @@
  *  find edge with lowest cost to collapse
  *  relocate remove vertex and faces to end
  *  no vertex will be added or removed, they just shuffle
+ *  cost of collapes a vertex <- max (1 - Na dot Nb)
+ *  Na, Nb is normal of any face pair connected to the vertex
  *
  */
 
@@ -47,7 +49,7 @@ private:
     void insertFacesAt(const std::deque<FaceIndex> &faces, 
                         int location);
 /// area max (1 - dotN)
-    void computeVertexCost(VertexValue &vert, int vi);
+    void computeVertexCost(VertexValue &vert);
 /// ||va - vb|| max (ca, cb)
     void computeEdgeCost(EdgeValue &e, const EdgeIndex &ei) const;
     bool canEdgeCollapse(const EdgeIndex &ei);
@@ -59,6 +61,8 @@ private:
     static void PrintConnectedPastWarning(int va, int vb,
             const VertexValue &a,
             const VertexValue &b); 
+    static void PrintOneRing(int va, const std::vector<int> &ring);
+
 };
 	
 }

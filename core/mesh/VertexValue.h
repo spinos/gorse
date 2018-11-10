@@ -2,9 +2,6 @@
  *  VertexValue.h
  *
  *  vertex-to-face connection
- *  cost of collapes <- max (1 - Na dot Nb) 
- *  Na is vertex normal
- *  Nb is connected vertex normal
  *
  */
 
@@ -54,9 +51,6 @@ public:
 
 	bool getOneRing(std::vector<int> &vertInds, int vi,
 		const Vector3F *pos, const Vector3F &nv) const;
-
-	void higherCost(const Vector3F &Na,
-					const Vector3F &Nb);
 
 	void copyPastFacesTo(std::vector<FaceIndex> &faces) const;
 	

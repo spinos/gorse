@@ -17,10 +17,10 @@ EdgeCollapseTest::EdgeCollapseTest()
     m_mesh = new AdaptableMesh;
     m_sourceMesh = new HistoryMesh;
     m_reformer = new HistoryReform;
-    const int nu = 34;
+    const int nu = 41;
     for(int i=0;i<nu;++i) {
         float phi = .21f * i;
-        m_sourceMesh->addVertex(Vector3F(-67.f + 3.53f * i + RandomFn11() * 1.41f, -40.f + 11.f * sin(phi), -30.f -13.f * sin(phi) ));
+        m_sourceMesh->addVertex(Vector3F(-67.f + 7.93f * i + RandomFn11() * 1.47f, -40.f + 11.f * cos(phi), -30.f - 19.f * sin(phi) ));
     }
     
     FrontLine originLine;
@@ -29,9 +29,9 @@ EdgeCollapseTest::EdgeCollapseTest()
     for(int i=0;i<nu;++i)
         originLine.addVertex(m_sourceMesh->vertexPositionR(i), i);
     
-    Vector3F up(0.f, 4.7f, 0.1f);
-    const Quaternion lq(-.039f, Vector3F::ZAxis);
-    const Quaternion tq(.015f, Vector3F::YAxis);
+    Vector3F up(0.f, 4.3f, 0.1f);
+    const Quaternion lq(-.0472f, Vector3F::ZAxis);
+    const Quaternion tq(.0193f, Vector3F::YAxis);
     constexpr float cshrinking = .0f;
     originLine.setWorldSpace(Matrix33F::IdentityMatrix);
     originLine.rotateLocalBy(lq);
@@ -41,17 +41,17 @@ EdgeCollapseTest::EdgeCollapseTest()
     originLine.setMinEdgeLength(.1f);
     
     FrontLine *la = &originLine;
-    FrontLine l[24];
+    FrontLine l[29];
 
     FrontMesher msher;
     msher.attachMesh(m_sourceMesh);
 
-    for(int i=0;i<24;++i) {
+    for(int i=0;i<29;++i) {
         msher.setFrontId(i+1);
 
         l[i].rotateLocalBy(lq);
         l[i].rotateLocalBy(tq);
-        l[i].setShrinking(cshrinking + RandomFn11() * .02f);
+        l[i].setShrinking(cshrinking + RandomFn11() * .001f);
         up.y += RandomFn11() * 1.97f;
         up.z += RandomFn11() * 1.99f;
         l[i].setDirection(up);

@@ -103,13 +103,6 @@ void VertexValue::clearFaces()
 void VertexValue::clearPastFaces()
 { m_pastFaceInds.clear(); }
 
-void VertexValue::higherCost(const Vector3F &Na,
-					const Vector3F &Nb)
-{
-	float c = 1.f - Na.dot(Nb);
-	if(m_cost < c) m_cost = c;
-}
-
 float &VertexValue::cost()
 { return m_cost; }
 

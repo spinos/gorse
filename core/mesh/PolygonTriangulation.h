@@ -12,15 +12,16 @@
 
 #include <vector>
 #include <deque>
+#include <math/Vector3F.h>
 
 namespace alo {
 
-class Vector3F;
 class FaceIndex;
 
 class PolygonTriangulation {
 
 	std::vector<int> m_vertices;
+	Vector3F m_center;
 	const Vector3F *m_pos;
 
 public:
@@ -28,6 +29,7 @@ public:
 	~PolygonTriangulation();
 
 	void setPositions(const Vector3F *pos);
+	void setCenter(const Vector3F &c);
 
 	std::vector<int> &vertices();
 
@@ -39,6 +41,14 @@ private:
 	float getCircumRadius(const Vector3F &p1, 
 					const Vector3F &p2,
 					const Vector3F &p3) const;
+///             b
+///            /
+/// center - a
+///            \
+///             c
+	bool isCornerConcave(const Vector3F &a, 
+					const Vector3F &b,
+					const Vector3F &c) const;
 	void addTriangle(std::deque<FaceIndex> &faces, int i) const;
 /// b    i+1
 /// | \

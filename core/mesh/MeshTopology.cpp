@@ -52,7 +52,8 @@ void MeshTopology::buildTopology(const ATriangleMesh *mesh)
 
 		FaceIndex fi(ind[i], ind[i + 1], ind[i+2]);
 		m_tris[fi] = FaceValue(j);
-		m_tris[fi].calculateArea(pos, fi);
+		m_tris[fi].setArea(mesh->getTriangleArea(j));
+		m_tris[fi].setNormal(mesh->getTriangleNormal(j));
 
 		EdgeValue &e0 = m_edges[EdgeIndex(ind[i], ind[i + 1])];
 		stat = e0.connectToFace(fi);

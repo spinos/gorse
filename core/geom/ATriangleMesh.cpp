@@ -114,7 +114,7 @@ void ATriangleMesh::calculateVertexNormals()
     const int& n = numTriangles();
     const unsigned* triv = c_indices();
     for(int i=0;i<n;++i) {
-        const Vector3F triNm = getTriangleNormal(i);
+        const Vector3F triNm = getTriangleNormalMultArea(i);
         const unsigned* triInd = &triv[i*3];
         ndst[triInd[0]] += triNm;
         ndst[triInd[1]] += triNm;
@@ -125,6 +125,26 @@ void ATriangleMesh::calculateVertexNormals()
         ndst[i].normalize();
     }
     
+}
+
+Vector3F ATriangleMesh::getTriangleNormalMultArea(int i) const
+{
+    const Vector3F* p = c_positions();
+    const unsigned* v = &c_indices()[i*3];
+    const Vector3F& a = p[v[0]];
+    const Vector3F& b = p[v[1]];
+    const Vector3F& c = p[v[2]];
+    Vector3F ab = b - a;
+    Vector3F ac = c - a;
+    Vector3F nor = ab.cross(ac);
+    nor.normalize();
+
+    float la = (b - a).length();
+    float lb = (c - b).length();
+    float lc = (a - c).length();
+    float s = 0.5f * (la + lb + lc);
+
+    return nor * sqrt(s * (s - la) * (s - lb) * (s - lc));
 }
 
 Vector3F ATriangleMesh::getTriangleNormal(int i) const

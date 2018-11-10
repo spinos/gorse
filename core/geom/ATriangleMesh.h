@@ -50,6 +50,7 @@ public:
     
     void reverseTriangleNormals();
     void calculateVertexNormals();
+    Vector3F getTriangleNormalMultArea(int i) const;
     Vector3F getTriangleNormal(int i) const;
     float getTriangleArea(int i) const;
     bool replaceFaceVertex(int i, int a, int b);

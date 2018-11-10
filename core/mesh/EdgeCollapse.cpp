@@ -53,6 +53,8 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 
 		const VertexValue &vrm = vertex(vert2Remove);
 		
+		m_triangulate->setCenter(m_mesh->c_positions()[vert2Remove]);
+
 		std::vector<int> &vring = m_triangulate->vertices();
 		vring.clear();
 		if(!vrm.getOneRing(vring, vert2Remove,
@@ -62,7 +64,12 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 			std::cout << "\n\n ERROR not one ring v" << vert2Remove << vrm;
 			return -1;
 		}
-
+#if 0
+		std::vector<int> dbgRing;
+		vrm.getOneRing(dbgRing, vert2Remove,
+			m_mesh->c_positions(),
+			m_mesh->c_normals()[vert2Remove]);
+#endif
 /// coarse faces to be created
 		std::deque<FaceIndex> coarseFaces;
 		if(!m_triangulate->getTriangles(coarseFaces)) {
@@ -108,6 +115,9 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		if(!addFaces(coarseFaces) ) {
 			std::cout << "\n when add collapsed faces";
 			PrintAddFaceWarning(coarseFaces, false);
+#if 0
+			PrintOneRing(vert2Remove, dbgRing);
+#endif
 			return -1;
 		}
 /// no connection to fine faces
@@ -175,7 +185,7 @@ void EdgeCollapse::computeEdgeCost()
 			vi.setOnBorder(true);
 			nbv++;
 		} else {
-			computeVertexCost(vi, i);
+			computeVertexCost(vi);
 			vi.setOnBorder(false);
 		}
 	}
@@ -274,16 +284,19 @@ void EdgeCollapse::updateCost(const std::deque<FaceIndex> &faces)
 
 	for(;it!=faces.end();++it) {
 		const FaceIndex &fi = *it;
-		face(fi).calculateArea(pos, fi);
+		FaceValue &facei = face(fi);
+		const int &ti = facei.ind();
+		facei.setArea(m_mesh->getTriangleArea(ti));
+		facei.setNormal(m_mesh->getTriangleNormal(ti));
 	}
 
 	it = faces.begin();
 	for(;it!=faces.end();++it) {
 		const FaceIndex &fi = *it;
 
-		computeVertexCost(vertex(fi.v0()), fi.v0());
-		computeVertexCost(vertex(fi.v1()), fi.v1());
-		computeVertexCost(vertex(fi.v2()), fi.v2());
+		computeVertexCost(vertex(fi.v0()));
+		computeVertexCost(vertex(fi.v1()));
+		computeVertexCost(vertex(fi.v2()));
 	}
 
 	it = faces.begin();
@@ -378,29 +391,48 @@ void EdgeCollapse::insertFacesAt(const std::deque<FaceIndex> &faces,
     pushPastFaceIndex(faces.size());
 }
 
-void EdgeCollapse::computeVertexCost(VertexValue &vert, int vi)
+void EdgeCollapse::computeVertexCost(VertexValue &vert)
 {
-	const Vector3F *nmls = m_mesh->c_normals();
-	const Vector3F &vn = nmls[vi];
+	const int faceCount = vert.numConnectedFaces();
+	std::pair<Vector3F, float> * faceCost = new std::pair<Vector3F, float>[faceCount];
 
 	float totalArea = 0.f;
-	vert.cost() = 0.f;
+	int i=0;
 	std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
 	for(;it != vert.facesEnd(); ++it) {
 		const FaceIndex &fi = *it;
+		const FaceValue &facei = face(fi);
 
-		if(fi.v0() != vi) 
-			vert.higherCost(vn, nmls[fi.v0()]);
+		faceCost[i].first = facei.normal();
+		i++;
 
-		if(fi.v1() != vi)
-			vert.higherCost(vn, nmls[fi.v1()]);
-		
-		if(fi.v2() != vi)
-			vert.higherCost(vn, nmls[fi.v2()]);
-
-		totalArea += face(fi).area();
+		totalArea += facei.area();
 	}
-	vert.cost() *= totalArea;
+
+	for(i=0;i<faceCount;++i) {
+		faceCost[i].second = 0.f;
+		const Vector3F &ni = faceCost[i].first;
+		for(int j=0;j<faceCount;++j) {
+			if(j==i) continue;
+			float nidnj = 1.f - ni.dot(faceCost[j].first);
+			if(faceCost[i].second < nidnj)
+				faceCost[i].second = nidnj;
+		}
+	}
+
+	vert.cost() = 0.f;
+	for(i=0;i<faceCount;++i) {
+		if(vert.cost() < faceCost[i].second)
+			vert.cost() = faceCost[i].second;
+	}
+
+	delete[] faceCost;
+
+/// not flat enough
+	if(vert.cost() > .3f) 
+		vert.cost() = 1e28f;
+	else 
+		vert.cost() *= totalArea;
 }
 
 void EdgeCollapse::computeEdgeCost(EdgeValue &e, const EdgeIndex &ei) const
@@ -419,7 +451,7 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 	if(e.isOnBorder()) return false;
 	
 	const VertexValue &va = vertex(ei.v0());
-	const VertexValue &vb = vertex(ei.v1());
+	const VertexValue &vb = vertex(ei.v1());		
 	
 	if(va.isLocked() || vb.isLocked())
 		return false;
@@ -427,15 +459,19 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 	if(va.isOnBorder() || vb.isOnBorder())
 		return false;
 
-	if(va.numConnectedFaces() > 9 
-			|| vb.numConnectedFaces() > 9 )
+	if(va.numConnectedFaces() < 4 
+			|| vb.numConnectedFaces() < 4 )
+		return false;
+
+	if(va.numConnectedFaces() > 10 
+			|| vb.numConnectedFaces() > 10 )
 		return false;
 
 	int vci = e.face0().getOpposite(ei.v0(), ei.v1());
 	int vdi = e.face1().getOpposite(ei.v0(), ei.v1());
 	
-	if(vertex(vci).numConnectedFaces() < 5 
-			|| vertex(vdi).numConnectedFaces() < 5 )
+	if(vertex(vci).numConnectedFaces() < 4 
+			|| vertex(vdi).numConnectedFaces() < 4 )
 		return false;
 
 	int lastVert = m_mesh->numVertices() - 2;
@@ -464,7 +500,7 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 
 bool EdgeCollapse::canEndProcess() const
 { 
-	return m_mesh->numVertices() < (numBorderVertices() + (numVertices() >> 3) ); 
+	return m_mesh->numVertices() < (numBorderVertices() + (numVertices() >> 4) ); 
 }
 
 void EdgeCollapse::PrintCollapseEdgeError(int va, int vb,
@@ -490,6 +526,17 @@ void EdgeCollapse::PrintConnectedPastWarning(int va, int vb,
 		std::cout<<" "<<*it;
 	std::cout<<"] ";
 
+}
+
+void EdgeCollapse::PrintOneRing(int va, const std::vector<int> &ring)
+{
+	std::cout<<"\n\n INFO one ring around vertex " << va <<" [";
+
+	std::vector<int>::const_iterator it = ring.begin();
+	for(;it!=ring.end();++it)
+		std::cout<<" "<<*it;
+
+	std::cout<<"] ";
 }
 
 }

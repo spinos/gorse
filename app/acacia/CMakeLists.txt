@@ -30,3 +30,7 @@ target_link_libraries (acacia Qt5::OpenGL)
 target_link_libraries (acacia ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (acacia ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (acacia ${Boost_THREAD_LIBRARY})
+
+IF(WIN32)
+## set_target_properties(acacia PROPERTIES LINK_FLAGS "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+ENDIF()
