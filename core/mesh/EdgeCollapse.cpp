@@ -215,10 +215,10 @@ EdgeIndex EdgeCollapse::findEdgeToCollapse()
 
 		edgeCostMin = it->second.cost();
 		collapseEdgeI = it->first;
-
 	}
-	//std::cout<<"\n collapse edge "<<collapseEdgeI
-	//	<<" cost "<<edgeCostMin;
+
+	if(edgeCostMin > .9e28f) 
+	    return EdgeIndex();
 	
 	return collapseEdgeI;
 }
@@ -427,10 +427,10 @@ void EdgeCollapse::computeVertexCost(VertexValue &vert)
 	}
 
 	delete[] faceCost;
-
+	
 /// not flat enough
-	if(vert.cost() > .3f) 
-		vert.cost() = 1e28f;
+	if(vert.cost() > .54f) 
+		vert.cost() = 1e29f;
 	else 
 		vert.cost() *= totalArea;
 }
