@@ -13,8 +13,8 @@ namespace alo {
 
 BaseCamera::BaseCamera() 
 {
-    m_nearClipPlane = 0.1f;
-    m_farClipPlane = 1000.f;
+    m_nearClipPlane = 0.9f;
+    m_farClipPlane = 9999.9f;
 	fPortWidth = 400;
 	fPortHeight = 300;
 	reset(Vector3F(0.f, 0.f, 0.f));
@@ -301,4 +301,3 @@ void BaseCamera::getScreenCoord(float& cx, float& cy,
 }
  
 }
-//:~

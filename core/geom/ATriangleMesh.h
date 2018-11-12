@@ -2,8 +2,7 @@
  *  ATriangleMesh.h
  *  aloe
  *
- *  Created by jian zhang on 4/25/15.
- *  Copyright 2015 __MyCompanyName__. All rights reserved.
+ *  uv is facing-varying
  *
  */
 
@@ -12,8 +11,12 @@
  
 #include <math/SimpleBuffer.h>
 #include <math/BoundingBox.h>
+#include <math/Float2.h>
+#include <deque>
 
 namespace alo {
+
+typedef std::pair<std::string, SimpleBuffer<Float2> > NamedUV;
 
 class ATriangleMesh {
 	
@@ -23,6 +26,7 @@ class ATriangleMesh {
     int m_numVertices;
     int m_numTriangles;
     int m_numIndices;
+    std::deque<NamedUV > m_uvSets;
     
 public:
 	ATriangleMesh();
@@ -35,14 +39,17 @@ public:
     
     void copyPositionsFrom(const Vector3F *x);
     void copyIndicesFrom(const unsigned *x);
-    
+    Float2 *addUVSet(const std::string &name);
+
     const int& numVertices() const;
     const int& numTriangles() const;
     const int& numIndices() const;
+    int numUVSets() const;
     
     const unsigned* c_indices() const;
     const Vector3F* c_positions() const;
     const Vector3F* c_normals() const;
+    const Float2 *c_uvSet(const std::string &name) const;
     
 /// face-varying vertex attribute
     void createPositionNormalArray(SimpleBuffer<Vector3F>& posnml) const;
@@ -69,6 +76,8 @@ protected:
     SimpleBuffer<Vector3F>& positionBuffer();
     SimpleBuffer<Vector3F>& normalBuffer();
     SimpleBuffer<unsigned>& indexBuffer();
+    std::deque<NamedUV >::iterator uvBegin();
+    std::deque<NamedUV >::iterator uvEnd();
     
 private:
     

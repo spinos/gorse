@@ -17,7 +17,7 @@ ATriangleMesh::ATriangleMesh() : m_numVertices(0),
 {}
 
 ATriangleMesh::~ATriangleMesh() 
-{}
+{ m_uvSets.clear(); }
 
 const int& ATriangleMesh::numVertices() const
 { return m_numVertices; }
@@ -27,6 +27,9 @@ const int& ATriangleMesh::numTriangles() const
 
 const int& ATriangleMesh::numIndices() const
 { return m_numIndices; }
+
+int ATriangleMesh::numUVSets() const
+{ return m_uvSets.size(); }
 
 const Vector3F* ATriangleMesh::c_positions() const
 { return m_positions.c_data(); }
@@ -89,6 +92,26 @@ void ATriangleMesh::copyPositionsFrom(const Vector3F *x)
 
 void ATriangleMesh::copyIndicesFrom(const unsigned *x)
 { m_indices.copyFrom(x, m_numIndices); }
+
+Float2 *ATriangleMesh::addUVSet(const std::string &name)
+{
+    m_uvSets.push_front(NamedUV());
+    NamedUV &fuv = m_uvSets.front();
+    fuv.first = name;
+    fuv.second.createBuffer(m_numIndices);
+    return fuv.second.data();
+}
+
+const Float2 *ATriangleMesh::c_uvSet(const std::string &name) const
+{
+    std::deque<NamedUV >::const_iterator it = m_uvSets.begin();
+    for(;it!=m_uvSets.end();++it) {
+        const NamedUV &auv = *it;
+        if(auv.first == name) 
+            return auv.second.c_data();
+    }
+    return 0;
+}
 
 void ATriangleMesh::reverseTriangleNormals()
 {
@@ -249,6 +272,12 @@ void ATriangleMesh::printFace(int i) const
     const unsigned *fv = &c_indices()[i*3];
     std::cout << " face "<<i<<" (" << fv[0] << "," << fv[1] << "," << fv[2] << ") ";               
 }
+
+std::deque<NamedUV >::iterator ATriangleMesh::uvBegin()
+{ return m_uvSets.begin(); }
+
+std::deque<NamedUV >::iterator ATriangleMesh::uvEnd()
+{ return m_uvSets.end(); }
 
 }
 //:~
