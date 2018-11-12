@@ -50,6 +50,7 @@ public:
     const Vector3F* c_positions() const;
     const Vector3F* c_normals() const;
     const Float2 *c_uvSet(const std::string &name) const;
+    const Float2 *c_uvSet(int i) const;
     
 /// face-varying vertex attribute
     void createPositionNormalArray(SimpleBuffer<Vector3F>& posnml) const;

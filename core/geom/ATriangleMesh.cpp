@@ -113,6 +113,12 @@ const Float2 *ATriangleMesh::c_uvSet(const std::string &name) const
     return 0;
 }
 
+const Float2 *ATriangleMesh::c_uvSet(int i) const
+{
+    const NamedUV &auv = m_uvSets[i];
+    return auv.second.c_data();
+}
+
 void ATriangleMesh::reverseTriangleNormals()
 {
 	const int& n = numTriangles();

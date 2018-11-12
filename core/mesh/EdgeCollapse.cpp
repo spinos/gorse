@@ -60,16 +60,12 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		if(!vrm.getOneRing(vring, vert2Remove,
 			m_mesh->c_positions(),
 			m_mesh->c_normals()[vert2Remove])) {
-
 			std::cout << "\n\n ERROR not one ring v" << vert2Remove << vrm;
 			return -1;
 		}
-#if 0
-		std::vector<int> dbgRing;
-		vrm.getOneRing(dbgRing, vert2Remove,
-			m_mesh->c_positions(),
-			m_mesh->c_normals()[vert2Remove]);
-#endif
+/// vertice around va
+		const std::vector<int> vaRing(vring);
+
 /// coarse faces to be created
 		std::deque<FaceIndex> coarseFaces;
 		if(!m_triangulate->getTriangles(coarseFaces)) {
@@ -115,9 +111,7 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		if(!addFaces(coarseFaces) ) {
 			std::cout << "\n when add collapsed faces";
 			PrintAddFaceWarning(coarseFaces, false);
-#if 0
-			PrintOneRing(vert2Remove, dbgRing);
-#endif
+			PrintOneRing(vert2Remove, vaRing);
 			return -1;
 		}
 /// no connection to fine faces
@@ -165,32 +159,23 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		numCoarseFaces += coarseFaces.size();
 		numFineFaces += nfRemove;
 
-		updateCost(coarseFaces);
-		lockFaces(coarseFaces);
+		updateCost(coarseFaces, vaRing);
+		lockVertices(vaRing);
 		updateCost(lastFaces);
-		
+#if 0		
 		if(!checkTopology(m_mesh) ) return -1;
-
+#endif
 	}
 	return nvStageBegin - m_mesh->numVertices();
 }
 
 void EdgeCollapse::computeEdgeCost()
 {
-	int nbv = 0;
 	for(int i=0;i<m_mesh->numVertices();++i) {
 		VertexValue &vi = vertex(i);
-		if(isVertexOnBorder(i, vi)) {
-/// always on border
-			vi.setOnBorder(true);
-			nbv++;
-		} else {
+		if(!vi.isOnBorder())
 			computeVertexCost(vi);
-			vi.setOnBorder(false);
-		}
 	}
-
-	setNumBorderVertices(nbv);
 
 	std::map<EdgeIndex, EdgeValue>::iterator it = edgesBegin();
 	for(;it!=edgesEnd();++it) {
@@ -276,21 +261,9 @@ void EdgeCollapse::relocateVertices(int va, int vb,
 
 void EdgeCollapse::updateCost(const std::deque<FaceIndex> &faces)
 {
-	const unsigned *ind = m_mesh->c_indices();
-	const Vector3F *nmls = m_mesh->c_normals();
-	const Vector3F *pos = m_mesh->c_positions();
+	updateFaces(faces);
 
 	std::deque<FaceIndex>::const_iterator it = faces.begin();
-
-	for(;it!=faces.end();++it) {
-		const FaceIndex &fi = *it;
-		FaceValue &facei = face(fi);
-		const int &ti = facei.ind();
-		facei.setArea(m_mesh->getTriangleArea(ti));
-		facei.setNormal(m_mesh->getTriangleNormal(ti));
-	}
-
-	it = faces.begin();
 	for(;it!=faces.end();++it) {
 		const FaceIndex &fi = *it;
 
@@ -299,7 +272,36 @@ void EdgeCollapse::updateCost(const std::deque<FaceIndex> &faces)
 		computeVertexCost(vertex(fi.v2()));
 	}
 
-	it = faces.begin();
+	computeEdgeCost(faces);
+}
+
+void EdgeCollapse::updateCost(const std::deque<FaceIndex> &faces,
+						const std::vector<int> &vertices)
+{
+	updateFaces(faces);
+
+	std::vector<int>::const_iterator vit = vertices.begin();
+	for(;vit!=vertices.end();++vit)
+		computeVertexCost(vertex(*vit));
+
+	computeEdgeCost(faces);
+}
+
+void EdgeCollapse::updateFaces(const std::deque<FaceIndex> &faces)
+{
+	std::deque<FaceIndex>::const_iterator it = faces.begin();
+	for(;it!=faces.end();++it) {
+		const FaceIndex &fi = *it;
+		FaceValue &facei = face(fi);
+		const int &ti = facei.ind();
+		facei.setArea(m_mesh->getTriangleArea(ti));
+		facei.setNormal(m_mesh->getTriangleNormal(ti));
+	}
+}
+
+void EdgeCollapse::computeEdgeCost(const std::deque<FaceIndex> &faces)
+{
+	std::deque<FaceIndex>::const_iterator it = faces.begin();
 	for(;it!=faces.end();++it) {
 		const FaceIndex &fi = *it;
 		const EdgeIndex e0(fi.v0(), fi.v1());
@@ -429,7 +431,7 @@ void EdgeCollapse::computeVertexCost(VertexValue &vert)
 	delete[] faceCost;
 	
 /// not flat enough
-	if(vert.cost() > .54f) 
+	if(vert.cost() > .5f) 
 		vert.cost() = 1e29f;
 	else 
 		vert.cost() *= totalArea;

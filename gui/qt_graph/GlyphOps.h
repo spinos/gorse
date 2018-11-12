@@ -33,6 +33,9 @@ public:
 	virtual bool hasDrawable() const;
 	virtual void onSelection();
 	virtual void postUI();
+	virtual bool hasMenu() const;
+	virtual void getMenuItems(std::vector<std::pair<std::string, int > > &ks) const;
+	virtual void recvAction(int x);
 
 protected:
 	void addAttribute(const QJsonObject &content);

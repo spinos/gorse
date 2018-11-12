@@ -212,5 +212,19 @@ void MeshListenerOps::computeMesh()
     if(m_toRelocate) m_mesh->createBarycentricCoordinates(baryc);
 }
 
+bool MeshListenerOps::hasMenu() const
+{ return true; }
+
+void MeshListenerOps::getMenuItems(std::vector<std::pair<std::string, int > > &ks) const 
+{
+    ks.push_back(std::make_pair("Save", 1));
+}
+
+void MeshListenerOps::recvAction(int x) 
+{
+    std::cout<<" MeshListenerOps::recvAction ";
+    if(x == 1) std::cout << " todo save ";
+}
+
 }
 

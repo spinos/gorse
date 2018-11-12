@@ -28,9 +28,6 @@ const int &MeshTopology::numFaces() const
 const int &MeshTopology::numBorderVertices() const
 { return m_numBorderVertices; }
 
-void MeshTopology::setNumBorderVertices(int x)
-{ m_numBorderVertices = x; }
-
 void MeshTopology::buildTopology(const ATriangleMesh *mesh)
 {
 	m_numFaces = mesh->numTriangles();
@@ -50,10 +47,12 @@ void MeshTopology::buildTopology(const ATriangleMesh *mesh)
 	for(int i=0;i<mesh->numIndices();i+=3) {
 		const int j = i/3;
 
-		FaceIndex fi(ind[i], ind[i + 1], ind[i+2]);
+		FaceIndex fi(ind[i], ind[i + 1], ind[i + 2]);
 		m_tris[fi] = FaceValue(j);
-		m_tris[fi].setArea(mesh->getTriangleArea(j));
-		m_tris[fi].setNormal(mesh->getTriangleNormal(j));
+		FaceValue &f = m_tris[fi];
+		f.setVertexUV(ind[i], i, ind[i + 1], i + 1, ind[i + 2], i + 2);
+		f.setArea(mesh->getTriangleArea(j));
+		f.setNormal(mesh->getTriangleNormal(j));
 
 		EdgeValue &e0 = m_edges[EdgeIndex(ind[i], ind[i + 1])];
 		stat = e0.connectToFace(fi);
@@ -72,9 +71,21 @@ void MeshTopology::buildTopology(const ATriangleMesh *mesh)
 		m_vertices[ind[i + 2]].connectToFace(fi);
 	}
 
-	std::cout<<"\n n vert "<<m_numVertices
-		<<" n face "<<m_tris.size()
-		<<" n edge "<<m_edges.size();
+	m_numBorderVertices=0;
+	for(int i=0;i<m_numVertices;++i) {
+		VertexValue &vi = vertex(i);
+		if(isVertexOnBorder(i, vi, mesh)) {
+/// always on border
+			vi.setOnBorder(true);
+			m_numBorderVertices++;
+		} else
+			vi.setOnBorder(false);
+	}
+
+	std::cout<<"\n n vertex "<<m_numVertices
+		<<" n face "<<m_numFaces
+		<<" n edge "<<m_edges.size()
+		<<" n vertex-on-border "<<m_numBorderVertices;
 }
 
 bool MeshTopology::checkTopology(const ATriangleMesh *mesh)
@@ -298,7 +309,8 @@ bool MeshTopology::faceExists(const FaceIndex &fi)
 bool MeshTopology::pastFaceExists(const FaceIndex &fi)
 { return m_pastFaces.find(fi) != m_pastFaces.end(); }
 
-bool MeshTopology::isVertexOnBorder(int vi, const VertexValue &vert)
+bool MeshTopology::isVertexOnBorder(int vi, const VertexValue &vert,
+								const ATriangleMesh *mesh)
 { 
     if(vert.numConnectedFaces() < 3) return true;
 	std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
@@ -323,7 +335,46 @@ bool MeshTopology::isVertexOnBorder(int vi, const VertexValue &vert)
 				return true;
 		}
 	}
+
+	const int nuv = mesh->numUVSets();
+	if(nuv < 1) return false;
+
+	for(int i=0;i<nuv;++i) {
+		const Float2 *uvs = mesh->c_uvSet(i);
+		if(isVertexOnUVBorder(vi, vert, uvs)) 
+			return true;
+	}
+
 	return false; 
+}
+
+bool MeshTopology::isVertexOnUVBorder(int vi, const VertexValue &vert,
+                const Float2 *uvs)
+{
+	Float2 preUV;
+	bool isFirst = true;
+	std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
+	for(;it!=vert.facesEnd();++it) {
+		const FaceValue &facei = face(*it);
+		const int uvi = facei.vertexUV(vi);
+		const Float2 &uv = uvs[uvi];
+
+		if(isFirst) {
+			isFirst = false;		
+		} else {
+			if(!preUV.isCloseTo(uv)) return true;
+		}
+
+		preUV = uv;
+	}
+	return false;
+}
+
+void MeshTopology::lockVertices(const std::vector<int> &v)
+{
+	std::vector<int>::const_iterator it = v.begin();
+	for(;it!=v.end();++it)
+		m_vertices[*it].lock();
 }
 
 void MeshTopology::lockFaces(const std::deque<FaceIndex> &faces)

@@ -20,7 +20,7 @@ class EdgeIndex;
 class EdgeValue;
 class FaceIndex;
 class FaceValue;
-
+struct Float2;
 class ATriangleMesh;
 
 class MeshTopology {
@@ -54,7 +54,6 @@ protected:
 	void addFace(const FaceIndex &fi);
 	bool addFaces(const std::deque<FaceIndex> &faces,
                 int lastV = 1<<30);
-	void setNumBorderVertices(int x);
 	bool checkTopology(const ATriangleMesh *mesh);
 	bool setFaceInd(const FaceIndex &fi, int x);
 	bool setPastFaceInd(const FaceIndex &fi, int x);
@@ -68,8 +67,12 @@ protected:
 	bool faceExists(const FaceIndex &fi);
 	bool pastFaceExists(const FaceIndex &fi);
 /// connected to edge on border
-    bool isVertexOnBorder(int vi, const VertexValue &vert);
+    bool isVertexOnBorder(int vi, const VertexValue &vert,
+                const ATriangleMesh *mesh);
+    bool isVertexOnUVBorder(int vi, const VertexValue &vert,
+                const Float2 *uvs);
     void lockFaces(const std::deque<FaceIndex> &faces);
+    void lockVertices(const std::vector<int> &v);
     bool lockFace(const FaceIndex &fi);
     void unlockVertices(int high);
     void connectFaceToVertex(const FaceIndex &fi);

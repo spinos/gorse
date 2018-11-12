@@ -44,6 +44,10 @@ private:
                 const std::vector<int> &vbFaces);
 
     void updateCost(const std::deque<FaceIndex> &faces);
+    void updateCost(const std::deque<FaceIndex> &faces,
+                const std::vector<int> &vertices);
+/// ind area normal to each face
+    void updateFaces(const std::deque<FaceIndex> &faces);
     
     void relocateFacesTo(const std::vector<int> &faces, int toLastFace);
     void insertFacesAt(const std::deque<FaceIndex> &faces, 
@@ -52,6 +56,7 @@ private:
     void computeVertexCost(VertexValue &vert);
 /// ||va - vb|| max (ca, cb)
     void computeEdgeCost(EdgeValue &e, const EdgeIndex &ei) const;
+    void computeEdgeCost(const std::deque<FaceIndex> &faces);
     bool canEdgeCollapse(const EdgeIndex &ei);
     bool canEndProcess() const;
     

@@ -216,4 +216,11 @@ void GlyphOps::onSelection() {}
 
 void GlyphOps::postUI() {}
 
+bool GlyphOps::hasMenu() const
+{ return false; }
+
+void GlyphOps::getMenuItems(std::vector<std::pair<std::string, int > > &ks) const {}
+
+void GlyphOps::recvAction(int x) {}
+
 }

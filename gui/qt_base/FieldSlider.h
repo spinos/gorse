@@ -36,6 +36,7 @@ private slots:
     
 private:
    void paintEvent(QPaintEvent *e) override;
+   void notifyValueChange();
 
 private:
     std::string m_name;
@@ -45,6 +46,7 @@ private:
    int m_lastPos;
    int m_startPos;
    int m_stepInd;
+   bool m_isContinuous;
    static const char *SMenuLabels[];
    static const float SFSteps[];
 };

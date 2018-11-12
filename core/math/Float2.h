@@ -12,6 +12,14 @@ struct Float2 {
 	{}
 	
 	void set(float a, float b) { x = a; y = b; }
+
+	bool isCloseTo(const Float2 &b, const float &thre=1e-4f) const {
+
+		float d = b.x - x;
+		if(d < -thre || d > thre) return false;
+		d = b.y - y;
+		return (d > -thre && d < thre);
+	}
 	
 	float x, y;
 };

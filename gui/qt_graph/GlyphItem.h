@@ -58,13 +58,14 @@ public:
 /// after connection via port is changed
 	void postDisconnection(GlyphPort* viaPort);
 	void postSelection();
-	
+
 protected:
 	GlyphPort *addPort(const QString & name, 
 							bool isOutgoing);
 	void resizeBlock(int bx, int by);
 	virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
 	virtual void mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event );
+	virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent * event);
 	
 private:
 	void centerIcon();

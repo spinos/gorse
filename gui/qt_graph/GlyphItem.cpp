@@ -79,6 +79,30 @@ void GlyphItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 void GlyphItem::mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event )
 { event->ignore(); }
 
+void GlyphItem::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
+{
+	if(!m_ops->hasMenu()) {
+		event->ignore();
+		return;
+    }
+
+    std::vector<std::pair<std::string, int > > ks;
+    m_ops->getMenuItems(ks);
+    
+	QMenu menu;
+	std::vector<std::pair<std::string, int > >::const_iterator it = ks.begin();
+	for(;it!=ks.end();++it) {
+		QAction *a = menu.addAction(QString(it->first.c_str()));
+		a->setData(QVariant(it->second));
+	}
+	ks.clear();
+    
+    QAction *selectedAction = menu.exec(event->screenPos());
+    if(selectedAction) {
+    	m_ops->recvAction(selectedAction->data().toInt());
+    }
+}
+
 void GlyphItem::setHalo(GlyphHalo* hal)
 { m_halo = hal; }
 

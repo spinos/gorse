@@ -34,6 +34,7 @@ FieldSlider::FieldSlider(QWidget *parent)
     m_lastPos = -1;
     m_startPos = -1;
     m_stepInd = 1;
+    m_isContinuous = false;
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
     this, SLOT(ShowContextMenu(const QPoint&)));
@@ -115,12 +116,18 @@ void FieldSlider::mouseMoveEvent(QMouseEvent *e)
     
     m_lastPos = px;
     update();
+    if(m_isContinuous) notifyValueChange();
 }
 
 void FieldSlider::mouseReleaseEvent(QMouseEvent *)
 {
     m_startPos = m_lastPos = -1;
     update();
+    notifyValueChange();
+}
+
+void FieldSlider::notifyValueChange()
+{
     if(m_preVar != m_var) {
         m_preVar = m_var;
         QPair<std::string, float> sigv(m_name, m_var);
@@ -141,10 +148,18 @@ void FieldSlider::ShowContextMenu(const QPoint& pos)
         a->setData(QVariant(i));
         if(m_stepInd == i) a->setChecked(true);
     }
+    QAction * ac = myMenu.addAction(tr("Continuous"));
+    ac->setData(QVariant(8));
+    ac->setCheckable(true);
+    ac->setChecked(m_isContinuous);
 
     QAction* selectedItem = myMenu.exec(globalPos);
     if (selectedItem) {
-        m_stepInd = selectedItem->data().toInt();
+        int k = selectedItem->data().toInt();
+        if(k < 8)
+            m_stepInd = k;
+        else 
+            m_isContinuous = !m_isContinuous;
     }
 }
 

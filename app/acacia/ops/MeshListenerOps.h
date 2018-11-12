@@ -34,6 +34,9 @@ public:
     virtual void update() override;
     virtual void postUI() override;
  	virtual void addDrawableTo(DrawableScene *scene) override;
+    virtual bool hasMenu() const override;
+    virtual void getMenuItems(std::vector<std::pair<std::string, int > > &ks) const override;
+    virtual void recvAction(int x) override;
 
 protected:
     
