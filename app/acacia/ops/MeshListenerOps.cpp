@@ -58,7 +58,7 @@ void MeshListenerOps::update()
 
     DrawableScene *scene = drawableScene();
     DrawableObject *d = drawable();
-    if(m_toRelocate) {
+    if(m_toRelocate || dataChanged || meshSelectionChanged) {
         scene->enqueueRemoveDrawable(d);
         setMeshDrawable(scene);
     } else {
@@ -174,6 +174,7 @@ bool MeshListenerOps::loadMesh(bool dataChanged)
     if(region.get_size() < 1) return false;
     
     const JMesh &msh = m_meshMap[m_meshName];
+        
     const int &nv = msh.nv();
     const int &nt = msh.nt();
     m_sourceMesh->createTriangleMesh(nv, nt);
@@ -183,6 +184,16 @@ bool MeshListenerOps::loadMesh(bool dataChanged)
     m_sourceMesh->copyPositionsFrom(pos);
     const unsigned *ind = (const unsigned *)&mem[msh.getIndLoc()];
     m_sourceMesh->copyIndicesFrom(ind);
+    
+    m_sourceMesh->clearUVSets();
+
+    std::vector<JMesh::UVSet>::const_iterator uvit = msh.uvSetBegin();
+    for(;uvit!=msh.uvSetEnd();++uvit) {
+        Float2 *uvd = m_sourceMesh->addUVSet(uvit->_name);
+        const Float2 *uvs = (const Float2 *)&mem[uvit->_uv];
+        memcpy(uvd, uvs, nt * 24);
+    }
+
     m_sourceMesh->calculateVertexNormals();
     
     EdgeCollapse ech;

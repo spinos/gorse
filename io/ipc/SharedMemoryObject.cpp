@@ -33,7 +33,7 @@ mapped_region *SharedMemoryObject::createRegion(const char *name, int size)
 
 mapped_region SharedMemoryObject::readRegion(const char *name)
 {
-	std::cout<<"\n open shared memory object " << name;
+	//std::cout<<"\n open shared memory object " << name;
 	try {
 		windows_shared_memory shm(open_only, name, read_only);
       	return mapped_region(shm, read_only);

@@ -83,7 +83,7 @@ void WireframeProgram::initializeProgram(QOpenGLContext *ctx)
     m_normalMatrixLoc = m_program->uniformLocation("normalMatrix");
     m_lightPosLoc = m_program->uniformLocation("lightPos");
 
-    m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 40, 70));
+    m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 9000, 9000));
 
     m_program->release();
 }

@@ -102,6 +102,9 @@ Float2 *ATriangleMesh::addUVSet(const std::string &name)
     return fuv.second.data();
 }
 
+void ATriangleMesh::clearUVSets()
+{ m_uvSets.clear(); }
+
 const Float2 *ATriangleMesh::c_uvSet(const std::string &name) const
 {
     std::deque<NamedUV >::const_iterator it = m_uvSets.begin();

@@ -40,6 +40,7 @@ public:
     void copyPositionsFrom(const Vector3F *x);
     void copyIndicesFrom(const unsigned *x);
     Float2 *addUVSet(const std::string &name);
+    void clearUVSets();
 
     const int& numVertices() const;
     const int& numTriangles() const;

@@ -62,11 +62,13 @@ ptree JMesh::createPtree()
 
 	ptree uvChildren;
 
-	std::vector<UVSet>::const_iterator it = m_uvsets.begin();
+	std::vector<UVSet>::iterator it = m_uvsets.begin();
 	for(;it!=m_uvsets.end();++it) {
 		ptree childUv;
 		childUv.put("name", it->_name);
 		childUv.put("uv", loc);
+		it->_uv = loc;
+		
 		loc += m_nt * 24;
 
 		uvChildren.push_back(std::make_pair("", childUv));
@@ -87,6 +89,7 @@ bool JMesh::readPtree(const ptree & tree)
 	m_pos = tree.get<int>("pos");
 	m_ind = tree.get<int>("ind");
 
+	m_uvsets.clear();
 	BOOST_FOREACH(ptree::value_type const&v, tree.get_child("uvs")) {
 
 		const ptree &uvtree = v.second;
@@ -119,6 +122,9 @@ const int &JMesh::pos() const
 const int &JMesh::ind() const
 { return m_ind; }
 
+int JMesh::numUvSet() const
+{ return m_uvsets.size(); }
+
 std::vector<JMesh::UVSet>::const_iterator JMesh::uvSetBegin() const
 { return m_uvsets.begin(); }
 
@@ -132,7 +138,7 @@ std::ostream& operator<<(std::ostream &output, const JMesh & p)
 			<< " pos " << p.pos() << " ind " << p.ind();
 	std::vector<JMesh::UVSet>::const_iterator it = p.uvSetBegin();
 	for(;it!=p.uvSetEnd();++it) {
-		output << " uvset " << it->_name << " uv " << it->_uv;
+		output << "\n uvset " << it->_name << " uv " << it->_uv;
 	}
     return output;
 }
