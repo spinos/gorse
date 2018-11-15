@@ -55,6 +55,7 @@ public:
     
 /// face-varying vertex attribute
     void createPositionNormalArray(SimpleBuffer<Vector3F>& posnml) const;
+    void createUVNormalArray(SimpleBuffer<Vector3F>& posnml) const;
     void createBarycentricCoordinates(SimpleBuffer<Vector3F>& baryc) const;
     
     void reverseTriangleNormals();
@@ -80,6 +81,8 @@ protected:
     SimpleBuffer<unsigned>& indexBuffer();
     std::deque<NamedUV >::iterator uvBegin();
     std::deque<NamedUV >::iterator uvEnd();
+    std::deque<NamedUV >::const_iterator c_uvBegin() const;
+    std::deque<NamedUV >::const_iterator c_uvEnd() const;
     
 private:
     

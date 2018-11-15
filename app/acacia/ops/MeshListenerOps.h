@@ -26,6 +26,7 @@ class MeshListenerOps : public DrawableOps {
     unsigned m_upd;
     float m_lod;
     bool m_toRelocate;
+    bool m_shoUV;
     
 public:
     MeshListenerOps();

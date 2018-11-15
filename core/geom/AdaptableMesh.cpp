@@ -111,8 +111,14 @@ void AdaptableMesh::removeLastFaces(int x)
 }
 
 void AdaptableMesh::swapFace(int fromFace, int toFace)
+{ indexBuffer().swap(fromFace * 3, toFace * 3, 3); }
+
+void AdaptableMesh::swapFaceUV(int fromFace, int toFace)
 {
-    indexBuffer().swap(fromFace * 3, toFace * 3, 3);
+    std::deque<NamedUV >::iterator it = uvBegin();
+    for(;it!=uvEnd();++it) {
+        it->second.swap(fromFace * 3, toFace * 3, 3);
+    }
 }
 
 void AdaptableMesh::insertFaces(const std::vector<int> &faceVertices, int toFirstFace)

@@ -34,7 +34,8 @@ public slots:
 private slots:
 	void recvFloatValue(QPair<std::string, float> x);
 	void recvListItemSelection(QPair<std::string, std::string> x);
-
+	void recvBoolValue(QPair<std::string, bool> x);
+	
 private:
 	void clearAttribs();
 	void lsAttribs(alo::GlyphOps *ops);
@@ -42,7 +43,8 @@ private:
 	void lsFloatAttr(alo::QAttrib *attr);
 	void lsFloat2Attr(alo::QAttrib *attr);
 	void lsListAttr(alo::QAttrib *attr);
-
+	void lsBoolAttr(alo::QAttrib *attr);
+	
 private:
 	AcaciaScene *m_scene;
 	QQueue<QWidget *> m_leftCollWigs;

@@ -227,6 +227,24 @@ void ATriangleMesh::createPositionNormalArray(SimpleBuffer<Vector3F>& posnml) co
     }
 }
 
+void ATriangleMesh::createUVNormalArray(SimpleBuffer<Vector3F>& posnml) const
+{
+    const Float2 *uvs = c_uvSet(0);
+    posnml.createBuffer(m_numIndices * 2);
+    for(int i=0;i<m_numTriangles;++i) {
+        const Float2 &uv0 = uvs[i*3];
+        const Float2 &uv1 = uvs[i*3 + 1];
+        const Float2 &uv2 = uvs[i*3 + 2];
+        const int i6 = i * 6;
+        posnml[i6].set(uv0.x * 32.f, uv0.y * 32.f, 0.f);
+        posnml[i6+1] = Vector3F::ZAxis;
+        posnml[i6+2].set(uv1.x * 32.f, uv1.y * 32.f, 0.f);
+        posnml[i6+3] = Vector3F::ZAxis;
+        posnml[i6+4].set(uv2.x * 32.f, uv2.y * 32.f, 0.f);
+        posnml[i6+5] = Vector3F::ZAxis;
+    }
+}
+
 void ATriangleMesh::createBarycentricCoordinates(SimpleBuffer<Vector3F>& baryc) const
 {
     baryc.createBuffer(m_numIndices);
@@ -286,6 +304,12 @@ std::deque<NamedUV >::iterator ATriangleMesh::uvBegin()
 { return m_uvSets.begin(); }
 
 std::deque<NamedUV >::iterator ATriangleMesh::uvEnd()
+{ return m_uvSets.end(); }
+
+std::deque<NamedUV >::const_iterator ATriangleMesh::c_uvBegin() const
+{ return m_uvSets.begin(); }
+
+std::deque<NamedUV >::const_iterator ATriangleMesh::c_uvEnd() const
 { return m_uvSets.end(); }
 
 }

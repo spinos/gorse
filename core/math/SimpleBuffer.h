@@ -27,6 +27,7 @@ class SimpleBuffer {
 public:
 
     SimpleBuffer();
+    SimpleBuffer(const SimpleBuffer &b);
     ~SimpleBuffer();
     
     void createBuffer(int count);
@@ -66,6 +67,15 @@ SimpleBuffer<T>::SimpleBuffer() : m_data(0),
 {}
 
 template<typename T>
+SimpleBuffer<T>::SimpleBuffer(const SimpleBuffer &b)
+{
+    m_cap = calcCap(b.count());
+    m_data = new T[m_cap];
+    m_count = b.count();
+    copyFrom(b.c_data(), b.count() );
+}
+
+template<typename T>
 SimpleBuffer<T>::~SimpleBuffer()
 {
     if(m_data) delete[] m_data;
@@ -77,7 +87,7 @@ void SimpleBuffer<T>::resetBuffer(int count)
     if(m_data)
         delete[] m_data;
 
-    m_cap = 4096;
+    m_cap = calcCap(count);
     m_data = new T[m_cap];
     m_count = count;
 }

@@ -5,6 +5,7 @@
  */
 
 #include "HistoryMesh.h"
+#include "FaceValue.h"
 
 namespace alo {
 	
@@ -23,14 +24,60 @@ void HistoryMesh::initHistory()
 
 void HistoryMesh::initUV()
 {
-	const int nfv = numTriangles() * 3;
-	m_uvIndices.createBuffer(nfv);
-	for(int i=0;i<nfv;++i)
-		m_uvIndices[i] = i;
+	const int nf = numTriangles();
+	m_uvIndices.createBuffer(nf);
+	for(int i=0;i<nf;++i)
+		m_uvIndices[i].set(i * 3, i * 3 + 1, i * 3 + 2);
+}
+
+void HistoryMesh::swapUV(int fromFace, int toFace)
+{ m_uvIndices.swap(fromFace, toFace, 1); }
+
+void HistoryMesh::insertUV(const std::vector<int> &faceVertices, 
+                            const std::deque<FaceValue> &faceUVs, int toFirstFace)
+{
+    const int nv = faceVertices.size();
+    const int nf = nv / 3;
+    Int3 *b = new Int3[nf];
+    int *bi = (int *)b;
+    for(int i=0;i<nv;++i)
+        bi[i] = lookupUVIndex(faceUVs, faceVertices[i]);
+    
+    m_uvIndices.insert(b, nf, toFirstFace);
+    delete[] b;
+}
+
+int HistoryMesh::lookupUVIndex(const std::deque<FaceValue> &faceUVs, int vi) const
+{
+    std::deque<FaceValue>::const_iterator it = faceUVs.begin();
+    for(;it!=faceUVs.end();++it) {
+        int uv = it->vertexUV(vi);
+        if(uv > -1) return uv;
+    }
+    return -1;
 }
 
 void HistoryMesh::finishUV()
 {
+    std::deque<NamedUV >::iterator it = uvBegin();
+    for(;it!=uvEnd();++it)
+        reformUV(it->second);
+}
+
+void HistoryMesh::reformUV(SimpleBuffer<Float2> &uv )
+{
+    const SimpleBuffer<Float2> b(uv);
+    const int nf = m_uvIndices.count();
+    const int nfv = nf * 3;
+    uv.resetBuffer(nfv);
+    
+    const Int3 *ind = m_uvIndices.c_data();
+    for(int i=0;i<nf;++i) {
+        const Int3 &fi = ind[i]; //std::cout << " (" << fi.x <<","<<fi.y<<","<<fi.z<<")";
+        uv[i*3    ] = b[fi.x];
+        uv[i*3 + 1] = b[fi.y];
+        uv[i*3 + 2] = b[fi.z];
+    }
 }
 
 void HistoryMesh::addHistoryStage()
@@ -73,41 +120,6 @@ void HistoryMesh::insertHistory(int n, int location)
     	CoarseFineHistory &his = m_stages[i];
     	his.insert(nv, n, location);
 	}
-}
-
-void HistoryMesh::swapVertex(int va, int vb,
-    			const std::vector<int> &facesa,
-    			const std::vector<int> &facesb)
-{
-	AdaptableMesh::swapVertex(va, vb, facesa, facesb);
-#if 0
-/// last stage is the longest
-	const int nf = m_stages.back().length();
-	for(int i=numTriangles(); i<nf;++i) {
-		unsigned *fi = &indices()[i*3];
-		if(fi[0] == vb) {
-			fi[0] = va;
-		} else if(fi[0] == va) {
-			fi[0] = vb;
-		}
-		if(fi[1] == vb) {
-			fi[1] = va;
-		} else if(fi[1] == va) {
-			fi[1] = vb;
-		}
-		if(fi[2] == vb) {
-			fi[2] = va;
-		} else if(fi[2] == va) {
-			fi[2] = vb;
-		}
-	}
-#endif
-}
-
-void HistoryMesh::insertFaces(const std::vector<int> &faceVertices, int toFirstFace)
-{
-	AdaptableMesh::insertFaces(faceVertices, toFirstFace);
-/// todo insert uv inds
 }
 
 void HistoryMesh::finishHistory(int nv, int nf)
@@ -188,6 +200,12 @@ void HistoryMesh::copyTo(AdaptableMesh *b, const int &nv, const int &nf) const
 	b->createTriangleMesh(c_indices(), 
 		c_positions(), c_normals(),
 		 nv, nf);
+	b->clearUVSets();
+	std::deque<NamedUV >::const_iterator it = c_uvBegin();
+    for(;it!=c_uvEnd();++it) {
+        Float2 *uvs = b->addUVSet(it->first);
+        memcpy(uvs, it->second.c_data(), nf * 3 * 8);
+    }
 }
 
 void HistoryMesh::copyStageTo(HistoryMesh *b, int i) const

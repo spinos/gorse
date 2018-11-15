@@ -45,6 +45,7 @@ public:
     void removeLastVertices(int x);
     void removeLastFaces(int x);
     void swapFace(int fromFace, int toFace);
+    void swapFaceUV(int fromFace, int toFace);
     void insertFaces(const std::vector<int> &faceVertices, int toFirstFace);
 /// n faces to end
     void appendFaces(const unsigned *faceVertices, int n);

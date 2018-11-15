@@ -21,7 +21,8 @@ namespace alo {
    
 MeshListenerOps::MeshListenerOps() : m_upd(0), 
 m_meshName("unknown"),
-m_lod(.5f)
+m_lod(.5f),
+m_shoUV(false)
 { 
     m_mesh = new AdaptableMesh; 
     m_sourceMesh = new HistoryMesh;
@@ -54,6 +55,10 @@ void MeshListenerOps::update()
     FloatAttrib *flod = static_cast<FloatAttrib *>(alod);
     flod->getValue(m_lod);
     
+    QAttrib * ashouv = findAttrib("sho_uv");
+    BoolAttrib *fshouv = static_cast<BoolAttrib *>(ashouv);
+    fshouv->getValue(m_shoUV);
+
     computeMesh();
 
     DrawableScene *scene = drawableScene();
@@ -218,7 +223,10 @@ void MeshListenerOps::computeMesh()
     }
     
     const int oldL = posnml.capacity();
-    m_mesh->createPositionNormalArray(posnml);
+    if(m_shoUV && m_mesh->numUVSets() > 0) 
+        m_mesh->createUVNormalArray(posnml);
+    else
+        m_mesh->createPositionNormalArray(posnml);
     m_toRelocate = oldL < posnml.capacity();
     if(m_toRelocate) m_mesh->createBarycentricCoordinates(baryc);
 }

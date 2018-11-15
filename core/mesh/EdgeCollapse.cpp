@@ -68,14 +68,21 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		}
 /// vertice around red
 		const std::vector<int> vaRing(vring);
-
+		
 /// coarse faces to be created
 		std::deque<FaceIndex> coarseFaces;
-		std::deque<FaceValue> uvFaces;
-		if(!m_triangulate->getTriangleFaces(coarseFaces, uvFaces)) {
+		if(!m_triangulate->getTriangles(coarseFaces)) {
 			std::cout << "\n\n ERROR wrong triangulate n face" << coarseFaces.size();
 			return -1;
 		}
+		
+		m_triangulate->clearUVLookup();
+		std::deque<FaceIndex>::const_iterator itf = vred.facesBegin();
+		for(;itf!=vred.facesEnd();++itf) 
+		    m_triangulate->mapFace(*itf, face(*itf));
+		
+		std::deque<FaceValue> uvFaces;
+		m_triangulate->getTriangleFaces(uvFaces, coarseFaces);
 
 		std::deque<FaceIndex> lastFaces;
 		std::deque<FaceIndex> fineFaces;
@@ -134,13 +141,13 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		relocateVertices(vert2Remove, lastV, vaFaceInds, vbFaceInds);
 
 		const int &ntri = m_mesh->numTriangles();
-/// to the very end
+/// red to the very end
 		relocateFacesTo(vaFaceInds, ntri - 1);
 
 		const int nfRemove = fineFaces.size();
 
 /// to the location before fine faces
-		insertFacesAt(coarseFaces, ntri - nfRemove);
+		insertFacesAt(coarseFaces, uvFaces, ntri - nfRemove);
 		indexPastFaces(m_mesh, ntri - nfRemove, ntri);
 
 		std::vector<FaceIndex>::const_iterator pit;
@@ -351,6 +358,7 @@ void EdgeCollapse::relocateFacesTo(const std::vector<int> &faces, int toLastFace
     	m_mesh->swapFace(*it, toFace);
     	m_mesh->swapHistory(*it, toFace);
     	m_mesh->setHistory(toFace);
+    	m_mesh->swapUV(*it, toFace);
     	
 /// move forward
     	toFace--;
@@ -358,6 +366,7 @@ void EdgeCollapse::relocateFacesTo(const std::vector<int> &faces, int toLastFace
 }
 
 void EdgeCollapse::insertFacesAt(const std::deque<FaceIndex> &faces, 
+                        const std::deque<FaceValue> &uvs, 
                         int location)
 {
 	const Vector3F *pos = m_mesh->c_positions();
@@ -384,6 +393,7 @@ void EdgeCollapse::insertFacesAt(const std::deque<FaceIndex> &faces,
 	}
 
 	m_mesh->insertFaces(cfv, location);
+	m_mesh->insertUV(cfv, uvs, location);
 	m_mesh->insertHistory(faces.size(), location);
 
 	for(int i=location;i<location + faces.size();++i) {

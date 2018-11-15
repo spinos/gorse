@@ -51,6 +51,7 @@ private:
     
     void relocateFacesTo(const std::vector<int> &faces, int toLastFace);
     void insertFacesAt(const std::deque<FaceIndex> &faces, 
+                        const std::deque<FaceValue> &uvs, 
                         int location);
 /// area max (1 - dotN)
     void computeVertexCost(VertexValue &vert);

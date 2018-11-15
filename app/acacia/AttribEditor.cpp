@@ -10,6 +10,7 @@
 #include <qt_base/SimpleLabel.h>
 #include <qt_base/FieldSlider.h>
 #include <qt_base/ListSelector.h>
+#include <qt_base/CheckLabel.h>
 
 using namespace alo;
 
@@ -112,6 +113,9 @@ void AttribEditor::lsAttr(QAttrib *attr)
 		case QAttrib::AtList :
 			lsListAttr(attr);
 		break;
+		case QAttrib::AtBool :
+			lsBoolAttr(attr);
+		break;
 		default :
 		break;
 	}
@@ -188,6 +192,26 @@ void AttribEditor::lsListAttr(alo::QAttrib *attr)
            this, SLOT(recvListItemSelection(QPair<std::string, std::string>) ) );
 }
 
+void AttribEditor::lsBoolAttr(alo::QAttrib *attr)
+{
+    SimpleLabel *lab = new SimpleLabel(QString(attr->label().c_str()));
+	CheckLabel* chk = new CheckLabel();
+	
+    m_leftCollWigs.enqueue(lab);
+    m_rightCollWigs.enqueue(chk);
+
+	BoolAttrib *fattr = static_cast<BoolAttrib *>(attr);
+	bool val;
+	fattr->getValue(val);
+	
+	chk->setValue(val);
+	chk->setName(attr->attrName());
+	
+	connect(chk, SIGNAL(valueChanged(QPair<std::string, bool>)),
+           this, SLOT(recvBoolValue(QPair<std::string, bool>)));
+    
+}
+
 void AttribEditor::recvFloatValue(QPair<std::string, float> x)
 {
 	GlyphOps *ops = m_scene->getActiveOps();
@@ -205,3 +229,13 @@ void AttribEditor::recvListItemSelection(QPair<std::string, std::string> x)
 	if(ops->setListAttrValue(x.first, x.second) )
 		emit sendAttribChanged();
 }
+
+void AttribEditor::recvBoolValue(QPair<std::string, bool> x)
+{
+    GlyphOps *ops = m_scene->getActiveOps();
+	if(!ops) return;
+
+	if(ops->setBoolAttrValue(x.first, x.second) )
+		emit sendAttribChanged();
+}
+

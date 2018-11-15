@@ -70,6 +70,7 @@ void HistoryReform::sortCoarseFaces(int first, int last, const int *history)
         {
         	m_mesh->swapHistory(low, high);
         	m_mesh->swapFace(low, high);
+        	m_mesh->swapFaceUV(low, high);
             
             low++;
             high--;

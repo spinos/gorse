@@ -27,7 +27,8 @@ public:
 	std::map<std::string, QAttrib * >::iterator attribEnd();
 	QAttrib *findAttrib(const std::string &attrName);
 	bool setFloatAttrValue(const std::string &attrName, const float &x);
-    bool setListAttrValue(const std::string &attrName, const std::string &itemName);
+    bool setBoolAttrValue(const std::string &attrName, const bool &x);
+	bool setListAttrValue(const std::string &attrName, const std::string &itemName);
 	
 	virtual void update();
 	virtual bool hasDrawable() const;

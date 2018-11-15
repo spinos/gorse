@@ -29,8 +29,8 @@ public:
 
 	void mapFace(const FaceIndex &fi, const FaceValue &fa);
 
-	bool getTriangleFaces(std::deque<FaceIndex> &inds,
-					std::deque<FaceValue> &faces);
+	void getTriangleFaces(std::deque<FaceValue> &faces,
+	            const std::deque<FaceIndex> &inds);
 
 };
 

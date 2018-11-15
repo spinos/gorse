@@ -189,6 +189,18 @@ void GlyphOps::setFloatComponentAttrValue(QAttrib *attr, const int &component, c
 	}
 }
 
+bool GlyphOps::setBoolAttrValue(const std::string &attrName, const bool &x)
+{
+    QAttrib *attr = findAttrib(attrName);
+	if(!attr) return false;
+	
+	BoolAttrib *fattr = static_cast<BoolAttrib *>(attr);
+	fattr->setValue(x);
+	
+	update();
+	return true;
+}
+
 QAttrib *GlyphOps::addListAttribute(const QJsonObject &content)
 {
 	QString name = content["name"].toString();
