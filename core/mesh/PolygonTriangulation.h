@@ -1,7 +1,7 @@
 /*
  *  PolygonTriangulation.h
  *
- *  triangulate a polygon by a list of vertices
+ *  triangulate a polygon defined by a list of vertices
  *  ngon has n-2 triangles
  *  select corner with minimal circumcircle radius
  *
@@ -26,7 +26,7 @@ class PolygonTriangulation {
 
 public:
 	PolygonTriangulation();
-	~PolygonTriangulation();
+	virtual ~PolygonTriangulation();
 
 	void setPositions(const Vector3F *pos);
 	void setCenter(const Vector3F &c);

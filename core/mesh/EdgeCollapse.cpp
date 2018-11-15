@@ -4,13 +4,13 @@
 #include "FaceIndex.h"
 #include "FaceValue.h"
 #include "VertexValue.h"
-#include "PolygonTriangulation.h"
+#include "PolygonUVTriangulation.h"
 #include "HistoryMesh.h"
 
 namespace alo {
 
 EdgeCollapse::EdgeCollapse()
-{ m_triangulate = new PolygonTriangulation; }
+{ m_triangulate = new PolygonUVTriangulation; }
 
 EdgeCollapse::~EdgeCollapse()
 { delete m_triangulate; }
@@ -18,6 +18,7 @@ EdgeCollapse::~EdgeCollapse()
 void EdgeCollapse::simplify(HistoryMesh *msh)
 {
 	m_mesh = msh;
+	m_mesh->initUV();
 	m_mesh->initHistory();
 
 	m_triangulate->setPositions(m_mesh->c_positions());
@@ -35,6 +36,7 @@ void EdgeCollapse::simplify(HistoryMesh *msh)
 		unlockVertices(m_mesh->numVertices());
 	}
 
+	m_mesh->finishUV();
 	m_mesh->finishHistory(numVertices(), numFaces());
 }
 
@@ -51,24 +53,26 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		getVertexToRemove(vert2Remove, vert2Keep, collapseEdgeI);
 		const int lastV = m_mesh->numVertices() - 1;
 
-		const VertexValue &vrm = vertex(vert2Remove);
+		const VertexValue &vred = vertex(vert2Remove);
+		const VertexValue &vgreen = vertex(lastV);
 		
 		m_triangulate->setCenter(m_mesh->c_positions()[vert2Remove]);
 
 		std::vector<int> &vring = m_triangulate->vertices();
 		vring.clear();
-		if(!vrm.getOneRing(vring, vert2Remove,
+		if(!vred.getOneRing(vring, vert2Remove,
 			m_mesh->c_positions(),
 			m_mesh->c_normals()[vert2Remove])) {
-			std::cout << "\n\n ERROR not one ring v" << vert2Remove << vrm;
+			std::cout << "\n\n ERROR not one ring v" << vert2Remove << vred;
 			return -1;
 		}
-/// vertice around va
+/// vertice around red
 		const std::vector<int> vaRing(vring);
 
 /// coarse faces to be created
 		std::deque<FaceIndex> coarseFaces;
-		if(!m_triangulate->getTriangles(coarseFaces)) {
+		std::deque<FaceValue> uvFaces;
+		if(!m_triangulate->getTriangleFaces(coarseFaces, uvFaces)) {
 			std::cout << "\n\n ERROR wrong triangulate n face" << coarseFaces.size();
 			return -1;
 		}
@@ -77,46 +81,46 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		std::deque<FaceIndex> fineFaces;
 		std::vector<int> vaFaceInds;
 		std::vector<int> vbFaceInds;
-/// relocated
-		vrm.getReformedFaces(fineFaces, vert2Remove, lastV);
+/// red <---> green
+		vred.getReformedFaces(fineFaces, vert2Remove, lastV);
+		vgreen.getReformedFaces(lastFaces, lastV, vert2Remove);
 
 /// to be connected to relocated vertex
-		getConnectedFaceInds(vaFaceInds, vrm);
+		getConnectedFaceInds(vaFaceInds, vred);
 		getConnectedFaceInds(vbFaceInds, vertex(lastV));
-		vertex(lastV).getReformedFaces(lastFaces, lastV, vert2Remove);
 
 /// to relocate past face connections 
 		std::vector<FaceIndex> aPast;
-		vertex(vert2Remove).copyPastFacesTo(aPast);
+		vred.copyPastFacesTo(aPast);
 		vertex(vert2Remove).clearPastFaces();
 
 		std::vector<FaceIndex> bPast;
-		vertex(lastV).copyPastFacesTo(bPast);
+		vgreen.copyPastFacesTo(bPast);
 		vertex(lastV).clearPastFaces();
 
 /// remove faces connected to vertex 
 		if(!removeVertexConnection(vert2Remove)) {
 			PrintCollapseEdgeError(vert2Remove, lastV,
-				vertex(vert2Remove), vertex(lastV));
+				vred, vgreen);
 			return -1;
 		}
 
 /// remove faces connected to last vertex
 		if(!removeVertexConnection(lastV)) {
 			PrintCollapseEdgeError(vert2Remove, lastV,
-				vertex(vert2Remove), vertex(lastV));
+				vred, vgreen);
 			return -1;
 		}
 	
 		if(!addFaces(coarseFaces) ) {
-			std::cout << "\n when add collapsed faces";
+			std::cout << "\n when add coarse faces";
 			PrintAddFaceWarning(coarseFaces, false);
 			PrintOneRing(vert2Remove, vaRing);
 			return -1;
 		}
 /// no connection to fine faces
 		if(!addFaces(fineFaces, lastV ) ) {
-			std::cout << "\n when add reduced faces";
+			std::cout << "\n when add fine faces";
 			PrintAddFaceWarning(fineFaces, false);
 			return -1;
 		}
@@ -135,7 +139,7 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 
 		const int nfRemove = fineFaces.size();
 
-/// to the end but before faces to be reduced
+/// to the location before fine faces
 		insertFacesAt(coarseFaces, ntri - nfRemove);
 		indexPastFaces(m_mesh, ntri - nfRemove, ntri);
 
@@ -431,7 +435,7 @@ void EdgeCollapse::computeVertexCost(VertexValue &vert)
 	delete[] faceCost;
 	
 /// not flat enough
-	if(vert.cost() > .5f) 
+	if(vert.cost() > .293f) 
 		vert.cost() = 1e29f;
 	else 
 		vert.cost() *= totalArea;

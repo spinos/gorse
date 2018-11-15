@@ -21,6 +21,18 @@ void HistoryMesh::initHistory()
 	m_stages.clear();
 }
 
+void HistoryMesh::initUV()
+{
+	const int nfv = numTriangles() * 3;
+	m_uvIndices.createBuffer(nfv);
+	for(int i=0;i<nfv;++i)
+		m_uvIndices[i] = i;
+}
+
+void HistoryMesh::finishUV()
+{
+}
+
 void HistoryMesh::addHistoryStage()
 {
 	m_stages.push_front(CoarseFineHistory());
@@ -92,6 +104,12 @@ void HistoryMesh::swapVertex(int va, int vb,
 #endif
 }
 
+void HistoryMesh::insertFaces(const std::vector<int> &faceVertices, int toFirstFace)
+{
+	AdaptableMesh::insertFaces(faceVertices, toFirstFace);
+/// todo insert uv inds
+}
+
 void HistoryMesh::finishHistory(int nv, int nf)
 {
 	int stageEndHh = m_stages.back().length();
@@ -115,7 +133,7 @@ void HistoryMesh::finishHistory(int nv, int nf)
 	for(int i =0;i<numStages();++i) 
 		std::cout << "\n stage"<<i<<stage(i);
 	
-	std::cout<<"\n n vert "<<numVertices()
+	std::cout<<"\n n vertex "<<numVertices()
 				<< " n face "<<numTriangles();
 
 }

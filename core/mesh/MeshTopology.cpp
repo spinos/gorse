@@ -348,6 +348,7 @@ bool MeshTopology::isVertexOnBorder(int vi, const VertexValue &vert,
 	return false; 
 }
 
+/// face-varying uv has different coordinates
 bool MeshTopology::isVertexOnUVBorder(int vi, const VertexValue &vert,
                 const Float2 *uvs)
 {

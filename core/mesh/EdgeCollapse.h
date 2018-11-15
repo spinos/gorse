@@ -17,12 +17,12 @@
 namespace alo {
 
 class HistoryMesh;
-class PolygonTriangulation;
+class PolygonUVTriangulation;
 
 class EdgeCollapse : public MeshTopology {
 
     HistoryMesh *m_mesh;
-    PolygonTriangulation *m_triangulate;
+    PolygonUVTriangulation *m_triangulate;
     
 public:
 

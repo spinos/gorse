@@ -1,7 +1,7 @@
 /*
  *  HistoryMesh.h
  *
- *  has coarse/fine stages, can sort faces by history
+ *  coarse/fine history to sort faces in stages
  *
  */
 
@@ -18,18 +18,23 @@ namespace alo {
 class HistoryMesh : public AdaptableMesh {
 
     std::deque<CoarseFineHistory> m_stages;
+/// face-varying uv indices
+    SimpleBuffer<int> m_uvIndices;
 
 public:
 	HistoryMesh();
 	virtual ~HistoryMesh();
 
 	void initHistory();
+    void initUV();
     void addHistoryStage();
 /// coarser ones are in the front
 /// stage nf change = nCoarse - nFine
     void finishHistoryStage(const int &nCoarse, const int &nFine);
 /// original nv nf
     void finishHistory(int nv, int nf);
+/// reform uv by indices
+    void finishUV();
 
 /// set nv to coarse at location
     void setHistory(int location);
@@ -41,6 +46,7 @@ public:
     virtual void swapVertex(int va, int vb,
     			const std::vector<int> &facesa,
     			const std::vector<int> &facesb) override;
+    void insertFaces(const std::vector<int> &faceVertices, int toFirstFace);
 
     int numStages() const;
     int maxNumStages() const;
