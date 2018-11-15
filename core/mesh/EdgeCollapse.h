@@ -36,8 +36,6 @@ private:
 /// nv reduced -1: failed 
     int processStage(int &numCoarseFaces, int &numFineFaces);
     EdgeIndex findEdgeToCollapse();
-/// remove a keep b
-    void getVertexToRemove(int &a, int &b, const EdgeIndex &ei);
     bool lastConnectedFaceOor(const VertexValue &vert);
     void relocateVertices(int va, int vb,
                 const std::vector<int> &vaFaces,
@@ -60,6 +58,10 @@ private:
     void computeEdgeCost(const std::deque<FaceIndex> &faces);
     bool canEdgeCollapse(const EdgeIndex &ei);
     bool canEndProcess() const;
+    void mapConnectedFaces(const VertexValue &v);
+/// one ring around i-th vertex
+    bool getTriangulatePolygon(int i);
+    int getRedVertex(const EdgeIndex &ei) const;
     
     static void PrintCollapseEdgeError(int va, int vb,
             const VertexValue &a,

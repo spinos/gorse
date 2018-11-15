@@ -142,16 +142,16 @@ EdgeValue &MeshTopology::edge(const EdgeIndex &ei)
 FaceValue &MeshTopology::face(const FaceIndex &fi)
 { return m_tris[fi]; }
 
-void MeshTopology::addPastFace(const FaceIndex &fi)
+void MeshTopology::addPastFace(const FaceIndex &fi, const FaceValue &f)
 {
 	if(m_pastFaces.find(fi) == m_pastFaces.end())
-		m_pastFaces[fi] = FaceValue();
+		m_pastFaces[fi] = f;
 }
 
-void MeshTopology::addFace(const FaceIndex &fi)
+void MeshTopology::addFace(const FaceIndex &fi, const FaceValue &f)
 {
 	if(m_tris.find(fi) == m_tris.end())
-		m_tris[fi] = FaceValue();
+		m_tris[fi] = f;
 }
 
 void MeshTopology::addEdge(const EdgeIndex &e)
@@ -197,20 +197,34 @@ bool MeshTopology::removeEdge(const EdgeIndex &ei)
 	return true;
 }
 
-bool MeshTopology::addFaces(const std::deque<FaceIndex> &faces, int lastV)
+void MeshTopology::reformFaces(std::deque<FaceIndex> &inds,
+                    std::deque<FaceValue> &uvs,
+                    int va, int vb)
+{
+	std::deque<FaceIndex>::iterator it = inds.begin();
+	for(;it!=inds.end();++it) {
+		uvs.push_back(face(*it));
+		uvs.back().replaceVertex(va, vb);
+		it->reform(va, vb);
+	}
+}
+
+bool MeshTopology::addFaces(const std::deque<FaceIndex> &faces, 
+					const std::deque<FaceValue> &uvs,
+					int lastV)
 {
     bool stat;
 	std::deque<FaceIndex>::const_iterator it = faces.begin();
-	for(;it!=faces.end();++it) {
+	for(int i=0;it!=faces.end();++it,++i) {
 		const FaceIndex &fi = *it;
 
 /// no edge connection to past
 		const bool isInRange = fi.v2() < lastV;
 
 		if(isInRange)
-			addFace(fi);
+			addFace(fi, uvs[i]);
 		else
-			addPastFace(fi);
+			addPastFace(fi, uvs[i]);
 		
 		EdgeIndex e0(fi.v0(), fi.v1());
 		addEdge(e0);
@@ -285,22 +299,6 @@ bool MeshTopology::removeVertexConnection(int vi)
 	}
 	vert.clearFaces();
 	return true;
-}
-
-void MeshTopology::getConnectedFaceInds(std::vector<int> &faceInds,
-                const VertexValue &vert)
-{
-	std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
-	for(;it!=vert.facesEnd();++it) {
-		const FaceIndex &fi = *it;
-
-		if(m_tris.find(fi) == m_tris.end()) {
-			std::cout << "\n\n ERROR getConnectedFaceInd nonexistent face " << fi;
-			return;
-		}
-
-		faceInds.push_back(face(fi).ind());
-	}
 }
 
 bool MeshTopology::faceExists(const FaceIndex &fi)
@@ -422,7 +420,7 @@ void MeshTopology::replaceMeshVertex(ATriangleMesh *mesh,
 				<<" replace "<<fi<<" to "<<rfi
 				<<" a "<<va<<" b "<<vb;
 	}
-	addPastFace(rfi);
+	addPastFace(rfi, FaceValue());
 	m_pastFaces[rfi].ind() = ti;
 	
 	m_vertices[rfi.v0()].connectToPastFace(rfi);
@@ -487,6 +485,14 @@ bool MeshTopology::setPastFaceInd(const FaceIndex &fi, int x)
 		return false;
 	m_pastFaces[fi].ind() = x;
 	return true;
+}
+
+void MeshTopology::getFaceInds(std::vector<int> &faceInds,
+                		const std::deque<FaceValue> &faces) const
+{
+	std::deque<FaceValue>::const_iterator it = faces.begin();
+	for(;it!=faces.end();++it) 
+		faceInds.push_back(it->ind());
 }
 
 void MeshTopology::PrintUnmanifoldEdgeWarning(const FaceIndex &fi, const EdgeValue &e,

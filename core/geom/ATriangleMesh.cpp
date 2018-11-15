@@ -236,11 +236,11 @@ void ATriangleMesh::createUVNormalArray(SimpleBuffer<Vector3F>& posnml) const
         const Float2 &uv1 = uvs[i*3 + 1];
         const Float2 &uv2 = uvs[i*3 + 2];
         const int i6 = i * 6;
-        posnml[i6].set(uv0.x * 32.f, uv0.y * 32.f, 0.f);
+        posnml[i6  ].set(uv0.x, uv0.y, 0.f);
         posnml[i6+1] = Vector3F::ZAxis;
-        posnml[i6+2].set(uv1.x * 32.f, uv1.y * 32.f, 0.f);
+        posnml[i6+2].set(uv1.x, uv1.y, 0.f);
         posnml[i6+3] = Vector3F::ZAxis;
-        posnml[i6+4].set(uv2.x * 32.f, uv2.y * 32.f, 0.f);
+        posnml[i6+4].set(uv2.x, uv2.y, 0.f);
         posnml[i6+5] = Vector3F::ZAxis;
     }
 }

@@ -50,6 +50,7 @@ public:
 /// n faces to end
     void appendFaces(const unsigned *faceVertices, int n);
     void setNumFaces(int n);
+    void copyTo(AdaptableMesh *b, const int &nv, const int &nf) const;
  
 protected:
     

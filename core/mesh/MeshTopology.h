@@ -51,9 +51,14 @@ public:
 
 protected:
 	void addEdge(const EdgeIndex &e);
-	void addFace(const FaceIndex &fi);
+	void addFace(const FaceIndex &fi, const FaceValue &f);
 	bool addFaces(const std::deque<FaceIndex> &faces,
+                const std::deque<FaceValue> &uvs,
                 int lastV = 1<<30);
+/// replace va by vb
+    void reformFaces(std::deque<FaceIndex> &inds,
+                    std::deque<FaceValue> &uvs,
+                    int va, int vb);
 	bool checkTopology(const ATriangleMesh *mesh);
 	bool setFaceInd(const FaceIndex &fi, int x);
 	bool setPastFaceInd(const FaceIndex &fi, int x);
@@ -62,8 +67,6 @@ protected:
 	bool removeEdge(const EdgeIndex &ei);
 /// face and edge connected to vertex[vi]
     bool removeVertexConnection(int vi);
-	void getConnectedFaceInds(std::vector<int> &faceInds,
-                const VertexValue &vert);
 	bool faceExists(const FaceIndex &fi);
 	bool pastFaceExists(const FaceIndex &fi);
 /// connected to edge on border
@@ -78,13 +81,15 @@ protected:
     void connectFaceToVertex(const FaceIndex &fi);
     void connectFaceToVertexPast(const FaceIndex &fi);
     void connectFaceToEdge(const EdgeIndex &ei, const FaceIndex &fi, bool &stat);
-    void addPastFace(const FaceIndex &fi);
+    void addPastFace(const FaceIndex &fi, const FaceValue &f);
     bool removePastFace(const FaceIndex &fi);
     void indexPastFaces(const ATriangleMesh *mesh, int begin, int end);
 /// every past face ind +x
     void pushPastFaceIndex(int x);
     void replaceMeshVertex(ATriangleMesh *mesh, 
 					const FaceIndex &fi, int va, int vb);
+    void getFaceInds(std::vector<int> &faceInds,
+                const std::deque<FaceValue> &faces) const;
 	std::map<EdgeIndex, EdgeValue>::iterator edgesBegin();
 	std::map<EdgeIndex, EdgeValue>::iterator edgesEnd();
 

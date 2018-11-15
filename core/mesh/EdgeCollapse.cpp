@@ -49,130 +49,128 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		EdgeIndex collapseEdgeI = findEdgeToCollapse();
 		if(!collapseEdgeI.isValid()) break;
 
-		int vert2Remove, vert2Keep;
-		getVertexToRemove(vert2Remove, vert2Keep, collapseEdgeI);
-		const int lastV = m_mesh->numVertices() - 1;
+		int vertRed = getRedVertex(collapseEdgeI);
+		const int vertGreen = m_mesh->numVertices() - 1;
 
-		const VertexValue &vred = vertex(vert2Remove);
-		const VertexValue &vgreen = vertex(lastV);
+/// red -----> 
+///    <----- green
+		const VertexValue &vred = vertex(vertRed);
+		const VertexValue &vgreen = vertex(vertGreen);
+
+		if(!getTriangulatePolygon(vertRed)) return -1;
 		
-		m_triangulate->setCenter(m_mesh->c_positions()[vert2Remove]);
-
-		std::vector<int> &vring = m_triangulate->vertices();
-		vring.clear();
-		if(!vred.getOneRing(vring, vert2Remove,
-			m_mesh->c_positions(),
-			m_mesh->c_normals()[vert2Remove])) {
-			std::cout << "\n\n ERROR not one ring v" << vert2Remove << vred;
-			return -1;
-		}
 /// vertice around red
-		const std::vector<int> vaRing(vring);
+		const std::vector<int> redRing(m_triangulate->vertices());
 		
 /// coarse faces to be created
-		std::deque<FaceIndex> coarseFaces;
-		if(!m_triangulate->getTriangles(coarseFaces)) {
-			std::cout << "\n\n ERROR wrong triangulate n face" << coarseFaces.size();
+		std::deque<FaceIndex> blueFaces;
+		if(!m_triangulate->getTriangles(blueFaces)) {
+			std::cout << "\n\n ERROR cannot triangulate";
+			PrintOneRing(vertRed, redRing);
 			return -1;
 		}
-		
-		m_triangulate->clearUVLookup();
-		std::deque<FaceIndex>::const_iterator itf = vred.facesBegin();
-		for(;itf!=vred.facesEnd();++itf) 
-		    m_triangulate->mapFace(*itf, face(*itf));
-		
-		std::deque<FaceValue> uvFaces;
-		m_triangulate->getTriangleFaces(uvFaces, coarseFaces);
 
-		std::deque<FaceIndex> lastFaces;
-		std::deque<FaceIndex> fineFaces;
-		std::vector<int> vaFaceInds;
-		std::vector<int> vbFaceInds;
-/// red <---> green
-		vred.getReformedFaces(fineFaces, vert2Remove, lastV);
-		vgreen.getReformedFaces(lastFaces, lastV, vert2Remove);
+		mapConnectedFaces(vred);
+		
+		std::deque<FaceValue> blueUVs;
+		m_triangulate->getTriangleFaces(blueUVs, blueFaces);
 
-/// to be connected to relocated vertex
-		getConnectedFaceInds(vaFaceInds, vred);
-		getConnectedFaceInds(vbFaceInds, vertex(lastV));
+		std::deque<FaceIndex> redFaces;
+		vred.getFaces(redFaces);
+
+/// connect red faces to green vertex
+		std::deque<FaceValue> redUVs;
+		reformFaces(redFaces, redUVs, vertRed, vertGreen);
+
+		std::deque<FaceIndex> greenFaces;
+		vgreen.getFaces(greenFaces);
+
+/// connect green faces to red vertex
+		std::deque<FaceValue> greenUVs;
+		reformFaces(greenFaces, greenUVs, vertGreen, vertRed);
+
+		std::vector<int> redFaceInds;
+		getFaceInds(redFaceInds, redUVs);
+		std::vector<int> greenFaceInds;
+		getFaceInds(greenFaceInds, greenUVs);
 
 /// to relocate past face connections 
-		std::vector<FaceIndex> aPast;
-		vred.copyPastFacesTo(aPast);
-		vertex(vert2Remove).clearPastFaces();
+		std::vector<FaceIndex> redPast;
+		vred.copyPastFacesTo(redPast);
+		vertex(vertRed).clearPastFaces();
 
-		std::vector<FaceIndex> bPast;
-		vgreen.copyPastFacesTo(bPast);
-		vertex(lastV).clearPastFaces();
+		std::vector<FaceIndex> greenPast;
+		vgreen.copyPastFacesTo(greenPast);
+		vertex(vertGreen).clearPastFaces();
 
-/// remove faces connected to vertex 
-		if(!removeVertexConnection(vert2Remove)) {
-			PrintCollapseEdgeError(vert2Remove, lastV,
+/// remove faces connected to red 
+		if(!removeVertexConnection(vertRed)) {
+			PrintCollapseEdgeError(vertRed, vertGreen,
 				vred, vgreen);
 			return -1;
 		}
 
-/// remove faces connected to last vertex
-		if(!removeVertexConnection(lastV)) {
-			PrintCollapseEdgeError(vert2Remove, lastV,
+/// remove faces connected to green
+		if(!removeVertexConnection(vertGreen)) {
+			PrintCollapseEdgeError(vertRed, vertGreen,
 				vred, vgreen);
 			return -1;
 		}
 	
-		if(!addFaces(coarseFaces) ) {
-			std::cout << "\n when add coarse faces";
-			PrintAddFaceWarning(coarseFaces, false);
-			PrintOneRing(vert2Remove, vaRing);
+		if(!addFaces(blueFaces, blueUVs) ) {
+			std::cout << "\n when add blue faces";
+			PrintAddFaceWarning(blueFaces, false);
+			PrintOneRing(vertRed, redRing);
 			return -1;
 		}
 /// no connection to fine faces
-		if(!addFaces(fineFaces, lastV ) ) {
-			std::cout << "\n when add fine faces";
-			PrintAddFaceWarning(fineFaces, false);
+		if(!addFaces(redFaces, redUVs, vertGreen ) ) {
+			std::cout << "\n when add red faces";
+			PrintAddFaceWarning(redFaces, false);
 			return -1;
 		}
 
-		if(!addFaces(lastFaces) ) {
-			std::cout << "\n when add last faces";
-			PrintAddFaceWarning(lastFaces, false);
+		if(!addFaces(greenFaces, greenUVs) ) {
+			std::cout << "\n when add green faces";
+			PrintAddFaceWarning(greenFaces, false);
 			return -1;
 		}
 
-		relocateVertices(vert2Remove, lastV, vaFaceInds, vbFaceInds);
+		relocateVertices(vertRed, vertGreen, redFaceInds, greenFaceInds);
 
 		const int &ntri = m_mesh->numTriangles();
 /// red to the very end
-		relocateFacesTo(vaFaceInds, ntri - 1);
+		relocateFacesTo(redFaceInds, ntri - 1);
 
-		const int nfRemove = fineFaces.size();
+		const int nfRemove = redFaces.size();
 
-/// to the location before fine faces
-		insertFacesAt(coarseFaces, uvFaces, ntri - nfRemove);
+/// blue to just before red
+		insertFacesAt(blueFaces, blueUVs, ntri - nfRemove);
 		indexPastFaces(m_mesh, ntri - nfRemove, ntri);
 
 		std::vector<FaceIndex>::const_iterator pit;
-		pit = aPast.begin();
-		for(;pit!=aPast.end();++pit) 
-			replaceMeshVertex(m_mesh, *pit, vert2Remove, lastV);
+		pit = redPast.begin();
+		for(;pit!=redPast.end();++pit) 
+			replaceMeshVertex(m_mesh, *pit, vertRed, vertGreen);
 				
-		aPast.clear();
+		redPast.clear();
 
-		pit = bPast.begin();
-		for(;pit!=bPast.end();++pit) 
-			replaceMeshVertex(m_mesh, *pit, lastV, vert2Remove);
+		pit = greenPast.begin();
+		for(;pit!=greenPast.end();++pit) 
+			replaceMeshVertex(m_mesh, *pit, vertGreen, vertRed);
 				
-		bPast.clear();
+		greenPast.clear();
 
-/// hide last vertex and fine faces
+/// hide green vertex and red faces
 		m_mesh->removeLastVertices(1);
 		m_mesh->removeLastFaces(nfRemove);
 
-		numCoarseFaces += coarseFaces.size();
+		numCoarseFaces += blueFaces.size();
 		numFineFaces += nfRemove;
 
-		updateCost(coarseFaces, vaRing);
-		lockVertices(vaRing);
-		updateCost(lastFaces);
+		updateCost(blueFaces, redRing);
+		lockVertices(redRing);
+		updateCost(greenFaces);
 #if 0		
 		if(!checkTopology(m_mesh) ) return -1;
 #endif
@@ -217,18 +215,6 @@ EdgeIndex EdgeCollapse::findEdgeToCollapse()
 	    return EdgeIndex();
 	
 	return collapseEdgeI;
-}
-
-void EdgeCollapse::getVertexToRemove(int &a, int &b, const EdgeIndex &ei)
-{
-	a = ei.v0();
-	b = ei.v1();
-/// lower cost
-	if(vertex(a).cost() > vertex(b).cost()) {
-		int c = a;
-		a = b;
-		b = c;
-	}
 }
 
 bool EdgeCollapse::lastConnectedFaceOor(const VertexValue &vert)
@@ -445,7 +431,7 @@ void EdgeCollapse::computeVertexCost(VertexValue &vert)
 	delete[] faceCost;
 	
 /// not flat enough
-	if(vert.cost() > .293f) 
+	if(vert.cost() > .3573f) /// 50 deg
 		vert.cost() = 1e29f;
 	else 
 		vert.cost() *= totalArea;
@@ -517,6 +503,39 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 bool EdgeCollapse::canEndProcess() const
 { 
 	return m_mesh->numVertices() < (numBorderVertices() + (numVertices() >> 4) ); 
+}
+
+void EdgeCollapse::mapConnectedFaces(const VertexValue &v)
+{
+	m_triangulate->clearUVLookup();
+	std::deque<FaceIndex>::const_iterator it = v.facesBegin();
+	for(;it!=v.facesEnd();++it) 
+		m_triangulate->mapFace(*it, face(*it));
+}
+
+bool EdgeCollapse::getTriangulatePolygon(int i)
+{
+	m_triangulate->setCenter(m_mesh->c_positions()[i]);
+
+	std::vector<int> &vring = m_triangulate->vertices();
+	vring.clear();
+	const VertexValue &vred = vertex(i);
+	if(!vred.getOneRing(vring, i,
+		m_mesh->c_positions(),
+		m_mesh->c_normals()[i])) {
+		std::cout << "\n\n ERROR not one ring v" << i << vred;
+		return false;
+	}
+	return true;
+}
+
+int EdgeCollapse::getRedVertex(const EdgeIndex &ei) const
+{
+/// lower cost
+	if(vertex(ei.v0()).cost() < vertex(ei.v1()).cost()) 
+		return ei.v0();
+
+	return ei.v1();
 }
 
 void EdgeCollapse::PrintCollapseEdgeError(int va, int vb,

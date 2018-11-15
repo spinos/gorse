@@ -53,4 +53,18 @@ int FaceValue::vertexUV(int vi) const
 	return -1;
 }
 
+bool FaceValue::replaceVertex(int a, int b)
+{
+	if(a == m_vertexId[0]) {
+		m_vertexId[0] = b; return true;
+	}
+	if(a == m_vertexId[1]) {
+		m_vertexId[1] = b; return true;
+	}
+	if(a == m_vertexId[2]) {
+		m_vertexId[2] = b; return true;
+	}
+	return false;
+}
+
 }

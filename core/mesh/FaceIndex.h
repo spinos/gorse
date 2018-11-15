@@ -35,6 +35,7 @@ public:
 	bool hasV(int x) const;
 /// replace a with b
 	FaceIndex reformed(int a, int b) const;
+	bool reform(int a, int b);
 	
 	friend std::ostream& operator<<(std::ostream &output, const FaceIndex & p)
     {

@@ -134,4 +134,21 @@ FaceIndex FaceIndex::reformed(int a, int b) const
 	return FaceIndex();
 }
 
+bool FaceIndex::reform(int a, int b)
+{
+	if(a == m_v0) {
+		*this = FaceIndex(b, v1(), v2()); 
+		return true;
+	}
+	if(a == m_v1) {
+		*this = FaceIndex(v0(), b, v2()); 
+		return true;
+	}
+	if(a == m_v2) {
+		*this = FaceIndex(v0(), v1(), b); 
+		return true;
+	}
+	return false;
+}
+
 }

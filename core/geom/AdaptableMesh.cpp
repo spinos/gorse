@@ -147,5 +147,18 @@ void AdaptableMesh::appendFaces(const unsigned *faceVertices, int n)
 void AdaptableMesh::setNumFaces(int n)
 { setNumTriangles(n); }
 
+void AdaptableMesh::copyTo(AdaptableMesh *b, const int &nv, const int &nf) const
+{
+    b->createTriangleMesh(c_indices(), 
+        c_positions(), c_normals(),
+         nv, nf);
+    b->clearUVSets();
+    std::deque<NamedUV >::const_iterator it = c_uvBegin();
+    for(;it!=c_uvEnd();++it) {
+        Float2 *uvs = b->addUVSet(it->first);
+        memcpy(uvs, it->second.c_data(), nf * 3 * 8);
+    }
+}
+
 }
 //:~

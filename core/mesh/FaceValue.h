@@ -37,6 +37,7 @@ public:
 	const float &area() const;
 	const Vector3F &normal() const;
 	int vertexUV(int vi) const;
+	bool replaceVertex(int a, int b);
 
 	friend std::ostream& operator<<(std::ostream &output, const FaceValue & p)
     {

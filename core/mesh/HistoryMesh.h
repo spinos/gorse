@@ -57,7 +57,6 @@ public:
     const CoarseFineHistory &selectStage(int &istage, int &nv,
                 const float &lod) const;
 
-    void copyTo(AdaptableMesh *b, const int &nv, const int &nf) const;
     void copyStageTo(HistoryMesh *b, int i) const;
 
 	void printHistoryStage(int i) const;

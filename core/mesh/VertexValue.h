@@ -43,8 +43,7 @@ public:
 	const bool &isOnBorder() const;
 	void getConnectedVertices(std::deque<int> &vs,
 			int vi) const;
-/// reform vi to vb
-	void getReformedFaces(std::deque<FaceIndex> &faces, int vi, int vb) const;
+	void getFaces(std::deque<FaceIndex> &faces) const;
 	const bool &isLocked() const;
 /// all faces has vi
 	bool checkFaces(int vi) const;

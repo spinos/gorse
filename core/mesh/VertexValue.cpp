@@ -133,14 +133,11 @@ void VertexValue::getConnectedVertices(std::deque<int> &vs,
 	}
 }
 
-void VertexValue::getReformedFaces(std::deque<FaceIndex> &faces, int vi, int vb) const
+void VertexValue::getFaces(std::deque<FaceIndex> &faces) const
 {
 	std::deque<FaceIndex>::const_iterator it = m_faceInds.begin();
-	for(;it!=m_faceInds.end();++it) {
-		const FaceIndex &fi = *it;
-		FaceIndex fr = fi.reformed(vi, vb);
-		faces.push_back(fr);
-	}
+	for(;it!=m_faceInds.end();++it)
+		faces.push_back(*it);
 }
 
 void VertexValue::addToVector(std::deque<int> &vs, int x) const
