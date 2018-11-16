@@ -1,5 +1,5 @@
 #include "MeshTopology.h"
-#include <geom/ATriangleMesh.h>
+#include <geom/V1ATriangleMesh.h>
 #include "EdgeIndex.h"
 #include "EdgeValue.h"
 #include "FaceIndex.h"
@@ -28,17 +28,17 @@ const int &MeshTopology::numFaces() const
 const int &MeshTopology::numBorderVertices() const
 { return m_numBorderVertices; }
 
-void MeshTopology::buildTopology(const ATriangleMesh *mesh)
+void MeshTopology::buildTopology(const ver1::ATriangleMesh *mesh)
 {
 	m_numFaces = mesh->numTriangles();
 	m_numVertices = mesh->numVertices();
 	m_vertices = new VertexValue[m_numVertices];
 
-	const unsigned *ind = mesh->c_indices();
-	for(int i=0;i<mesh->numIndices();i+=3) {
-		addEdge(EdgeIndex(ind[i], ind[i + 1]));
-		addEdge(EdgeIndex(ind[i + 1], ind[i + 2]));
-		addEdge(EdgeIndex(ind[i + 2], ind[i]));
+	for(int i=0;i<m_numFaces;++i) {
+		const Int3 &fv = mesh->c_indices()[i];
+		addEdge(EdgeIndex(fv.x, fv.y));
+		addEdge(EdgeIndex(fv.y, fv.z));
+		addEdge(EdgeIndex(fv.z, fv.x));
 	}
 
 	const Vector3F *pos = mesh->c_positions();
@@ -46,29 +46,29 @@ void MeshTopology::buildTopology(const ATriangleMesh *mesh)
 	bool stat;
 	for(int i=0;i<mesh->numIndices();i+=3) {
 		const int j = i/3;
-
-		FaceIndex fi(ind[i], ind[i + 1], ind[i + 2]);
+		const Int3 &fv = mesh->c_indices()[j];
+		FaceIndex fi(fv.x, fv.y, fv.z);
 		m_tris[fi] = FaceValue(j);
 		FaceValue &f = m_tris[fi];
-		f.setVertexUV(ind[i], i, ind[i + 1], i + 1, ind[i + 2], i + 2);
+		f.setVertexUV(fv.x, i, fv.y, i + 1, fv.z, i + 2);
 		f.setArea(mesh->getTriangleArea(j));
 		f.setNormal(mesh->getTriangleNormal(j));
 
-		EdgeValue &e0 = m_edges[EdgeIndex(ind[i], ind[i + 1])];
+		EdgeValue &e0 = m_edges[EdgeIndex(fv.x, fv.y)];
 		stat = e0.connectToFace(fi);
 		PrintUnmanifoldEdgeWarning(fi, e0, stat);
 	    
-		EdgeValue &e1 = m_edges[EdgeIndex(ind[i + 1], ind[i + 2])];
+		EdgeValue &e1 = m_edges[EdgeIndex(fv.y, fv.z)];
 		stat = e1.connectToFace(fi);
 		PrintUnmanifoldEdgeWarning(fi, e1, stat);
 		
-		EdgeValue &e2 = m_edges[EdgeIndex(ind[i + 2], ind[i])];
+		EdgeValue &e2 = m_edges[EdgeIndex(fv.z, fv.x)];
 		stat = e2.connectToFace(fi);
 		PrintUnmanifoldEdgeWarning(fi, e2, stat);
 		
-		m_vertices[ind[i]].connectToFace(fi);
-		m_vertices[ind[i + 1]].connectToFace(fi);
-		m_vertices[ind[i + 2]].connectToFace(fi);
+		m_vertices[fv.x].connectToFace(fi);
+		m_vertices[fv.y].connectToFace(fi);
+		m_vertices[fv.z].connectToFace(fi);
 	}
 
 	m_numBorderVertices=0;
@@ -88,9 +88,8 @@ void MeshTopology::buildTopology(const ATriangleMesh *mesh)
 		<<" n vertex-on-border "<<m_numBorderVertices;
 }
 
-bool MeshTopology::checkTopology(const ATriangleMesh *mesh)
+bool MeshTopology::checkTopology(const ver1::ATriangleMesh *mesh)
 {
-	const unsigned *inds = mesh->c_indices();
 	const int &nv = mesh->numVertices();
 	for(int i=0;i<nv;++i) {
 		if(!m_vertices[i].checkFaces(i)) return false;
@@ -119,14 +118,10 @@ bool MeshTopology::checkTopology(const ATriangleMesh *mesh)
 	return true;
 }
 
-void MeshTopology::setMeshFaceInd(const ATriangleMesh *mesh, int i)
+void MeshTopology::setMeshFaceInd(const ver1::ATriangleMesh *mesh, int i)
 {
-	const unsigned *inds = mesh->c_indices();
-	int fv[3];
-	fv[0] = inds[i * 3];
-	fv[1] = inds[i * 3 + 1];
-	fv[2] = inds[i * 3 + 2];
-	FaceIndex fi(fv[0], fv[1], fv[2]);
+	const Int3 &fv = mesh->c_indices()[i];
+	FaceIndex fi(fv.x, fv.y, fv.z);
 	setFaceInd(fi, i);
 }
 
@@ -308,7 +303,7 @@ bool MeshTopology::pastFaceExists(const FaceIndex &fi)
 { return m_pastFaces.find(fi) != m_pastFaces.end(); }
 
 bool MeshTopology::isVertexOnBorder(int vi, const VertexValue &vert,
-								const ATriangleMesh *mesh)
+								const ver1::ATriangleMesh *mesh)
 { 
     if(vert.numConnectedFaces() < 3) return true;
 	std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
@@ -398,7 +393,7 @@ void MeshTopology::unlockVertices(int high)
 		m_vertices[i].unlock();
 }
 
-void MeshTopology::replaceMeshVertex(ATriangleMesh *mesh, 
+void MeshTopology::replaceMeshVertex(ver1::ATriangleMesh *mesh, 
 					const FaceIndex &fi, int va, int vb)
 {
 	int ti = m_pastFaces[fi].ind();
@@ -461,11 +456,11 @@ void MeshTopology::connectFaceToEdge(const EdgeIndex &ei, const FaceIndex &fi, b
 	PrintUnmanifoldEdgeWarning(fi, edge(ei), stat);
 }
 
-void MeshTopology::indexPastFaces(const ATriangleMesh *mesh, int begin, int end)
+void MeshTopology::indexPastFaces(const ver1::ATriangleMesh *mesh, int begin, int end)
 {
 	for(int i=begin;i<end;++i) {
-		const unsigned *ind = &mesh->c_indices()[i*3];
-		FaceIndex fi(ind[0], ind[1], ind[2]);
+		const Int3 &fv = mesh->c_indices()[i];
+		FaceIndex fi(fv.x, fv.y, fv.z);
 		if(!setPastFaceInd(fi, i) )
 			std::cout << "\n\n WARNING nonexistent past face " << fi;
 	}

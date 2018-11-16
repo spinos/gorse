@@ -20,9 +20,6 @@ endif ()
 
 IF (INSTALLED_HDF5)
 FIND_PACKAGE (HDF5 REQUIRED)
-IF (WIN32)
-SET (HDF5_LIBRARIES "C:/Program Files/HDF5/lib/hdf5.lib")	
-ENDIF ()
 ENDIF ()
 
 MESSAGE (" hdf5 version is " ${HDF5_VERSION} )
@@ -31,3 +28,4 @@ MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
 
 include_directories (${HDF5_INCLUDE_DIRS})
 
+ADD_DEFINITIONS (-DH5_BUILT_AS_DYNAMIC_LIB)

@@ -118,22 +118,25 @@ char H2dDataset<DataRank, NRows, CnkSz>::create(hid_t parentId)
 	hid_t fileSpace = createFileSpace();
 	
 	if(fileSpace < 0) {
-		std::cout<<"\nERROE: h data space create failed\n";
+		std::cout<<"\n ERROE: h2d data space create failed\n";
 		return 0;
 	}
 	
 	hid_t createProps = H5Pcreate(H5P_DATASET_CREATE);
 	if(createProps < 0) {
-		std::cout<<"\nERROR: h create property failed\n";
+		std::cout<<"\n ERROR: h2d create property failed\n";
 		return 0;
 	}
 	H5Pset_layout(createProps, H5D_CHUNKED);
 	
 	int ndim = 2;
-	hsize_t chunkSize[2] = {NRows>>1, CnkSz};
+    int minDim = NRows;
+/// chunk size <= maximum dimension size
+    if(minDim > CnkSz) minDim = CnkSz;
+	hsize_t chunkSize[2] = {minDim, minDim};
 
 	if(H5Pset_chunk(createProps, ndim, chunkSize)<0) {
-      printf("\nError: set chunk failed\n");
+      printf("\n ERROR: h2d set chunk failed\n");
       return -1;
 	}
 	
@@ -143,7 +146,7 @@ char H2dDataset<DataRank, NRows, CnkSz>::create(hid_t parentId)
                           H5P_DEFAULT, createProps, H5P_DEFAULT);
 		  
 	if(fObjectId < 0) {
-	    std::cout<<"\nERROR: h data set create failed\n";
+	    std::cout<<"\n ERROR: h2d data set create failed\n";
 		return 0;
 	}
 	

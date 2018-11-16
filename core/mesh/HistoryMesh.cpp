@@ -59,7 +59,7 @@ int HistoryMesh::lookupUVIndex(const std::deque<FaceValue> &faceUVs, int vi) con
 
 void HistoryMesh::finishUV()
 {
-    std::deque<NamedUV >::iterator it = uvBegin();
+    std::deque<ver1::NamedUV >::iterator it = uvBegin();
     for(;it!=uvEnd();++it)
         reformUV(it->second);
 }

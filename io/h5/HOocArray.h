@@ -2,10 +2,9 @@
  *  HOocArray.h
  *  aloe
  *
- *  Created by jian zhang on 1/3/16.
- *  Copyright 2016 __MyCompanyName__. All rights reserved.
- *
  *  out-of-core 2d array
+ *  n row is fixed
+ *
  */
 
 #ifndef ALO_H_OOC_ARRAY_H
@@ -36,9 +35,11 @@ public:
 	
 	bool createStorage(hid_t parentId);
 	bool openStorage(hid_t parentId, bool doClear=false);
-	
+/// one column at a time
 	void insert(char * d);
 	void finishInsert();
+/// n columns begins at offset
+    void writeColumns(char *d, int offset, int n);
 	
 	int numCols() const;
 	const int & numPoints() const;
@@ -47,6 +48,7 @@ public:
 	void readIncore(int offset, int ncols);
 	void readPoint(char * dst, int idx);
 	void readColumn(char * dst, int idx);
+    void readColumns(char *d, int first, int n);
 	
 	char * incoreBuf() const;
 	
@@ -139,6 +141,22 @@ void HOocArray<DataRank, NRows, BufSize>::writeCurrentBuf(int ncols)
 	
 	H2dDataset<DataRank, NRows, BufSize>::open(m_parentId);
 	H2dDataset<DataRank, NRows, BufSize>::write(m_data, &part);
+	H2dDataset<DataRank, NRows, BufSize>::close();
+}
+
+template <int DataRank, int NRows, int BufSize>
+void HOocArray<DataRank, NRows, BufSize>::writeColumns(char *d, int offset, int n)
+{
+    int np = NRows * (offset + n);
+    if(m_pnts < np) m_pnts = np;
+    hdata::Select2DPart part;
+	part.start[0] = offset;
+	part.start[1] = 0;
+	part.count[0] = n;
+	part.count[1] = NRows;
+	
+	H2dDataset<DataRank, NRows, BufSize>::open(m_parentId);
+	H2dDataset<DataRank, NRows, BufSize>::write(d, &part);
 	H2dDataset<DataRank, NRows, BufSize>::close();
 }
 
@@ -258,6 +276,18 @@ void HOocArray<DataRank, NRows, BufSize>::readColumn(char * dst, int idx)
 		m_currentBlock = blk;
 	}
 	memcpy( dst, &m_data[bpc * (idx & (BufSize-1))], bpc );
+}
+
+template <int DataRank, int NRows, int BufSize>
+void HOocArray<DataRank, NRows, BufSize>::readColumns(char *d, int offset, int n)
+{
+    int nc = offset + n;
+    if(nc > numCols() ) {
+		std::cout<<"\n HOocArray out-of-range column count: "<<nc;
+		return;
+	}
+    
+    read(d, offset, n);
 }
 
 template <int DataRank, int NRows, int BufSize>

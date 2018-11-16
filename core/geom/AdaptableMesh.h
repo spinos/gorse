@@ -10,12 +10,12 @@
 #ifndef ALO_GEOM_ADAPTABLE_MESH_H
 #define ALO_GEOM_ADAPTABLE_MESH_H
 
-#include "ATriangleMesh.h"
+#include "V1ATriangleMesh.h"
 #include <vector>
 
 namespace alo {
 
-class AdaptableMesh : public ATriangleMesh {
+class AdaptableMesh : public ver1::ATriangleMesh {
 
 public:
 	AdaptableMesh();
@@ -48,7 +48,7 @@ public:
     void swapFaceUV(int fromFace, int toFace);
     void insertFaces(const std::vector<int> &faceVertices, int toFirstFace);
 /// n faces to end
-    void appendFaces(const unsigned *faceVertices, int n);
+    void appendFaces(const Int3 *faceVertices, int n);
 /// n faces to i-th uv set to end
     void appendFaceUVs(const Float2 *faceUVs, int i, int n);
     void setNumFaces(int n);

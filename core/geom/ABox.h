@@ -9,11 +9,11 @@
 #ifndef ALO_A_BOX_H
 #define ALO_A_BOX_H
 
-#include "ATriangleMesh.h"
+#include "V1ATriangleMesh.h"
 
 namespace alo {
 
-class ABox : public ATriangleMesh {
+class ABox : public ver1::ATriangleMesh {
 
 	static const unsigned BoxFaceIndices[];
     static const float BoxVertexNormals[];

@@ -2,8 +2,6 @@
  *  HStringAttribute.cpp
  *  aloe
  *
- *  Created by jian zhang on 10/7/13.
- *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
  */
 
@@ -17,55 +15,54 @@ namespace alo {
 HStringAttribute::HStringAttribute(const std::string & path) : HAttribute(path) {}
 HStringAttribute::~HStringAttribute() {}
 	
-hid_t HStringAttribute::dataType()
+hid_t HStringAttribute::dataType() const
 {
 	return H5T_NATIVE_CHAR;
 }
 
-char HStringAttribute::write(const std::string & str)
+bool HStringAttribute::write(const std::string & str)
 {
-	herr_t status = H5Awrite(fObjectId, dataType(), str.c_str());
-	if(status < 0)
-		return 0;
-	return 1;
+	if(writeRaw(str.c_str()) < 0)
+		return false;
+	return true;
 }
 
-char HStringAttribute::read(std::string & str)
+bool HStringAttribute::read(std::string & str)
 {
 	const int d = dataSpaceDimension();
 	char * t = new char[d + 1];
-	herr_t status = H5Aread(fObjectId, dataType(), t);
-	if(status < 0)
-		return 0;
+	herr_t status = readRaw(t);
+	if(status < 0) {
+        delete[] t;
+		return false;
+    }
 	t[d] = '\0';
 	str = std::string(t);
 	delete[] t;
-	return 1;
+	return true;
 }
 
 HVLStringAttribute::HVLStringAttribute(const std::string & path) : HStringAttribute(path) {}
 HVLStringAttribute::~HVLStringAttribute() {}
 	
-hid_t HVLStringAttribute::dataType()
+hid_t HVLStringAttribute::dataType() const
 {
 	hid_t type = H5Tcopy (H5T_C_S1);
 	H5Tset_size (type, H5T_VARIABLE);
 	return type;
 }
 
-char HVLStringAttribute::write(const std::string & str)
+bool HVLStringAttribute::write(const std::string &str)
 {
-	const char *string_att[1];
-	string_att[0] = str.c_str();
-	herr_t status = H5Awrite(fObjectId, dataType(), &string_att);	
-		
-	if(status < 0)
-		return 0;
-	
-	return 1;
+    const char *str_att[1];
+    str_att[0] = str.c_str();
+    herr_t status = H5Awrite(fObjectId, dataType(), &str_att);
+    if(status < 0)
+		return false;
+	return true;
 }
 
-char HVLStringAttribute::read(std::string & str)
+bool HVLStringAttribute::read(std::string & str)
 {	
 	hid_t ftype = H5Aget_type(fObjectId);
     H5T_class_t type_class = H5Tget_class (ftype);   
@@ -75,13 +72,14 @@ char HVLStringAttribute::read(std::string & str)
 		return HStringAttribute::read(str);
 	}
     
-	char * t[1];
+	char *t[1];
 	herr_t status = H5Aread(fObjectId, dataType(), &t);
-	if(status < 0)
-		return 0;
+    if(status < 0)
+		return false;
+    
 	str = std::string(t[0]);
 	free( t[0]);
-	return 1;
+	return true;
 }
 
 }

@@ -1,17 +1,15 @@
 /*
- *  HBase.h
+ *  V1HBase.h
  *  aloe
  *
- *  Created by jian zhang on 5/4/13.
- *  Copyright 2013 __MyCompanyName__. All rights reserved.
+ *  all data sets are ooc
  *
  */
 
-#ifndef ALO_H_BASE_H
-#define ALO_H_BASE_H
+#ifndef ALO_V1_H_BASE_H
+#define ALO_V1_H_BASE_H
 
 #include "HGroup.h"
-#include "HDataset.h"
 
 #include <string>
 #include <iostream>
@@ -19,7 +17,7 @@
 
 namespace alo {
     
-class Vector3F;
+namespace ver1 {
 
 class HBase : public HGroup {
 public:
@@ -41,22 +39,10 @@ public:
 	char readStringAttr(const char * attrName, std::string & value);
 	char readVLStringAttr(const char * attrName, std::string & value);
 	
-	void addIntData(const char * dataName, unsigned count);
-	void addFloatData(const char * dataName, unsigned count);
-	void addVector3Data(const char * dataName, unsigned count);
-	
-	void writeIntData(const char * dataName, unsigned count, int *value, HDataset::SelectPart * part = 0);
-	void writeFloatData(const char * dataName, unsigned count, float *value, HDataset::SelectPart * part = 0);
-	void writeVector3Data(const char * dataName, unsigned count, Vector3F *value, HDataset::SelectPart * part = 0);
-	
-	char readIntData(const char * dataname, unsigned count, int *dst, HDataset::SelectPart * part = 0);
-	char readFloatData(const char * dataname, unsigned count, float *dst, HDataset::SelectPart * part = 0);
-	char readVector3Data(const char * dataname, unsigned count, Vector3F *dst, HDataset::SelectPart * part = 0);
-	
-	char hasNamedAttr(const char * attrName);
+	bool hasNamedAttr(const char * attrName);
 	std::string getAttrName(hid_t attrId);
 	
-	char hasNamedChild(const char * childName);
+	bool hasNamedChild(const char * childName);
 	std::string getChildName(hsize_t i);
 	bool isChildGroup(hsize_t i);
 	bool isChildData(hsize_t i);
@@ -203,12 +189,9 @@ public:
         
 	}
 	
-		void addVertexBlock(const char * nvName, const char * posName, const char * nmlName,
-						int * nv, Vector3F * pos, Vector3F * nml);
-	void addVertexBlock2(const char * nvName, const char * posName, const char * nmlName, const char * colName,
-						int * nv, Vector3F * pos, Vector3F * nml, Vector3F * col);
-
 };
 
 }
-#endif        //  #ifndef HBASE_H
+
+}
+#endif       

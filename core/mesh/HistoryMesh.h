@@ -10,8 +10,6 @@
 
 #include <geom/AdaptableMesh.h>
 #include "CoarseFineHistory.h"
-#include <math/Int3.h>
-#include <deque>
 
 namespace alo {
 

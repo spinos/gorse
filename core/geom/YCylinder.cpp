@@ -18,7 +18,7 @@ void YCylinder::createCylinder(int nu, int nv, float radius, float height)
     createTriangleMesh(np, nt);
     
     Vector3F * p = positions();
-    unsigned * ind = indices();
+    Int3 * ind = indices();
     
     const float da = 6.28318531f / (float)nu;
 	m_circum = Vector3F(cos(da), 0.f, sin(da) ).distanceTo(Vector3F::XAxis) * radius * nu; 
@@ -67,39 +67,27 @@ void YCylinder::createCylinder(int nu, int nv, float radius, float height)
 ///  |  /  |     odd
 /// i0 --- i1  
 
-void YCylinder::addOddCell(unsigned* ind, int& tri,
+void YCylinder::addOddCell(Int3* ind, int& tri,
 				const int& i, const int& j,
 				const int& i1, const int& j1,
 				const int& nu)
 {
-	int tri3 = tri * 3;
-	ind[tri3    ] = j * nu + i;
-	ind[tri3 + 1] = j * nu + i1;
-	ind[tri3 + 2] = j1 * nu + i1;
+	ind[tri].set(j * nu + i, j * nu + i1, j1 * nu + i1);
 	tri++;
     
-	tri3 = tri * 3;
-	ind[tri3    ] = j * nu + i;
-	ind[tri3 + 1] = j1 * nu + i1;
-	ind[tri3 + 2] = j1 * nu + i;
+	ind[tri].set(j * nu + i, j1 * nu + i1, j1 * nu + i);
 	tri++;
 }
 
-void YCylinder::addEvenCell(unsigned* ind, int& tri,
+void YCylinder::addEvenCell(Int3* ind, int& tri,
 				const int& i, const int& j,
 				const int& i1, const int& j1,
 				const int& nu)
 {
-	int tri3 = tri * 3;
-	ind[tri3    ] = j * nu + i;
-	ind[tri3 + 1] = j * nu + i1;
-	ind[tri3 + 2] = j1 * nu + i;
+	ind[tri].set(j * nu + i, j * nu + i1, j1 * nu + i);
 	tri++;
     
-	tri3 = tri * 3;
-	ind[tri3    ] = j * nu + i1;
-	ind[tri3 + 1] = j1 * nu + i1;
-	ind[tri3 + 2] = j1 * nu + i;
+	ind[tri].set(j * nu + i1, j1 * nu + i1, j1 * nu + i);
 	tri++;
 }
 

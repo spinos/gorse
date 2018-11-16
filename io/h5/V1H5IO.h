@@ -1,9 +1,7 @@
 /*
- *  H5IO.h
+ *  V1H5IO.h
  *  aloe
  *
- *  Created by jian zhang on 10/20/15.
- *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
 
@@ -11,9 +9,12 @@
 #define ALO_H5_IO_H
 
 #include "HDocument.h"
-#include "HBase.h"
 
 namespace alo {
+    
+namespace ver1 {
+    
+class HBase;
 
 class H5IO {
 	
@@ -25,9 +26,10 @@ public:
 				HDocument::OpenMode om = HDocument::oReadOnly);
 	void end();
 	
-	static bool objectExists(const std::string & fullPath);
+	static bool ObjectExists(const std::string & fullPath);
 	
 	static void CreateGroup(const std::string & name);
+    
 	template<typename T1, typename T2>
 	static void SaveData(const std::string & name, T2 * data)
 	{
@@ -54,6 +56,8 @@ protected:
 	
 private:
 };
+
+}
 
 }
 

@@ -2,8 +2,6 @@
  *  HFloatAttribute.h
  *  aloe
  *
- *  Created by jian zhang on 12/21/12.
- *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
 
@@ -19,9 +17,13 @@ class HFloatAttribute : public HAttribute
 public:
 	HFloatAttribute(const std::string & path);
 	~HFloatAttribute() {}
-	virtual hid_t dataType();
-	virtual char write(float *data);
-	virtual char read(float *data);
+    
+	virtual bool write(float *data);
+	virtual bool read(float *data);
+    
+protected:
+	virtual hid_t dataType() const;
+    
 };
 
 }

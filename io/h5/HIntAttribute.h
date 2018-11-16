@@ -2,8 +2,6 @@
  *  HIntAttribute.h
  *  aloe
  *
- *  Created by jian zhang on 12/21/12.
- *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
 
@@ -20,8 +18,12 @@ public:
 	HIntAttribute(const std::string & path);
 	~HIntAttribute() {}
 	
-	virtual char write(int *data);
-	virtual char read(int *data);
+    virtual bool write(int *data);
+	virtual bool read(int *data);
+   
+protected:
+    virtual hid_t dataType() const;
+	
 };
 
 }

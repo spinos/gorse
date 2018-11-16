@@ -1,22 +1,19 @@
 /*
- *  HBase.cpp
+ *  V1HBase.cpp
  *  aloe
  *
- *  Created by jian zhang on 5/4/13.
- *  Copyright 2013 __MyCompanyName__. All rights reserved.
  *
  */
 
-#include "HBase.h"
+#include "V1HBase.h"
 #include "HIntAttribute.h"
 #include "HFloatAttribute.h"
 #include "HStringAttribute.h"
-#include "IndicesHDataset.h"
-#include "FloatsHDataset.h"
-#include "VerticesHDataset.h"
 #include <sstream>
 
 namespace alo {
+    
+namespace ver1 {
 
 HBase::HBase(const std::string & path) : HGroup(path) 
 {
@@ -165,108 +162,7 @@ char HBase::readVLStringAttr(const char * attrName, std::string & value)
 	return 1;
 }
 
-void HBase::addIntData(const char * dataName, unsigned count)
-{	
-	IndicesHDataset cset(dataName);
-	cset.setNumIndices(count);
-	cset.create(fObjectId);
-	cset.close();
-}
-
-void HBase::addFloatData(const char * dataName, unsigned count)
-{
-	FloatsHDataset cset(dataName);
-	cset.setNumFloats(count);
-	cset.create(fObjectId);
-	cset.close();
-}
-
-void HBase::addVector3Data(const char * dataName, unsigned count)
-{	
-	VerticesHDataset pset(dataName);
-	pset.setNumVertices(count);
-	pset.create(fObjectId);
-	pset.close();
-}
-
-void HBase::writeIntData(const char * dataName, unsigned count, int *value, HDataset::SelectPart * part)
-{	
-	IndicesHDataset cset(dataName);
-	cset.setNumIndices(count);
-	cset.open(fObjectId);
-
-	if(!cset.write((char *)value, part)) std::cout<<dataName<<" write failed";
-	cset.close();
-}
-
-void HBase::writeFloatData(const char * dataName, unsigned count, float *value, HDataset::SelectPart * part)
-{	
-	FloatsHDataset cset(dataName);
-	cset.setNumFloats(count);
-	cset.open(fObjectId);
-
-	if(!cset.write((char *)value, part)) std::cout<<dataName<<" write failed";
-	cset.close();
-}
-
-void HBase::writeVector3Data(const char * dataName, unsigned count, Vector3F *value, HDataset::SelectPart * part)
-{
-    VerticesHDataset pset(dataName);
-	pset.setNumVertices(count);	
-	pset.open(fObjectId);
-
-	if(!pset.write((char *)value, part)) std::cout<<dataName<<" write failed";
-	pset.close();
-}
-
-char HBase::readIntData(const char * dataName, unsigned count, int *dst, HDataset::SelectPart * part)
-{	
-	IndicesHDataset cset(dataName);
-	cset.setNumIndices(count);
-	
-	if(!cset.open(fObjectId)) {
-		std::cout<<dataName<<" open failed";
-		return 0;
-	}
-	
-	cset.read((char *)dst, part);
-		
-	cset.close();
-	return 1;
-}
-
-char HBase::readFloatData(const char * dataName, unsigned count, float *dst, HDataset::SelectPart * part)
-{	
-	FloatsHDataset cset(dataName);
-	cset.setNumFloats(count);
-	
-	if(!cset.open(fObjectId)) {
-		std::cout<<dataName<<" open failed";
-		return 0;
-	}
-	
-	cset.read((char *)dst, part);
-		
-	cset.close();
-	return 1;
-}
-
-char HBase::readVector3Data(const char * dataName, unsigned count, Vector3F *dst, HDataset::SelectPart * part)
-{
-	VerticesHDataset pset(dataName);
-	pset.setNumVertices(count);
-	
-	if(!pset.open(fObjectId)) {
-		std::cout<<dataName<<" open failed";
-		return 0;
-	}
-	
-	pset.read((char *)dst, part);
-	pset.close();
-	return 1;
-}
-
-char HBase::hasNamedAttr(const char * attrName)
+bool HBase::hasNamedAttr(const char * attrName)
 { return H5Aexists(fObjectId, attrName) > 0; }
 
 std::string HBase::getAttrName(hid_t attrId)
@@ -280,7 +176,7 @@ std::string HBase::getAttrName(hid_t attrId)
 	return sst.str();
 }
 
-char HBase::hasNamedChild(const char * childName)
+bool HBase::hasNamedChild(const char * childName)
 {
 	hsize_t nobj = 0;
 	H5Gget_num_objs(fObjectId, &nobj);
@@ -290,10 +186,10 @@ char HBase::hasNamedChild(const char * childName)
 		//std::cout<<getChildName(i)<<"\n";
 		if(getChildName(i) == childName) {
 			//std::cout<<"found "<<childName;
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 std::string HBase::getChildName(hsize_t i)
@@ -404,50 +300,6 @@ char HBase::load()
 char HBase::verifyType()
 { return 1; }
 
-void HBase::addVertexBlock(const char * nvName, const char * posName, const char * nmlName,
-						int * nv, Vector3F * pos, Vector3F * nml)
-{
-	if(!hasNamedAttr(nvName))
-		addIntAttr(nvName);
-	
-	writeIntAttr(nvName, nv);
-	
-	if(!hasNamedData(posName))
-	    addVector3Data(posName, *nv);
-	
-	writeVector3Data(posName, *nv, pos);
-	
-	if(!hasNamedData(nmlName))
-	    addVector3Data(nmlName, *nv);
-	
-	writeVector3Data(nmlName, *nv, nml);
-
-}
-
-void HBase::addVertexBlock2(const char * nvName, const char * posName, const char * nmlName, const char * colName,
-						int * nv, Vector3F * pos, Vector3F * nml, Vector3F * col)
-{
-	if(!hasNamedAttr(nvName))
-		addIntAttr(nvName);
-	
-	writeIntAttr(nvName, nv);
-	
-	if(!hasNamedData(posName))
-	    addVector3Data(posName, *nv);
-	
-	writeVector3Data(posName, *nv, pos);
-	
-	if(!hasNamedData(nmlName))
-	    addVector3Data(nmlName, *nv);
-	
-	writeVector3Data(nmlName, *nv, nml);
-	
-	if(!hasNamedData(colName))
-	    addVector3Data(colName, *nv);
-	
-	writeVector3Data(colName, *nv, col);
-
 }
 
 }
-//:~

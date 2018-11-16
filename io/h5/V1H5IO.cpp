@@ -1,16 +1,17 @@
 /*
- *  H5IO.cpp
+ *  V1H5IO.cpp
  *  aloe
  *
- *  Created by jian zhang on 10/20/15.
- *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
 
-#include "H5IO.h"
-#include <foundation/SHelper.h>
+#include "V1H5IO.h"
+#include "V1HBase.h"
+#include "PathList.h"
 
 namespace alo {
+    
+namespace ver1 {
 
 std::string H5IO::BeheadName("");
 
@@ -35,28 +36,25 @@ void H5IO::end()
 {
 	std::cout<<"\n h5io close file "<<m_doc.fileName()<<"\n";
 	m_doc.close();
-	//HObject::FileIO.close();
 }
 
-bool H5IO::objectExists(const std::string & fullPath)
+bool H5IO::ObjectExists(const std::string & fullPath)
 {
-	std::vector<std::string> allNames; 
-    SHelper::Split(fullPath, allNames);
+    const PathList pl(fullPath);
 	bool stat = true;
 	HBase rt("/");
 	std::vector<HBase *> openedGrps;
     openedGrps.push_back(&rt);
-	
-    std::vector<std::string>::const_iterator it = allNames.begin();
-    for(;it!=allNames.end();++it) {
-		stat = openedGrps.back()->hasNamedChild((*it).c_str() );
+
+    const int n = pl.length();
+    for(int i=0;i<n;++i) {
+		stat = openedGrps.back()->hasNamedChild(pl.elementName(i).c_str() );
 		
 		if(stat ) {
-			openedGrps.push_back(new HBase(openedGrps.back()->childPath(*it ) ) );
+			openedGrps.push_back(new HBase(pl.elementPath(i) ) );
 			
-		}
-		else {
-			std::cout<<"\n  h5io cannot find "<<openedGrps.back()->childPath(*it )
+		} else {
+			std::cout<<"\n  h5io cannot find "<<pl.elementPath(i)
 					<<" in file "<<HObject::FileIO.fileName();
 			std::cout.flush();
 			stat = false;
@@ -74,24 +72,20 @@ bool H5IO::objectExists(const std::string & fullPath)
 
 void H5IO::CreateGroup(const std::string & name)
 {
-    //std::cout<<"\n h5 io create group "<<name
-    //<<" in file "<<HObject::FileIO.fileName();
-/// hierarchy to name
-	std::vector<std::string> allNames; 
-    SHelper::listAllNames(name, allNames);
-    std::vector<std::string>::const_iterator it = allNames.begin();
-    for(;it!=allNames.end();++it) {
-        HBase grpPar(*it);
+	const PathList pl(name);
+	const int n = pl.length();
+    for(int i=0;i<n;++i) {
+        HBase grpPar(pl.elementPath(i) );
         grpPar.close();
     }
-	allNames.clear();
 }
 
+/// behead and strip ns
 void H5IO::H5PathName(std::string & dst)
 {
-// behead and strip ns
-	if(BeheadName.size() > 1) SHelper::behead(dst, BeheadName);
-    SHelper::removeAnyNamespace(dst);
+	PathList pl(dst);
+	pl.behead(BeheadName);
+	dst = pl.lastPathStripNs();
 }
 
 HBase * H5IO::GetH5dHeadGroup()
@@ -100,7 +94,7 @@ HBase * H5IO::GetH5dHeadGroup()
         return new HBase("/");
     }
     
-    if(!objectExists(BeheadName)) {
+    if(!ObjectExists(BeheadName)) {
         return new HBase("/");
    }
    
@@ -108,5 +102,6 @@ HBase * H5IO::GetH5dHeadGroup()
    return new HBase(BeheadName);
 }
 
+}
 
 }

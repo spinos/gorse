@@ -21,7 +21,10 @@ class EdgeValue;
 class FaceIndex;
 class FaceValue;
 struct Float2;
+
+namespace ver1 {
 class ATriangleMesh;
+}
 
 class MeshTopology {
 
@@ -38,7 +41,7 @@ public:
 	MeshTopology();
 	~MeshTopology();
 
-	void buildTopology(const ATriangleMesh *mesh);
+	void buildTopology(const ver1::ATriangleMesh *mesh);
 
 	const int &numVertices() const;
 	const int &numFaces() const;
@@ -59,10 +62,10 @@ protected:
     void reformFaces(std::deque<FaceIndex> &inds,
                     std::deque<FaceValue> &uvs,
                     int va, int vb);
-	bool checkTopology(const ATriangleMesh *mesh);
+	bool checkTopology(const ver1::ATriangleMesh *mesh);
 	bool setFaceInd(const FaceIndex &fi, int x);
 	bool setPastFaceInd(const FaceIndex &fi, int x);
-	void setMeshFaceInd(const ATriangleMesh *mesh, int i);
+	void setMeshFaceInd(const ver1::ATriangleMesh *mesh, int i);
 	bool removeFace(const FaceIndex &fi);
 	bool removeEdge(const EdgeIndex &ei);
 /// face and edge connected to vertex[vi]
@@ -71,7 +74,7 @@ protected:
 	bool pastFaceExists(const FaceIndex &fi);
 /// connected to edge on border
     bool isVertexOnBorder(int vi, const VertexValue &vert,
-                const ATriangleMesh *mesh);
+                const ver1::ATriangleMesh *mesh);
     bool isVertexOnUVBorder(int vi, const VertexValue &vert,
                 const Float2 *uvs);
     void lockFaces(const std::deque<FaceIndex> &faces);
@@ -83,10 +86,10 @@ protected:
     void connectFaceToEdge(const EdgeIndex &ei, const FaceIndex &fi, bool &stat);
     void addPastFace(const FaceIndex &fi, const FaceValue &f);
     bool removePastFace(const FaceIndex &fi);
-    void indexPastFaces(const ATriangleMesh *mesh, int begin, int end);
+    void indexPastFaces(const ver1::ATriangleMesh *mesh, int begin, int end);
 /// every past face ind +x
     void pushPastFaceIndex(int x);
-    void replaceMeshVertex(ATriangleMesh *mesh, 
+    void replaceMeshVertex(ver1::ATriangleMesh *mesh, 
 					const FaceIndex &fi, int va, int vb);
     void getFaceInds(std::vector<int> &faceInds,
                 const std::deque<FaceValue> &faces) const;

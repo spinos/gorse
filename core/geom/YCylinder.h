@@ -9,11 +9,11 @@
 #ifndef X_ARROW_H
 #define X_ARROW_H
 
-#include "ATriangleMesh.h"
+#include "V1ATriangleMesh.h"
 
 namespace alo {
 
-class YCylinder : public ATriangleMesh {
+class YCylinder : public ver1::ATriangleMesh {
 
 /// num cells u and v
 	int m_nu, m_nv;
@@ -26,11 +26,11 @@ public:
     
 private:
 
-    void addOddCell(unsigned* ind, int& tri,
+    void addOddCell(Int3* ind, int& tri,
 				const int& i, const int& j,
 				const int& i1, const int& j1,
 				const int& nu);
-	void addEvenCell(unsigned* ind, int& tri,
+	void addEvenCell(Int3* ind, int& tri,
 				const int& i, const int& j,
 				const int& i1, const int& j1,
 				const int& nu);

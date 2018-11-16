@@ -1,28 +1,33 @@
 /*
- *  ATriangleMesh.h
+ *  V1ATriangleMesh.h
  *  aloe
  *
+ *  int3 as face indices
  *  uv is facing-varying
  *
  */
 
-#ifndef ALO_GEOM_TRIANGLE_MESH_H
-#define ALO_GEOM_TRIANGLE_MESH_H
+#ifndef ALO_GEOM_V1_ATRIANGLE_MESH_H
+#define ALO_GEOM_V1_ATRIANGLE_MESH_H
  
 #include <math/SimpleBuffer.h>
 #include <math/BoundingBox.h>
 #include <math/Float2.h>
+#include <math/Int3.h>
 #include <deque>
 
 namespace alo {
+       
+namespace ver1 {
 
+/// uv set name and face-varying texture coordinate
 typedef std::pair<std::string, SimpleBuffer<Float2> > NamedUV;
 
 class ATriangleMesh {
 	
     SimpleBuffer<Vector3F> m_positions;
     SimpleBuffer<Vector3F> m_normals;
-    SimpleBuffer<unsigned> m_indices;
+    SimpleBuffer<Int3> m_indices;
     int m_numVertices;
     int m_numTriangles;
     int m_numIndices;
@@ -47,7 +52,7 @@ public:
     const int& numIndices() const;
     int numUVSets() const;
     
-    const unsigned* c_indices() const;
+    const Int3* c_indices() const;
     const Vector3F* c_positions() const;
     const Vector3F* c_normals() const;
     const Float2 *c_uvSet(const std::string &name) const;
@@ -69,7 +74,7 @@ public:
     void printFace(int i) const;
     
 protected:
-    unsigned* indices();
+    Int3* indices();
     Vector3F* positions();
     Vector3F* normals();
     
@@ -78,7 +83,7 @@ protected:
     
     SimpleBuffer<Vector3F>& positionBuffer();
     SimpleBuffer<Vector3F>& normalBuffer();
-    SimpleBuffer<unsigned>& indexBuffer();
+    SimpleBuffer<Int3>& indexBuffer();
     std::deque<NamedUV >::iterator uvBegin();
     std::deque<NamedUV >::iterator uvEnd();
     std::deque<NamedUV >::const_iterator c_uvBegin() const;
@@ -89,7 +94,7 @@ private:
     
 };
 
-
+}
 
 }
-#endif //  #ifndef APH_GEOM_TRIANGLE_MESH_H
+#endif //  

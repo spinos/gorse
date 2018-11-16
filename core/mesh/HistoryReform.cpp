@@ -51,7 +51,7 @@ void HistoryReform::reform(AdaptableMesh *outMesh, const float &lod, const Histo
 		    outMesh->appendFaceUVs(buv, i, fineL);
 		}
 		
-		const unsigned *b = &m_mesh->c_indices()[stage.fbegin() * 3];
+		const Int3 *b = &m_mesh->c_indices()[stage.fbegin()];
 		outMesh->appendFaces(b, fineL);
 	}
 

@@ -2,14 +2,14 @@
  *  ATriangleMesh.cpp
  *  aloe
  *
- *  Created by jian zhang on 4/25/15.
- *  Copyright 2015 __MyCompanyName__. All rights reserved.
  *
  */
 
-#include "ATriangleMesh.h"
+#include "V1ATriangleMesh.h"
 
 namespace alo {
+    
+namespace ver1 {
 
 ATriangleMesh::ATriangleMesh() : m_numVertices(0),
     m_numTriangles(0),
@@ -37,10 +37,10 @@ const Vector3F* ATriangleMesh::c_positions() const
 const Vector3F* ATriangleMesh::c_normals() const
 { return m_normals.c_data(); }
 
-const unsigned* ATriangleMesh::c_indices() const
+const Int3* ATriangleMesh::c_indices() const
 { return m_indices.c_data(); }
 
-unsigned* ATriangleMesh::indices()
+Int3* ATriangleMesh::indices()
 { return m_indices.data(); } 
 
 Vector3F* ATriangleMesh::positions()
@@ -64,7 +64,7 @@ SimpleBuffer<Vector3F>& ATriangleMesh::positionBuffer()
 SimpleBuffer<Vector3F>& ATriangleMesh::normalBuffer()
 { return m_normals; }
 
-SimpleBuffer<unsigned>& ATriangleMesh::indexBuffer()
+SimpleBuffer<Int3>& ATriangleMesh::indexBuffer()
 { return m_indices; }
 
 void ATriangleMesh::createTriangleMesh(int vertexCount, int triangleCount)
@@ -74,7 +74,7 @@ void ATriangleMesh::createTriangleMesh(int vertexCount, int triangleCount)
     m_numIndices = triangleCount * 3;
     m_positions.createBuffer(vertexCount);
     m_normals.createBuffer(vertexCount);
-    m_indices.createBuffer(m_numIndices);
+    m_indices.createBuffer(m_numTriangles);
 }
 
 void ATriangleMesh::createTriangleMesh(const unsigned *inds,
@@ -82,7 +82,7 @@ void ATriangleMesh::createTriangleMesh(const unsigned *inds,
         int vertexCount, int triangleCount)
 {
     createTriangleMesh(vertexCount, triangleCount);
-    m_indices.copyFrom(inds, triangleCount * 3);
+    m_indices.copyFrom((const Int3 *)inds, triangleCount);
     m_positions.copyFrom(pos, vertexCount);
     m_normals.copyFrom(nml, vertexCount);
 }
@@ -91,7 +91,7 @@ void ATriangleMesh::copyPositionsFrom(const Vector3F *x)
 { m_positions.copyFrom(x, m_numVertices); }
 
 void ATriangleMesh::copyIndicesFrom(const unsigned *x)
-{ m_indices.copyFrom(x, m_numIndices); }
+{ m_indices.copyFrom((const Int3 *)x, m_numTriangles); }
 
 Float2 *ATriangleMesh::addUVSet(const std::string &name)
 {
@@ -125,13 +125,13 @@ const Float2 *ATriangleMesh::c_uvSet(int i) const
 void ATriangleMesh::reverseTriangleNormals()
 {
 	const int& n = numTriangles();
-    unsigned* triv = indices();
+    Int3* triv = indices();
     
 	for(int i=0;i<n;++i) {
-		unsigned* v = &triv[i*3];
-		unsigned t = v[0];
-		v[0] = v[2];
-		v[2] = t;
+		Int3 &fv = triv[i];
+		int t = fv.x;
+		fv.x = fv.z;
+		fv.z = t;
 	}
 }
 
@@ -144,13 +144,13 @@ void ATriangleMesh::calculateVertexNormals()
     }
     
     const int& n = numTriangles();
-    const unsigned* triv = c_indices();
+    const Int3* triv = c_indices();
     for(int i=0;i<n;++i) {
         const Vector3F triNm = getTriangleNormalMultArea(i);
-        const unsigned* triInd = &triv[i*3];
-        ndst[triInd[0]] += triNm;
-        ndst[triInd[1]] += triNm;
-        ndst[triInd[2]] += triNm;
+        const Int3 &fv = triv[i];
+        ndst[fv.x] += triNm;
+        ndst[fv.y] += triNm;
+        ndst[fv.z] += triNm;
     }
     
     for(int i=0;i<nv;++i) {
@@ -162,10 +162,10 @@ void ATriangleMesh::calculateVertexNormals()
 Vector3F ATriangleMesh::getTriangleNormalMultArea(int i) const
 {
     const Vector3F* p = c_positions();
-    const unsigned* v = &c_indices()[i*3];
-    const Vector3F& a = p[v[0]];
-    const Vector3F& b = p[v[1]];
-    const Vector3F& c = p[v[2]];
+    const Int3 &fv = c_indices()[i];
+    const Vector3F& a = p[fv.x];
+    const Vector3F& b = p[fv.y];
+    const Vector3F& c = p[fv.z];
     Vector3F ab = b - a;
     Vector3F ac = c - a;
     Vector3F nor = ab.cross(ac);
@@ -182,10 +182,10 @@ Vector3F ATriangleMesh::getTriangleNormalMultArea(int i) const
 Vector3F ATriangleMesh::getTriangleNormal(int i) const
 {
     const Vector3F* p = c_positions();
-	const unsigned* v = &c_indices()[i*3];
-	const Vector3F& a = p[v[0]];
-	const Vector3F& b = p[v[1]];
-	const Vector3F& c = p[v[2]];
+	const Int3 &fv = c_indices()[i];
+	const Vector3F& a = p[fv.x];
+    const Vector3F& b = p[fv.y];
+    const Vector3F& c = p[fv.z];
 	Vector3F ab = b - a;
 	Vector3F ac = c - a;
 	Vector3F nor = ab.cross(ac);
@@ -197,11 +197,10 @@ Vector3F ATriangleMesh::getTriangleNormal(int i) const
 float ATriangleMesh::getTriangleArea(int i) const
 {
     const Vector3F* p = c_positions();
-	const unsigned* v = &c_indices()[i*3];
-    const Vector3F& a = p[v[0]];
-	const Vector3F& b = p[v[1]];
-	const Vector3F& c = p[v[2]];
-
+	const Int3 &fv = c_indices()[i];
+    const Vector3F& a = p[fv.x];
+    const Vector3F& b = p[fv.y];
+    const Vector3F& c = p[fv.z];
 	float la = (b - a).length();
 	float lb = (c - b).length();
 	float lc = (a - c).length();
@@ -216,14 +215,14 @@ void ATriangleMesh::createPositionNormalArray(SimpleBuffer<Vector3F>& posnml) co
     const Vector3F* n = c_normals();
     posnml.createBuffer(m_numIndices * 2);
     for(int i=0;i<m_numTriangles;++i) {
-        const unsigned* v = &c_indices()[i*3];
+        const Int3 &fv = c_indices()[i];
         const int i6 = i * 6;
-        posnml[i6]   = p[v[0]];
-        posnml[i6+1] = n[v[0]];
-        posnml[i6+2] = p[v[1]];
-        posnml[i6+3] = n[v[1]];
-        posnml[i6+4] = p[v[2]];
-        posnml[i6+5] = n[v[2]];
+        posnml[i6]   = p[fv.x];
+        posnml[i6+1] = n[fv.x];
+        posnml[i6+2] = p[fv.y];
+        posnml[i6+3] = n[fv.y];
+        posnml[i6+4] = p[fv.z];
+        posnml[i6+5] = n[fv.z];
     }
 }
 
@@ -258,46 +257,46 @@ void ATriangleMesh::createBarycentricCoordinates(SimpleBuffer<Vector3F>& baryc) 
 
 bool ATriangleMesh::replaceFaceVertex(int i, int a, int b)
 {
-    unsigned *fv = &indices()[i*3];
-    if(fv[0] != a && fv[1] != a && fv[2] != a) {
+    Int3 &fv = indices()[i];
+    if(fv.x != a && fv.y != a && fv.z != a) {
         std::cout<<"\n WARNING ATriangleMesh replaceFaceVertex face "<<i
-                <<" ("<<fv[0]<<","<<fv[1]<<","<<fv[2]<<") "
+                <<" ("<<fv.x<<","<<fv.y<<","<<fv.z<<") "
                 <<" cannot replace "<<a<<" to "<<b;
         return false;
     }
-    if(fv[0] == a) fv[0] = b;
-    if(fv[1] == a) fv[1] = b;
-    if(fv[2] == a) fv[2] = b;
+    if(fv.x == a) fv.x = b;
+    if(fv.y == a) fv.y = b;
+    if(fv.z == a) fv.z = b;
     return true;
 }
 
 bool ATriangleMesh::checkFaceVertex(int i, int a, int b, int c) const
 {
-    const unsigned *fv = &c_indices()[i*3];
+    const Int3 &fv = c_indices()[i];
 
-    int flo = fv[0];
-    if(flo > fv[1]) flo = fv[1];
-    if(flo > fv[2]) flo = fv[2];
+    int flo = fv.x;
+    if(flo > fv.y) flo = fv.y;
+    if(flo > fv.z) flo = fv.z;
 
     if(a != flo) return false;
 
-    int fhi = fv[0];
-    if(fhi < fv[1]) fhi = fv[1];
-    if(fhi < fv[2]) fhi = fv[2];
+    int fhi = fv.x;
+    if(fhi < fv.y) fhi = fv.y;
+    if(fhi < fv.z) fhi = fv.z;
 
     if(c != fhi) return false;
 
-    int fmd = fv[0];
-    if(fv[1] > flo && fv[1] < fhi) fmd = fv[1];
-    if(fv[2] > flo && fv[2] < fhi) fmd = fv[2];
+    int fmd = fv.x;
+    if(fv.y > flo && fv.y < fhi) fmd = fv.y;
+    if(fv.z > flo && fv.z < fhi) fmd = fv.z;
 
     return b == fmd;
 }
 
 void ATriangleMesh::printFace(int i) const
 {
-    const unsigned *fv = &c_indices()[i*3];
-    std::cout << " face "<<i<<" (" << fv[0] << "," << fv[1] << "," << fv[2] << ") ";               
+    const Int3 &fv = c_indices()[i];
+    std::cout << " face "<<i<<" (" << fv.x << "," << fv.y << "," << fv.z << ") ";               
 }
 
 std::deque<NamedUV >::iterator ATriangleMesh::uvBegin()
@@ -316,4 +315,5 @@ SimpleBuffer<Float2> &ATriangleMesh::uvBuffer(int i)
 { return m_uvSets[i].second; }
 
 }
-//:~
+
+}

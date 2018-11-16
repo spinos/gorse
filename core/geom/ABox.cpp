@@ -62,7 +62,7 @@ ABox::ABox()
     const int nt = 12;
     createTriangleMesh(np, nt);
     updateBox(BoundingBox(-1.f, -1.f, -1.f, 1.f, 1.f, 1.f));
-    unsigned *ind = indices();
+    Int3 *ind = indices();
     memcpy(ind, BoxFaceIndices, 12 * 3 * 4);
     Vector3F* nmls = normals();
     memcpy(nmls, BoxVertexNormals, 24 * 3 * 4);

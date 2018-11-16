@@ -323,21 +323,14 @@ void EdgeCollapse::relocateFacesTo(const std::vector<int> &faces, int toLastFace
 
     for(;it!=faces.end();++it) {
 
-    	const unsigned *afv = &m_mesh->c_indices()[*it * 3];
-    	int fv[3];
-    	fv[0] = afv[0];
-    	fv[1] = afv[1];
-    	fv[2] = afv[2];
-    	FaceIndex afi(fv[0], fv[1], fv[2]);
+    	const Int3 &afv = m_mesh->c_indices()[*it];
+    	FaceIndex afi(afv.x, afv.y, afv.z);
 
     	setFaceInd(afi, toFace);
    	
-    	const unsigned *bfv = &m_mesh->c_indices()[toFace * 3];
+    	const Int3 &bfv = m_mesh->c_indices()[toFace];
 
-    	fv[0] = bfv[0];
-    	fv[1] = bfv[1];
-    	fv[2] = bfv[2];
-    	FaceIndex bfi(fv[0], fv[1], fv[2]);
+    	FaceIndex bfi(bfv.x, bfv.y, bfv.z);
 
     	setFaceInd(bfi, *it);
 
@@ -383,8 +376,8 @@ void EdgeCollapse::insertFacesAt(const std::deque<FaceIndex> &faces,
 	m_mesh->insertHistory(faces.size(), location);
 
 	for(int i=location;i<location + faces.size();++i) {
-		const unsigned *fv = &m_mesh->c_indices()[i * 3];
-		const FaceIndex fi(fv[0], fv[1], fv[2]);
+		const Int3 &fv = m_mesh->c_indices()[i];
+		const FaceIndex fi(fv.x, fv.y, fv.z);
 		if(!setFaceInd(fi, i) )
             std::cout<<"\n WARNING set ind to nonexistent face "<<fi
                     <<" insert "<<i<<" location "<<location;

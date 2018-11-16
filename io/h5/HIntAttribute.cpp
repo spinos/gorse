@@ -2,8 +2,6 @@
  *  HIntAttribute.cpp
  *  aloe
  *
- *  Created by jian zhang on 12/21/12.
- *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
 
@@ -15,20 +13,23 @@ HIntAttribute::HIntAttribute(const std::string & path) : HAttribute(path)
 {
 }
 
-char HIntAttribute::write(int *data)
+hid_t HIntAttribute::dataType() const
 {
-	herr_t status = H5Awrite(fObjectId, dataType(), data);
-	if(status < 0)
-		return 0;
-	return 1;
+	return H5T_NATIVE_INT;
 }
 
-char HIntAttribute::read(int *data)
+bool HIntAttribute::write(int *data)
 {
-	herr_t status = H5Aread(fObjectId, dataType(), data);
-	if(status < 0)
-		return 0;
-	return 1;
+	if(writeRaw((char *)data) < 0)
+		return false;
+	return true;
+}
+
+bool HIntAttribute::read(int *data)
+{
+	if(readRaw((char *)data) < 0)
+		return false;
+	return true;
 }
 
 }
