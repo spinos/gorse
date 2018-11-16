@@ -43,6 +43,13 @@ void HistoryReform::reform(AdaptableMesh *outMesh, const float &lod, const Histo
 		int fineL = nf - stage.fbegin();
 
 		outMesh->removeLastFaces(coarseL);
+/// append uv
+		const int nuv = m_mesh->numUVSets();
+		for(int i=0;i<nuv;++i) {
+		    const Float2 *uvs = m_mesh->c_uvSet(i);
+		    const Float2 *buv = &uvs[stage.fbegin() * 3];
+		    outMesh->appendFaceUVs(buv, i, fineL);
+		}
 		
 		const unsigned *b = &m_mesh->c_indices()[stage.fbegin() * 3];
 		outMesh->appendFaces(b, fineL);
@@ -50,7 +57,6 @@ void HistoryReform::reform(AdaptableMesh *outMesh, const float &lod, const Histo
 
 	//std::cout<< "\n  stage "<<istage
 	//	<<" select nv "<<selV << " reformed nf "<<outMesh->numTriangles();
-
 }
 
 void HistoryReform::sortCoarseFaces(int first, int last, const int *history)

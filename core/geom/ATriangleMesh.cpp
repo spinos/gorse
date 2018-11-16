@@ -312,5 +312,8 @@ std::deque<NamedUV >::const_iterator ATriangleMesh::c_uvBegin() const
 std::deque<NamedUV >::const_iterator ATriangleMesh::c_uvEnd() const
 { return m_uvSets.end(); }
 
+SimpleBuffer<Float2> &ATriangleMesh::uvBuffer(int i)
+{ return m_uvSets[i].second; }
+
 }
 //:~

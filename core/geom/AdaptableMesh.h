@@ -49,6 +49,8 @@ public:
     void insertFaces(const std::vector<int> &faceVertices, int toFirstFace);
 /// n faces to end
     void appendFaces(const unsigned *faceVertices, int n);
+/// n faces to i-th uv set to end
+    void appendFaceUVs(const Float2 *faceUVs, int i, int n);
     void setNumFaces(int n);
     void copyTo(AdaptableMesh *b, const int &nv, const int &nf) const;
  

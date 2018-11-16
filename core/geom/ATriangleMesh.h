@@ -83,6 +83,7 @@ protected:
     std::deque<NamedUV >::iterator uvEnd();
     std::deque<NamedUV >::const_iterator c_uvBegin() const;
     std::deque<NamedUV >::const_iterator c_uvEnd() const;
+    SimpleBuffer<Float2> &uvBuffer(int i);
     
 private:
     

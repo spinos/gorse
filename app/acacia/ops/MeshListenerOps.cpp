@@ -63,6 +63,7 @@ void MeshListenerOps::update()
 
     DrawableScene *scene = drawableScene();
     DrawableObject *d = drawable();
+    
     if(m_toRelocate || dataChanged || meshSelectionChanged) {
         scene->enqueueRemoveDrawable(d);
         setMeshDrawable(scene);

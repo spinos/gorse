@@ -106,7 +106,7 @@ void AdaptableMesh::removeLastVertices(int x)
 
 void AdaptableMesh::removeLastFaces(int x)
 { 
-    int nt = numTriangles() - x;
+    const int nt = numTriangles() - x;
     setNumTriangles(nt); 
 }
 
@@ -142,6 +142,14 @@ void AdaptableMesh::appendFaces(const unsigned *faceVertices, int n)
     indexBuffer().createBuffer(nt);
     memcpy(&indices()[numTriangles() * 3], faceVertices, n * 12);
     setNumTriangles(nt);
+}
+
+void AdaptableMesh::appendFaceUVs(const Float2 *faceUVs, int i, int n)
+{
+    SimpleBuffer<Float2> &uvi = uvBuffer(i);
+    int nt = numTriangles() + n;
+    uvi.createBuffer(nt * 3);
+    memcpy(&uvi.data()[numTriangles() * 3], faceUVs, n * 24);
 }
 
 void AdaptableMesh::setNumFaces(int n)
