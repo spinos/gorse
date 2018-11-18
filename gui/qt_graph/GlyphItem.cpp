@@ -100,6 +100,7 @@ void GlyphItem::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
     QAction *selectedAction = menu.exec(event->screenPos());
     if(selectedAction) {
     	m_ops->recvAction(selectedAction->data().toInt());
+    	
     }
 }
 

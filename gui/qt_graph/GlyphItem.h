@@ -45,7 +45,7 @@ public:
 	void setHalo(GlyphHalo* hal);
 	void showHalo();
 	void hideHalo();
-	GlyphHalo* halo();
+	GlyphHalo *halo();
 	GlyphOps *getOps() const;
 	GlyphOps *ops();
 	

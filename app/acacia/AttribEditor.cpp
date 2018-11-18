@@ -183,6 +183,7 @@ void AttribEditor::lsListAttr(alo::QAttrib *attr)
     
     ListSelector *lg = new ListSelector();
     lg->setName(attr->attrName() );
+    lg->setFixedHeight(78);
     m_rightCollWigs.enqueue(lg);
 
     ListAttrib *flist = static_cast<ListAttrib *>(attr);

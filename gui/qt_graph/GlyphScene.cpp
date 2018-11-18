@@ -30,7 +30,7 @@ GlyphScene::~GlyphScene()
 
 void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
 {
-	GlyphItem * g = new GlyphItem(pix, typ);
+	GlyphItem *g = new GlyphItem(pix, typ);
 	addItem(g);
 
 	g->setPos(pos);

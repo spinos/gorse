@@ -5,7 +5,7 @@ namespace alo {
 ListSelector::ListSelector(QWidget *parent)
    : QListWidget(parent)
 { 
-    setFixedHeight(78);
+	setAlternatingRowColors(true);
     connect(this, &QListWidget::itemClicked,
            this, &ListSelector::recvListItemSelection );
 }

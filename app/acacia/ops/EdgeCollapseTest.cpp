@@ -124,5 +124,21 @@ void EdgeCollapseTest::computeMesh()
     if(m_toRelocate) m_mesh->createBarycentricCoordinates(baryc);
 }
 
+bool EdgeCollapseTest::hasMenu() const
+{ return true; }
+
+void EdgeCollapseTest::getMenuItems(std::vector<std::pair<std::string, int > > &ks) const 
+{
+    ks.push_back(std::make_pair("Save", 1));
+}
+
+void EdgeCollapseTest::recvAction(int x) 
+{
+    std::cout<<" EdgeCollapseTest::recvAction ";
+    if(x == 1) std::cout << " todo save ";
+    
+}
+
+
 }
 
