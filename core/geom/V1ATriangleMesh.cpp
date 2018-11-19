@@ -116,6 +116,12 @@ const Float2 *ATriangleMesh::c_uvSet(const std::string &name) const
     return 0;
 }
 
+const std::string &ATriangleMesh::c_uvName(int i) const
+{
+    const NamedUV &auv = m_uvSets[i];
+    return auv.first;
+}
+
 const Float2 *ATriangleMesh::c_uvSet(int i) const
 {
     const NamedUV &auv = m_uvSets[i];

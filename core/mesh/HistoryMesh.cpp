@@ -162,6 +162,18 @@ CoarseFineHistory &HistoryMesh::stage(int i)
 int HistoryMesh::maxNumStages() const
 { return 8; }
 
+int HistoryMesh::minNumVertices() const
+{ return m_stages.front().vbegin(); }
+
+int HistoryMesh::minNumTriangles() const
+{ return m_stages.front().fbegin(); }
+
+int HistoryMesh::maxNumVertices() const
+{ return m_stages.back().vend(); }
+
+int HistoryMesh::maxNumTriangles() const
+{ return m_stages.back().fend(); }
+
 const CoarseFineHistory &HistoryMesh::selectStage(int &istage, int &nv,
                 const float &lod) const
 {

@@ -14,6 +14,7 @@
 #include "GlyphHalo.h"
 #include "GlyphOps.h"
 #include "Attrib.h"
+#include <qt_base/AFileDlg.h>
 
 namespace alo {
 
@@ -98,10 +99,9 @@ void GlyphItem::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
 	ks.clear();
     
     QAction *selectedAction = menu.exec(event->screenPos());
-    if(selectedAction) {
-    	m_ops->recvAction(selectedAction->data().toInt());
-    	
-    }
+    if(selectedAction)
+    	processContextMenu(selectedAction->data().toInt() );
+
 }
 
 void GlyphItem::setHalo(GlyphHalo* hal)
@@ -163,6 +163,27 @@ void GlyphItem::movePort(GlyphPort *pt, const Connectable *c)
 	}
 
 	pt->setPos(px, py);
+}
+
+void GlyphItem::processContextMenu(int k)
+{
+	AFileDlgProfile *prof = 0;
+	if(k==AFileDlgProfile::FWrite)
+		prof = m_ops->writeFileProfileR();
+	else if (k==AFileDlgProfile::FWrite)
+		prof = m_ops->readFileProfileR();
+
+	if(!prof) return;
+
+	AFileDlg d(*prof, QApplication::activeWindow() );
+    int res = d.exec();
+    if(res == QDialog::Rejected) {
+        qDebug()<<" abort ";
+        return;
+    }
+
+    m_ops->recvAction(k);
+    	
 }
 
 const std::string& GlyphItem::glyphName() const

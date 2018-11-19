@@ -56,6 +56,8 @@ public:
     const Vector3F* c_positions() const;
     const Vector3F* c_normals() const;
     const Float2 *c_uvSet(const std::string &name) const;
+/// i-th uv set
+    const std::string &c_uvName(int i) const;
     const Float2 *c_uvSet(int i) const;
     
 /// face-varying vertex attribute

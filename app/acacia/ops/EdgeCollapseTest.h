@@ -18,6 +18,7 @@ class EdgeCollapseTest : public DrawableOps {
     HistoryReform *m_reformer;
     float m_lod;
     bool m_toRelocate;
+    static AFileDlgProfile SWriteProfile;
     
 public:
     EdgeCollapseTest();
@@ -29,11 +30,13 @@ public:
     virtual bool hasMenu() const override;
     virtual void getMenuItems(std::vector<std::pair<std::string, int > > &ks) const override;
     virtual void recvAction(int x) override;
-    
+    virtual AFileDlgProfile *writeFileProfileR () const override;
+
 protected:
     
 private:
     void computeMesh();
+    bool saveToFile(const std::string &fileName);
     void setMeshDrawable(DrawableScene *scene);
     
 };

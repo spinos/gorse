@@ -291,14 +291,14 @@ bool HBase::hasNamedAttrIntVal(const std::string & attrName,
 	return (v == attrVal);
 }
 
-char HBase::save()
-{ return 1; }
+bool HBase::save()
+{ return true; }
 
-char HBase::load()
-{ return 1; }
+bool HBase::load()
+{ return true; }
 
-char HBase::verifyType()
-{ return 1; }
+bool HBase::verifyType()
+{ return true; }
 
 }
 

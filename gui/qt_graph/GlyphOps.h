@@ -14,6 +14,8 @@
 
 namespace alo {
 
+struct AFileDlgProfile;
+
 class GlyphOps
 {
 	std::map<std::string, QAttrib * > m_attribs;
@@ -37,6 +39,8 @@ public:
 	virtual bool hasMenu() const;
 	virtual void getMenuItems(std::vector<std::pair<std::string, int > > &ks) const;
 	virtual void recvAction(int x);
+	virtual AFileDlgProfile *writeFileProfileR () const;
+	virtual AFileDlgProfile *readFileProfileR () const;
 
 protected:
 	void addAttribute(const QJsonObject &content);

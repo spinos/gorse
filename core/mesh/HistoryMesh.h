@@ -48,6 +48,10 @@ public:
     
     int numStages() const;
     int maxNumStages() const;
+    int minNumVertices() const;
+    int minNumTriangles() const;
+    int maxNumVertices() const;
+    int maxNumTriangles() const;
     const CoarseFineHistory &stage(int i) const;
     CoarseFineHistory &stage(int i);
 

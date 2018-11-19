@@ -60,10 +60,9 @@ public:
 	std::string childPath(const std::string & name) const;
 	std::string childPath(int i);
 	
-	virtual char save();
-	virtual char load();
-    
-    virtual char verifyType();
+	virtual bool save();
+	virtual bool load();
+    virtual bool verifyType();
 
 	template<typename T>
 	void lsTypedChild(std::vector<std::string> & names) {

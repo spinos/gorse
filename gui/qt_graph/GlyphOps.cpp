@@ -235,4 +235,10 @@ void GlyphOps::getMenuItems(std::vector<std::pair<std::string, int > > &ks) cons
 
 void GlyphOps::recvAction(int x) {}
 
+AFileDlgProfile *GlyphOps::writeFileProfileR () const
+{ return 0; }
+
+AFileDlgProfile *GlyphOps::readFileProfileR () const
+{ return 0; }
+
 }

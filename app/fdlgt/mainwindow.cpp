@@ -8,7 +8,7 @@ using namespace alo;
 
 MainWindow::MainWindow()
 {
-    AFileDlg::Profile prof(AFileDlg::FWrite,
+    AFileDlgProfile prof(AFileDlgProfile::FWrite,
     	"Choose File To Save",
         ":images/unknown.png",
     	"Save mesh to file\nNv\nNt",

@@ -23,6 +23,39 @@ class QPushButton;
 QT_END_NAMESPACE
 
 namespace alo {
+
+struct AFileDlgProfile {
+
+    enum FileMode {
+        FRead = 255,
+        FWrite
+    };
+
+    FileMode _mode;
+    std::string _title;
+    std::string _iconName;
+    std::string _notice;
+    std::string _applyName;
+    std::string _ext;
+    std::string _folder;
+    std::string _name;
+
+    AFileDlgProfile();
+    AFileDlgProfile(FileMode mode,
+        const std::string &title,
+        const std::string &iconName,
+        const std::string &notice,
+        const std::string &applyName,
+        const std::string &ext,
+        const std::string &folder,
+        const std::string &name);
+    
+    void setName(const std::string &x);
+    void setFolder(const std::string &x);
+
+    std::string getFilePath() const;
+    
+};
     
 class ListSelector;
 
@@ -31,41 +64,7 @@ class AFileDlg : public QDialog
     Q_OBJECT
 
 public:
-
-    enum FileMode {
-        FRead = 255,
-        FWrite
-    };
-
-	struct Profile {
-
-		FileMode _mode;
-		std::string _title;
-        std::string _iconName;
-		std::string _notice;
-        std::string _applyName;
-		std::string _ext;
-		std::string _folder;
-		std::string _name;
-
-        Profile();
-        Profile(FileMode mode,
-            const std::string &title,
-            const std::string &iconName,
-            const std::string &notice,
-            const std::string &applyName,
-            const std::string &ext,
-            const std::string &folder,
-            const std::string &name);
-        
-        void setName(const std::string &x);
-        void setFolder(const std::string &x);
-
-        std::string getFilePath() const;
-        
-	};
-
-    AFileDlg(Profile &prof, QWidget *parent = 0);
+    AFileDlg(AFileDlgProfile &prof, QWidget *parent = 0);
 
 protected:
     void lsFilesInFolder();
@@ -83,7 +82,7 @@ private:
 	QPushButton * m_applyBtn;
 	QPushButton * m_cancelBtn;
 	ListSelector *m_fileList;
-    Profile *m_profile;
+    AFileDlgProfile *m_profile;
 };
 
 }

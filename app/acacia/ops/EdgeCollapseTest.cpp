@@ -9,8 +9,21 @@
 #include <mesh/EdgeCollapse.h>
 #include <mesh/HistoryMesh.h>
 #include <mesh/HistoryReform.h>
+#include <qt_base/AFileDlg.h>
+#include <h5/V1H5IO.h>
+#include <h5/V1HBase.h>
+#include <h5_mesh/HHistoryMesh.h>
 
 namespace alo {
+
+AFileDlgProfile EdgeCollapseTest::SWriteProfile(AFileDlgProfile::FWrite,
+        "Choose File To Save",
+        ":images/test.png",
+        "Save mesh to file\nNv\nNt",
+        "Save .hes",
+        ".hes",
+        "./",
+        "untitled");
    
 EdgeCollapseTest::EdgeCollapseTest()
 {
@@ -129,16 +142,38 @@ bool EdgeCollapseTest::hasMenu() const
 
 void EdgeCollapseTest::getMenuItems(std::vector<std::pair<std::string, int > > &ks) const 
 {
-    ks.push_back(std::make_pair("Save", 1));
+    ks.push_back(std::make_pair("Save", AFileDlgProfile::FWrite));
 }
 
 void EdgeCollapseTest::recvAction(int x) 
 {
     std::cout<<" EdgeCollapseTest::recvAction ";
-    if(x == 1) std::cout << " todo save ";
+    if(x == AFileDlgProfile::FWrite) saveToFile(SWriteProfile.getFilePath());
     
 }
 
+AFileDlgProfile *EdgeCollapseTest::writeFileProfileR () const
+{ return &SWriteProfile; }
+
+bool EdgeCollapseTest::saveToFile(const std::string &fileName)
+{
+    ver1::H5IO hio;
+    bool stat = hio.begin(fileName, HDocument::oCreate);
+    if(!stat) return false;
+
+    ver1::HBase w("/world");
+    ver1::HBase b("/world/meshes");
+
+    HHistoryMesh hmh("/world/meshes/mesh_1");
+    hmh.save(m_sourceMesh);
+    hmh.close();
+
+    b.close();
+    w.close();
+
+    hio.end();
+    return true; 
+}
 
 }
 

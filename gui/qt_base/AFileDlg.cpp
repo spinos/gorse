@@ -19,10 +19,10 @@
 
 namespace alo {
     
-AFileDlg::Profile::Profile()
+AFileDlgProfile::AFileDlgProfile()
 {}
 
-AFileDlg::Profile::Profile(FileMode mode,
+AFileDlgProfile::AFileDlgProfile(FileMode mode,
     const std::string &title,
     const std::string &iconName,
     const std::string &notice,
@@ -41,14 +41,14 @@ AFileDlg::Profile::Profile(FileMode mode,
     _name = name;
 }
 
-void AFileDlg::Profile::setName(const std::string &x)
+void AFileDlgProfile::setName(const std::string &x)
 {
     _name = x;
     int l = _name.rfind(_ext);
     if(l>1) _name.erase(l);
 }
 
-void AFileDlg::Profile::setFolder(const std::string &x)
+void AFileDlgProfile::setFolder(const std::string &x)
 {
 /// remove repeated slashes
     struct both_slashes {
@@ -67,11 +67,11 @@ void AFileDlg::Profile::setFolder(const std::string &x)
     _folder = spath + '/';
 }
 
-std::string AFileDlg::Profile::getFilePath() const
+std::string AFileDlgProfile::getFilePath() const
 { return _folder + _name + _ext; }
 
 
-AFileDlg::AFileDlg(Profile &prof, QWidget *parent) : QDialog(parent)
+AFileDlg::AFileDlg(AFileDlgProfile &prof, QWidget *parent) : QDialog(parent)
 {
     m_profile = &prof;
     
@@ -126,7 +126,7 @@ AFileDlg::AFileDlg(Profile &prof, QWidget *parent) : QDialog(parent)
     connect(m_fileList, SIGNAL(selectionChanged(QPair<std::string, std::string>)),
             this, SLOT(recvListItemSelection(QPair<std::string, std::string>)) );
     
-    if(prof._mode == FRead)
+    if(prof._mode == AFileDlgProfile::FRead)
         m_nameEdt->setReadOnly(true);
     else
         connect(m_nameEdt, SIGNAL(textEdited(QString)),

@@ -13,6 +13,7 @@
 #include <mesh/EdgeCollapse.h>
 #include <mesh/HistoryMesh.h>
 #include <mesh/HistoryReform.h>
+#include <qt_base/AFileDlg.h>
 
 using namespace boost::interprocess;
 using namespace boost::property_tree;

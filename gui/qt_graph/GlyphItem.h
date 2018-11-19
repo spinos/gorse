@@ -70,6 +70,7 @@ protected:
 private:
 	void centerIcon();
 	void movePort(GlyphPort *pt, const Connectable *c);
+	void processContextMenu(int k);
 	
 private:
 	QGraphicsPixmapItem *m_icon;
