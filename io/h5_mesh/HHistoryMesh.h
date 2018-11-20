@@ -5,8 +5,8 @@
  *  iattr: nv ntri nstg nuvs
  *  f3data: pos nml
  *  i3data: ind
- *  uv_set[nuvs]
- *  history_stage[nstg]
+ *  coarse_fine_history /stg[0:nstg-1]
+ *  /face_varying_uv
  *
  */
 #ifndef ALO_H5_HISTORY_MESH_H

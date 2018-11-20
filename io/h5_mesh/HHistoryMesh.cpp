@@ -12,6 +12,9 @@
 #include <mesh/HistoryMesh.h>
 #include <h5/HOocArray.h>
 #include <math/roundi.h>
+#include "HFaceVaryingUV.h"
+#include "HCoarseFineHistory.h"
+#include <boost/format.hpp>
 
 namespace alo {
 
@@ -66,9 +69,18 @@ bool HHistoryMesh::save(const HistoryMesh *msh)
 	writeF3Data(".pos", (char *)msh->c_positions(), nv);
 	writeF3Data(".nml", (char *)msh->c_normals(), nv);
 	writeI3Data(".ind", (char *)msh->c_indices(), nt);
+	
+	for(int i=0;i<nstg;++i) {
+	    const std::string stgName = boost::str(boost::format("stg%1%") % i);
+	    HCoarseFineHistory fhis(childPath(stgName));
+	    fhis.save(&msh->stage(i));
+	    fhis.close();
+	}
 
-	for(int i=0;i<nuvs;++i) {
-		std::cout << "\n todo save uv " << msh->c_uvName(i) << " " << msh->c_uvSet(i);
+	if(nuvs>0) {
+	    HFaceVaryingUV fuv(childPath("face_varying_uv"));
+	    fuv.save(msh, nt);
+	    fuv.close();
 	}
 
 	return true;
