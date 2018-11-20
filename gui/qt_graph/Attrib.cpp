@@ -293,6 +293,16 @@ void StringAttrib::getValue(std::string& y) const
 bool StringAttrib::isFileName() const
 { return m_sat == SaFileName; }
 
+void StringAttrib::setStrAttrTyp(int x)
+{ 
+	if(x == SaFileName) m_sat = SaFileName; 
+	if(x == SaDirectory) m_sat = SaDirectory; 
+	if(x == SaNote) m_sat = SaNote; 
+}
+
+const StringAttrib::StrAttrType &StringAttrib::strAttrTyp() const
+{ return m_sat; }
+
 ActionAttrib::ActionAttrib(const std::string &name) : QAttrib(name, AtAction)
 { value()<<true<<QString(""); }
 

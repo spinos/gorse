@@ -50,7 +50,7 @@ public:
 		AtFloat3,
 		AtFloat4,
 		AtEnum,
-		AtSpline,
+		AtSpline = 8,
 		AtString,
 		AtAction,
 		AtMesh,
@@ -209,12 +209,16 @@ class StringAttrib : public QAttrib {
 	
 public:
 	enum StrAttrType {
-		SaUnknown = 256,
+		SaUnknown = 512,
 		SaFileName,
+		SaDirectory,
 		SaNote
 	};
 
 	StringAttrib(const std::string &name, StrAttrType sat = SaUnknown);
+
+	void setStrAttrTyp(int x);
+	const StrAttrType &strAttrTyp() const;
 	
 	void setValue(const std::string& x);
 	void getValue(std::string& y) const;

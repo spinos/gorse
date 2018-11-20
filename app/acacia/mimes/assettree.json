@@ -40,18 +40,6 @@
                                     "value": false
                                 }
                             ]
-                        },
-                        {
-                            "id": 769952,
-                            "name": "leaf",
-                            "label": "Leaf",
-                            "is_element": true
-                        },
-                        {
-                            "id": 126650,
-                            "name": "branch",
-                            "label": "Branch",
-                            "is_element": true
                         }
                     ]
                 },
@@ -67,6 +55,29 @@
                             "icon": ":images/edgeCollapseTest.png",
                             "is_element": true,
                             "attribs" : [
+                                {
+                                    "name": "lod",
+                                    "label": "Level of Detail",
+                                    "typ": 3,
+                                    "value": 0.5,
+                                    "min": 0.0,
+                                    "max": 1.0
+                                }
+                            ]
+                        },
+                        {
+                            "id": 828636,
+                            "name": "lod_mesh_in",
+                            "label": "LOD Mesh In",
+                            "icon": ":images/test.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "cache_path",
+                                    "label": "Cache Path",
+                                    "typ": 9,
+                                    "strtyp": 513
+                                },
                                 {
                                     "name": "lod",
                                     "label": "Level of Detail",

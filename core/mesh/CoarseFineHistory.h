@@ -19,17 +19,21 @@
 #include <math/SimpleBuffer.h>
 
 namespace alo {
+
+struct CoarseFineHistoryDesc {
+	int _length;
+	int _vbegin;
+    int _vend;
+    int _ncoarse;
+    int _nfine;
+    int _fbegin;
+    int _fend;
+};
 	
 class CoarseFineHistory {
 
 	SimpleBuffer<int> m_history;
-	int m_length;
-	int m_vbegin;
-    int m_vend;
-    int m_ncoarse;
-    int m_nfine;
-    int m_fbegin;
-    int m_fend;
+	CoarseFineHistoryDesc m_desc;
 
 public:
 
@@ -61,6 +65,7 @@ public:
 	int coarseMax() const;
 /// fend - 1
 	int fineMax() const;
+	const CoarseFineHistoryDesc &desc() const;
 	const int *c_value() const;
 
 	void printDetail() const;

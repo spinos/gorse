@@ -11,6 +11,7 @@
 #include <qt_base/FieldSlider.h>
 #include <qt_base/ListSelector.h>
 #include <qt_base/CheckLabel.h>
+#include <qt_base/StringEdit.h>
 
 using namespace alo;
 
@@ -116,6 +117,9 @@ void AttribEditor::lsAttr(QAttrib *attr)
 		case QAttrib::AtBool :
 			lsBoolAttr(attr);
 		break;
+		case QAttrib::AtString :
+			lsStringAttr(attr);
+		break;
 		default :
 		break;
 	}
@@ -213,6 +217,25 @@ void AttribEditor::lsBoolAttr(alo::QAttrib *attr)
     
 }
 
+void AttribEditor::lsStringAttr(alo::QAttrib *attr)
+{
+	SimpleLabel *lab = new SimpleLabel(QString(attr->label().c_str()));
+	StringEdit *fld = new StringEdit();
+	m_leftCollWigs.enqueue(lab);
+    m_rightCollWigs.enqueue(fld);
+
+    StringAttrib *fattr = static_cast<StringAttrib *>(attr);
+    std::string val;
+	fattr->getValue(val);
+	
+	fld->setValue(val);
+	fld->setName(attr->attrName());
+
+	connect(fld, SIGNAL(valueChanged(QPair<std::string, std::string>)),
+           this, SLOT(recvStringValue(QPair<std::string, std::string>)));
+
+}
+
 void AttribEditor::recvFloatValue(QPair<std::string, float> x)
 {
 	GlyphOps *ops = m_scene->getActiveOps();
@@ -240,3 +263,11 @@ void AttribEditor::recvBoolValue(QPair<std::string, bool> x)
 		emit sendAttribChanged();
 }
 
+void AttribEditor::recvStringValue(QPair<std::string, std::string> x)
+{
+    GlyphOps *ops = m_scene->getActiveOps();
+	if(!ops) return;
+
+	if(ops->setStringAttrValue(x.first, x.second) )
+		emit sendAttribChanged();
+}

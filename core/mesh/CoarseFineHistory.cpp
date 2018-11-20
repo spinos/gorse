@@ -12,18 +12,18 @@ void CoarseFineHistory::initialize(int nf)
 {
 	static const int unn = 1<<30;
 
-	m_length = nf;
+	m_desc._length = nf;
 		
-	m_history.createBuffer(m_length);
-	for(int i=0;i<m_length;++i)
+	m_history.createBuffer(m_desc._length);
+	for(int i=0;i<m_desc._length;++i)
 		m_history[i] = unn;
 }
 
 void CoarseFineHistory::setVCF(const int &vbegin, const int &ncoarse, const int &nfine)
 {
-	m_vbegin = vbegin; 
-    m_ncoarse = ncoarse;
-    m_nfine = nfine;
+	m_desc._vbegin = vbegin; 
+    m_desc._ncoarse = ncoarse;
+    m_desc._nfine = nfine;
 }
 
 void CoarseFineHistory::setNv(const int &x, int location)
@@ -42,62 +42,59 @@ void CoarseFineHistory::insert(int x, int n, int location)
     
     m_history.insert(b, n, location);
     delete[] b;
-    m_length += n;
+    m_desc._length += n;
 }
 
 void CoarseFineHistory::setFRange(int x, int y) 
 {
-	m_fend = x;
-	m_fbegin = y;
+	m_desc._fend = x;
+	m_desc._fbegin = y;
 }
 
 const int &CoarseFineHistory::vbegin() const
-{ return m_vbegin; }
+{ return m_desc._vbegin; }
 
 int &CoarseFineHistory::vbegin()
-{ return m_vbegin; }
+{ return m_desc._vbegin; }
 
 const int &CoarseFineHistory::vend() const
-{ return m_vend; }
+{ return m_desc._vend; }
 
 int &CoarseFineHistory::vend()
-{ return m_vend; }
+{ return m_desc._vend; }
 
 const int &CoarseFineHistory::nfine() const
-{ return m_nfine; }
+{ return m_desc._nfine; }
 
 const int &CoarseFineHistory::ncoarse() const
-{ return m_ncoarse; }
+{ return m_desc._ncoarse; }
 
 const int &CoarseFineHistory::length() const
-{ return m_length; }
+{ return m_desc._length; }
 
 const int &CoarseFineHistory::fbegin() const
-{ return m_fbegin; }
+{ return m_desc._fbegin; }
 
 const int &CoarseFineHistory::fend() const
-{ return m_fend; }
+{ return m_desc._fend; }
 
 const int *CoarseFineHistory::c_value() const
 { return m_history.c_data(); }
 
 int CoarseFineHistory::coarseMax() const
-{ return m_fbegin - 1; }
+{ return m_desc._fbegin - 1; }
 
 int CoarseFineHistory::fineMax() const
-{ return m_fend - 1; }
+{ return m_desc._fend - 1; }
+
+const CoarseFineHistoryDesc &CoarseFineHistory::desc() const
+{ return m_desc; }
 
 void CoarseFineHistory::operator=(const CoarseFineHistory &b)
 {
-	m_length = b.m_length;
-	m_vbegin = b.m_vbegin;
-    m_vend = b.m_vend;
-    m_ncoarse = b.m_ncoarse;
-    m_nfine = b.m_nfine;
-    m_fbegin = b.m_fbegin;
-    m_fend = b.m_fend;
-    m_history.createBuffer(m_length);
-	memcpy(m_history.data(), b.c_value(), m_length<<2);
+	m_desc = b.desc();
+    m_history.createBuffer(m_desc._length);
+	memcpy(m_history.data(), b.c_value(), m_desc._length<<2);
 }
 
 void CoarseFineHistory::printDetail() const
@@ -105,7 +102,7 @@ void CoarseFineHistory::printDetail() const
 	static const int unn = 1<<29;
 
 	std::cout << "\n coarse [";
-    for(int i=0;i<m_fbegin;++i) {
+    for(int i=0;i<m_desc._fbegin;++i) {
         const int & vi = m_history[i];
 	    if(i % 100 == 0) std::cout << "\n";
 		if(i % 10 == 0) std::cout << " " << i << ": ";
@@ -116,7 +113,7 @@ void CoarseFineHistory::printDetail() const
 	}
 	std::cout << "]\n\n fine [";
 
-	for(int i=m_fbegin;i<m_fend;++i) {
+	for(int i=m_desc._fbegin;i<m_desc._fend;++i) {
 	    const int & vi = m_history[i];
 	    if(i % 100 == 0) std::cout << "\n";
 		if(i % 10 == 0) std::cout << " " << i << ": ";

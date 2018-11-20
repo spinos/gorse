@@ -53,6 +53,9 @@ void GlyphOps::addAttribute(const QJsonObject &content)
 		case QAttrib::AtList :
 			b = addListAttribute(content);
 			break;
+		case QAttrib::AtString :
+			b = addStringAttribute(content);
+			break;
 		default:
 			break;
 	}
@@ -210,15 +213,36 @@ QAttrib *GlyphOps::addListAttribute(const QJsonObject &content)
 	return b;
 }
 
+QAttrib *GlyphOps::addStringAttribute(const QJsonObject &content)
+{
+	QString name = content["name"].toString();
+	int sat = content["strtyp"].toInt();
+	std::string snm = name.toStdString();
+	StringAttrib *b = new StringAttrib(snm);
+	b->setStrAttrTyp(sat);
+	m_attribs[snm] = b;
+	return b;
+}
+
 bool GlyphOps::setListAttrValue(const std::string &attrName, const std::string &itemName)
-{ 
-qDebug() << "GlyphOps::setListAttrValue" << attrName.c_str() 
-		 << itemName.c_str();
+{
 	QAttrib *attr = findAttrib(attrName);
 	if(!attr) return false;
 	
 	ListAttrib *fattr = static_cast<ListAttrib *>(attr);
 	fattr->setValue(itemName);
+	
+	update();
+    return true; 
+}
+
+bool GlyphOps::setStringAttrValue(const std::string &attrName, const std::string &x)
+{
+	QAttrib *attr = findAttrib(attrName);
+	if(!attr) return false;
+	
+	StringAttrib *fattr = static_cast<StringAttrib *>(attr);
+	fattr->setValue(x);
 	
 	update();
     return true; 

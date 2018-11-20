@@ -31,6 +31,7 @@ public:
 	bool setFloatAttrValue(const std::string &attrName, const float &x);
     bool setBoolAttrValue(const std::string &attrName, const bool &x);
 	bool setListAttrValue(const std::string &attrName, const std::string &itemName);
+	bool setStringAttrValue(const std::string &attrName, const std::string &x);
 	
 	virtual void update();
 	virtual bool hasDrawable() const;
@@ -50,6 +51,7 @@ protected:
 	QAttrib *addFloat2Attribute(const QJsonObject &content);
 	QAttrib *addMeshAttribute(const QJsonObject &content);
 	QAttrib *addListAttribute(const QJsonObject &content);
+	QAttrib *addStringAttribute(const QJsonObject &content);
 
 private:
 	void addConnection(QAttrib *b, const QJsonObject &content);

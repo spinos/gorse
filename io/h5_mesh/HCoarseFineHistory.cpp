@@ -16,14 +16,7 @@ bool HCoarseFineHistory::save(const CoarseFineHistory *his)
     if(!hasNamedAttr(".attr"))
 		addIntAttr(".attr", 7);
 	
-	int attrs[7];
-	attrs[0] = his->length();
-	attrs[1] = his->vbegin();
-	attrs[2] = his->vend();
-	attrs[3] = his->ncoarse();
-	attrs[4] = his->nfine();
-	attrs[5] = his->fbegin();
-	attrs[6] = his->fend();
+	int *attrs = (int *)&his->desc();
 	writeIntAttr(".attr", attrs);
 	
 	typedef HOocArray<hdata::TInt, 32, 32> IData;
@@ -41,4 +34,3 @@ bool HCoarseFineHistory::save(const CoarseFineHistory *his)
 }
 
 }
-

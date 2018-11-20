@@ -23,8 +23,8 @@ bool HFaceVaryingUV::save(const ver1::ATriangleMesh *msh, const int &ntri)
 bool HFaceVaryingUV::writeUVData(const std::string &name, 
                         char *data, const int &ntri)
 {
-/// 32 triangles 96 uvs 192 floats per column
-    typedef HOocArray<hdata::TInt, 192, 96> FUVData;
+/// 32 uvs 64 floats per column
+    typedef HOocArray<hdata::TInt, 64, 64> FUVData;
 	bool stat;
     FUVData *uvd = createDataStorage<FUVData>(name, true, stat);
     if(!stat) {
@@ -43,4 +43,3 @@ bool HFaceVaryingUV::load(ver1::ATriangleMesh *msh, const int &ntri)
 { return true; }
 
 }
-
