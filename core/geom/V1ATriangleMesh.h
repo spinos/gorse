@@ -37,10 +37,11 @@ public:
 	ATriangleMesh();
 	virtual ~ATriangleMesh();
 
-    void createTriangleMesh(int vertexCount, int triangleCount, bool doPurge=false);
+    void createTriangleMesh(int vertexCount, int triangleCount);
     void createTriangleMesh(const unsigned *inds,
         const Vector3F *pos, const Vector3F *nml,
         int vertexCount, int triangleCount);
+    void purgeMesh();
 
     void copyPositionsFrom(const Vector3F *x);
     void copyIndicesFrom(const unsigned *x);
@@ -74,12 +75,12 @@ public:
 /// a < b < c
     bool checkFaceVertex(int i, int a, int b, int c) const;
     void printFace(int i) const;
-    
-protected:
+
     Int3* indices();
     Vector3F* positions();
     Vector3F* normals();
     
+protected:
     void setNumVertices(int x);
     void setNumTriangles(int x);
     

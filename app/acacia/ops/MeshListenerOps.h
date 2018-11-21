@@ -12,7 +12,7 @@ QT_END_NAMESPACE
 namespace alo {
 class AdaptableMesh;
 class HistoryMesh;
-class HistoryReform;
+class HistoryReformSrc;
 class JMesh;
 class MeshListenerOps : public DrawableOps {
     
@@ -21,12 +21,14 @@ class MeshListenerOps : public DrawableOps {
     SimpleBuffer<Vector3F> posnml;
     SimpleBuffer<Vector3F> baryc;
     HistoryMesh *m_sourceMesh;
-    HistoryReform *m_reformer;
+    HistoryMesh *m_stageMesh;
+    HistoryReformSrc *m_reformer;
     AdaptableMesh *m_mesh;
     unsigned m_upd;
     float m_lod;
     bool m_toRelocate;
     bool m_shoUV;
+    static AFileDlgProfile SWriteProfile;
     
 public:
     MeshListenerOps();
@@ -38,6 +40,7 @@ public:
     virtual bool hasMenu() const override;
     virtual void getMenuItems(std::vector<std::pair<std::string, int > > &ks) const override;
     virtual void recvAction(int x) override;
+    virtual AFileDlgProfile *writeFileProfileR () const override;
 
 protected:
     
@@ -48,7 +51,8 @@ private:
     void computeMesh();
     void setMeshDrawable(DrawableScene *scene);
     void listAvailableMeshes(QListWidget *wig);
-
+    bool saveToFile(const std::string &fileName);
+    
 };
 
 }

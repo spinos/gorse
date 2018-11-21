@@ -12,13 +12,25 @@
 #include <jsn/JMesh.h>
 #include <mesh/EdgeCollapse.h>
 #include <mesh/HistoryMesh.h>
-#include <mesh/HistoryReform.h>
+#include <mesh/HistoryReformSrc.h>
 #include <qt_base/AFileDlg.h>
+#include <h5/V1H5IO.h>
+#include <h5/V1HBase.h>
+#include <h5_mesh/HHistoryMesh.h>
 
 using namespace boost::interprocess;
 using namespace boost::property_tree;
     
 namespace alo {
+
+AFileDlgProfile MeshListenerOps::SWriteProfile(AFileDlgProfile::FWrite,
+        "Choose File To Save",
+        ":images/test.png",
+        "Save mesh to file\nNv\nNt",
+        "Save .hes",
+        ".hes",
+        "./",
+        "untitled");
    
 MeshListenerOps::MeshListenerOps() : m_upd(0), 
 m_meshName("unknown"),
@@ -26,13 +38,17 @@ m_lod(.5f),
 m_shoUV(false)
 { 
     m_mesh = new AdaptableMesh; 
+    m_stageMesh = new HistoryMesh;
+    m_stageMesh->createTriangleMesh(1024, 1024);
+    m_stageMesh->addHistoryStage();
     m_sourceMesh = new HistoryMesh;
-    m_reformer = new HistoryReform;
+    m_reformer = new HistoryReformSrc;
 }
 
 MeshListenerOps::~MeshListenerOps()
 { 
     delete m_mesh; 
+    delete m_stageMesh;
     delete m_sourceMesh;
     delete m_reformer;
 }
@@ -214,7 +230,7 @@ void MeshListenerOps::computeMesh()
     if(m_meshName == "unknown")
         m_mesh->createMinimal();
     else
-        m_reformer->reform(m_mesh, m_lod, m_sourceMesh);
+        m_reformer->reformSrc(m_mesh, m_stageMesh, m_lod, m_sourceMesh);
     
     const int oldL = posnml.capacity();
     if(m_shoUV && m_mesh->numUVSets() > 0) 
@@ -226,18 +242,42 @@ void MeshListenerOps::computeMesh()
 }
 
 bool MeshListenerOps::hasMenu() const
-{ return true; }
+{
+    if(m_meshName == "unknown") return false;
+    return true; 
+}
 
 void MeshListenerOps::getMenuItems(std::vector<std::pair<std::string, int > > &ks) const 
 {
-    ks.push_back(std::make_pair("Save", 1));
+    ks.push_back(std::make_pair("Save", AFileDlgProfile::FWrite));
 }
 
 void MeshListenerOps::recvAction(int x) 
 {
-    std::cout<<" MeshListenerOps::recvAction ";
-    if(x == 1) std::cout << " todo save ";
+    if(x == AFileDlgProfile::FWrite) saveToFile(SWriteProfile.getFilePath());
+}
+
+AFileDlgProfile *MeshListenerOps::writeFileProfileR () const
+{ return &SWriteProfile; }
+
+bool MeshListenerOps::saveToFile(const std::string &fileName)
+{
+    ver1::H5IO hio;
+    bool stat = hio.begin(fileName, HDocument::oCreate);
+    if(!stat) return false;
+
+    ver1::HBase w("/world");
+    ver1::HBase b("/world/meshes");
+
+    HHistoryMesh hmh("/world/meshes/" + m_meshName);
+    hmh.save(m_sourceMesh);
+    hmh.close();
+
+    b.close();
+    w.close();
+
+    hio.end();
+    return true; 
 }
 
 }
-

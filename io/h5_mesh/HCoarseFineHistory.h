@@ -26,6 +26,7 @@ public:
     virtual bool save(const CoarseFineHistory *his);
 /// desc only
     virtual bool load(CoarseFineHistoryDesc *desc);
+	virtual bool load(CoarseFineHistory *his, int count);
 	
 private:
 	

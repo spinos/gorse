@@ -14,14 +14,12 @@ LodMeshIn::LodMeshIn() :
 m_lod(.5f)
 {
     m_mesh = new AdaptableMesh;
-    m_sourceMesh = new HistoryMesh;
     m_reformer = new HistoryReform;
 }
 
 LodMeshIn::~LodMeshIn()
 { 
     delete m_mesh; 
-    delete m_sourceMesh;
     delete m_reformer;
 }
     
@@ -75,10 +73,9 @@ void LodMeshIn::computeMesh()
     if(LodMeshCache::isValid()) {
         int istage, nv;
         selectStage(istage, nv, m_lod);
-        if(stageChanged(istage))
-            loadStage(istage);
+        reformStage(m_mesh, nv, istage);
+
     }
-    //m_reformer->reform(m_mesh, m_lod, m_sourceMesh);
     else
         m_mesh->createMinimal();
     

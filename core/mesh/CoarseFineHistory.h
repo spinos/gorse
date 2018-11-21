@@ -40,6 +40,10 @@ public:
 	CoarseFineHistory();
 	~CoarseFineHistory();
 	
+	void purgeHistory();
+	void createHistory(int nf);
+	void setDesc(const CoarseFineHistoryDesc &x);
+	
 /// create nf vert large numbers
 	void initialize(int nf);
 	void setVCF(const int &vbegin, const int &ncoarse, const int &nfine);
@@ -67,6 +71,7 @@ public:
 	int fineMax() const;
 	const CoarseFineHistoryDesc &desc() const;
 	const int *c_value() const;
+	int *value();
 
 	void printDetail() const;
 

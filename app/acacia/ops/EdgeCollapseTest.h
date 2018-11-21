@@ -8,14 +8,15 @@
 namespace alo {
 class AdaptableMesh;
 class HistoryMesh;
-class HistoryReform;
+class HistoryReformSrc;
 class EdgeCollapseTest : public DrawableOps {
     
     SimpleBuffer<Vector3F> posnml;
     SimpleBuffer<Vector3F> baryc;
     AdaptableMesh *m_mesh;
+    HistoryMesh *m_stageMesh;
     HistoryMesh *m_sourceMesh;
-    HistoryReform *m_reformer;
+    HistoryReformSrc *m_reformer;
     float m_lod;
     bool m_toRelocate;
     static AFileDlgProfile SWriteProfile;

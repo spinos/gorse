@@ -8,6 +8,15 @@ CoarseFineHistory::CoarseFineHistory()
 CoarseFineHistory::~CoarseFineHistory()
 {}
 
+void CoarseFineHistory::purgeHistory()
+{ m_history.purgeBuffer(); }
+
+void CoarseFineHistory::createHistory(int nf)
+{ m_history.createBuffer(nf); }
+
+void CoarseFineHistory::setDesc(const CoarseFineHistoryDesc &x)
+{ m_desc = x; }
+
 void CoarseFineHistory::initialize(int nf)
 {
 	static const int unn = 1<<30;
@@ -80,6 +89,9 @@ const int &CoarseFineHistory::fend() const
 
 const int *CoarseFineHistory::c_value() const
 { return m_history.c_data(); }
+
+int *CoarseFineHistory::value()
+{ return m_history.data(); }
 
 int CoarseFineHistory::coarseMax() const
 { return m_desc._fbegin - 1; }

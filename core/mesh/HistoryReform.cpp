@@ -3,33 +3,16 @@
 
 namespace alo {
 
-HistoryReform::HistoryReform() : m_selectedStage(-1)
-{ 
-	m_mesh = new HistoryMesh; 
-	m_mesh->createTriangleMesh(1024, 1024);
-	m_mesh->addHistoryStage();
-}
+HistoryReform::HistoryReform()
+{}
 
 HistoryReform::~HistoryReform()
-{ delete m_mesh; }
+{}
 
-void HistoryReform::reform(AdaptableMesh *outMesh, const float &lod, const HistoryMesh *sourceMesh)
+void HistoryReform::reform(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
+					const int &selV, const int &istage, const CoarseFineHistory &stage)
 {
-	int istage;
-	int selV;
-
-	sourceMesh->selectStage(istage, selV, lod);
-	
-	const CoarseFineHistory &stage = m_mesh->stage(0);
-	
-	if(istage != m_selectedStage) {
-		sourceMesh->copyStageTo(m_mesh, istage);
-		sortCoarseFaces(0, stage.coarseMax(), stage.c_value() );
-		//m_mesh->printHistoryStage(0); 
-		m_selectedStage = istage;
-	}
-
-	m_mesh->copyTo(outMesh, selV, stage.fbegin());
+	stageMesh->copyTo(outMesh, selV, stage.fbegin());
 
 	if(selV > stage.vbegin() || istage > 0) {
 
@@ -44,14 +27,14 @@ void HistoryReform::reform(AdaptableMesh *outMesh, const float &lod, const Histo
 
 		outMesh->removeLastFaces(coarseL);
 /// append uv
-		const int nuv = m_mesh->numUVSets();
+		const int nuv = stageMesh->numUVSets();
 		for(int i=0;i<nuv;++i) {
-		    const Float2 *uvs = m_mesh->c_uvSet(i);
+		    const Float2 *uvs = stageMesh->c_uvSet(i);
 		    const Float2 *buv = &uvs[stage.fbegin() * 3];
 		    outMesh->appendFaceUVs(buv, i, fineL);
 		}
 		
-		const Int3 *b = &m_mesh->c_indices()[stage.fbegin()];
+		const Int3 *b = &stageMesh->c_indices()[stage.fbegin()];
 		outMesh->appendFaces(b, fineL);
 	}
 
@@ -59,7 +42,7 @@ void HistoryReform::reform(AdaptableMesh *outMesh, const float &lod, const Histo
 	//	<<" select nv "<<selV << " reformed nf "<<outMesh->numTriangles();
 }
 
-void HistoryReform::sortCoarseFaces(int first, int last, const int *history)
+void HistoryReform::sortCoarseFaces(HistoryMesh *stageMesh, int first, int last, const int *history)
 {
 	if(last < first) return;
     int low, high;
@@ -74,17 +57,17 @@ void HistoryReform::sortCoarseFaces(int first, int last, const int *history)
 
         if(low<=high)
         {
-        	m_mesh->swapHistory(low, high);
-        	m_mesh->swapFace(low, high);
-        	m_mesh->swapFaceUV(low, high);
+        	stageMesh->swapHistory(low, high);
+        	stageMesh->swapFace(low, high);
+        	stageMesh->swapFaceUV(low, high);
             
             low++;
             high--;
         }
     } while(low<=high);
     
-    if(first<high) sortCoarseFaces(first,high, history);
-    if(low<last) sortCoarseFaces(low,last, history);
+    if(first<high) sortCoarseFaces(stageMesh, first,high, history);
+    if(low<last) sortCoarseFaces(stageMesh, low,last, history);
 }
 
 int HistoryReform::searchCoarseBegin(int nv, int first, int last, const int *history) const

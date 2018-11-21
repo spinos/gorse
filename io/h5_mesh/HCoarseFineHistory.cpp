@@ -40,4 +40,20 @@ bool HCoarseFineHistory::load(CoarseFineHistoryDesc *desc)
     return true;
 }
 
+bool HCoarseFineHistory::load(CoarseFineHistory *his, int count)
+{
+    typedef HOocArray<hdata::TInt, 32, 32> IData;
+    bool stat;
+    IData *ind = openDataStorage<IData>(".his", stat);
+    if(!stat) {
+        std::cout << "\n ERROR cannot open ooc storage .his";
+        return false;
+    }
+    
+    int nc = Round32(count)>>5;
+    
+    ind->readColumns((char *)his->value(), 0, nc);
+    return true;
+}
+
 }

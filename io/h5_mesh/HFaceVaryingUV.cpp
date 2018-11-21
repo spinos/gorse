@@ -40,6 +40,9 @@ bool HFaceVaryingUV::writeUVData(const std::string &name,
 }
 
 bool HFaceVaryingUV::load(ver1::ATriangleMesh *msh, const int &ntri)
-{ return true; }
+{ 
+    std::cout << "\n todo HFaceVaryingUV::load ";
+    return true; 
+}
 
 }

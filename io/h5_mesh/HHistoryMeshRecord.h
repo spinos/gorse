@@ -14,6 +14,7 @@
 namespace alo {
 
 struct CoarseFineHistoryDesc;
+class CoarseFineHistory;
     
 class HHistoryMeshRecord : public HHistoryMesh {
 
@@ -22,8 +23,14 @@ public:
     virtual ~HHistoryMeshRecord();
     
     virtual bool load(std::deque<CoarseFineHistoryDesc> &stageDescs);
+    virtual bool load(HistoryMesh *msh, int nv, int nt);
+    virtual bool load(CoarseFineHistory *stg, int hl, int i);
     
 protected:
+	bool readF3Data(const std::string &name,
+                char *data, const int &count);
+	bool readI3Data(const std::string &name,
+                char *data, const int &count);
 
 private:
 

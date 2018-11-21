@@ -106,7 +106,7 @@ void SimpleBuffer<T>::extendBuffer(int count)
 {
     m_cap = calcCap(count);
     T* d = new T[m_cap];
-    if(m_data) {
+    if(m_data && m_count) {
         memcpy(d, m_data, sizeof(T) * m_count);
         delete[] m_data;
     }
@@ -209,6 +209,7 @@ template<typename T>
 void SimpleBuffer<T>::purgeBuffer()
 {
     delete[] m_data;
+	m_data = 0;
     m_count = m_cap = 0;  
 }
 

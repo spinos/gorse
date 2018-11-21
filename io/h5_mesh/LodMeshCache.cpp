@@ -113,10 +113,13 @@ bool LodMeshCache::loadStage(int x)
     const CoarseFineHistoryDesc &d = m_stageDescs[x];
     const int nv = d._vend;
     const int nf = d._fend;
+    hrec.load(m_meshInCore, nv, nf);
+
     const int hl = d._length;
-    m_meshInCore->createTriangleMesh(nv, nf, true);
-    //m_meshInCore->stage(0)
-    
+    CoarseFineHistory &stg = m_meshInCore->stage(0);
+    stg.setDesc(d);
+    hrec.load(&stg, hl, x);
+
     hrec.close();
     
     g.close();
@@ -124,7 +127,17 @@ bool LodMeshCache::loadStage(int x)
     hio.end();
     
     m_curStage = x;
+
+    sortCoarseFaces(m_meshInCore, 0, stg.coarseMax(), stg.c_value() );
     return true;
+}
+
+void LodMeshCache::reformStage(AdaptableMesh *outMesh, const int &nv, const int &istage)
+{
+    if(stageChanged(istage))
+        loadStage(istage);
+
+    reform(outMesh, m_meshInCore, nv, istage, m_meshInCore->stage(0) );
 }
 
 void LodMeshCache::printStages() const
@@ -142,4 +155,3 @@ void LodMeshCache::printStages() const
 }
 
 }
-

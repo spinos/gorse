@@ -8,7 +8,7 @@
 #include <rng/Lehmer.h>
 #include <mesh/EdgeCollapse.h>
 #include <mesh/HistoryMesh.h>
-#include <mesh/HistoryReform.h>
+#include <mesh/HistoryReformSrc.h>
 #include <qt_base/AFileDlg.h>
 #include <h5/V1H5IO.h>
 #include <h5/V1HBase.h>
@@ -29,7 +29,10 @@ EdgeCollapseTest::EdgeCollapseTest()
 {
     m_mesh = new AdaptableMesh;
     m_sourceMesh = new HistoryMesh;
-    m_reformer = new HistoryReform;
+    m_stageMesh = new HistoryMesh;
+    m_stageMesh->createTriangleMesh(1024, 1024);
+    m_stageMesh->addHistoryStage();
+    m_reformer = new HistoryReformSrc;
     const int nu = 41;
     for(int i=0;i<nu;++i) {
         float phi = .21f * i;
@@ -87,6 +90,7 @@ EdgeCollapseTest::~EdgeCollapseTest()
 { 
     delete m_mesh; 
     delete m_sourceMesh;
+    delete m_stageMesh;
     delete m_reformer;
 }
     
@@ -129,7 +133,7 @@ void EdgeCollapseTest::addDrawableTo(DrawableScene *scene)
 
 void EdgeCollapseTest::computeMesh()
 {
-    m_reformer->reform(m_mesh, m_lod, m_sourceMesh);
+    m_reformer->reformSrc(m_mesh, m_stageMesh, m_lod, m_sourceMesh);
     
     const int oldL = posnml.capacity();
     m_mesh->createPositionNormalArray(posnml);
@@ -147,9 +151,7 @@ void EdgeCollapseTest::getMenuItems(std::vector<std::pair<std::string, int > > &
 
 void EdgeCollapseTest::recvAction(int x) 
 {
-    std::cout<<" EdgeCollapseTest::recvAction ";
     if(x == AFileDlgProfile::FWrite) saveToFile(SWriteProfile.getFilePath());
-    
 }
 
 AFileDlgProfile *EdgeCollapseTest::writeFileProfileR () const

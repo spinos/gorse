@@ -4,12 +4,13 @@
 #include <string>
 #include <deque>
 #include <mesh/CoarseFineHistory.h>
+#include <mesh/HistoryReform.h>
 
 namespace alo {
     
 class HistoryMesh;
     
-class LodMeshCache {
+class LodMeshCache : public HistoryReform {
 
     std::string m_meshName;
     std::string m_cachePath;
@@ -30,6 +31,7 @@ protected:
     bool selectStage(int &istage, int &nv, const float &lod);
     bool stageChanged(int x) const;
     bool loadStage(int x);
+    void reformStage(AdaptableMesh *outMesh, const int &nv, const int &istage);
     void printStages() const;
     
 private:
