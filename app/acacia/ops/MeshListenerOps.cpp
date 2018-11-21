@@ -211,18 +211,10 @@ bool MeshListenerOps::loadMesh(bool dataChanged)
 
 void MeshListenerOps::computeMesh()
 {
-    if(m_meshName == "unknown") {
-        m_mesh->initAdaptableMesh();
-        m_mesh->addVertex(Vector3F(0.f, 0.f, 0.f));
-        m_mesh->addVertex(Vector3F(8.f, 0.f, 0.f));
-        m_mesh->addVertex(Vector3F(8.f, 8.f, 0.f));
-        m_mesh->addVertex(Vector3F(0.f, 8.f, 0.f));
-        m_mesh->addTriangle(0, 1, 2);
-        m_mesh->addTriangle(0, 2, 3);
-        m_mesh->calculateVertexNormals();
-    } else {
+    if(m_meshName == "unknown")
+        m_mesh->createMinimal();
+    else
         m_reformer->reform(m_mesh, m_lod, m_sourceMesh);
-    }
     
     const int oldL = posnml.capacity();
     if(m_shoUV && m_mesh->numUVSets() > 0) 

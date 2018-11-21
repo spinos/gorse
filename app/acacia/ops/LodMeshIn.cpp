@@ -10,13 +10,12 @@
 
 namespace alo {
    
-LodMeshIn::LodMeshIn()
+LodMeshIn::LodMeshIn() :
+m_lod(.5f)
 {
     m_mesh = new AdaptableMesh;
     m_sourceMesh = new HistoryMesh;
     m_reformer = new HistoryReform;
-    
-    m_lod = .5f;
 }
 
 LodMeshIn::~LodMeshIn()
@@ -28,6 +27,14 @@ LodMeshIn::~LodMeshIn()
     
 void LodMeshIn::update()
 {
+    QAttrib * acp = findAttrib("cache_path");
+    StringAttrib *fcp = static_cast<StringAttrib *>(acp);
+    std::string scachePath;
+    fcp->getValue(scachePath);
+    
+    if(cachePathChanged(scachePath) )
+        loadCache(scachePath);
+    
     QAttrib * al = findAttrib("lod");
     FloatAttrib *fl = static_cast<FloatAttrib *>(al);
     fl->getValue(m_lod);
@@ -65,7 +72,15 @@ void LodMeshIn::addDrawableTo(DrawableScene *scene)
 
 void LodMeshIn::computeMesh()
 {
-    m_reformer->reform(m_mesh, m_lod, m_sourceMesh);
+    if(LodMeshCache::isValid()) {
+        int istage, nv;
+        selectStage(istage, nv, m_lod);
+        if(stageChanged(istage))
+            loadStage(istage);
+    }
+    //m_reformer->reform(m_mesh, m_lod, m_sourceMesh);
+    else
+        m_mesh->createMinimal();
     
     const int oldL = posnml.capacity();
     m_mesh->createPositionNormalArray(posnml);

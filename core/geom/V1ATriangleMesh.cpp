@@ -67,11 +67,16 @@ SimpleBuffer<Vector3F>& ATriangleMesh::normalBuffer()
 SimpleBuffer<Int3>& ATriangleMesh::indexBuffer()
 { return m_indices; }
 
-void ATriangleMesh::createTriangleMesh(int vertexCount, int triangleCount)
+void ATriangleMesh::createTriangleMesh(int vertexCount, int triangleCount, bool doPurge)
 {
     m_numVertices = vertexCount;
     m_numTriangles = triangleCount;
     m_numIndices = triangleCount * 3;
+    if(doPurge) {
+        m_positions.purgeBuffer();
+        m_normals.purgeBuffer();
+        m_indices.purgeBuffer();
+    }
     m_positions.createBuffer(vertexCount);
     m_normals.createBuffer(vertexCount);
     m_indices.createBuffer(m_numTriangles);

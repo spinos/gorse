@@ -119,7 +119,7 @@ bool HHistoryMesh::writeI3Data(const std::string &name,
     ind->writeColumns(data, 0, nc);
 	return true;
 }
-
+/*
 bool HHistoryMesh::load(HistoryMesh *msh)
 {
 	int nv = 3;
@@ -142,7 +142,7 @@ bool HHistoryMesh::load(HistoryMesh *msh)
 	
 	return true;//readAftCreation(tri);
 }
-/*
+
 
 char HHistoryMesh::saveTriangleTexcoord(ATriangleMesh * tri)
 {

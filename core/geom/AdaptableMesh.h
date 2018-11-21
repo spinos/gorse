@@ -22,6 +22,7 @@ public:
 	virtual ~AdaptableMesh();
     
     void initAdaptableMesh();
+    void createMinimal();
     
     int addVertex(const Vector3F& pos);
     void addTriangle(int v0, int v1, int v2);

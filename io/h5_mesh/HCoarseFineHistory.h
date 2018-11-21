@@ -14,6 +14,7 @@
 
 namespace alo {
 
+struct CoarseFineHistoryDesc;
 class CoarseFineHistory;
 
 class HCoarseFineHistory : public ver1::HBase {
@@ -23,6 +24,8 @@ public:
     virtual ~HCoarseFineHistory();
     
     virtual bool save(const CoarseFineHistory *his);
+/// desc only
+    virtual bool load(CoarseFineHistoryDesc *desc);
 	
 private:
 	

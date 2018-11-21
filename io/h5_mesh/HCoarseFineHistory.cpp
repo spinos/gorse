@@ -33,4 +33,11 @@ bool HCoarseFineHistory::save(const CoarseFineHistory *his)
     return true; 
 }
 
+bool HCoarseFineHistory::load(CoarseFineHistoryDesc *desc)
+{
+    int *attrs = (int *)desc;
+    readIntAttr(".attr", attrs);
+    return true;
+}
+
 }

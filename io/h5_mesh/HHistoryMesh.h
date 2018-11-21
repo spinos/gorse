@@ -25,8 +25,7 @@ public:
 	
 	virtual bool verifyType() override;
 	virtual bool save(const HistoryMesh *msh);
-	virtual bool load(HistoryMesh *msh);
-	
+
 protected:
 
 private:

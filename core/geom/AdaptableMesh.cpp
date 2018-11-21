@@ -25,6 +25,18 @@ void AdaptableMesh::initAdaptableMesh()
     setNumTriangles(0);
 }
 
+void AdaptableMesh::createMinimal()
+{
+    initAdaptableMesh();
+    addVertex(Vector3F(0.f, 0.f, 0.f));
+    addVertex(Vector3F(8.f, 0.f, 0.f));
+    addVertex(Vector3F(8.f, 8.f, 0.f));
+    addVertex(Vector3F(0.f, 8.f, 0.f));
+    addTriangle(0, 1, 2);
+    addTriangle(0, 2, 3);
+    calculateVertexNormals();
+}
+
 int AdaptableMesh::addVertex(const Vector3F& pos)
 {
     const int nv = numVertices();

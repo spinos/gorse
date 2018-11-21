@@ -37,11 +37,11 @@ public:
 	ATriangleMesh();
 	virtual ~ATriangleMesh();
 
-    void createTriangleMesh(int vertexCount, int triangleCount);
+    void createTriangleMesh(int vertexCount, int triangleCount, bool doPurge=false);
     void createTriangleMesh(const unsigned *inds,
         const Vector3F *pos, const Vector3F *nml,
         int vertexCount, int triangleCount);
-    
+
     void copyPositionsFrom(const Vector3F *x);
     void copyIndicesFrom(const unsigned *x);
     Float2 *addUVSet(const std::string &name);

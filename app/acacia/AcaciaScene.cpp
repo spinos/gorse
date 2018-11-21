@@ -30,6 +30,8 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
         return new MeshListenerOps;
     case AcaciaOpsType::AoEdgeCollapseTest :
         return new EdgeCollapseTest;
+    case AcaciaOpsType::AoLodMeshIn :
+        return new LodMeshIn;
     default:
         break;
     }

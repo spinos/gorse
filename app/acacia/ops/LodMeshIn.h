@@ -4,12 +4,13 @@
 #include "DrawableOps.h"
 #include <math/SimpleBuffer.h>
 #include <math/Vector3F.h>
+#include <h5_mesh/LodMeshCache.h>
 
 namespace alo {
 class AdaptableMesh;
 class HistoryMesh;
 class HistoryReform;
-class LodMeshIn : public DrawableOps {
+class LodMeshIn : public DrawableOps, public LodMeshCache {
     
     SimpleBuffer<Vector3F> posnml;
     SimpleBuffer<Vector3F> baryc;

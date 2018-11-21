@@ -30,6 +30,7 @@ public:
     SimpleBuffer(const SimpleBuffer &b);
     ~SimpleBuffer();
     
+    void purgeBuffer();
     void createBuffer(int count);
     void resetBuffer(int count);
 /// insert n elements at loc
@@ -202,6 +203,13 @@ template<typename T>
 void SimpleBuffer<T>::copyFrom(const T *b, int n, int loc)
 {
     memcpy(&m_data[loc], b, sizeof(T) * n);
+}
+
+template<typename T>
+void SimpleBuffer<T>::purgeBuffer()
+{
+    delete[] m_data;
+    m_count = m_cap = 0;  
 }
 
 }
