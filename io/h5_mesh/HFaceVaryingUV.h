@@ -30,6 +30,8 @@ public:
 private:
     bool writeUVData(const std::string &name, 
                         char *data, const int &ntri);
+    bool readUVData(const std::string &name, 
+                        char *data, const int &ntri);
 	
 };
 

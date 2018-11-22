@@ -18,7 +18,8 @@ class LodMeshIn : public DrawableOps, public LodMeshCache {
     HistoryReform *m_reformer;
     float m_lod;
     bool m_toRelocate;
-
+    bool m_shoUV;
+    
 public:
     LodMeshIn();
     virtual ~LodMeshIn();

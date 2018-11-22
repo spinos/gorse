@@ -26,7 +26,7 @@ namespace alo {
 AFileDlgProfile MeshListenerOps::SWriteProfile(AFileDlgProfile::FWrite,
         "Choose File To Save",
         ":images/test.png",
-        "Save mesh to file\nNv\nNt",
+        "Save lod mesh to file",
         "Save .hes",
         ".hes",
         "./",

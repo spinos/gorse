@@ -77,7 +77,6 @@ bool LodMeshCache::selectStage(int &istage, int &nv, const float &lod)
 		nv = vmin + (float)(vmax - vmin + 1) * lod;
 		istage = findStage(nv);
 	}
-	std::cout << "\n select stage "<< istage << " nv " << nv;
     return true;
 }
 
