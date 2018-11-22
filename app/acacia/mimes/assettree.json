@@ -17,7 +17,7 @@
                             "id": 277635,
                             "name": "listen_mesh",
                             "label": "Listener",
-                            "icon": ":images/listener.png",
+                            "icon": ":images/mesh_decimation.png",
                             "is_element": true,
                             "attribs" : [
                                 {

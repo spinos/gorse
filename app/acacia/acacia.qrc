@@ -5,6 +5,7 @@
     <file>images/print.png</file>
     <file>images/save.png</file>
     <file>images/undo.png</file>
+    <file>images/save_big.png</file>
     <file>images/unknown.png</file>
     <file>images/field_body.png</file>
     <file>images/field_head.png</file>
@@ -13,6 +14,7 @@
     <file>images/open_file_small.png</file>
     <file>images/edgeCollapseTest.png</file>
     <file>images/listener.png</file>
+    <file>images/mesh_decimation.png</file>
     <file>mimes/assettree.json</file>
 </qresource>
 </RCC>

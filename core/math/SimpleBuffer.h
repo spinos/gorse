@@ -9,6 +9,7 @@
 #ifndef ALO_MATH_SIMPLE_BUFFER_H
 #define ALO_MATH_SIMPLE_BUFFER_H
 
+#include "roundi.h"
 #include <iostream>
 #ifdef LINUX
 #include <string.h>
@@ -55,8 +56,6 @@ public:
     void operator<<(const T& x);
     
 private:
-
-    int calcCap(int count) const;
     void extendBuffer(int count);
     
 };
@@ -70,7 +69,7 @@ SimpleBuffer<T>::SimpleBuffer() : m_data(0),
 template<typename T>
 SimpleBuffer<T>::SimpleBuffer(const SimpleBuffer &b)
 {
-    m_cap = calcCap(b.count());
+    m_cap = b.capacity();
     m_data = new T[m_cap];
     m_count = b.count();
     copyFrom(b.c_data(), b.count() );
@@ -88,7 +87,7 @@ void SimpleBuffer<T>::resetBuffer(int count)
     if(m_data)
         delete[] m_data;
 
-    m_cap = calcCap(count);
+    m_cap = Round1024(count);
     m_data = new T[m_cap];
     m_count = count;
 }
@@ -104,21 +103,13 @@ void SimpleBuffer<T>::createBuffer(int count)
 template<typename T>
 void SimpleBuffer<T>::extendBuffer(int count)
 {
-    m_cap = calcCap(count);
+    m_cap = Round1024(count);
     T* d = new T[m_cap];
     if(m_data && m_count) {
         memcpy(d, m_data, sizeof(T) * m_count);
         delete[] m_data;
     }
     m_data = d;
-}
-
-template<typename T>
-int SimpleBuffer<T>::calcCap(int count) const
-{
-    int r = count >> 12;
-    if(count & 4095) r++;
-    return (r<<12);
 }
 
 template<typename T>

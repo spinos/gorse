@@ -2,8 +2,6 @@
 #include <QListWidget>
 #include <qt_ogl/DrawableScene.h>
 #include <qt_ogl/DrawableObject.h>
-#include <geom/AdaptableMesh.h>
-#include <sstream>
 #include <boost/interprocess/mapped_region.hpp>
 #include <ipc/SharedMemoryObject.h>
 #include <boost/property_tree/ptree.hpp>
@@ -25,8 +23,8 @@ namespace alo {
 
 AFileDlgProfile MeshListenerOps::SWriteProfile(AFileDlgProfile::FWrite,
         "Choose File To Save",
-        ":images/test.png",
-        "Save lod mesh to file",
+        ":images/save_big.png",
+        "Save mesh",
         "Save .hes",
         ".hes",
         "./",
@@ -258,7 +256,12 @@ void MeshListenerOps::recvAction(int x)
 }
 
 AFileDlgProfile *MeshListenerOps::writeFileProfileR () const
-{ return &SWriteProfile; }
+{
+    SWriteProfile._notice = boost::str(boost::format("level-of-detail mesh cache \nn vertices [%1%:%2%] \nn faces [%3%:%4%] ") 
+        % m_sourceMesh->minNumVertices() % m_sourceMesh->maxNumVertices() 
+        % m_sourceMesh->minNumTriangles() % m_sourceMesh->maxNumTriangles() );
+    return &SWriteProfile; 
+}
 
 bool MeshListenerOps::saveToFile(const std::string &fileName)
 {

@@ -1,7 +1,6 @@
 #include "EdgeCollapseTest.h"
 #include <qt_ogl/DrawableScene.h>
 #include <qt_ogl/DrawableObject.h>
-#include <geom/AdaptableMesh.h>
 #include <mesh/FrontMesher.h>
 #include <math/wavefuncs.h>
 #include <rng/Uniform.h>
@@ -13,13 +12,14 @@
 #include <h5/V1H5IO.h>
 #include <h5/V1HBase.h>
 #include <h5_mesh/HHistoryMesh.h>
+#include <boost/format.hpp>
 
 namespace alo {
 
 AFileDlgProfile EdgeCollapseTest::SWriteProfile(AFileDlgProfile::FWrite,
         "Choose File To Save",
-        ":images/test.png",
-        "Save mesh to file\nNv\nNt",
+        ":images/save_big.png",
+        "Save mesh",
         "Save .hes",
         ".hes",
         "./",
@@ -155,7 +155,12 @@ void EdgeCollapseTest::recvAction(int x)
 }
 
 AFileDlgProfile *EdgeCollapseTest::writeFileProfileR () const
-{ return &SWriteProfile; }
+{
+    SWriteProfile._notice = boost::str(boost::format("level-of-detail mesh cache \nn vertices [%1%:%2%] \nn faces [%3%:%4%] ") 
+        % m_sourceMesh->minNumVertices() % m_sourceMesh->maxNumVertices() 
+        % m_sourceMesh->minNumTriangles() % m_sourceMesh->maxNumTriangles() );
+    return &SWriteProfile; 
+}
 
 bool EdgeCollapseTest::saveToFile(const std::string &fileName)
 {
