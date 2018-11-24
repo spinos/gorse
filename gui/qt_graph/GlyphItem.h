@@ -2,9 +2,7 @@
  *  GlyphItem.h
  *
  *  top level item holds instance of attribs
- *
- *  Created by jian zhang on 3/31/17.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
+ *  type, id, and ops
  *
  */
 
@@ -28,19 +26,22 @@ struct Connectable;
 class GlyphItem : public QGraphicsPathItem
 {
 	int m_glyphType;
+	int m_glyphId;
 	
 public:
 	enum { Type = UserType + 1 };
 	
 	GlyphItem(const QPixmap & iconPix, int gtyp,
 			QGraphicsItem * parent = 0 );
+
+	void setGlyphId(int x);
 							
 	void moveBlockBy(const QPointF & dp);
 	
 	int type() const { return Type; }
 	
 	const int & glyphType() const;
-	
+	const int &glyphId() const;
 	void setOps(GlyphOps *ops);
 	void setHalo(GlyphHalo* hal);
 	void showHalo();
@@ -77,7 +78,7 @@ private:
 	GlyphOps *m_ops;
 	GlyphHalo *m_halo;
 	int m_blockWidth, m_blockHeight;
-	
+
 };
 
 }

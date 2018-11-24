@@ -182,9 +182,25 @@
         },
         {
             "id": 513556,
-            "name": "texture",
-            "label": "Textures",
-            "children": []
+            "name": "scene",
+            "label": "Scene",
+            "children": [
+                {
+                    "id": 716941,
+                    "name": "pvs_test",
+                    "label": "PVS Test",
+                    "icon": ":images/test.png",
+                    "is_element": true,
+                    "attribs" : [
+                        {
+                            "name": "cache_path",
+                            "label": "Cache Path",
+                            "typ": 9,
+                            "strtyp": 513
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

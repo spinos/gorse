@@ -68,6 +68,9 @@ void PerspectiveCamera::setFieldOfView(float x)
 	m_2tanfov = tan(DegreeToAngle<float>(m_fov)) * 2.f; // half fov angle * 2
 }
 
+float PerspectiveCamera::tanhfov() const
+{ return m_2tanfov * .5f; }
+
 void PerspectiveCamera::screenToWorldVectorAt(int x, int y, float depth, Vector3F & worldVec) const
 {
 	Vector3F vecNear;

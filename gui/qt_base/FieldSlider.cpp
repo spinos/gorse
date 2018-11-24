@@ -36,8 +36,13 @@ FieldSlider::FieldSlider(QWidget *parent)
     m_stepInd = 1;
     m_isContinuous = false;
     setContextMenuPolicy(Qt::CustomContextMenu);
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    connect(this, &FieldSlider::customContextMenuRequested,
+            this, &FieldSlider::showContextMenu );
+#else
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
     this, SLOT(ShowContextMenu(const QPoint&)));
+#endif
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 }
 
@@ -135,7 +140,7 @@ void FieldSlider::notifyValueChange()
     }
 }
 
-void FieldSlider::ShowContextMenu(const QPoint& pos)
+void FieldSlider::showContextMenu(const QPoint& pos)
 {
     QPoint globalPos = mapToGlobal(pos);
     // for QAbstractScrollArea and derived classes you would use:

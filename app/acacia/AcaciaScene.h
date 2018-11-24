@@ -15,6 +15,7 @@
 
 namespace alo {
 class GlyphOps;
+class CameraEvent;
 }
 
 class AcaciaScene : public alo::GlyphScene, public alo::DrawableScene
@@ -27,6 +28,9 @@ public:
 
 signals:
 	void sendUpdateDrawable();
+
+public slots:
+	void recvCameraChanged(const alo::CameraEvent &x);
 		
 protected:
     virtual alo::GlyphOps *createOps(const QJsonObject &content) override;

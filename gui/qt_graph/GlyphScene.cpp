@@ -22,7 +22,8 @@ GlyphScene::GlyphScene(GroupCollection<QJsonObject> *collector,
 					QObject *parent) :
 	QGraphicsScene(parent), 
 	m_collector(collector),
-	m_activeGlyph(0)
+	m_activeGlyph(0),
+	m_glyphCounter(0)
 {}
 
 GlyphScene::~GlyphScene()
@@ -32,6 +33,9 @@ void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
 {
 	GlyphItem *g = new GlyphItem(pix, typ);
 	addItem(g);
+	g->setGlyphId(m_glyphCounter);
+	m_glyphMap[m_glyphCounter] = g;
+	m_glyphCounter++;
 
 	g->setPos(pos);
 
@@ -98,6 +102,7 @@ void GlyphScene::removeActiveItem()
 {
 	if(!m_activeGlyph) return;
 
+	const int &k = m_activeGlyph->glyphId();
 	deselectGlyph(m_activeGlyph);
 
 	GlyphHalo* h = m_activeGlyph->halo();
@@ -107,9 +112,21 @@ void GlyphScene::removeActiveItem()
 	preDestruction(m_activeGlyph);
 
 	QGraphicsScene::removeItem(m_activeGlyph);
+
+	std::map<int, GlyphItem * >::iterator found = m_glyphMap.find(k);
+	if(found != m_glyphMap.end())
+		m_glyphMap.erase(found);
+
 	delete m_activeGlyph;
 	m_activeGlyph = 0;
 	emit sendSelectGlyph(false);
+}
+
+void GlyphScene::getGlyphItems(std::vector<GlyphItem *> &itemList) const
+{
+	std::map<int, GlyphItem * >::const_iterator it = m_glyphMap.begin();
+	for(;it!=m_glyphMap.end();++it)
+		itemList.push_back(it->second);
 }
 
 }

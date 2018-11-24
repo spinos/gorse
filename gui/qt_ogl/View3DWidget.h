@@ -10,6 +10,8 @@
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include "CameraResponse.h"
+#include "CameraEvent.h"
+Q_DECLARE_METATYPE(alo::CameraEvent)
 
 namespace alo {
     
@@ -26,9 +28,7 @@ public:
     QSize sizeHint() const override;
     
 signals:
-    void beginCameraChange();
-    void progressCameraChange();
-    void endCameraChange();
+    void cameraChanged(const alo::CameraEvent &x);
 
 public slots:
 	

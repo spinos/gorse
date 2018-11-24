@@ -47,6 +47,16 @@ MainWindow::MainWindow()
     connect(m_scene, SIGNAL(sendUpdateDrawable()),
     m_glview, SLOT(recvAttribChanged()));
 
+    qRegisterMetaType<alo::CameraEvent>();
+    
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    connect(m_glview, &alo::View3DWidget::cameraChanged,
+            m_scene, &AcaciaScene::recvCameraChanged );
+#else
+    connect(m_glview, SIGNAL(cameraChanged(alo::CameraEvent)),
+    m_scene, SLOT(recvCameraChanged(alo::CameraEvent)));
+#endif
+
     setWindowTitle(tr("Acacia"));
 
     setUnifiedTitleAndToolBarOnMac(true);

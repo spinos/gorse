@@ -1,33 +1,28 @@
-#ifndef ACA_LOD_MESH_IN_H
-#define ACA_LOD_MESH_IN_H
+#ifndef ACA_PVS_TEST_H
+#define ACA_PVS_TEST_H
 
 #include "DrawableOps.h"
 #include <math/SimpleBuffer.h>
 #include <math/Vector3F.h>
-#include <h5_mesh/LodMeshCache.h>
 
 namespace alo {
-class AdaptableMesh;
-class HistoryMesh;
-class HistoryReform;
-class LodMeshIn : public DrawableOps, public LodMeshCache {
+class CameraEvent;
+class PVSTest : public DrawableOps {
     
     SimpleBuffer<Vector3F> posnml;
     SimpleBuffer<Vector3F> baryc;
-    AdaptableMesh *m_mesh;
-    HistoryReform *m_reformer;
-    float m_lod;
+    int m_drawLength;
     bool m_toRelocate;
-    bool m_shoUV;
     
 public:
-    LodMeshIn();
-    virtual ~LodMeshIn();
+    PVSTest();
+    virtual ~PVSTest();
 
     virtual void update() override;
 
  	virtual void addDrawableTo(DrawableScene *scene) override;
-
+    virtual void recvCameraChanged(const CameraEvent &x) override;
+    
 protected:
     
 private:

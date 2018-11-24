@@ -33,6 +33,9 @@ GlyphItem::GlyphItem(const QPixmap & iconPix, int gtyp,
 	m_ops = 0;
 }
 
+void GlyphItem::setGlyphId(int x)
+{ m_glyphId = x; }
+
 void GlyphItem::resizeBlock(int bx, int by)
 {
 	QPainterPath p;
@@ -73,6 +76,9 @@ void GlyphItem::moveBlockBy(const QPointF & dp)
 
 const int & GlyphItem::glyphType() const
 { return m_glyphType; }
+
+const int &GlyphItem::glyphId() const
+{ return m_glyphId; }
 
 void GlyphItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 { event->ignore(); }

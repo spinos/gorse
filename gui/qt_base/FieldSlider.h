@@ -32,7 +32,7 @@ signals:
     void valueChanged(QPair<std::string, float>);
 
 private slots:
-    void ShowContextMenu(const QPoint& pos);
+    void showContextMenu(const QPoint& pos);
     
 private:
    void paintEvent(QPaintEvent *e) override;

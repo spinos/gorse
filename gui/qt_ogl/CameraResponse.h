@@ -5,8 +5,10 @@
 
 namespace alo {
     
+class AFrustum;
 class PerspectiveCamera;
 class Matrix44F;
+class CameraEvent;
 
 class CameraResponse {
 
@@ -29,9 +31,12 @@ protected:
     void zoom();
     const QMatrix4x4 &calcProjectionMatrix();
     const QMatrix4x4 &calcCameraMatrix();
+    void calcCameraFrustum();
+    CameraEvent getCameraEvent() const;
 	
 private:
 
+    AFrustum *m_frustum;
     PerspectiveCamera *m_persp;
     QPoint m_lastPos;
 	QPoint m_deltaPos;

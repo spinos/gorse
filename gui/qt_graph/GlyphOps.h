@@ -14,6 +14,7 @@
 
 namespace alo {
 
+class CameraEvent;
 struct AFileDlgProfile;
 
 class GlyphOps
@@ -40,6 +41,7 @@ public:
 	virtual bool hasMenu() const;
 	virtual void getMenuItems(std::vector<std::pair<std::string, int > > &ks) const;
 	virtual void recvAction(int x);
+	virtual void recvCameraChanged(const CameraEvent &x);
 	virtual AFileDlgProfile *writeFileProfileR () const;
 	virtual AFileDlgProfile *readFileProfileR () const;
 

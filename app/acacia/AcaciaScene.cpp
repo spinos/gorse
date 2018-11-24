@@ -10,6 +10,8 @@
 #include "AcaciaScene.h"
 #include "ops/AllOps.h"
 #include <qt_graph/GlyphItem.h>
+#include <qt_ogl/CameraEvent.h>
+#include <math/AFrustum.h>
 
 using namespace alo;
 
@@ -32,6 +34,8 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
         return new EdgeCollapseTest;
     case AcaciaOpsType::AoLodMeshIn :
         return new LodMeshIn;
+    case AcaciaOpsType::AoPVSTest :
+        return new PVSTest;
     default:
         break;
     }
@@ -57,4 +61,16 @@ void AcaciaScene::preDestruction(GlyphItem *item)
         emit sendUpdateDrawable();
     }
     delete op;
+}
+
+void AcaciaScene::recvCameraChanged(const CameraEvent &x)
+{
+    std::vector<GlyphItem *> itemList;
+    getGlyphItems(itemList);
+    std::cout << "\n n items " << itemList.size();
+    std::vector<GlyphItem *>::iterator it = itemList.begin();
+    for(;it!=itemList.end();++it) {
+        GlyphOps *op = (*it)->ops();
+        op->recvCameraChanged(x);
+    }
 }

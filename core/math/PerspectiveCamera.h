@@ -14,7 +14,7 @@
 namespace alo {
 
 class PerspectiveCamera : public BaseCamera {
-/// field of view angle in degrees
+/// field of view / 2 angle in degrees
 	float m_fov;
 /// field width relative to depth
 	float m_2tanfov;
@@ -30,6 +30,9 @@ public:
 	virtual void incidentRay(int x, int y, Vector3F & origin, Vector3F & worldVec) const;
 	virtual void setFieldOfView(float x);
 	virtual void screenToWorldVectorAt(int x, int y, float depth, Vector3F & worldVec) const;
+/// tan(fieldOfView / 2)
+	float tanhfov() const;
+
 private:
 	
 };

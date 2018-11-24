@@ -46,8 +46,9 @@ public:
 
 signals:
 	void sendSelectGlyph(bool x);
-		
+	
 protected:
+	void getGlyphItems(std::vector<GlyphItem *> &itemList) const;
 	virtual GlyphOps *createOps(const QJsonObject &content);
 	virtual void postCreation(GlyphItem *item) = 0;
 	virtual void preDestruction(GlyphItem *item) = 0;
@@ -59,6 +60,9 @@ private:
 	GlyphItem *m_activeGlyph;
 	QList<GlyphItem *> m_selectedGlyph;;
 	GroupCollection<QJsonObject> *m_collector;
+	std::map<int, GlyphItem * > m_glyphMap;
+	int m_glyphCounter;
+
 };
 
 }

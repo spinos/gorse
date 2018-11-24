@@ -1,13 +1,21 @@
 #include "CameraResponse.h"
 #include <math/PerspectiveCamera.h>
+#include <math/AFrustum.h>
+#include "CameraEvent.h"
 
 namespace alo {
 
 CameraResponse::CameraResponse() 
-{ m_persp = new PerspectiveCamera;}
+{
+    m_frustum = new AFrustum; 
+    m_persp = new PerspectiveCamera;
+}
 
 CameraResponse::~CameraResponse() 
-{ delete m_persp; }
+{ 
+    delete m_frustum;
+    delete m_persp; 
+}
 
 void CameraResponse::resetCamera(const Matrix44F &mat)
 { m_persp->setViewTransform(mat, 100.f); }
@@ -70,10 +78,22 @@ const QMatrix4x4 &CameraResponse::calcCameraMatrix()
     return m_camera;
 }
 
+void CameraResponse::calcCameraFrustum()
+{
+    m_frustum->set(m_persp->tanhfov(),
+           m_persp->aspectRatio(),
+           -m_persp->nearClipPlane(),
+           -m_persp->farClipPlane(),
+           m_persp->fSpace);
+}
+
 const QMatrix4x4 &CameraResponse::projectionMatrix() const
 { return m_proj; }
 
 const QMatrix4x4 &CameraResponse::cameraMatrix() const
 { return m_camera; }
-    
+
+CameraEvent CameraResponse::getCameraEvent() const
+{ return CameraEvent(m_persp, m_frustum); }
+   
 }

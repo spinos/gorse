@@ -259,6 +259,8 @@ void GlyphOps::getMenuItems(std::vector<std::pair<std::string, int > > &ks) cons
 
 void GlyphOps::recvAction(int x) {}
 
+void GlyphOps::recvCameraChanged(const CameraEvent &x) {}
+
 AFileDlgProfile *GlyphOps::writeFileProfileR () const
 { return 0; }
 

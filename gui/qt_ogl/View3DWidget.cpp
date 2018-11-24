@@ -6,6 +6,7 @@
 
 #include "View3DWidget.h"
 #include <QMouseEvent>
+#include "CameraEvent.h"
 
 namespace alo {
 
@@ -60,20 +61,27 @@ void View3DWidget::resizeGL(int width, int height)
     setPortSize(width, height);
     calcProjectionMatrix();
     calcCameraMatrix();
+    calcCameraFrustum();
     clientResize(width, height);
 }
 
 void View3DWidget::mousePressEvent(QMouseEvent *event)
 {
     resetCursorPos(event->pos());
-    if(event->modifiers() == Qt::AltModifier)
-        emit beginCameraChange();
+    if(event->modifiers() == Qt::AltModifier) {
+        CameraEvent e = getCameraEvent();
+        e.setProgressMode(CameraEvent::MBegin);
+        emit cameraChanged(e);
+    }
 }
 
 void View3DWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    if(event->modifiers() == Qt::AltModifier)
-        emit endCameraChange();
+    if(event->modifiers() == Qt::AltModifier) {
+        CameraEvent e = getCameraEvent();
+        e.setProgressMode(CameraEvent::MEnd);
+        emit cameraChanged(e);
+    }
 }
 
 void View3DWidget::mouseMoveEvent(QMouseEvent *event)
@@ -101,7 +109,10 @@ void View3DWidget::processCamera(QMouseEvent *event)
         zoom();
     }
     calcCameraMatrix();
-    emit progressCameraChange();
+    calcCameraFrustum();
+    CameraEvent e = getCameraEvent();
+    e.setProgressMode(CameraEvent::MInProgress);
+    emit cameraChanged(e);
 }
 
 void View3DWidget::clientInit() {}
