@@ -4,6 +4,7 @@
 #include <h5/V1HBase.h>
 #include "HHistoryMeshRecord.h"
 #include <mesh/HistoryMesh.h>
+#include <algorithm>
 
 namespace alo {
 
@@ -29,6 +30,40 @@ bool LodMeshCache::isValid() const
 
 bool LodMeshCache::cachePathChanged(const std::string &x) const
 { return m_cachePath != x; }
+
+bool LodMeshCache::loadCache(const std::string &fileName, const std::string &meshName)
+{
+    ver1::H5IO hio;
+    
+    bool stat = hio.begin(fileName);
+    if(!stat) {
+        m_cachePath = "unknown";
+        m_meshName = "unknown";
+        return false;
+    }
+    
+    ver1::HBase g("/world/meshes");
+    
+    std::vector<std::string> meshNames;
+    g.lsTypedChild<HHistoryMeshRecord>(meshNames);
+    std::vector<std::string>::iterator it;
+    
+    it = std::find(meshNames.begin(),meshNames.end(), meshName);
+    stat = (it != meshNames.end());
+    if(stat) {
+        HHistoryMeshRecord hrec(meshName);
+        hrec.load(m_stageDescs);
+        hrec.close();
+        m_meshName = meshName;
+    }  
+
+    g.close();
+    
+    hio.end();
+    
+    m_cachePath = fileName;
+    return true;
+}
 
 bool LodMeshCache::loadCache(const std::string &x)
 {

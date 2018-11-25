@@ -9,13 +9,11 @@
 namespace alo {
 class AdaptableMesh;
 class HistoryMesh;
-class HistoryReform;
 class LodMeshIn : public DrawableOps, public LodMeshCache {
     
     SimpleBuffer<Vector3F> posnml;
     SimpleBuffer<Vector3F> baryc;
     AdaptableMesh *m_mesh;
-    HistoryReform *m_reformer;
     float m_lod;
     bool m_toRelocate;
     bool m_shoUV;

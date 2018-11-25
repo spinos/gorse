@@ -24,15 +24,16 @@ public:
     virtual ~LodMeshCache();
     
     bool isValid() const;
-    
-protected:
     bool cachePathChanged(const std::string &x) const;
+    bool loadCache(const std::string &fileName, const std::string &meshName);
     bool loadCache(const std::string &x);
     bool selectStage(int &istage, int &nv, const float &lod);
     bool stageChanged(int x) const;
     bool loadStage(int x);
     void reformStage(AdaptableMesh *outMesh, const int &nv, const int &istage);
     void printStages() const;
+    
+protected:
     
 private:
     int findStage(const int &nv) const;

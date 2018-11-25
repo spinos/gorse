@@ -2,7 +2,6 @@
 #include <qt_ogl/DrawableScene.h>
 #include <qt_ogl/DrawableObject.h>
 #include <mesh/HistoryMesh.h>
-#include <mesh/HistoryReform.h>
 #include <qt_base/AFileDlg.h>
 #include <h5/V1H5IO.h>
 #include <h5/V1HBase.h>
@@ -15,13 +14,11 @@ m_lod(.5f),
 m_shoUV(false)
 {
     m_mesh = new AdaptableMesh;
-    m_reformer = new HistoryReform;
 }
 
 LodMeshIn::~LodMeshIn()
 { 
     delete m_mesh; 
-    delete m_reformer;
 }
     
 void LodMeshIn::update()

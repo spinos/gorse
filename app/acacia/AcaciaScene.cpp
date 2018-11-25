@@ -67,7 +67,6 @@ void AcaciaScene::recvCameraChanged(const CameraEvent &x)
 {
     std::vector<GlyphItem *> itemList;
     getGlyphItems(itemList);
-    std::cout << "\n n items " << itemList.size();
     std::vector<GlyphItem *>::iterator it = itemList.begin();
     for(;it!=itemList.end();++it) {
         GlyphOps *op = (*it)->ops();
