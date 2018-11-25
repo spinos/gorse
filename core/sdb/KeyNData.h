@@ -1,6 +1,9 @@
 /*
  * KeyNData.h
  * aloe
+ *
+ * data look up
+ *
  */
 
 #ifndef ALO_SDB_KNDATA_H
@@ -8,7 +11,6 @@
 
 #include "Entity.h"
 #include "Types.h"
-#include <iostream>
 
 namespace alo {
 
@@ -22,6 +24,7 @@ struct SearchResult
 template <typename KeyType, int MaxNKey>
 class KeyNData {
 
+/// (key, index) pairs
     Pair<KeyType, Entity> m_data[MaxNKey];
     int m_numKeys;
     

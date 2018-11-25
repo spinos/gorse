@@ -1,3 +1,11 @@
+/*
+ *  DrawableScene.h
+ *  aloe
+ *
+ *  draw queue
+ *
+ */
+
 #ifndef DRAWABLE_SCENE_H
 #define DRAWABLE_SCENE_H
 

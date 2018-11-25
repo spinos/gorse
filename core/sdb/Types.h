@@ -2,16 +2,13 @@
  *  Types.h
  *  aloe
  *
- *  Created by jian zhang on 5/5/14.
- *  Copyright 2014 __MyCompanyName__. All rights reserved.
- *
  */
 
 #ifndef ALO_SDB_TYPES_H
 #define ALO_SDB_TYPES_H
 
+#include <iostream>
 #include <string>
-#include <math/Vector3F.h>
 
 namespace alo {
 
@@ -60,43 +57,6 @@ public:
 	bool intersects(const Coord2 & e) const;
 	
 	int x, y, z;
-};
-
-/// w first
-class Coord4
-{
-public:
-	Coord4();
-	Coord4(int a, int b, int c, int d);
-	const bool operator==(const Coord4 & another) const;
-	const bool operator<(const Coord4 & another) const;
-	const bool operator>=(const Coord4 & another) const;
-	const bool operator>(const Coord4 & another) const;
-//	Coord4 ordered() const;
-/// w as highest and keep in order
-//	void makeUnique();
-	const std::string str() const;
-	friend std::ostream& operator<<(std::ostream &output, const Coord4 & p)
-    {
-        output << p.str();
-        return output;
-    }
-	int x, y, z, w;
-};
-
-class V3 {
-public:
-	V3() { data[0] = data[1] = data[2] = 0.f; }
-	V3(float *d) { set(d); }
-	void set(float *d) {data[0] = d[0]; data[1] = d[1]; data[2] = d[2];}
-	float data[3];
-	
-	const std::string str() const;
-	friend std::ostream& operator<<(std::ostream &output, const V3 & p)
-    {
-        output << p.str();
-        return output;
-    }
 };
 
 template <typename KeyType, typename IndexType> 
@@ -158,16 +118,6 @@ public:
 		t2 = new T2;
 		t3 = new T3;
 		t4 = new T4;
-	}
-};
-
-typedef Quadruple<Vector3F, Vector3F, Vector3F, float > PNPrefW;
-class VertexP : public Pair<int, PNPrefW>
-{
-public:
-	
-	const bool operator==(const VertexP & another) const {
-		return index == another.index;
 	}
 };
 

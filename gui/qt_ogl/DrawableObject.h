@@ -1,6 +1,8 @@
 /*
  *  DrawableObject.h
+ *  aloe
  *
+ *  draw resources
  *  PN (interleaved position and normal)
  *  B (barycentric coordinate)
  *

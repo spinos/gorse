@@ -1,5 +1,5 @@
-file (GLOB ALOE_GJK_SRC
-${ALOE_DIR}/core/gjk/*.h
-${ALOE_DIR}/core/gjk/*.cpp
+file (GLOB GORS_GJK_SOURCE
+${GORS_DIR}/core/gjk/*.h
+${GORS_DIR}/core/gjk/*.cpp
 )
 

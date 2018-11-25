@@ -1,9 +1,39 @@
-#pragma once
+/*
+ *  Array.h
+ *  aloe
+ *
+ *  sequence of value
+ *
+ */
 
-#include "Entity.h"
+#ifndef ALO_SDB_ARRAY_H
+#define ALO_SDB_ARRAY_H
+
 #include "Sequence.h"
 namespace alo {
 namespace sdb {
+
+template<typename T>
+class Single : public Entity
+{
+	T * m_p;
+public:
+	Single(Entity * parent = 0) : Entity(parent),
+	m_p(0)
+	{}
+	
+	T * data() {
+		return m_p;
+	}
+	
+	void setData(T * x) {
+		m_p = x;
+	}
+	
+private:
+	
+};
+
 template<typename KeyType, typename ValueType>
 class Array : public Sequence<KeyType>
 {
@@ -91,3 +121,5 @@ private:
 };
 } //end namespace sdb
 }
+
+#endif

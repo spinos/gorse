@@ -1,3 +1,9 @@
+/*
+ *  JMesh.cpp
+ *  aloe
+ *
+ */
+
 #include "JMesh.h"
 #include <boost/foreach.hpp>
 
@@ -26,7 +32,7 @@ void JMesh::addUvSet(const std::string &name)
 
 int JMesh::getRegionSize() const
 {
-    int s = 0;
+    int s = 32;
     s += m_nv * 12;
     s += m_nt * 12;
     std::vector<UVSet>::const_iterator it = m_uvsets.begin();
@@ -40,10 +46,10 @@ int JMesh::getRegionSize() const
 }
 
 int JMesh::getPosLoc() const
-{ return 0; }
+{ return 32; }
 
 int JMesh::getIndLoc() const
-{ return m_nv * 12; }
+{ return 32 + m_nv * 12; }
 
 ptree JMesh::createPtree()
 {
@@ -53,7 +59,7 @@ ptree JMesh::createPtree()
 	tree.put("nv", m_nv); 
 	tree.put("nt", m_nt);
 
-	int loc = 0;
+	int loc = 32;
 	tree.put("pos", loc);
 	loc += m_nv * 12;
 

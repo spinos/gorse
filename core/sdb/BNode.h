@@ -2,17 +2,20 @@
  *  BNode.h
  *  aloe
  *
- *  Created by jian zhang on 4/24/14.
- *  Copyright 2014 __MyCompanyName__. All rights reserved.
+ *  tree_node
+ *  |
+ *  child_node
+ *  |
+ *  leaf_node -> leaf_node
  *
  */
 #ifndef ALO_SDB_BNODE_H
 #define ALO_SDB_BNODE_H
 
 #include "KeyNData.h"
+#include <sstream>
 #include <vector>
 #include <map>
-#include <sstream>
 
 namespace alo {
 

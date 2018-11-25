@@ -2,10 +2,10 @@
  *  Sequence.h
  *  aloe
  *
- *  Created by jian zhang on 5/9/14.
- *  Copyright 2014 __MyCompanyName__. All rights reserved.
+ *  sparse key indexing
  *
  */
+ 
 #ifndef ALO_SDB_SEQUENCE_H
 #define ALO_SDB_SEQUENCE_H
 
@@ -27,7 +27,10 @@ public:
 template<typename T>
 class Sequence : public Entity {
 
-	bool m_isDataExternal;
+	BNode<T> * m_root;
+	BNode<T> * m_current;
+	int m_currentData;
+    bool m_isDataExternal;
 	
 public:
 	Sequence(Entity * parent = NULL) : Entity(parent),
@@ -242,10 +245,6 @@ private:
 	void displayLevel(const int & level, const std::vector<Entity *> & nodes);
 	bool dbgCheckLayer(const int & level, const std::vector<Entity *> & nodes);
 
-private:
-	BNode<T> * m_root;
-	BNode<T> * m_current;
-	int m_currentData;
 };
 
 template<typename T>

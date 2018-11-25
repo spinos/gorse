@@ -1,19 +1,22 @@
 /*
  *  JMesh.h
+ *  aloe
  *
  *  triangle mesh property tree in json
+ *  bbox is first
+ *  pos, ind, uv location in bytes
  *  uvs are facevarying
  *
  *  {
  *		"name":"foo",
  *      "nv":100,
  *      "nt":200,
- *      "pos":0, /// location
- *      "ind":1200,
+ *      "pos":32,
+ *      "ind":1232,
  *      "uvs":[
  *             {
  *                 "name":"map1",
- *                 "uv":2400
+ *                 "uv":2432
  *             }
  *            ]
  *  }

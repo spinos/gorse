@@ -1,5 +1,5 @@
-#ifndef APH_GJK_INTERSECTION_H
-#define APH_GJK_INTERSECTION_H
+#ifndef ALO_GJK_INTERSECTION_H
+#define ALO_GJK_INTERSECTION_H
 
 #include <math/Vector3F.h>
 #include <math/Float4.h>
