@@ -160,7 +160,7 @@ CoarseFineHistory &HistoryMesh::stage(int i)
 { return m_stages[i]; }
 
 int HistoryMesh::maxNumStages() const
-{ return 8; }
+{ return 9; }
 
 int HistoryMesh::minNumVertices() const
 { return m_stages.front().vbegin(); }

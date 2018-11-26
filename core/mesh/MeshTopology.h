@@ -52,6 +52,8 @@ public:
 	EdgeValue &edge(const EdgeIndex &ei);
 	FaceValue &face(const FaceIndex &fi);
 
+    int numEdges() const;
+
 protected:
 	void addEdge(const EdgeIndex &e);
 	void addFace(const FaceIndex &fi, const FaceValue &f);
@@ -93,6 +95,7 @@ protected:
 					const FaceIndex &fi, int va, int vb);
     void getFaceInds(std::vector<int> &faceInds,
                 const std::deque<FaceValue> &faces) const;
+    void indexEdges();
 	std::map<EdgeIndex, EdgeValue>::iterator edgesBegin();
 	std::map<EdgeIndex, EdgeValue>::iterator edgesEnd();
 

@@ -52,6 +52,7 @@ public:
     int capacityByteSize() const;
 /// copy n element to data at loc
     void copyFrom(const T *b, int n, int loc=0);
+    void copyFrom(const SimpleBuffer &b);
 
     void operator<<(const T& x);
     
@@ -192,9 +193,11 @@ void SimpleBuffer<T>::swap(int a, int b, int n)
 
 template<typename T>
 void SimpleBuffer<T>::copyFrom(const T *b, int n, int loc)
-{
-    memcpy(&m_data[loc], b, sizeof(T) * n);
-}
+{ memcpy(&m_data[loc], b, sizeof(T) * n); }
+
+template<typename T>
+void SimpleBuffer<T>::copyFrom(const SimpleBuffer &b)
+{ copyFrom(b.c_data(), b.count() ); }
 
 template<typename T>
 void SimpleBuffer<T>::purgeBuffer()

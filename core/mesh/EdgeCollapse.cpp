@@ -1,13 +1,24 @@
+/*
+ *  EdgeCollapse.cpp
+ *  aloe
+ *
+ */
+
 #include "EdgeCollapse.h"
-#include "EdgeIndex.h"
 #include "EdgeValue.h"
 #include "FaceIndex.h"
 #include "FaceValue.h"
 #include "VertexValue.h"
 #include "PolygonUVTriangulation.h"
 #include "HistoryMesh.h"
+#include <math/QuickSort.h>
 
 namespace alo {
+
+const float EdgeCollapse::InvalidCost = 1e29f;
+const float EdgeCollapse::CheckInvalidCost = .9e29f;
+const float EdgeCollapse::HighCost = .5e29f;
+const float EdgeCollapse::CheckHighCost = .5e28f;
 
 EdgeCollapse::EdgeCollapse()
 { m_triangulate = new PolygonUVTriangulation; }
@@ -25,11 +36,10 @@ void EdgeCollapse::simplify(HistoryMesh *msh)
 	
 	buildTopology(m_mesh);
 
-	computeEdgeCost();
-
 	for(int istage = 0;istage < m_mesh->maxNumStages();++istage) {
 		m_mesh->addHistoryStage();
 		int ncoarse = 0, nfine = 0;
+		computeEdgeCost();
 		int dnf = processStage(ncoarse, nfine);
 		m_mesh->finishHistoryStage(ncoarse, nfine);
 		if(dnf < 1 || canEndProcess()) break;
@@ -44,8 +54,10 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 {
 	int nvStageBegin = m_mesh->numVertices();
 	const int nsteps = nvStageBegin>>1;
-	int i = 0;
-	for(;i<nsteps;++i) {
+	for(int istep = 0;istep<nsteps;++istep) {
+		if((istep & 31) == 0)
+			sortEdgesByCost();
+
 		EdgeIndex collapseEdgeI = findEdgeToCollapse();
 		if(!collapseEdgeI.isValid()) break;
 
@@ -102,6 +114,9 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		std::vector<FaceIndex> greenPast;
 		vgreen.copyPastFacesTo(greenPast);
 		vertex(vertGreen).clearPastFaces();
+
+		removeConnectedEdgeCosts(vertRed);
+		removeConnectedEdgeCosts(vertGreen);
 
 /// remove faces connected to red 
 		if(!removeVertexConnection(vertRed)) {
@@ -168,9 +183,9 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		numCoarseFaces += blueFaces.size();
 		numFineFaces += nfRemove;
 
-		updateCost(blueFaces, redRing);
+		updateFaces(blueFaces);
 		lockVertices(redRing);
-		updateCost(greenFaces);
+		updateFaces(greenFaces);
 #if 0		
 		if(!checkTopology(m_mesh) ) return -1;
 #endif
@@ -186,32 +201,74 @@ void EdgeCollapse::computeEdgeCost()
 			computeVertexCost(vi);
 	}
 
+	indexEdges();
+
+	const int n = numEdges();
+	m_edgeCosts.resetBuffer(n);
+	m_sortedEdgeCosts.resetBuffer(n);
+	
 	std::map<EdgeIndex, EdgeValue>::iterator it = edgesBegin();
 	for(;it!=edgesEnd();++it) {
-		if(!it->second.isOnBorder()) {
-			computeEdgeCost(it->second, it->first);
-		}
-	}
+		const int &ei = it->second.ind();
+		EdgeIndexCostPair &ec = m_edgeCosts[ei];
+		ec._ei = it->first;
+		ec._ind = it->second.ind();
 
+		if(it->second.isOnBorder())
+			ec._cost = InvalidCost;
+		else
+			ec._cost = computeEdgeCost(it->second, it->first);
+	}
+}
+
+void EdgeCollapse::sortEdgesByCost()
+{	
+	const int &n = m_edgeCosts.count();
+	m_sortedEdgeCosts.copyFrom(m_edgeCosts);
+	QuickSort1::SortByKeyF<float, EdgeIndexCostPair >(m_sortedEdgeCosts.data(), 0, n-1);
+
+	for(int i=0;i<n;++i) {
+		const int &j = m_sortedEdgeCosts[i]._ind;
+		m_edgeCosts[j]._sortInd = i;
+	}
+}
+
+void EdgeCollapse::removeConnectedEdgeCosts(int vi)
+{
+	const VertexValue &vert = vertex(vi);
+	std::deque<int> neivs;
+	vert.getConnectedVertices(neivs, vi);
+	std::deque<int>::const_iterator it = neivs.begin();
+	for(;it!=neivs.end();++it) {
+		const EdgeValue &e = edge(EdgeIndex(vi, *it));
+		EdgeIndexCostPair &ec = m_edgeCosts[e.ind()];
+		ec._cost = HighCost;
+		m_sortedEdgeCosts[ec._sortInd]._cost = HighCost;
+	}
 }
 
 EdgeIndex EdgeCollapse::findEdgeToCollapse()
 {
+	const int n = m_sortedEdgeCosts.count();
+
 	EdgeIndex collapseEdgeI;
-	float edgeCostMin = 1e28f;
+	float edgeCostMin = InvalidCost;
 	
-	std::map<EdgeIndex, EdgeValue>::iterator it = edgesBegin();
-	for(;it!=edgesEnd();++it) {
-		const EdgeIndex &ei = it->first;
-		if(edgeCostMin <= it->second.cost()) continue;
+	for(int i=0;i<n;++i) {
+		const EdgeIndexCostPair &ec = m_sortedEdgeCosts[i];
+		if(ec._cost > CheckInvalidCost) break;
+
+		if(edgeCostMin < ec._cost) continue;
+		const EdgeIndex &ei = ec._ei;
 
 		if(!canEdgeCollapse(ei)) continue;
 
-		edgeCostMin = it->second.cost();
-		collapseEdgeI = it->first;
+		edgeCostMin = ec._cost;
+		collapseEdgeI = ei;
+		break;
 	}
 
-	if(edgeCostMin > .9e28f) 
+	if(edgeCostMin > CheckHighCost) 
 	    return EdgeIndex();
 	
 	return collapseEdgeI;
@@ -256,34 +313,6 @@ void EdgeCollapse::relocateVertices(int va, int vb,
 
 }
 
-void EdgeCollapse::updateCost(const std::deque<FaceIndex> &faces)
-{
-	updateFaces(faces);
-
-	std::deque<FaceIndex>::const_iterator it = faces.begin();
-	for(;it!=faces.end();++it) {
-		const FaceIndex &fi = *it;
-
-		computeVertexCost(vertex(fi.v0()));
-		computeVertexCost(vertex(fi.v1()));
-		computeVertexCost(vertex(fi.v2()));
-	}
-
-	computeEdgeCost(faces);
-}
-
-void EdgeCollapse::updateCost(const std::deque<FaceIndex> &faces,
-						const std::vector<int> &vertices)
-{
-	updateFaces(faces);
-
-	std::vector<int>::const_iterator vit = vertices.begin();
-	for(;vit!=vertices.end();++vit)
-		computeVertexCost(vertex(*vit));
-
-	computeEdgeCost(faces);
-}
-
 void EdgeCollapse::updateFaces(const std::deque<FaceIndex> &faces)
 {
 	std::deque<FaceIndex>::const_iterator it = faces.begin();
@@ -293,26 +322,6 @@ void EdgeCollapse::updateFaces(const std::deque<FaceIndex> &faces)
 		const int &ti = facei.ind();
 		facei.setArea(m_mesh->getTriangleArea(ti));
 		facei.setNormal(m_mesh->getTriangleNormal(ti));
-	}
-}
-
-void EdgeCollapse::computeEdgeCost(const std::deque<FaceIndex> &faces)
-{
-	std::deque<FaceIndex>::const_iterator it = faces.begin();
-	for(;it!=faces.end();++it) {
-		const FaceIndex &fi = *it;
-		const EdgeIndex e0(fi.v0(), fi.v1());
-		if(!edge(e0).isOnBorder()) {
-			computeEdgeCost(edge(e0), e0);
-		}
-		const EdgeIndex e1(fi.v1(), fi.v2());
-		if(!edge(e1).isOnBorder()) {
-			computeEdgeCost(edge(e1), e1);
-		}
-		const EdgeIndex e2(fi.v2(), fi.v0());
-		if(!edge(e2).isOnBorder()) {
-			computeEdgeCost(edge(e2), e2);
-		}
 	}
 }
 
@@ -425,19 +434,19 @@ void EdgeCollapse::computeVertexCost(VertexValue &vert)
 	
 /// not flat enough
 	if(vert.cost() > .3573f) /// 50 deg
-		vert.cost() = 1e29f;
+		vert.cost() = InvalidCost;
 	else 
 		vert.cost() *= totalArea;
 }
 
-void EdgeCollapse::computeEdgeCost(EdgeValue &e, const EdgeIndex &ei) const
+float EdgeCollapse::computeEdgeCost(EdgeValue &e, const EdgeIndex &ei) const
 {
 	const Vector3F *pos = m_mesh->c_positions();
 	float c = vertex(ei.v0()).cost();
 	float cb = vertex(ei.v1()).cost();
 	if(c < cb) c = cb;
 
-	e.cost() = pos[ei.v0()].distanceTo(pos[ei.v1()]) * c;
+	return (pos[ei.v0()].distanceTo(pos[ei.v1()]) * c);
 }
 
 bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)

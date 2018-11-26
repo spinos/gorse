@@ -30,6 +30,8 @@ QT5_ADD_RESOURCES(ACAC_RES_SOURCES acacia.qrc)
 add_executable (acacia ${ACAC_SOURCE_FILES}
 ${ACAC_RES_SOURCES})
 
+set_target_properties( acacia PROPERTIES CXX_STANDARD 11 )
+
 target_link_libraries (acacia Qt5::OpenGL)
 target_link_libraries (acacia ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (acacia ${Boost_SYSTEM_LIBRARY})

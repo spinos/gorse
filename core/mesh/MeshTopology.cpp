@@ -84,7 +84,7 @@ void MeshTopology::buildTopology(const ver1::ATriangleMesh *mesh)
 
 	std::cout<<"\n n vertex "<<m_numVertices
 		<<" n face "<<m_numFaces
-		<<" n edge "<<m_edges.size()
+		<<" n edge "<<numEdges()
 		<<" n vertex-on-border "<<m_numBorderVertices;
 }
 
@@ -153,7 +153,6 @@ void MeshTopology::addEdge(const EdgeIndex &e)
 {
 	if(m_edges.find(e) == m_edges.end())
 		m_edges[e] = EdgeValue();
-		//std::cout << " add edge " << e;
 }
 
 bool MeshTopology::removePastFace(const FaceIndex &fi)
@@ -488,6 +487,16 @@ void MeshTopology::getFaceInds(std::vector<int> &faceInds,
 	std::deque<FaceValue>::const_iterator it = faces.begin();
 	for(;it!=faces.end();++it) 
 		faceInds.push_back(it->ind());
+}
+
+int MeshTopology::numEdges() const
+{ return m_edges.size(); }
+
+void MeshTopology::indexEdges()
+{
+	std::map<EdgeIndex, EdgeValue>::iterator it = edgesBegin();
+	for(int i=0;it!=edgesEnd();++it,++i)
+		it->second.setInd(i);
 }
 
 void MeshTopology::PrintUnmanifoldEdgeWarning(const FaceIndex &fi, const EdgeValue &e,

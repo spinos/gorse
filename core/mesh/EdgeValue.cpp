@@ -1,9 +1,15 @@
+/*
+ *  EdgeValue.cpp
+ *  aloe
+ *
+ */
+
 #include "EdgeValue.h"
 #include "EdgeIndex.h"
 
 namespace alo {
 
-EdgeValue::EdgeValue() : m_cost(1e28f)
+EdgeValue::EdgeValue() : m_ind(0)
 {}
 
 bool EdgeValue::connectToFace(const FaceIndex &x)
@@ -40,11 +46,11 @@ bool EdgeValue::disconnectFace(const FaceIndex &x)
 bool EdgeValue::isOnBorder() const
 { return !m_face1.isValid(); }
 
-float &EdgeValue::cost()
-{ return m_cost; }
+void EdgeValue::setInd(int x)
+{ m_ind = x; }
 
-const float &EdgeValue::cost() const
-{ return m_cost; }
+const int &EdgeValue::ind() const
+{ return m_ind; }
 
 const FaceIndex &EdgeValue::face0() const
 { return m_face0; }

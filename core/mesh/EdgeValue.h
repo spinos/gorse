@@ -1,7 +1,15 @@
+/*
+ *  EdgeValue.h
+ *  aloe
+ *
+ *  edge-to-face indirection
+ *  edge index
+ *
+ */
+
 #ifndef ALO_EDGE_VALUE_H
 #define ALO_EDGE_VALUE_H
 
-#include <iostream>
 #include "FaceIndex.h"
 
 namespace alo {
@@ -10,8 +18,8 @@ class EdgeIndex;
 	
 class EdgeValue
 {
-	float m_cost;
 	FaceIndex m_face0, m_face1;
+	int m_ind;
 
 public:
 	EdgeValue();
@@ -19,9 +27,9 @@ public:
 	bool connectToFace(const FaceIndex &x);
 	bool disconnectFace(const FaceIndex &x);
 	bool isOnBorder() const;
-	
-	float &cost();
-	const float &cost() const;
+
+	void setInd(int x);
+	const int &ind() const;
 	const FaceIndex &face0() const;
 	const FaceIndex &face1() const;
 
