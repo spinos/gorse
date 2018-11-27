@@ -55,8 +55,6 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 	int nvStageBegin = m_mesh->numVertices();
 	const int nsteps = nvStageBegin>>1;
 	for(int istep = 0;istep<nsteps;++istep) {
-		if((istep & 31) == 0)
-			sortEdgesByCost();
 
 		EdgeIndex collapseEdgeI = findEdgeToCollapse();
 		if(!collapseEdgeI.isValid()) break;
@@ -219,10 +217,14 @@ void EdgeCollapse::computeEdgeCost()
 		else
 			ec._cost = computeEdgeCost(it->second, it->first);
 	}
+	
+	sortEdgesByCost();
+	
+	m_lastSelectedEdge = 0;
 }
 
 void EdgeCollapse::sortEdgesByCost()
-{	
+{
 	const int &n = m_edgeCosts.count();
 	m_sortedEdgeCosts.copyFrom(m_edgeCosts);
 	QuickSort1::SortByKeyF<float, EdgeIndexCostPair >(m_sortedEdgeCosts.data(), 0, n-1);
@@ -254,7 +256,7 @@ EdgeIndex EdgeCollapse::findEdgeToCollapse()
 	EdgeIndex collapseEdgeI;
 	float edgeCostMin = InvalidCost;
 	
-	for(int i=0;i<n;++i) {
+	for(int i=m_lastSelectedEdge;i<n;++i) {
 		const EdgeIndexCostPair &ec = m_sortedEdgeCosts[i];
 		if(ec._cost > CheckInvalidCost) break;
 
@@ -265,6 +267,7 @@ EdgeIndex EdgeCollapse::findEdgeToCollapse()
 
 		edgeCostMin = ec._cost;
 		collapseEdgeI = ei;
+		m_lastSelectedEdge = i;
 		break;
 	}
 

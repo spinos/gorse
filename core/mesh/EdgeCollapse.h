@@ -40,6 +40,7 @@ class EdgeCollapse : public MeshTopology {
 
     SimpleBuffer<EdgeIndexCostPair> m_edgeCosts;
     SimpleBuffer<EdgeIndexCostPair> m_sortedEdgeCosts;
+    int m_lastSelectedEdge;
     HistoryMesh *m_mesh;
     PolygonUVTriangulation *m_triangulate;
     
