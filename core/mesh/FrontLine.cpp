@@ -80,7 +80,7 @@ void FrontLine::closeLine1()
 {
     FrontVertex* v0 = m_edges.back().v1();
     FrontVertex* v1 = m_edges.front().v0();
-    v0->pos()->mixWith(*v1->pos(), .5f);
+    v0->pos().mixWith(v1->pos(), .5f);
     m_edges.back().v1() = m_edges.front().v0();
     m_edges.front().connectBack(&m_edges.back());
 }
@@ -156,7 +156,7 @@ void FrontLine::calcVertexDirection()
     std::deque<FrontVertex>::iterator vit = m_vertices.begin();
     for(;vit != m_vertices.end();++vit) {
         
-        Vector3F v2c = toLocal(m_center - *vit->pos()) * m_shrink;
+        Vector3F v2c = toLocal(m_center - vit->pos()) * m_shrink;
         vit->dir() = v2c;
     }
 
@@ -207,8 +207,8 @@ void FrontLine::calcEdgeAdvanceType()
         Vector3F pvb0 = getAdvanceToPos(va0);
         Vector3F pvb1 = getAdvanceToPos(va1);
 
-        const float ml = pvb0.distanceTo(*va0->pos()) * .5f 
-                        + pvb1.distanceTo(*va1->pos()) * .5f;
+        const float ml = pvb0.distanceTo(va0->pos()) * .5f 
+                        + pvb1.distanceTo(va1->pos()) * .5f;
 
         if(ml < mergeL && it->historyType())// != FrontEdge::EhMerge)
             it->setAdvanceType(FrontEdge::GenNone);
@@ -269,7 +269,7 @@ void FrontLine::calcEdgeAdvanceType()
 
 Vector3F FrontLine::getAdvanceToPos(const FrontVertex* vert) const
 {
-    Vector3F vloc = toLocal(*vert->pos() - m_center) + vert->dir() + m_dir;
+    Vector3F vloc = toLocal(vert->pos() - m_center) + vert->dir() + m_dir;
     return  m_center + toWorld(m_rot.transform(vloc) );
 }
 

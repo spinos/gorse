@@ -18,20 +18,20 @@ class FrontVertex {
 /// move in local space
     Vector3F m_dir;
     int m_id;
-    Vector3F* m_pos;
+    Vector3F m_pos;
     float m_curvature;
     
 public:
     FrontVertex();
     FrontVertex(Vector3F* pos, int id);
     
-    Vector3F& dir();
-    Vector3F* &pos();
+    Vector3F &dir();
+    Vector3F &pos();
     int& id();
     float& curvature();
     
-    const Vector3F* pos() const;
-    const Vector3F& dir() const;
+    const Vector3F &pos() const;
+    const Vector3F &dir() const;
     const int& id() const;
     const float& curvature() const;
 

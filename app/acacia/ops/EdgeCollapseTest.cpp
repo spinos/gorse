@@ -3,8 +3,6 @@
 #include <qt_ogl/DrawableObject.h>
 #include <mesh/FrontMesher.h>
 #include <math/wavefuncs.h>
-#include <rng/Uniform.h>
-#include <rng/Lehmer.h>
 #include <mesh/EdgeCollapse.h>
 #include <mesh/HistoryMesh.h>
 #include <mesh/HistoryReformSrc.h>
@@ -13,6 +11,7 @@
 #include <h5/V1HBase.h>
 #include <h5_mesh/HHistoryMesh.h>
 #include <boost/format.hpp>
+#include <ctime>
 
 namespace alo {
 
@@ -30,13 +29,14 @@ EdgeCollapseTest::EdgeCollapseTest()
     m_mesh = new AdaptableMesh;
     m_sourceMesh = new HistoryMesh;
     m_stageMesh = new HistoryMesh;
-    m_stageMesh->createTriangleMesh(1024, 1024);
+    m_stageMesh->createTriangleMesh(1000, 1000);
     m_stageMesh->addHistoryStage();
     m_reformer = new HistoryReformSrc;
-    const int nu = 41;
+    const int nu = 125;
+    const float du = 39.f / (float)nu;
     for(int i=0;i<nu;++i) {
-        float phi = .21f * i;
-        m_sourceMesh->addVertex(Vector3F(-67.f + 7.93f * i + RandomFn11() * 1.47f, -40.f + 11.f * cos(phi), -30.f - 19.f * sin(phi) ));
+        float phi = du * i;
+        m_sourceMesh->addVertex(Vector3F(-167.f + 7.93f * i + RandomFn11(), -40.f + 19.f * cos(phi), -30.f - 19.f * sin(phi) ));
     }
     
     FrontLine originLine;
@@ -45,33 +45,33 @@ EdgeCollapseTest::EdgeCollapseTest()
     for(int i=0;i<nu;++i)
         originLine.addVertex(m_sourceMesh->vertexPositionR(i), i);
     
-    Vector3F up(0.f, 4.3f, 0.1f);
+    Vector3F up(0.f, 13.3f, 0.2f);
     const Quaternion lq(-.0472f, Vector3F::ZAxis);
-    const Quaternion tq(.0193f, Vector3F::YAxis);
+    const Quaternion tq(.093f, Vector3F::YAxis);
     constexpr float cshrinking = .0f;
     originLine.setWorldSpace(Matrix33F::IdentityMatrix);
     originLine.rotateLocalBy(lq);
     originLine.rotateLocalBy(tq);
     originLine.setShrinking(cshrinking);
     originLine.setDirection(up);
-    originLine.setMinEdgeLength(.1f);
+    originLine.setMinEdgeLength(.2f);
     
     FrontLine *la = &originLine;
-    FrontLine l[29];
+    FrontLine l[125];
 
     FrontMesher msher;
     msher.attachMesh(m_sourceMesh);
 
-    for(int i=0;i<29;++i) {
+    for(int i=0;i<125;++i) {
         msher.setFrontId(i+1);
 
         l[i].rotateLocalBy(lq);
         l[i].rotateLocalBy(tq);
-        l[i].setShrinking(cshrinking + RandomFn11() * .001f);
-        up.y += RandomFn11() * 1.97f;
-        up.z += RandomFn11() * 1.99f;
+        l[i].setShrinking(cshrinking);
+        up.y += RandomFn11() * .99f;
+        up.z += RandomFn11() * .99f;
         l[i].setDirection(up);
-        l[i].setMinEdgeLength(.1f);
+        l[i].setMinEdgeLength(.2f);
 
         msher.advanceFront(l[i], *la);
 
@@ -81,7 +81,16 @@ EdgeCollapseTest::EdgeCollapseTest()
     m_sourceMesh->calculateVertexNormals();
     
     EdgeCollapse ech;
+
+    time_t then;
+    time(&then);
+
     ech.simplify(m_sourceMesh);
+
+    time_t now;
+    time(&now);
+
+    std::cout << "\n finished in " << difftime(now,then) << " sec ";
     
     m_lod = .5f;
 }
@@ -134,7 +143,7 @@ void EdgeCollapseTest::addDrawableTo(DrawableScene *scene)
 void EdgeCollapseTest::computeMesh()
 {
     m_reformer->reformSrc(m_mesh, m_stageMesh, m_lod, m_sourceMesh);
-    
+
     const int oldL = posnml.capacity();
     m_mesh->createPositionNormalArray(posnml);
     m_toRelocate = oldL < posnml.capacity();

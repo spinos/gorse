@@ -94,7 +94,7 @@ bool FrontEdge::connectBack(FrontEdge* another)
 }
 
 Vector3F FrontEdge::getCenter() const
-{ return (*v0()->pos() + *v1()->pos() ) * .5f; }
+{ return (v0()->pos() + v1()->pos() ) * .5f; }
 
 float FrontEdge::angleToE1(const Vector3F& nml) const
 {
@@ -102,9 +102,9 @@ float FrontEdge::angleToE1(const Vector3F& nml) const
 
     const FrontVertex* vc = e1()->v1();
 
-    const Vector3F ab = *v1()->pos() - *v0()->pos();
-    const Vector3F bc = *vc->pos() - *v1()->pos();
-    const Vector3F ac = *vc->pos() - *v0()->pos();
+    const Vector3F ab = v1()->pos() - v0()->pos();
+    const Vector3F bc = vc->pos() - v1()->pos();
+    const Vector3F ac = vc->pos() - v0()->pos();
     Vector3F abxbc = ab.cross(bc);
     const float labxbc = abxbc.length();
     if(labxbc < 1e-6f) return 0.f;
@@ -119,7 +119,7 @@ float FrontEdge::getLength() const
 { return getDv().length(); }
 
 Vector3F FrontEdge::getDv() const
-{ return *v1()->pos() - *v0()->pos(); }
+{ return v1()->pos() - v0()->pos(); }
 
 bool FrontEdge::isFlat() const
 { return (  Absolute<float>(v0()->curvature()) < 0.13f && Absolute<float>(v1()->curvature()) < 0.13f) ; }
@@ -127,10 +127,10 @@ bool FrontEdge::isFlat() const
 void FrontEdge::averagePosition(const float& wei)
 {
     if(e0())
-        v0()->modifyPos((*e0()->v0()->pos() + *v1()->pos() ) * .5f, wei);
+        v0()->modifyPos((e0()->v0()->pos() + v1()->pos() ) * .5f, wei);
 
     if(e1())
-        v1()->modifyPos((*e1()->v1()->pos() + *v0()->pos() ) * .5f, wei);
+        v1()->modifyPos((e1()->v1()->pos() + v0()->pos() ) * .5f, wei);
 }
 
 std::ostream& operator<<(std::ostream &output, const FrontEdge & p) 
