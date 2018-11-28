@@ -27,6 +27,7 @@ public:
 	bool getOppositeEdge(int &a, int &b, const int &c) const;
 
 	const bool operator==(const FaceIndex & another) const;
+	const bool operator<=(const FaceIndex & another) const;
 	const bool operator<(const FaceIndex & another) const;
 	const bool operator>=(const FaceIndex & another) const;
 	const bool operator>(const FaceIndex & another) const;

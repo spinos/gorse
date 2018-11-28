@@ -22,8 +22,14 @@ const bool Coord2::operator<(const Coord2 & another) const {
 	if(y< another.y) return true;
 	if(y> another.y) return false;
 	
-	if(x < another.x) return true;
-	return false;
+	return x < another.x;
+}
+
+const bool Coord2::operator<=(const Coord2 & another) const {
+	if(y< another.y) return true;
+	if(y> another.y) return false;
+	
+	return x <= another.x;
 }
 
 const bool Coord2::operator>=(const Coord2 & another) const {

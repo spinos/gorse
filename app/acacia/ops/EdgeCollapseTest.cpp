@@ -11,6 +11,7 @@
 #include <h5/V1HBase.h>
 #include <h5_mesh/HHistoryMesh.h>
 #include <boost/format.hpp>
+#include <boost/chrono/include.hpp>
 #include <ctime>
 
 namespace alo {
@@ -57,12 +58,12 @@ EdgeCollapseTest::EdgeCollapseTest()
     originLine.setMinEdgeLength(.2f);
     
     FrontLine *la = &originLine;
-    FrontLine l[125];
+    FrontLine l[143];
 
     FrontMesher msher;
     msher.attachMesh(m_sourceMesh);
 
-    for(int i=0;i<125;++i) {
+    for(int i=0;i<143;++i) {
         msher.setFrontId(i+1);
 
         l[i].rotateLocalBy(lq);
@@ -82,15 +83,14 @@ EdgeCollapseTest::EdgeCollapseTest()
     
     EdgeCollapse ech;
 
-    time_t then;
-    time(&then);
+    boost::chrono::system_clock::time_point t0 = boost::chrono::system_clock::now();
 
     ech.simplify(m_sourceMesh);
 
-    time_t now;
-    time(&now);
+    boost::chrono::system_clock::time_point t1 = boost::chrono::system_clock::now();
 
-    std::cout << "\n finished in " << difftime(now,then) << " sec ";
+    boost::chrono::duration<double> sec = t1 - t0;
+    std::cout << "\n finished in " << sec.count() << " seconds ";
     
     m_lod = .5f;
 }

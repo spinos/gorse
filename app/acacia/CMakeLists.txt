@@ -37,6 +37,7 @@ target_link_libraries (acacia ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries (acacia ${Boost_SYSTEM_LIBRARY})
 target_link_libraries (acacia ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (acacia ${Boost_THREAD_LIBRARY})
+target_link_libraries (acacia ${Boost_CHRONO_LIBRARY})
 target_link_libraries (acacia ${HDF5_LIBRARIES})
 
 IF(WIN32)

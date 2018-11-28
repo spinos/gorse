@@ -71,29 +71,51 @@ void VertexValue::connectToPastFace(const FaceIndex &x)
 
 void VertexValue::disconnectFace(const FaceIndex &x)
 {
-	std::deque<FaceIndex>::iterator it = m_faceInds.begin();
-	for(;it!=m_faceInds.end();++it) {
+	if(m_faceInds.size() < 1) return;
 
-		if(*it == x)  {
-			m_faceInds.erase(it);
+	int low = 0;
+	if(m_faceInds[low] == x) {
+		m_faceInds.erase(m_faceInds.begin() + low);
+		return;
+	}
+	int high = m_faceInds.size() - 1;
+	if(m_faceInds[high] == x) {
+		m_faceInds.erase(m_faceInds.begin() + high);
+		return;
+	}
+	while(high > low + 1) {
+		int mid = (high + low) / 2;
+		if(m_faceInds[mid] == x) {
+			m_faceInds.erase(m_faceInds.begin() + mid);
 			return;
 		}
-
-		if(*it > x) return;
+		if(m_faceInds[mid] < x) low = mid;
+		else high = mid;
 	}
 }
 
 void VertexValue::disconnectPastFace(const FaceIndex &x)
 {
-	std::deque<FaceIndex>::iterator it = m_pastFaceInds.begin();
-	for(;it!=m_pastFaceInds.end();++it) {
+	if(m_pastFaceInds.size() < 1) return;
 
-		if(*it == x)  {
-			m_pastFaceInds.erase(it);
+	int low = 0;
+	if(m_pastFaceInds[low] == x) {
+		m_pastFaceInds.erase(m_pastFaceInds.begin() + low);
+		return;
+	}
+	int high = m_pastFaceInds.size() - 1;
+	if(m_pastFaceInds[high] == x) {
+		m_pastFaceInds.erase(m_pastFaceInds.begin() + high);
+		return;
+	}
+	while(high > low + 1) {
+		int mid = (high + low) / 2;
+		if(m_pastFaceInds[mid] == x) {
+			m_pastFaceInds.erase(m_pastFaceInds.begin() + mid);
 			return;
 		}
-
-		if(*it > x) return;
+		if(m_pastFaceInds[mid] < x) low = mid;
+		else high = mid;
 	}
 }
 

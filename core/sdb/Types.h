@@ -21,6 +21,7 @@ public:
 	Coord2(int a, int b);
 	const bool operator==(const Coord2 & another) const;
 	const bool operator<(const Coord2 & another) const;
+	const bool operator<=(const Coord2 & another) const;
 	const bool operator>=(const Coord2 & another) const;
 	const bool operator>(const Coord2 & another) const;
 	Coord2 ordered() const;

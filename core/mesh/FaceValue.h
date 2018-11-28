@@ -17,11 +17,11 @@ class FaceIndex;
 
 class FaceValue
 {
-	Vector3F m_nml;
 	float m_area;
 	int m_ind;
 	int m_vertexId[3];
 	int m_uvId[3];
+	Vector3F m_nml;
 	
 public:
 	FaceValue();
@@ -32,6 +32,7 @@ public:
 	void setVertexUV(int vertex0, int uv0,
 					int vertex1, int uv1,
 					int vertex2, int uv2);
+	void setInd(int x);
 	int &ind();
 	const int &ind() const;
 	const float &area() const;

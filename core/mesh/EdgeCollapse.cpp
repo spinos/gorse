@@ -129,6 +129,7 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 				vred, vgreen);
 			return -1;
 		}
+
 	
 		if(!addFaces(blueFaces, blueUVs) ) {
 			std::cout << "\n when add blue faces";
@@ -205,17 +206,23 @@ void EdgeCollapse::computeEdgeCost()
 	m_edgeCosts.resetBuffer(n);
 	m_sortedEdgeCosts.resetBuffer(n);
 	
-	std::map<EdgeIndex, EdgeValue>::iterator it = edgesBegin();
+	EdgeListType::iterator it = edgesBegin();
 	for(;it!=edgesEnd();++it) {
-		const int &ei = it->second.ind();
-		EdgeIndexCostPair &ec = m_edgeCosts[ei];
-		ec._ei = it->first;
-		ec._ind = it->second.ind();
+		EdgeDataType *block = *it;
 
-		if(it->second.isOnBorder())
-			ec._cost = InvalidCost;
-		else
-			ec._cost = computeEdgeCost(it->second, it->first);
+		for(int i=0;i<block->count();++i) {
+			EdgeValue &e = block->value(i);
+			const int &ei = e.ind();
+
+			EdgeIndexCostPair &ec = m_edgeCosts[ei];
+			ec._ei = block->key(i);
+			ec._ind = ei;
+
+			if(e.isOnBorder())
+				ec._cost = InvalidCost;
+			else
+				ec._cost = computeEdgeCost(e, ec._ei);
+		}
 	}
 	
 	sortEdgesByCost();
@@ -240,12 +247,17 @@ void EdgeCollapse::removeConnectedEdgeCosts(int vi)
 	const VertexValue &vert = vertex(vi);
 	std::deque<int> neivs;
 	vert.getConnectedVertices(neivs, vi);
+
+	try {
 	std::deque<int>::const_iterator it = neivs.begin();
 	for(;it!=neivs.end();++it) {
-		const EdgeValue &e = edge(EdgeIndex(vi, *it));
-		EdgeIndexCostPair &ec = m_edgeCosts[e.ind()];
+		const EdgeValue *e = edge(EdgeIndex(vi, *it));
+		EdgeIndexCostPair &ec = m_edgeCosts[e->ind()];
 		ec._cost = HighCost;
 		m_sortedEdgeCosts[ec._sortInd]._cost = HighCost;
+	}
+	} catch (...) {
+		std::cout << "some";
 	}
 }
 
@@ -287,7 +299,7 @@ bool EdgeCollapse::lastConnectedFaceOor(const VertexValue &vert)
 		if(!faceExists(fi)) continue;
 
 /// cannot connect to face to be relocated
-		if(face(fi).ind() + nf > m_mesh->numTriangles() - 2)
+		if(face(fi).ind() + nf > m_mesh->numTriangles() - 1 - nf)
 		    return true;
 	}
 	return false;
@@ -454,9 +466,14 @@ float EdgeCollapse::computeEdgeCost(EdgeValue &e, const EdgeIndex &ei) const
 
 bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 {
-	const EdgeValue &e = edge(ei);
-	if(e.isOnBorder()) return false;
+	const int &nv = m_mesh->numVertices();
+	if(ei.v0() > nv - 2 || ei.v1() > nv - 2) return false;
 	
+	const EdgeValue *e = edge(ei);
+	if(!e) return false;
+
+	if(e->isOnBorder()) return false;
+
 	const VertexValue &va = vertex(ei.v0());
 	const VertexValue &vb = vertex(ei.v1());		
 	
@@ -474,16 +491,15 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 			|| vb.numConnectedFaces() > 10 )
 		return false;
 
-	int vci = e.face0().getOpposite(ei.v0(), ei.v1());
-	int vdi = e.face1().getOpposite(ei.v0(), ei.v1());
+	int vci = e->face0().getOpposite(ei.v0(), ei.v1());
+	int vdi = e->face1().getOpposite(ei.v0(), ei.v1());
 	
 	if(vertex(vci).numConnectedFaces() < 4 
 			|| vertex(vdi).numConnectedFaces() < 4 )
 		return false;
 
-	int lastVert = m_mesh->numVertices() - 2;
-	const VertexValue &vlast = vertex(m_mesh->numVertices() - 1);
-    
+	const VertexValue &vlast = vertex(nv - 1);
+    	
 /// cannot share faces with last v
 /// present or past
 	if(va.hasFaceConnected(vlast))
@@ -495,12 +511,16 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
     	return false;
     if(vb.hasPastConnected(vlast))
     	return false;
-
+//try {
 /// limite range of connected face for relocate
     if(lastConnectedFaceOor(va))
         return false;
     if(lastConnectedFaceOor(vb))
         return false;
+
+	//} catch (...) {
+	//	return false;
+	//}
 
 	return true;
 }

@@ -21,7 +21,6 @@ public:
 	const unsigned &v1() const;
 
 	const bool operator==(const EdgeIndex & another) const;
-	const bool operator!=(const EdgeIndex & another) const;
 	const bool operator<(const EdgeIndex & another) const;
 	const bool operator>(const EdgeIndex & another) const;
 	const bool operator>=(const EdgeIndex & another) const;

@@ -32,6 +32,9 @@ void FaceValue::setNormal(const Vector3F &nml)
 
 void FaceValue::setArea(const float &x)
 { m_area = x; }
+
+void FaceValue::setInd(int x)
+{ m_ind = x; }
 	
 int &FaceValue::ind()
 { return m_ind; }

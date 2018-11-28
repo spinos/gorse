@@ -32,18 +32,17 @@ const unsigned &EdgeIndex::v1() const
 { return m_v1; }
 
 const bool EdgeIndex::operator==(const EdgeIndex &another) const 
-{ return m_v0 == another.v0() && m_v1 == another.v1(); }
-
-const bool EdgeIndex::operator!=(const EdgeIndex &another) const 
-{ return m_v0 != another.v0() || m_v1 != another.v1(); }
+{ 
+	if(m_v0 != another.v0()) return false; 
+	return m_v1 == another.v1(); 
+}
 
 const bool EdgeIndex::operator<(const EdgeIndex &another) const 
 {
 	if(m_v1 < another.v1()) return true;
 	if(m_v1 > another.v1()) return false;
 	
-	if(m_v0 < another.v0()) return true;
-	return false;
+	return m_v0 < another.v0();
 }
 
 const bool EdgeIndex::operator>(const EdgeIndex &another) const 
@@ -51,8 +50,7 @@ const bool EdgeIndex::operator>(const EdgeIndex &another) const
 	if(m_v1 > another.v1()) return true;
 	if(m_v1 < another.v1()) return false;
 	
-	if(m_v0 > another.v0()) return true;
-	return false;
+	return m_v0 > another.v0();
 }
 
 const bool EdgeIndex::operator>=(const EdgeIndex &another) const 
@@ -60,8 +58,7 @@ const bool EdgeIndex::operator>=(const EdgeIndex &another) const
 	if(m_v1 > another.v1()) return true;
 	if(m_v1 < another.v1()) return false;
 	
-	if(m_v0 >= another.v0()) return true;
-	return false;
+	return m_v0 >= another.v0();
 }
 
 const bool EdgeIndex::operator<=(const EdgeIndex & another) const
@@ -69,8 +66,7 @@ const bool EdgeIndex::operator<=(const EdgeIndex & another) const
 	if(m_v1 < another.v1()) return true;
 	if(m_v1 > another.v1()) return false;
 	
-	if(m_v0 <= another.v0()) return true;
-	return false;
+	return m_v0 <= another.v0();
 }
 
 bool EdgeIndex::hasV(int x) const

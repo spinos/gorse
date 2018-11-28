@@ -12,14 +12,15 @@
 #include <map>
 #include <deque>
 #include <vector>
+#include <sdb/L3Tree.h>
+#include "FaceIndex.h"
+#include "FaceValue.h"
+#include "EdgeIndex.h"
+#include "EdgeValue.h"
 
 namespace alo {
 
 class VertexValue;
-class EdgeIndex;
-class EdgeValue;
-class FaceIndex;
-class FaceValue;
 struct Float2;
 
 namespace ver1 {
@@ -33,9 +34,9 @@ class MeshTopology {
     int m_numFaces;
     int m_numBorderVertices;
     VertexValue *m_vertices;
-    std::map<EdgeIndex, EdgeValue> m_edges;
-    std::map<FaceIndex, FaceValue> m_tris;
-    std::map<FaceIndex, FaceValue> m_pastFaces;
+    sdb::L3Tree<EdgeIndex, EdgeValue, 4096, 1024> m_edges;
+    sdb::L3Tree<FaceIndex, FaceValue, 4096, 1024> m_tris;
+    sdb::L3Tree<FaceIndex, int, 4096, 1024> m_pastFaceInds;
 
 public:
 	MeshTopology();
@@ -49,7 +50,7 @@ public:
 
 	const VertexValue &vertex(int i) const;
 	VertexValue &vertex(int i);
-	EdgeValue &edge(const EdgeIndex &ei);
+	EdgeValue *edge(const EdgeIndex &ei);
 	FaceValue &face(const FaceIndex &fi);
 
     int numEdges() const;
@@ -86,7 +87,7 @@ protected:
     void connectFaceToVertex(const FaceIndex &fi);
     void connectFaceToVertexPast(const FaceIndex &fi);
     void connectFaceToEdge(const EdgeIndex &ei, const FaceIndex &fi, bool &stat);
-    void addPastFace(const FaceIndex &fi, const FaceValue &f);
+    void addPastFace(const FaceIndex &fi, const int &i);
     bool removePastFace(const FaceIndex &fi);
     void indexPastFaces(const ver1::ATriangleMesh *mesh, int begin, int end);
 /// every past face ind +x
@@ -96,8 +97,11 @@ protected:
     void getFaceInds(std::vector<int> &faceInds,
                 const std::deque<FaceValue> &faces) const;
     void indexEdges();
-	std::map<EdgeIndex, EdgeValue>::iterator edgesBegin();
-	std::map<EdgeIndex, EdgeValue>::iterator edgesEnd();
+
+    typedef sdb::L3Node<EdgeIndex, EdgeValue, 1024> EdgeDataType;
+    typedef std::vector<EdgeDataType * > EdgeListType;
+	EdgeListType::iterator edgesBegin();
+	EdgeListType::iterator edgesEnd();
 
 	static void PrintUnmanifoldEdgeWarning(const FaceIndex &fi, 
                 const EdgeValue &e,

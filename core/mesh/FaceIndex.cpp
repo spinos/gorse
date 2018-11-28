@@ -43,8 +43,21 @@ int &FaceIndex::v1()
 int &FaceIndex::v2()
 { return m_v2; }
 
-const bool FaceIndex::operator==(const FaceIndex & another) const {
-	return v0() == another.v0() && v1() == another.v1() && v2() == another.v2();
+const bool FaceIndex::operator==(const FaceIndex & another) const 
+{
+	if(m_v0 != another.v0()) return false;
+	if(m_v1 != another.v1()) return false;
+	return m_v2 == another.v2();
+}
+
+const bool FaceIndex::operator<=(const FaceIndex & another) const {
+	if(v2() < another.v2()) return true;
+	if(v2() > another.v2()) return false;
+/// z equals
+	if(v1() < another.v1()) return true;
+	if(v1() > another.v1()) return false;
+/// y equals
+	return v0() <= another.v0();
 }
 
 const bool FaceIndex::operator<(const FaceIndex & another) const {
