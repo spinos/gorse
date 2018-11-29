@@ -23,12 +23,22 @@ bool testArray()
     }
   }
 
-  arr.printDetail();
+  //arr.printDetail();
 
-  std::cout << " find (1000, 0)" << *arr.find(sdb::Coord2(1000,0));
+  sdb::L3DataIterator<sdb::Coord2, Visibility *, 1024>dit = arr.begin(sdb::Coord2(0,0));
+  if(dit.done()) std::cout << "(*,0) not found";
+  else std::cout << " begin in 0 " << dit.first;
+  int n0 = 0;
+  for(;!dit.done();dit.next()) {
+      if(dit.first.y > 0) break;
+      n0++;
+  }
+  std::cout << " end in 0 " << dit.first << " count " << n0;
 
-  std::vector<sdb::L3Node<sdb::Coord2, Visibility *, 1024> *>::const_iterator it = arr.begin();
-  for(;it!=arr.end();++it) {}
+  sdb::L3Node<sdb::Coord2, Visibility *, 1024> *d = arr.begin();
+  while(d) {
+    d = arr.next(d);
+  }
 
   for(int i=0;i<5;++i) {
     int n = 20754;

@@ -1,6 +1,7 @@
 #include "RootOps.h"
 #include <qt_ogl/DrawableScene.h>
 #include <qt_ogl/DrawableObject.h>
+#include <qt_ogl/DrawableResource.h>
 #include <geom/AdaptableMesh.h>
 #include <mesh/FrontMesher.h>
 #include <math/EllipseFunc.h>
@@ -14,6 +15,9 @@ RootOps::RootOps()
 { 
     for(int i=0;i<20;++i) m_fronts[i] = new FrontLine;
     m_mesh = new AdaptableMesh; 
+
+    DrawableResource *rec = createResource();
+    setResource(rec);
 }
 
 RootOps::~RootOps()
@@ -53,31 +57,27 @@ void RootOps::update()
 
     DrawableScene *scene = drawableScene();
     DrawableObject *d = drawable();
-    if(m_toRelocate) {
+    const DrawableResource *rec = resource();
+    if(rec->toRelocate()) {
         scene->enqueueRemoveDrawable(d);
-        setMeshDrawable(scene);
+        DrawableObject *d1 = setMeshDrawable(m_mesh, rec);
+        setDrawable(d1);
+        scene->enqueueCreateDrawable(d1, opsId());
+
     } else {
-        d->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
-        d->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
-        d->setDrawArrayLength(m_mesh->numIndices());
+        updateDrawableResource(d, rec, m_mesh->numIndices());
         scene->enqueueEditDrawable(d);
     }
-}
-
-void RootOps::setMeshDrawable(DrawableScene *scene)
-{
-    DrawableObject *cly = scene->createDrawable();
-    cly->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
-    cly->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
-    cly->setDrawArrayLength(m_mesh->numIndices());
-    setDrawable(cly);
 }
 
 void RootOps::addDrawableTo(DrawableScene *scene)
 { 
     computeMesh();
     setDrawableScene(scene);
-    setMeshDrawable(scene);
+    const DrawableResource *rec = resource();
+    DrawableObject *d = setMeshDrawable(m_mesh, rec);
+    setDrawable(d);
+    scene->enqueueCreateDrawable(d, opsId());
 }
 
 void RootOps::computeMesh()
@@ -165,10 +165,10 @@ void RootOps::computeMesh()
     }
 
     m_mesh->calculateVertexNormals();
-    const int oldL = posnml.capacity();
-    m_mesh->createPositionNormalArray(posnml);
-    m_toRelocate = oldL < posnml.capacity();
-    if(m_toRelocate) m_mesh->createBarycentricCoordinates(baryc);
+
+    DrawableResource *rec = resource();
+    updateMeshResouce(rec, m_mesh);
+    
 }
 
 }

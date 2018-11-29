@@ -57,7 +57,7 @@ public:
 
 protected:
 	EdgeValue *addEdge(const EdgeIndex &e);
-	void addFace(const FaceIndex &fi, const FaceValue &f);
+	FaceValue *addFace(const FaceIndex &fi, const FaceValue &f);
 	bool addFaces(const std::deque<FaceIndex> &faces,
                 const std::deque<FaceValue> &uvs,
                 int lastV = 1<<30);
@@ -98,9 +98,8 @@ protected:
     void indexEdges();
 
     typedef sdb::L3Node<EdgeIndex, EdgeValue, 1024> EdgeDataType;
-    typedef std::vector<EdgeDataType * > EdgeListType;
-	EdgeListType::iterator edgesBegin();
-	EdgeListType::iterator edgesEnd();
+	EdgeDataType *firstEdge();
+	EdgeDataType *nextEdge(const EdgeDataType *x);
 
 	static void PrintUnmanifoldEdgeWarning(const FaceIndex &fi, 
                 const EdgeValue &e,

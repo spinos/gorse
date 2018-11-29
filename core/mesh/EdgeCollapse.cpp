@@ -208,24 +208,30 @@ void EdgeCollapse::computeEdgeCost()
 	const int n = numEdges();
 	m_edgeCosts.resetBuffer(n);
 	m_sortedEdgeCosts.resetBuffer(n);
-	
-	EdgeListType::iterator it = edgesBegin();
-	for(;it!=edgesEnd();++it) {
-		EdgeDataType *block = *it;
 
+	for(int i=0;i<n;++i) 
+		m_edgeCosts[i]._cost = InvalidCost;
+	
+	EdgeDataType *block = firstEdge();
+	while(block) {
+		
 		for(int i=0;i<block->count();++i) {
+			const EdgeIndex &k = block->key(i);
+			if(k.v0() > lastV)
+				break;
+
 			EdgeValue &e = block->value(i);
 			const int &ei = e.ind();
 
 			EdgeIndexCostPair &ec = m_edgeCosts[ei];
-			ec._ei = block->key(i);
+			ec._ei = k;
 			ec._ind = ei;
 
-			if(e.isOnBorder() || ec._ei.v0() > lastV || ec._ei.v1() > lastV )
-				ec._cost = InvalidCost;
-			else
+			if(!e.isOnBorder() && ec._ei.v1() <= lastV )
 				ec._cost = computeEdgeCost(e, ec._ei);
 		}
+
+		block = nextEdge(block);
 	}
 	
 	sortEdgesByCost();

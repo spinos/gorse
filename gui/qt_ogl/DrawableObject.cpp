@@ -8,6 +8,7 @@ DrawableObject::DrawableObject()
 	m_drawArraySize = 0;
     m_count[0] = 0;
     m_count[1] = 0;
+    m_drawId = 0;
 }
 
 DrawableObject::~DrawableObject()
@@ -20,6 +21,12 @@ void DrawableObject::cleanup()
     m_posnmlVbo.destroy();
     m_barVbo.destroy();
 }
+
+void DrawableObject::setDrawId(int x)
+{ m_drawId = x; }
+    
+const int &DrawableObject::drawId() const
+{ return m_drawId; }
 
 void DrawableObject::setPosnml(const float *posnml, int count)
 {

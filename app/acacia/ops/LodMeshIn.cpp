@@ -1,6 +1,7 @@
 #include "LodMeshIn.h"
 #include <qt_ogl/DrawableScene.h>
 #include <qt_ogl/DrawableObject.h>
+#include <qt_ogl/DrawableResource.h>
 #include <mesh/HistoryMesh.h>
 #include <qt_base/AFileDlg.h>
 #include <h5/V1H5IO.h>
@@ -14,6 +15,8 @@ m_lod(.5f),
 m_shoUV(false)
 {
     m_mesh = new AdaptableMesh;
+    DrawableResource *rec = createResource();
+    setResource(rec);
 }
 
 LodMeshIn::~LodMeshIn()
@@ -43,31 +46,27 @@ void LodMeshIn::update()
 
     DrawableScene *scene = drawableScene();
     DrawableObject *d = drawable();
-    if(m_toRelocate) {
+    const DrawableResource *rec = resource();
+    if(rec->toRelocate()) {
         scene->enqueueRemoveDrawable(d);
-        setMeshDrawable(scene);
+        DrawableObject *d1 = setMeshDrawable(m_mesh, rec);
+        setDrawable(d1);
+        scene->enqueueCreateDrawable(d1, opsId());
+
     } else {
-        d->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
-        d->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
-        d->setDrawArrayLength(m_mesh->numIndices());
+        updateDrawableResource(d, rec, m_mesh->numIndices());
         scene->enqueueEditDrawable(d);
     }
-}
-
-void LodMeshIn::setMeshDrawable(DrawableScene *scene)
-{
-    DrawableObject *cly = scene->createDrawable();
-    cly->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
-    cly->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
-    cly->setDrawArrayLength(m_mesh->numIndices());
-    setDrawable(cly);
 }
 
 void LodMeshIn::addDrawableTo(DrawableScene *scene)
 { 
     computeMesh();
     setDrawableScene(scene);
-    setMeshDrawable(scene);
+    const DrawableResource *rec = resource();
+    DrawableObject *d = setMeshDrawable(m_mesh, rec);
+    setDrawable(d);
+    scene->enqueueCreateDrawable(d, opsId());
 }
 
 void LodMeshIn::computeMesh()
@@ -81,13 +80,8 @@ void LodMeshIn::computeMesh()
     else
         m_mesh->createMinimal();
     
-    const int oldL = posnml.capacity();
-    if(m_shoUV && m_mesh->numUVSets() > 0) 
-        m_mesh->createUVNormalArray(posnml);
-    else
-        m_mesh->createPositionNormalArray(posnml);
-    m_toRelocate = oldL < posnml.capacity();
-    if(m_toRelocate) m_mesh->createBarycentricCoordinates(baryc);
+    DrawableResource *rec = resource();
+    updateMeshResouce(rec, m_mesh, m_shoUV);
 }
 
 }

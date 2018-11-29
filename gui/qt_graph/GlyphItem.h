@@ -40,7 +40,7 @@ public:
 	
 	int type() const { return Type; }
 	
-	const int & glyphType() const;
+	const int &glyphType() const;
 	const int &glyphId() const;
 	void setOps(GlyphOps *ops);
 	void setHalo(GlyphHalo* hal);

@@ -46,11 +46,12 @@ void PVSTest::update()
 
 void PVSTest::setMeshDrawable(DrawableScene *scene)
 {
-    DrawableObject *cly = scene->createDrawable();
+    DrawableObject *cly = createDrawable();
     cly->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
     cly->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
     cly->setDrawArrayLength(m_drawLength);
     setDrawable(cly);
+    scene->enqueueCreateDrawable(cly, opsId());
 }
 
 void PVSTest::addDrawableTo(DrawableScene *scene)

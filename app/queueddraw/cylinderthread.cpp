@@ -85,8 +85,8 @@ void CylinderThread::addCylinder(int it)
     c.createBarycentricCoordinates(ac->baryc);
     
     if(added) {
-        m_scene->lock();
-        DrawableObject *cly = m_scene->createDrawable();
+        DrawableObject *cly = new DrawableObject;
+        cly->setDrawId(it);
         cly->setPosnml((const float *)ac->posnml.c_data(), ac->posnml.capacityByteSize());
         cly->setBarycentric((const float *)ac->baryc.c_data(), ac->baryc.capacityByteSize());
         cly->setDrawArrayLength(c.numIndices());
@@ -94,7 +94,7 @@ void CylinderThread::addCylinder(int it)
             m_rng->randf1() * 20.f, 
             m_rng->randf1() * 30.f);
         ac->dr = cly;
-        m_scene->unlock();
+        m_scene->enqueueCreateDrawable(cly, 99);
     } else {
         DrawableObject *cly = ac->dr;
         cly->move(m_rng->randf1() * 2.f - 1.f, 

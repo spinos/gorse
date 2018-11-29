@@ -2,7 +2,7 @@
  *  L3Tree.h
  *  sdb
  *
- *  2 levels
+ *  sparse key indexing and searching in 2 levels
  *  root and leaf[]
  *  data stored in connected leaves
  *
@@ -12,22 +12,57 @@
 #define SDB_L3_TREE_H
 
 #include <iostream>
-#include <vector>
 #include "L3Node.h"
 
 namespace alo {
 
 namespace sdb {
 
+template <typename KeyType, typename DataType, int Dim1>
+class L3DataIterator {
+
+public:
+	L3DataIterator();
+
+	bool done() const;
+	void next();
+	
+	KeyType first;
+	DataType *second;
+	L3Node<KeyType, DataType, Dim1> *m_node;
+	int m_loc;
+
+};
+
+template <typename KeyType, typename DataType, int Dim1>
+L3DataIterator<KeyType, DataType, Dim1>::L3DataIterator() :
+m_node(NULL)
+{}
+
+template <typename KeyType, typename DataType, int Dim1>
+bool L3DataIterator<KeyType, DataType, Dim1>::done() const
+{ return !m_node; }
+
+template <typename KeyType, typename DataType, int Dim1>
+void L3DataIterator<KeyType, DataType, Dim1>::next()
+{ 
+	m_loc++;
+	if(m_loc == m_node->count()) {
+		m_node = m_node->rightSibling();
+		if(!m_node) return;
+		m_loc = 0;
+	}
+	first = m_node->key(m_loc);
+	second = &m_node->value(m_loc);
+}
+
 template <typename KeyType, typename DataType, int Dim0, int Dim1>
 class L3Tree {
 
 typedef L3Node<KeyType, DataType, Dim1> LeafNodeType;
 typedef L3Node<KeyType, LeafNodeType *, Dim0> RootNodeType;
-typedef std::vector<LeafNodeType *> LeafList;
 
 	RootNodeType m_root;
-	LeafList m_leafNodes;
 
 public:
 	L3Tree();
@@ -35,20 +70,20 @@ public:
 
 /// initial value at x
 /// return data ptr null if failed
-	DataType *insert(const KeyType &x, const DataType &a);
+	DataType *insert(const KeyType &x, const DataType &a, bool writeExisting=true);
 	bool remove(const KeyType &x);
 	DataType *find(const KeyType &x);
 
 	int size() const;
 	void printDetail() const;
 
-	void add(const DataType &x);
-
-	typename LeafList::iterator begin();
-	typename LeafList::iterator end();
+	LeafNodeType *begin();
+	LeafNodeType *next(const LeafNodeType *x);
+/// at leaf and location of x
+/// if not found try last < x then first > x
+	L3DataIterator<KeyType, DataType, Dim1> begin(const KeyType &x) const;
 
 private:
-	void removeLeaf(LeafNodeType *x);
 
 };
 
@@ -59,20 +94,18 @@ L3Tree<KeyType, DataType, Dim0, Dim1>::L3Tree()
 template <typename KeyType, typename DataType, int Dim0, int Dim1>
 L3Tree<KeyType, DataType, Dim0, Dim1>::~L3Tree()
 {
-	std::vector<LeafNodeType *>::iterator it = m_leafNodes.begin();
-	for(;it!=m_leafNodes.end();++it)
-		delete *it;
+	for(int i=0;i<m_root.count();++i)
+		delete m_root.value(i);
 }
 
 template <typename KeyType, typename DataType, int Dim0, int Dim1>
-DataType *L3Tree<KeyType, DataType, Dim0, Dim1>::insert(const KeyType &x, const DataType &a)
+DataType *L3Tree<KeyType, DataType, Dim0, Dim1>::insert(const KeyType &x, const DataType &a, bool writeExisting)
 {
 	DataType *rp = NULL;
 	if(m_root.isEmpty()) {
 		LeafNodeType *leaf = new LeafNodeType;
 		int loc = leaf->insert(x, a);
 		rp = &leaf->value(loc);
-		m_leafNodes.push_back(leaf);
 		m_root.insert(x, leaf);
 		return rp;
 	}
@@ -85,12 +118,11 @@ DataType *L3Tree<KeyType, DataType, Dim0, Dim1>::insert(const KeyType &x, const 
 	}
 
 	LeafNodeType *leaf = m_root.value(loc);
-	loc = leaf->insert(x, a);
+	loc = leaf->insert(x, a, writeExisting);
 	rp = &leaf->value(loc);
 
 	if(leaf->isFull()) {
 		LeafNodeType *right = leaf->spawn();
-		m_leafNodes.push_back(right);
 		m_root.insert(right->key(0), right);
 
 		LeafNodeType *cousin = leaf->rightSibling();
@@ -123,7 +155,6 @@ bool L3Tree<KeyType, DataType, Dim0, Dim1>::remove(const KeyType &x)
 		if(right) right->connectToLeftSibling(left);
 
 		m_root.remove(x);
-		removeLeaf(leaf);
 		delete leaf;
 
 	} else {
@@ -145,43 +176,51 @@ DataType *L3Tree<KeyType, DataType, Dim0, Dim1>::find(const KeyType &x)
 }
 
 template <typename KeyType, typename DataType, int Dim0, int Dim1>
-void L3Tree<KeyType, DataType, Dim0, Dim1>::removeLeaf(LeafNodeType *x)
-{
-	std::vector<LeafNodeType *>::iterator it = m_leafNodes.begin();
-	for(;it!=m_leafNodes.end();++it) {
-		if(*it == x) {
-			m_leafNodes.erase(it);
-			return;
-		}
-	}
-}
-
-template <typename KeyType, typename DataType, int Dim0, int Dim1>
-void L3Tree<KeyType, DataType, Dim0, Dim1>::add(const DataType &x)
-{
-	std::vector<LeafNodeType *>::iterator it = m_leafNodes.begin();
-	for(;it!=m_leafNodes.end();++it)
-		(*it)->add(x);
-}
-
-template <typename KeyType, typename DataType, int Dim0, int Dim1>
 int L3Tree<KeyType, DataType, Dim0, Dim1>::size() const
 {
+	if(m_root.isEmpty()) return 0;
 	int s = 0;
-	std::vector<LeafNodeType *>::const_iterator it = m_leafNodes.begin();
-	for(;it!=m_leafNodes.end();++it) {
-		s += (*it)->count();
+	LeafNodeType *leaf = m_root.value(0);
+	for(;;) {
+		s += leaf->count();
+		leaf = leaf->rightSibling();
+		if(!leaf) break;
 	}
 	return s;
 }
 
 template <typename KeyType, typename DataType, int Dim0, int Dim1>
-typename std::vector<L3Node<KeyType, DataType, Dim1> *>::iterator L3Tree<KeyType, DataType, Dim0, Dim1>::begin()
-{ return m_leafNodes.begin(); }
+L3Node<KeyType, DataType, Dim1> *L3Tree<KeyType, DataType, Dim0, Dim1>::begin()
+{
+	if(m_root.isEmpty()) return NULL;
+	return m_root.value(0);
+}
 
 template <typename KeyType, typename DataType, int Dim0, int Dim1>
-typename std::vector<L3Node<KeyType, DataType, Dim1> *>::iterator L3Tree<KeyType, DataType, Dim0, Dim1>::end()
-{ return m_leafNodes.end(); }
+L3Node<KeyType, DataType, Dim1> *L3Tree<KeyType, DataType, Dim0, Dim1>::next(const L3Node<KeyType, DataType, Dim1> *x)
+{ return x->rightSibling(); }
+
+template <typename KeyType, typename DataType, int Dim0, int Dim1>
+L3DataIterator<KeyType, DataType, Dim1> L3Tree<KeyType, DataType, Dim0, Dim1>::begin(const KeyType &x) const
+{
+	L3DataIterator<KeyType, DataType, Dim1> it;
+	if(m_root.isEmpty()) return it;
+	KeyType b;
+	int loc = m_root.keyLeft(x, b);
+	if(loc < 0) loc = m_root.keyRight(x, b);
+	if(loc < 0) return it;
+
+	LeafNodeType *leaf = m_root.value(loc);
+	loc = leaf->keyLeft(x, b);
+	if(loc < 0) loc = leaf->keyRight(x, b);
+	if(loc < 0) return it;
+
+	it.first = b;
+	it.second = &leaf->value(loc);
+	it.m_node = leaf;
+	it.m_loc = loc;
+	return it;
+}
 
 template <typename KeyType, typename DataType, int Dim0, int Dim1>
 void L3Tree<KeyType, DataType, Dim0, Dim1>::printDetail() const
@@ -189,7 +228,7 @@ void L3Tree<KeyType, DataType, Dim0, Dim1>::printDetail() const
 	std::cout << "\n l3 tree root " << m_root.count();
 	m_root.printDetail();
 
-	if(m_leafNodes.size() < 1) return;
+	if(m_root.isEmpty()) return;
 
 	LeafNodeType *leaf = m_root.value(0);
 	for(int i=0;;++i) {

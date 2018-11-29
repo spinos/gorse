@@ -2,6 +2,7 @@
 #include <QListWidget>
 #include <qt_ogl/DrawableScene.h>
 #include <qt_ogl/DrawableObject.h>
+#include <qt_ogl/DrawableResource.h>
 #include <boost/interprocess/mapped_region.hpp>
 #include <ipc/SharedMemoryObject.h>
 #include <boost/property_tree/ptree.hpp>
@@ -41,6 +42,8 @@ m_shoUV(false)
     m_stageMesh->addHistoryStage();
     m_sourceMesh = new HistoryMesh;
     m_reformer = new HistoryReformSrc;
+    DrawableResource *rec = createResource();
+    setResource(rec);
 }
 
 MeshListenerOps::~MeshListenerOps()
@@ -78,14 +81,14 @@ void MeshListenerOps::update()
 
     DrawableScene *scene = drawableScene();
     DrawableObject *d = drawable();
-    
-    if(m_toRelocate || dataChanged || meshSelectionChanged) {
+    const DrawableResource *rec = resource();
+    if(rec->toRelocate() || dataChanged || meshSelectionChanged) {
         scene->enqueueRemoveDrawable(d);
-        setMeshDrawable(scene);
+        DrawableObject *d1 = setMeshDrawable(m_mesh, rec);
+        setDrawable(d1);
+        scene->enqueueCreateDrawable(d1, opsId());
     } else {
-        d->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
-        d->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
-        d->setDrawArrayLength(m_mesh->numIndices());
+        updateDrawableResource(d, rec, m_mesh->numIndices());
         scene->enqueueEditDrawable(d);
     }
 }
@@ -126,20 +129,14 @@ void MeshListenerOps::listAvailableMeshes(QListWidget *wig)
     }
 }
 
-void MeshListenerOps::setMeshDrawable(DrawableScene *scene)
-{
-    DrawableObject *cly = scene->createDrawable();
-    cly->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
-    cly->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
-    cly->setDrawArrayLength(m_mesh->numIndices());
-    setDrawable(cly);
-}
-
 void MeshListenerOps::addDrawableTo(DrawableScene *scene)
 { 
     computeMesh();
     setDrawableScene(scene);
-    setMeshDrawable(scene);
+    const DrawableResource *rec = resource();
+    DrawableObject *d = setMeshDrawable(m_mesh, rec);
+    setDrawable(d);
+    scene->enqueueCreateDrawable(d, opsId());
 }
 
 bool MeshListenerOps::checkBroadcastTime()
@@ -155,7 +152,7 @@ bool MeshListenerOps::checkBroadcastTime()
     json_parser::read_json(sst, pt);
 
     unsigned upd = pt.get<unsigned>("updated");
-/// out of date
+/// outdated
     bool changed = m_upd < upd;
     m_upd = upd;
     return changed;
@@ -229,14 +226,9 @@ void MeshListenerOps::computeMesh()
         m_mesh->createMinimal();
     else
         m_reformer->reformSrc(m_mesh, m_stageMesh, m_lod, m_sourceMesh);
-    
-    const int oldL = posnml.capacity();
-    if(m_shoUV && m_mesh->numUVSets() > 0) 
-        m_mesh->createUVNormalArray(posnml);
-    else
-        m_mesh->createPositionNormalArray(posnml);
-    m_toRelocate = oldL < posnml.capacity();
-    if(m_toRelocate) m_mesh->createBarycentricCoordinates(baryc);
+
+    DrawableResource *rec = resource();
+    updateMeshResouce(rec, m_mesh, m_shoUV);
 }
 
 bool MeshListenerOps::hasMenu() const

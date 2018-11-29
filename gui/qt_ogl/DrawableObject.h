@@ -25,6 +25,9 @@ public:
     DrawableObject();
     ~DrawableObject();
 
+    void setDrawId(int x);
+    const int &drawId() const;
+
 /// entry to data
     void setPosnml(const float *posnml, int count);
     void setBarycentric(const float *barycoord, int count);
@@ -54,6 +57,8 @@ private:
     const float *m_data[2];
     int m_count[2];
     int m_drawArraySize;
+    int m_drawId;
+
 };
 
 }

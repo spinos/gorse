@@ -72,18 +72,20 @@ void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
     m_program1->endProgram();
 }
 
-DrawableObject *DrawableScene::createDrawable()
-{
-	DrawableObject *o = new DrawableObject;
-    m_createQueue.push_back(o);
-	return o;
+void DrawableScene::enqueueCreateDrawable(DrawableObject *d, int groupId)
+{ 
+    m_createQueue.push_back(d); 
 }
 
 void DrawableScene::enqueueEditDrawable(DrawableObject *d)
-{ m_editQueue.push_back(d); }
+{ 
+    m_editQueue.push_back(d); 
+}
 
 void DrawableScene::enqueueRemoveDrawable(DrawableObject *d)
-{ m_removeQueue.push_back(d); }
+{ 
+    m_removeQueue.push_back(d);
+}
 
 bool DrawableScene::removeDrawable(DrawableObject *k)
 {

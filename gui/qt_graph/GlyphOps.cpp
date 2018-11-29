@@ -15,6 +15,12 @@ GlyphOps::~GlyphOps()
 	m_attribs.clear();
 }
 
+void GlyphOps::setOpsId(int x)
+{ m_opsId = x; }
+
+const int &GlyphOps::opsId() const
+{ return m_opsId; }
+
 void GlyphOps::update()
 { qDebug()<<"GlyphOps::update"; }
 

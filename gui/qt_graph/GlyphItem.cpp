@@ -142,6 +142,7 @@ void GlyphItem::setOps(GlyphOps *ops)
 			movePort(pt, c);
 		}
 	}
+	ops->setOpsId(glyphId());
 }
 
 void GlyphItem::movePort(GlyphPort *pt, const Connectable *c)

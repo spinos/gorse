@@ -2,8 +2,10 @@
  *  DrawableScene.h
  *  aloe
  *
- *  draw queue
- *
+ *  draw queue 
+ *  index (object_id, group_id)
+ *  value object
+ *  create, edit, remove
  */
 
 #ifndef DRAWABLE_SCENE_H
@@ -42,7 +44,7 @@ public:
     void initializeScene();
     void draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam);
 
-    DrawableObject *createDrawable();
+    void enqueueCreateDrawable(DrawableObject *d, int groupId);
     void enqueueEditDrawable(DrawableObject *d);
     void enqueueRemoveDrawable(DrawableObject *d);
 

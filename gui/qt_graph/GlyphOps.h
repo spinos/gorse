@@ -19,6 +19,7 @@ struct AFileDlgProfile;
 
 class GlyphOps
 {
+	int m_opsId;
 	std::map<std::string, QAttrib * > m_attribs;
 
 public:
@@ -33,6 +34,9 @@ public:
     bool setBoolAttrValue(const std::string &attrName, const bool &x);
 	bool setListAttrValue(const std::string &attrName, const std::string &itemName);
 	bool setStringAttrValue(const std::string &attrName, const std::string &x);
+
+	void setOpsId(int x);
+	const int &opsId() const;
 	
 	virtual void update();
 	virtual bool hasDrawable() const;

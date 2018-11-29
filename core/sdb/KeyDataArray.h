@@ -25,7 +25,7 @@ public:
     virtual ~KeyDataArray();
 
     DataType *find(const KeyType &x);
-    int insert(const KeyType &x, const DataType &a);
+    int insert(const KeyType &x, const DataType &a, bool writeExisting=true);
     bool remove(const KeyType &x);
     void copyFrom(const KeyType *ks, const DataType *vs, int n);
     void add(const DataType &x);
@@ -75,7 +75,7 @@ DataType *KeyDataArray<KeyType, DataType, Dim>::find(const KeyType &x)
 }
 
 template <typename KeyType, typename DataType, int Dim>
-int KeyDataArray<KeyType, DataType, Dim>::insert(const KeyType &x, const DataType &a)
+int KeyDataArray<KeyType, DataType, Dim>::insert(const KeyType &x, const DataType &a, bool writeExisting)
 {
 	if(isEmpty()) {
 		m_key[0] = x;
@@ -87,7 +87,7 @@ int KeyDataArray<KeyType, DataType, Dim>::insert(const KeyType &x, const DataTyp
 	KeyType b;
 	int loc = keyLeft(x, b);
 	if(b == x && loc > -1) {
-		m_data[loc] = a;
+		if(writeExisting) m_data[loc] = a;
 		return loc;
 	}
 

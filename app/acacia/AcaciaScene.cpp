@@ -65,11 +65,13 @@ void AcaciaScene::preDestruction(GlyphItem *item)
 
 void AcaciaScene::recvCameraChanged(const CameraEvent &x)
 {
-    std::vector<GlyphItem *> itemList;
-    getGlyphItems(itemList);
-    std::vector<GlyphItem *>::iterator it = itemList.begin();
-    for(;it!=itemList.end();++it) {
-        GlyphOps *op = (*it)->ops();
-        op->recvCameraChanged(x);
+    GlyphDataType *block = firstGlyph();
+    while(block) {
+        for(int i=0;i<block->count();++i) {
+            GlyphItem *g = block->value(i);
+            GlyphOps *op = g->ops();
+            op->recvCameraChanged(x);
+        }
+        block = nextGlyph(block);
     }
 }

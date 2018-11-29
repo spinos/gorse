@@ -10,6 +10,9 @@
 #ifndef ALO_GLYPH_SCENE_H
 #define ALO_GLYPH_SCENE_H
 
+#include <rng/Uniform.h>
+#include <rng/Lehmer.h>
+#include <sdb/L3Tree.h>
 #include <QGraphicsScene>
 #include <QJsonObject>
 
@@ -48,20 +51,24 @@ signals:
 	void sendSelectGlyph(bool x);
 	
 protected:
-	void getGlyphItems(std::vector<GlyphItem *> &itemList) const;
 	virtual GlyphOps *createOps(const QJsonObject &content);
 	virtual void postCreation(GlyphItem *item) = 0;
 	virtual void preDestruction(GlyphItem *item) = 0;
+
+	typedef sdb::L3Node<int, GlyphItem *, 128> GlyphDataType;
+	GlyphDataType *firstGlyph();
+	GlyphDataType *nextGlyph(const GlyphDataType *x);
 	
 private:
+	int getUid();
 	
 private:
 /// only one can be active
 	GlyphItem *m_activeGlyph;
 	QList<GlyphItem *> m_selectedGlyph;;
 	GroupCollection<QJsonObject> *m_collector;
-	std::map<int, GlyphItem * > m_glyphMap;
-	int m_glyphCounter;
+	sdb::L3Tree<int, GlyphItem *, 128, 128> m_glyphMap;
+	Uniform<Lehmer> *m_rng;
 
 };
 

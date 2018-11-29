@@ -137,20 +137,14 @@ void MeshTopology::addPastFace(const FaceIndex &fi, const int &i)
 	else m_pastFaceInds.insert(fi, i);
 }
 
-void MeshTopology::addFace(const FaceIndex &fi, const FaceValue &f)
+FaceValue *MeshTopology::addFace(const FaceIndex &fi, const FaceValue &f)
 {
-	//if(m_tris.find(fi) == m_tris.end())
-	//	m_tris[fi] = f;
-	m_tris.insert(fi, f);
+	return m_tris.insert(fi, f);
 }
 
 EdgeValue *MeshTopology::addEdge(const EdgeIndex &e)
 {
-	//if(m_edges.find(e) == m_edges.end())
-	//	m_edges[e] = EdgeValue();
-	EdgeValue *r = m_edges.find(e);
-	if(!r) r = m_edges.insert(e, EdgeValue());
-	return r;
+	return m_edges.insert(e, EdgeValue(), false);
 }
 
 bool MeshTopology::removePastFace(const FaceIndex &fi)
@@ -162,7 +156,6 @@ bool MeshTopology::removePastFace(const FaceIndex &fi)
 	//	return false;
 	//}
 
-	//m_pastFaceInds.erase(ff);
 	m_pastFaceInds.remove(fi);
 	return true;
 }
@@ -175,7 +168,6 @@ bool MeshTopology::removeFace(const FaceIndex &fi)
 	//	return false;
 	//}
 
-	//m_tris.erase(ff);
 	m_tris.remove(fi);
 	return true;
 }
@@ -188,7 +180,6 @@ bool MeshTopology::removeEdge(const EdgeIndex &ei)
 	//	return false;
 	//}
 	
-	//m_edges.erase(fe);
 	m_edges.remove(ei);
 	return true;
 }
@@ -440,17 +431,18 @@ void MeshTopology::replaceMeshVertex(ver1::ATriangleMesh *mesh,
 
 void MeshTopology::pushPastFaceIndex(int x)
 {
-	//std::map<FaceIndex, int>::iterator it = m_pastFaceInds.begin();
-	//for(;it!=m_pastFaceInds.end();++it)
-	//	it->second +=x;
-	m_pastFaceInds.add(x);
+	sdb::L3Node<FaceIndex, int, 1024> *d = m_pastFaceInds.begin();
+	while(d) {
+		d->add(x);
+		d = m_pastFaceInds.next(d);
+	}
 }
 
-MeshTopology::EdgeListType::iterator MeshTopology::edgesBegin()
+MeshTopology::EdgeDataType *MeshTopology::firstEdge()
 { return m_edges.begin(); }
 
-MeshTopology::EdgeListType::iterator MeshTopology::edgesEnd()
-{ return m_edges.end(); }
+MeshTopology::EdgeDataType *MeshTopology::nextEdge(const EdgeDataType *x)
+{ return m_edges.next(x); }
 
 void MeshTopology::connectFaceToVertex(const FaceIndex &fi)
 {
@@ -481,19 +473,14 @@ bool MeshTopology::setFaceInd(const FaceIndex &fi, int x)
 	FaceValue *f = m_tris.find(fi);
 	if(!f) return false;
 	f->setInd(x);
-	//if(!faceExists(fi))
-	//	return false;
-	//m_tris[fi].ind() = x;
 	return true;
 }
 
 bool MeshTopology::setPastFaceInd(const FaceIndex &fi, int x)
 {
-	//if(!pastFaceExists(fi))
-	//	return false;
 	int *i = m_pastFaceInds.find(fi);
+	if(!i) return false;
 	*i = x;
-	//m_pastFaceInds[fi] = x;
 	return true;
 }
 
@@ -510,19 +497,15 @@ int MeshTopology::numEdges() const
 
 void MeshTopology::indexEdges()
 {
-	//std::map<EdgeIndex, EdgeValue>::iterator it = edgesBegin();
-	//for(int i=0;it!=edgesEnd();++it,++i)
-	//	it->second.setInd(i);
 	int acc = 0;
-	EdgeListType::iterator it = edgesBegin();
-	for(;it!=edgesEnd();++it) {
-		EdgeDataType *block = *it;
-
+	EdgeDataType *block = firstEdge();
+	while(block) {
 		for(int i=0;i<block->count();++i) {
 			EdgeValue &e = block->value(i);
 			e.setInd(acc);
 			acc++;
 		}
+		block = nextEdge(block);
 	}
 }
 

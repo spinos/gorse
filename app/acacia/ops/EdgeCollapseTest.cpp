@@ -1,6 +1,7 @@
 #include "EdgeCollapseTest.h"
 #include <qt_ogl/DrawableScene.h>
 #include <qt_ogl/DrawableObject.h>
+#include <qt_ogl/DrawableResource.h>
 #include <mesh/FrontMesher.h>
 #include <math/wavefuncs.h>
 #include <mesh/EdgeCollapse.h>
@@ -93,6 +94,9 @@ EdgeCollapseTest::EdgeCollapseTest()
     std::cout << "\n finished in " << sec.count() << " seconds ";
     
     m_lod = .5f;
+
+    DrawableResource *rec = createResource();
+    setResource(rec);
 }
 
 EdgeCollapseTest::~EdgeCollapseTest()
@@ -113,41 +117,41 @@ void EdgeCollapseTest::update()
 
     DrawableScene *scene = drawableScene();
     DrawableObject *d = drawable();
-    if(m_toRelocate) {
+    const DrawableResource *rec = resource();
+    if(rec->toRelocate()) {
         scene->enqueueRemoveDrawable(d);
-        setMeshDrawable(scene);
+        DrawableObject *d1 = setMeshDrawable(m_mesh, rec);
+        setDrawable(d1);
+        scene->enqueueCreateDrawable(d1, opsId());
+
     } else {
-        d->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
-        d->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
-        d->setDrawArrayLength(m_mesh->numIndices());
+        updateDrawableResource(d, rec, m_mesh->numIndices());
         scene->enqueueEditDrawable(d);
     }
-}
-
-void EdgeCollapseTest::setMeshDrawable(DrawableScene *scene)
-{
-    DrawableObject *cly = scene->createDrawable();
-    cly->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
-    cly->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
-    cly->setDrawArrayLength(m_mesh->numIndices());
-    setDrawable(cly);
 }
 
 void EdgeCollapseTest::addDrawableTo(DrawableScene *scene)
 { 
     computeMesh();
     setDrawableScene(scene);
-    setMeshDrawable(scene);
+    const DrawableResource *rec = resource();
+    DrawableObject *d = setMeshDrawable(m_mesh, rec);
+    setDrawable(d);
+    scene->enqueueCreateDrawable(d, opsId());
 }
 
 void EdgeCollapseTest::computeMesh()
 {
     m_reformer->reformSrc(m_mesh, m_stageMesh, m_lod, m_sourceMesh);
 
-    const int oldL = posnml.capacity();
-    m_mesh->createPositionNormalArray(posnml);
-    m_toRelocate = oldL < posnml.capacity();
-    if(m_toRelocate) m_mesh->createBarycentricCoordinates(baryc);
+    DrawableResource *rec = resource();
+    const int oldL = rec->size();
+    m_mesh->createPositionNormalArray(rec->posnmlBuffer());
+    if(oldL < rec->size()) {
+        rec->setToRelocate(true);
+        m_mesh->createBarycentricCoordinates(rec->barycBuffer());
+    } else
+        rec->setToRelocate(false);
 }
 
 bool EdgeCollapseTest::hasMenu() const
