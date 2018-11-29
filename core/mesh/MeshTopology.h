@@ -51,12 +51,12 @@ public:
 	const VertexValue &vertex(int i) const;
 	VertexValue &vertex(int i);
 	EdgeValue *edge(const EdgeIndex &ei);
-	FaceValue &face(const FaceIndex &fi);
+	FaceValue *face(const FaceIndex &fi);
 
     int numEdges() const;
 
 protected:
-	void addEdge(const EdgeIndex &e);
+	EdgeValue *addEdge(const EdgeIndex &e);
 	void addFace(const FaceIndex &fi, const FaceValue &f);
 	bool addFaces(const std::deque<FaceIndex> &faces,
                 const std::deque<FaceValue> &uvs,
@@ -86,7 +86,6 @@ protected:
     void unlockVertices(int high);
     void connectFaceToVertex(const FaceIndex &fi);
     void connectFaceToVertexPast(const FaceIndex &fi);
-    void connectFaceToEdge(const EdgeIndex &ei, const FaceIndex &fi, bool &stat);
     void addPastFace(const FaceIndex &fi, const int &i);
     bool removePastFace(const FaceIndex &fi);
     void indexPastFaces(const ver1::ATriangleMesh *mesh, int begin, int end);

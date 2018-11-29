@@ -127,8 +127,8 @@ VertexValue &MeshTopology::vertex(int i)
 EdgeValue *MeshTopology::edge(const EdgeIndex &ei)
 { return m_edges.find(ei); }
 
-FaceValue &MeshTopology::face(const FaceIndex &fi)
-{ return *m_tris.find(fi); }
+FaceValue *MeshTopology::face(const FaceIndex &fi)
+{ return m_tris.find(fi); }
 
 void MeshTopology::addPastFace(const FaceIndex &fi, const int &i)
 {
@@ -144,12 +144,13 @@ void MeshTopology::addFace(const FaceIndex &fi, const FaceValue &f)
 	m_tris.insert(fi, f);
 }
 
-void MeshTopology::addEdge(const EdgeIndex &e)
+EdgeValue *MeshTopology::addEdge(const EdgeIndex &e)
 {
 	//if(m_edges.find(e) == m_edges.end())
 	//	m_edges[e] = EdgeValue();
-	if(!m_edges.find(e))
-		m_edges.insert(e, EdgeValue());
+	EdgeValue *r = m_edges.find(e);
+	if(!r) r = m_edges.insert(e, EdgeValue());
+	return r;
 }
 
 bool MeshTopology::removePastFace(const FaceIndex &fi)
@@ -198,7 +199,7 @@ void MeshTopology::reformFaces(std::deque<FaceIndex> &inds,
 {
 	std::deque<FaceIndex>::iterator it = inds.begin();
 	for(;it!=inds.end();++it) {
-		uvs.push_back(face(*it));
+		uvs.push_back(*face(*it));
 		uvs.back().replaceVertex(va, vb);
 		it->reform(va, vb);
 	}
@@ -222,23 +223,26 @@ bool MeshTopology::addFaces(const std::deque<FaceIndex> &faces,
 			addPastFace(fi, uvs[i].ind());
 		
 		EdgeIndex e0(fi.v0(), fi.v1());
-		addEdge(e0);
+		EdgeValue *ev0 = addEdge(e0);
 		if(isInRange) {
-		    connectFaceToEdge(e0, fi, stat);
+		    stat = ev0->connectToFace(fi);
+		    PrintUnmanifoldEdgeWarning(fi, *ev0, stat);
 		    if(!stat) return false;
 		}
 		
 		EdgeIndex e1(fi.v1(), fi.v2());
-		addEdge(e1);
+		EdgeValue *ev1 = addEdge(e1);
 		if(isInRange) {
-		    connectFaceToEdge(e1, fi, stat);
+		    stat = ev1->connectToFace(fi);
+		    PrintUnmanifoldEdgeWarning(fi, *ev1, stat);
 		    if(!stat) return false;
 		}
 		
 		EdgeIndex e2(fi.v2(), fi.v0());
-		addEdge(e2);
+		EdgeValue *ev2 = addEdge(e2);
 		if(isInRange) {
-		    connectFaceToEdge(e2, fi, stat);
+		    stat = ev2->connectToFace(fi);
+		    PrintUnmanifoldEdgeWarning(fi, *ev2, stat);
 		    if(!stat) return false;
 		}
 		
@@ -259,8 +263,6 @@ bool MeshTopology::removeVertexConnection(int vi)
 	std::deque<int>::const_iterator it = neivs.begin();
 	for(;it!=neivs.end();++it) 
 		removeEdge(EdgeIndex(vi, *it));	
-
-
 
 	std::deque<FaceIndex>::const_iterator fit = vert.facesBegin();
 	for(;fit!= vert.facesEnd();++fit) {
@@ -361,8 +363,8 @@ bool MeshTopology::isVertexOnUVBorder(int vi, const VertexValue &vert,
 	bool isFirst = true;
 	std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
 	for(;it!=vert.facesEnd();++it) {
-		const FaceValue &facei = face(*it);
-		const int uvi = facei.vertexUV(vi);
+		const FaceValue *facei = face(*it);
+		const int uvi = facei->vertexUV(vi);
 		const Float2 &uv = uvs[uvi];
 
 		if(isFirst) {
@@ -462,12 +464,6 @@ void MeshTopology::connectFaceToVertexPast(const FaceIndex &fi)
 	m_vertices[fi.v0()].connectToPastFace(fi);
 	m_vertices[fi.v1()].connectToPastFace(fi);
 	m_vertices[fi.v2()].connectToPastFace(fi);
-}
-
-void MeshTopology::connectFaceToEdge(const EdgeIndex &ei, const FaceIndex &fi, bool &stat)
-{
-	edge(ei)->connectToFace(fi);
-	//PrintUnmanifoldEdgeWarning(fi, edge(ei), stat);
 }
 
 void MeshTopology::indexPastFaces(const ver1::ATriangleMesh *mesh, int begin, int end)

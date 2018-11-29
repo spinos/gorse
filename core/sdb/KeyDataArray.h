@@ -3,6 +3,7 @@
  *  sdb
  *
  *  SoA (key,data) look up
+ *
  */
 
 #ifndef SDB_KEY_DATA_ARRAY_H
@@ -64,6 +65,7 @@ KeyDataArray<KeyType, DataType, Dim>::~KeyDataArray()
 template <typename KeyType, typename DataType, int Dim>
 DataType *KeyDataArray<KeyType, DataType, Dim>::find(const KeyType &x)
 {
+	if(isEmpty()) return NULL;
 	KeyType b;
 	int loc = keyLeft(x, b);
 	if(loc < 0) return NULL;
@@ -205,6 +207,11 @@ int KeyDataArray<KeyType, DataType, Dim>::keyLeft(const KeyType & x, KeyType &b)
 	int low = 0;
 	if(m_key[low] > x)
 		return -1;
+
+	if(isSingular()) {
+		b = m_key[0];
+		return 0;
+	}
 	
 	int high = m_count - 1;
 	if(m_key[high] <= x) {
@@ -235,6 +242,10 @@ int KeyDataArray<KeyType, DataType, Dim>::keyRight(const KeyType & x, KeyType &b
 		b = m_key[low];
 		return 0;
 	}
+
+	if(isSingular())
+		return -1;
+
 	int high = m_count - 1;
 	if(m_key[high] <= x)
 		return -1;

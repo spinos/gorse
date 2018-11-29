@@ -48,6 +48,8 @@ void EdgeCollapse::simplify(HistoryMesh *msh)
 
 	m_mesh->finishUV();
 	m_mesh->finishHistory(numVertices(), numFaces());
+
+	std::cout <<"\n n edge "<<numEdges();
 }
 
 int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
@@ -194,6 +196,7 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 
 void EdgeCollapse::computeEdgeCost()
 {
+	const int lastV = m_mesh->numVertices() - 2;
 	for(int i=0;i<m_mesh->numVertices();++i) {
 		VertexValue &vi = vertex(i);
 		if(!vi.isOnBorder())
@@ -218,7 +221,7 @@ void EdgeCollapse::computeEdgeCost()
 			ec._ei = block->key(i);
 			ec._ind = ei;
 
-			if(e.isOnBorder())
+			if(e.isOnBorder() || ec._ei.v0() > lastV || ec._ei.v1() > lastV )
 				ec._cost = InvalidCost;
 			else
 				ec._cost = computeEdgeCost(e, ec._ei);
@@ -292,14 +295,16 @@ EdgeIndex EdgeCollapse::findEdgeToCollapse()
 bool EdgeCollapse::lastConnectedFaceOor(const VertexValue &vert)
 {
     const int nf = vert.numConnectedFaces();
+    const int lastF = m_mesh->numTriangles() - 1 - nf;
     std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
 	for(;it!=vert.facesEnd();++it) {
 		const FaceIndex &fi = *it;
 
-		if(!faceExists(fi)) continue;
+		FaceValue *fv = face(fi);
+		if(!fv) continue;
 
 /// cannot connect to face to be relocated
-		if(face(fi).ind() + nf > m_mesh->numTriangles() - 1 - nf)
+		if(fv->ind() + nf > lastF)
 		    return true;
 	}
 	return false;
@@ -333,10 +338,10 @@ void EdgeCollapse::updateFaces(const std::deque<FaceIndex> &faces)
 	std::deque<FaceIndex>::const_iterator it = faces.begin();
 	for(;it!=faces.end();++it) {
 		const FaceIndex &fi = *it;
-		FaceValue &facei = face(fi);
-		const int &ti = facei.ind();
-		facei.setArea(m_mesh->getTriangleArea(ti));
-		facei.setNormal(m_mesh->getTriangleNormal(ti));
+		FaceValue *facei = face(fi);
+		const int &ti = facei->ind();
+		facei->setArea(m_mesh->getTriangleArea(ti));
+		facei->setNormal(m_mesh->getTriangleNormal(ti));
 	}
 }
 
@@ -420,12 +425,12 @@ void EdgeCollapse::computeVertexCost(VertexValue &vert)
 	std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
 	for(;it != vert.facesEnd(); ++it) {
 		const FaceIndex &fi = *it;
-		const FaceValue &facei = face(fi);
+		const FaceValue *facei = face(fi);
 
-		faceCost[i].first = facei.normal();
+		faceCost[i].first = facei->normal();
 		i++;
 
-		totalArea += facei.area();
+		totalArea += facei->area();
 	}
 
 	for(i=0;i<faceCount;++i) {
@@ -535,7 +540,7 @@ void EdgeCollapse::mapConnectedFaces(const VertexValue &v)
 	m_triangulate->clearUVLookup();
 	std::deque<FaceIndex>::const_iterator it = v.facesBegin();
 	for(;it!=v.facesEnd();++it) 
-		m_triangulate->mapFace(*it, face(*it));
+		m_triangulate->mapFace(*it, *face(*it));
 }
 
 bool EdgeCollapse::getTriangulatePolygon(int i)

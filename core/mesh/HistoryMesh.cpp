@@ -145,9 +145,6 @@ void HistoryMesh::finishHistory(int nv, int nf)
 	for(int i =0;i<numStages();++i) 
 		std::cout << "\n stage"<<i<<stage(i);
 	
-	std::cout<<"\n n vertex "<<numVertices()
-				<< " n face "<<numTriangles();
-
 }
 
 int HistoryMesh::numStages() const
