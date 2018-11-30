@@ -9,6 +9,8 @@
 #ifndef SDB_KEY_DATA_ARRAY_H
 #define SDB_KEY_DATA_ARRAY_H
 
+#include <iostream>
+
 namespace alo {
 
 namespace sdb {
@@ -114,6 +116,7 @@ int KeyDataArray<KeyType, DataType, Dim>::insert(const KeyType &x, const DataTyp
 
 	m_count++;
 	return loc+1;
+
 }
 
 template <typename KeyType, typename DataType, int Dim>
@@ -191,7 +194,7 @@ const int &KeyDataArray<KeyType, DataType, Dim>::count() const
 
 template <typename KeyType, typename DataType, int Dim>
 bool KeyDataArray<KeyType, DataType, Dim>::isFull() const
-{ return m_count > Dim-1; }
+{ return m_count > Dim-2; }
 
 template <typename KeyType, typename DataType, int Dim>
 bool KeyDataArray<KeyType, DataType, Dim>::isSingular() const

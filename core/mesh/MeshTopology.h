@@ -1,5 +1,6 @@
 /*
  *  MeshTopology.h
+ *  aloe
  *
  *  M = (V,E,F)
  *  past F has no edge connected
@@ -9,14 +10,12 @@
 #ifndef ALO_MESH_TOPOLOGY_H
 #define ALO_MESH_TOPOLOGY_H
 
-#include <map>
-#include <deque>
-#include <vector>
 #include <sdb/L3Tree.h>
-#include "FaceIndex.h"
 #include "FaceValue.h"
 #include "EdgeIndex.h"
 #include "EdgeValue.h"
+#include "FaceIndex.h"
+#include "VertexFaceConnection.h"
 
 namespace alo {
 
@@ -33,10 +32,12 @@ class MeshTopology {
     int m_numVertices;
     int m_numFaces;
     int m_numBorderVertices;
-    VertexValue *m_vertices;
-    sdb::L3Tree<EdgeIndex, EdgeValue, 4096, 1024> m_edges;
-    sdb::L3Tree<FaceIndex, FaceValue, 4096, 1024> m_tris;
-    sdb::L3Tree<FaceIndex, int, 4096, 1024> m_pastFaceInds;
+    std::vector<VertexValue> m_vertices;
+    sdb::L3Tree<EdgeIndex, EdgeValue, 2048, 512, 1024> m_edges;
+    sdb::L3Tree<FaceIndex, FaceValue, 2048, 512, 1024> m_tris;
+    sdb::L3Tree<FaceIndex, int, 2048, 512, 1024> m_pastFaceInds;
+    VertexFaceConnection m_vertexFaceConnection;
+    VertexFaceConnection m_vertexPastFaceConnection;
 
 public:
 	MeshTopology();
@@ -54,25 +55,26 @@ public:
 	FaceValue *face(const FaceIndex &fi);
 
     int numEdges() const;
+    int numFacesConnectedTo(int vi) const;
+    void printDetail() const;
 
 protected:
-	EdgeValue *addEdge(const EdgeIndex &e);
-	FaceValue *addFace(const FaceIndex &fi, const FaceValue &f);
+/// face and edge connected to vertex[vi]
+    bool removeVertexEdgeFace(int vi);
+/// add face edge vertex connection
 	bool addFaces(const std::deque<FaceIndex> &faces,
                 const std::deque<FaceValue> &uvs,
                 int lastV = 1<<30);
-/// replace va by vb
+/// replace va by vb with uv
     void reformFaces(std::deque<FaceIndex> &inds,
                     std::deque<FaceValue> &uvs,
                     int va, int vb);
+
 	bool checkTopology(const ver1::ATriangleMesh *mesh);
 	bool setFaceInd(const FaceIndex &fi, int x);
 	bool setPastFaceInd(const FaceIndex &fi, int x);
 	void setMeshFaceInd(const ver1::ATriangleMesh *mesh, int i);
-	bool removeFace(const FaceIndex &fi);
-	bool removeEdge(const EdgeIndex &ei);
-/// face and edge connected to vertex[vi]
-    bool removeVertexConnection(int vi);
+	
 	bool faceExists(const FaceIndex &fi);
 	bool pastFaceExists(const FaceIndex &fi);
 /// connected to edge on border
@@ -84,10 +86,7 @@ protected:
     void lockVertices(const std::vector<int> &v);
     bool lockFace(const FaceIndex &fi);
     void unlockVertices(int high);
-    void connectFaceToVertex(const FaceIndex &fi);
-    void connectFaceToVertexPast(const FaceIndex &fi);
-    void addPastFace(const FaceIndex &fi, const int &i);
-    bool removePastFace(const FaceIndex &fi);
+
     void indexPastFaces(const ver1::ATriangleMesh *mesh, int begin, int end);
 /// every past face ind +x
     void pushPastFaceIndex(int x);
@@ -100,6 +99,21 @@ protected:
     typedef sdb::L3Node<EdgeIndex, EdgeValue, 1024> EdgeDataType;
 	EdgeDataType *firstEdge();
 	EdgeDataType *nextEdge(const EdgeDataType *x);
+    const std::deque<FaceIndex> &facesConnectedTo(int vi) const;
+
+    void copyPastFacesTo(std::vector<FaceIndex> &faces, int v) const;
+    void clearPastFaces(int v);
+    bool hasPastConnected(int a, int b) const;
+
+    void copyFacesTo(std::deque<FaceIndex> &faces, int v) const;
+    void clearFaces(int v);
+    bool hasFaceConnected(int a, int b) const;
+    
+    bool faceConnectedIsOor(int vi, int lastFace);
+    void getConnectedVertices(std::deque<int> &neivs, int vi) const;
+    bool getVertexOneRing(std::vector<int> &vring, int vi,
+                    const Vector3F *pos,
+                    const Vector3F &nml) const;
 
 	static void PrintUnmanifoldEdgeWarning(const FaceIndex &fi, 
                 const EdgeValue &e,
@@ -109,6 +123,12 @@ protected:
                 bool stat);
 
 private:
+    EdgeValue *addEdge(const EdgeIndex &e);
+    FaceValue *addFace(const FaceIndex &fi, const FaceValue &f);
+    void addPastFace(const FaceIndex &fi, const int &i);
+    bool removeFace(const FaceIndex &fi);
+    bool removeEdge(const EdgeIndex &ei);
+    bool removePastFace(const FaceIndex &fi);
 
 };
 

@@ -45,7 +45,6 @@ class EdgeCollapse : public MeshTopology {
     PolygonUVTriangulation *m_triangulate;
     
 public:
-
 	EdgeCollapse();
     ~EdgeCollapse();
 
@@ -59,7 +58,7 @@ private:
 /// very high cost edges connected to vertex i
     void removeConnectedEdgeCosts(int vi);
     EdgeIndex findEdgeToCollapse();
-    bool lastConnectedFaceOor(const VertexValue &vert);
+    
     void relocateVertices(int va, int vb,
                 const std::vector<int> &vaFaces,
                 const std::vector<int> &vbFaces);
@@ -72,12 +71,12 @@ private:
                         const std::deque<FaceValue> &uvs, 
                         int location);
 /// area max (1 - dotN)
-    void computeVertexCost(VertexValue &vert);
+    void computeVertexCost(int vi);
 /// ||va - vb|| max (ca, cb)
     float computeEdgeCost(EdgeValue &e, const EdgeIndex &ei) const;
     bool canEdgeCollapse(const EdgeIndex &ei);
     bool canEndProcess() const;
-    void mapConnectedFaces(const VertexValue &v);
+    void mapConnectedFaces(int vi);
 /// one ring around i-th vertex
     bool getTriangulatePolygon(int i);
     int getRedVertex(const EdgeIndex &ei) const;
@@ -88,7 +87,6 @@ private:
     static void PrintConnectedPastWarning(int va, int vb,
             const VertexValue &a,
             const VertexValue &b); 
-    static void PrintOneRing(int va, const std::vector<int> &ring);
 
     static const float InvalidCost;
     static const float CheckInvalidCost;

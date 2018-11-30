@@ -1,3 +1,9 @@
+/*
+ *  MeshTopology.cpp
+ *  aloe
+ *
+ */
+
 #include "MeshTopology.h"
 #include <geom/V1ATriangleMesh.h>
 #include "VertexValue.h"
@@ -8,9 +14,7 @@ MeshTopology::MeshTopology()
 {}
 
 MeshTopology::~MeshTopology()
-{ 
-	delete[] m_vertices; 
-}
+{}
 
 const int &MeshTopology::numVertices() const
 { return m_numVertices; }
@@ -25,7 +29,9 @@ void MeshTopology::buildTopology(const ver1::ATriangleMesh *mesh)
 {
 	m_numFaces = mesh->numTriangles();
 	m_numVertices = mesh->numVertices();
-	m_vertices = new VertexValue[m_numVertices];
+	m_vertices.resize(m_numVertices);
+	m_vertexFaceConnection.resize(m_numVertices);
+	m_vertexPastFaceConnection.resize(m_numVertices);
 
 	for(int i=0;i<m_numFaces;++i) {
 		const Int3 &fv = mesh->c_indices()[i];
@@ -58,9 +64,7 @@ void MeshTopology::buildTopology(const ver1::ATriangleMesh *mesh)
 		stat = e2->connectToFace(fi);
 		PrintUnmanifoldEdgeWarning(fi, *e2, stat);
 		
-		m_vertices[fv.x].connectToFace(fi);
-		m_vertices[fv.y].connectToFace(fi);
-		m_vertices[fv.z].connectToFace(fi);
+		m_vertexFaceConnection.connectFace(fi);
 	}
 
 	m_numBorderVertices=0;
@@ -74,19 +78,19 @@ void MeshTopology::buildTopology(const ver1::ATriangleMesh *mesh)
 			vi.setOnBorder(false);
 	}
 
-	std::cout<<"\n n vertex "<<m_numVertices
-		<<" n face "<<m_numFaces
-		<<" n edge "<<numEdges()
-		<<" n vertex-on-border "<<m_numBorderVertices;
+	printDetail();
+
 }
 
 bool MeshTopology::checkTopology(const ver1::ATriangleMesh *mesh)
 {
 	const int &nv = mesh->numVertices();
 	for(int i=0;i<nv;++i) {
-		if(!m_vertices[i].checkFaces(i)) return false;
-		std::deque<FaceIndex>::const_iterator it = m_vertices[i].facesBegin();
-		for(;it!=m_vertices[i].facesEnd();++it) {
+		if(!m_vertexFaceConnection.check(i)) return false;
+
+		const std::deque<FaceIndex> &faces = m_vertexFaceConnection[i];
+		std::deque<FaceIndex>::const_iterator it = faces.begin();
+		for(;it!=faces.end();++it) {
 			const FaceIndex &fi = *it;
 			if(!faceExists(fi)) {
 				std::cout << "\n\n ERROR v "<<i<<" nonexistent face " << fi;
@@ -149,37 +153,18 @@ EdgeValue *MeshTopology::addEdge(const EdgeIndex &e)
 
 bool MeshTopology::removePastFace(const FaceIndex &fi)
 {
-	//std::map<FaceIndex, int>::iterator ff = m_pastFaceInds.find(fi);
-	//if(ff == m_pastFaceInds.end()) {
-	//if(!m_pastFaceInds.findKey(fi)) {
-	//	std::cout<< "\n\n ERROR cannot remove nonexistent past face "<<fi;
-	//	return false;
-	//}
-
 	m_pastFaceInds.remove(fi);
 	return true;
 }
 
 bool MeshTopology::removeFace(const FaceIndex &fi)
-{ 
-	//std::map<FaceIndex, FaceValue>::iterator ff = m_tris.find(fi);
-	//if(ff == m_tris.end()) {
-	//	std::cout<< "\n\n ERROR cannot remove nonexistent face "<<fi;
-	//	return false;
-	//}
-
+{
 	m_tris.remove(fi);
 	return true;
 }
 
 bool MeshTopology::removeEdge(const EdgeIndex &ei)
 {
-	//std::map<EdgeIndex, EdgeValue>::iterator fe = m_edges.find(ei);
-	//if(fe == m_edges.end()) {
-	//	std::cout<< "\n\n ERROR cannot remove nonexistent edge "<<ei;
-	//	return false;
-	//}
-	
 	m_edges.remove(ei);
 	return true;
 }
@@ -238,37 +223,37 @@ bool MeshTopology::addFaces(const std::deque<FaceIndex> &faces,
 		}
 		
 		if(isInRange)
-			connectFaceToVertex(fi);
+			m_vertexFaceConnection.connectFace(fi);
 		else 
-			connectFaceToVertexPast(fi);
+			m_vertexPastFaceConnection.connectFace(fi);
 			
 	}
 	return true;
 }
 
-bool MeshTopology::removeVertexConnection(int vi)
+bool MeshTopology::removeVertexEdgeFace(int vi)
 {
-	VertexValue &vert = m_vertices[vi];
 	std::deque<int> neivs;
-	vert.getConnectedVertices(neivs, vi);
+	getConnectedVertices(neivs, vi);
 	std::deque<int>::const_iterator it = neivs.begin();
 	for(;it!=neivs.end();++it) 
 		removeEdge(EdgeIndex(vi, *it));	
 
-	std::deque<FaceIndex>::const_iterator fit = vert.facesBegin();
-	for(;fit!= vert.facesEnd();++fit) {
+	const std::deque<FaceIndex> &faces = facesConnectedTo(vi);
+	std::deque<FaceIndex>::const_iterator fit = faces.begin();
+	for(;fit!= faces.end();++fit) {
 		const FaceIndex &fi = *fit;
 
 		removeFace(fi);
 /// disconnect valence vertices
 		if(fi.v0() != vi)
-			vertex(fi.v0()).disconnectFace(fi);
+			m_vertexFaceConnection.disconnectFace(fi.v0(), fi);
 
 		if(fi.v1() != vi)
-			vertex(fi.v1()).disconnectFace(fi);
+			m_vertexFaceConnection.disconnectFace(fi.v1(), fi);
 
 		if(fi.v2() != vi)
-			vertex(fi.v2()).disconnectFace(fi);
+			m_vertexFaceConnection.disconnectFace(fi.v2(), fi);
 		
   	try {
 /// disconnect valence edges
@@ -296,7 +281,7 @@ bool MeshTopology::removeVertexConnection(int vi)
 
 	}
 
-	vert.clearFaces();
+	m_vertexFaceConnection.clearFaces(vi);
 	return true;
 }
 
@@ -309,10 +294,11 @@ bool MeshTopology::pastFaceExists(const FaceIndex &fi)
 bool MeshTopology::isVertexOnBorder(int vi, const VertexValue &vert,
 								const ver1::ATriangleMesh *mesh)
 { 
-    if(vert.numConnectedFaces() < 3) return true;
+	const std::deque<FaceIndex> &faces = facesConnectedTo(vi);
+    if(faces.size() < 3) return true;
 
-	std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
-	for(;it!=vert.facesEnd();++it) {
+	std::deque<FaceIndex>::const_iterator it = faces.begin();
+	for(;it!=faces.end();++it) {
 		const FaceIndex &fi = *it;
 
 		if(fi.v0() == vi || fi.v1() == vi) {
@@ -352,8 +338,9 @@ bool MeshTopology::isVertexOnUVBorder(int vi, const VertexValue &vert,
 {
 	Float2 preUV;
 	bool isFirst = true;
-	std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
-	for(;it!=vert.facesEnd();++it) {
+	const std::deque<FaceIndex> &faces = facesConnectedTo(vi);
+	std::deque<FaceIndex>::const_iterator it = faces.begin();
+	for(;it!= faces.end();++it) {
 		const FaceValue *facei = face(*it);
 		const int uvi = facei->vertexUV(vi);
 		const Float2 &uv = uvs[uvi];
@@ -408,11 +395,9 @@ void MeshTopology::replaceMeshVertex(ver1::ATriangleMesh *mesh,
 	//}
 	mesh->replaceFaceVertex(ti, va, vb);
 
-	m_vertices[fi.v0()].disconnectPastFace(fi);
-	m_vertices[fi.v1()].disconnectPastFace(fi);
-	m_vertices[fi.v2()].disconnectPastFace(fi);
-	removePastFace(fi);
+	m_vertexPastFaceConnection.disconnectFace(fi);
 
+	removePastFace(fi);
 	
 	FaceIndex rfi = fi.reformed(va, vb);
 
@@ -422,11 +407,8 @@ void MeshTopology::replaceMeshVertex(ver1::ATriangleMesh *mesh,
 	//			<<" a "<<va<<" b "<<vb;
 	//}
 	addPastFace(rfi, ti);
-	//m_pastFaceInds[rfi] = ti;
 	
-	m_vertices[rfi.v0()].connectToPastFace(rfi);
-	m_vertices[rfi.v1()].connectToPastFace(rfi);
-	m_vertices[rfi.v2()].connectToPastFace(rfi);
+	m_vertexPastFaceConnection.connectFace(rfi);
 }
 
 void MeshTopology::pushPastFaceIndex(int x)
@@ -443,20 +425,6 @@ MeshTopology::EdgeDataType *MeshTopology::firstEdge()
 
 MeshTopology::EdgeDataType *MeshTopology::nextEdge(const EdgeDataType *x)
 { return m_edges.next(x); }
-
-void MeshTopology::connectFaceToVertex(const FaceIndex &fi)
-{
-	m_vertices[fi.v0()].connectToFace(fi);
-	m_vertices[fi.v1()].connectToFace(fi);
-	m_vertices[fi.v2()].connectToFace(fi);
-}
-
-void MeshTopology::connectFaceToVertexPast(const FaceIndex &fi)
-{
-	m_vertices[fi.v0()].connectToPastFace(fi);
-	m_vertices[fi.v1()].connectToPastFace(fi);
-	m_vertices[fi.v2()].connectToPastFace(fi);
-}
 
 void MeshTopology::indexPastFaces(const ver1::ATriangleMesh *mesh, int begin, int end)
 {
@@ -509,6 +477,54 @@ void MeshTopology::indexEdges()
 	}
 }
 
+void MeshTopology::copyPastFacesTo(std::vector<FaceIndex> &faces, int v) const
+{ m_vertexPastFaceConnection.copyFacesTo(faces, v); }
+    
+void MeshTopology::clearPastFaces(int v)
+{ m_vertexPastFaceConnection.clearFaces(v); }
+
+bool MeshTopology::hasPastConnected(int a, int b) const
+{ return m_vertexPastFaceConnection.hasIntersection(a, b); }
+
+void MeshTopology::copyFacesTo(std::deque<FaceIndex> &faces, int v) const
+{ faces = m_vertexFaceConnection[v]; }
+
+bool MeshTopology::hasFaceConnected(int a, int b) const
+{ return m_vertexFaceConnection.hasIntersection(a, b); }
+
+int MeshTopology::numFacesConnectedTo(int vi) const
+{ return m_vertexFaceConnection.numFacesConnected(vi); }
+
+const std::deque<FaceIndex> &MeshTopology::facesConnectedTo(int vi) const
+{ return m_vertexFaceConnection[vi]; }
+
+bool MeshTopology::faceConnectedIsOor(int vi, int lastFace)
+{
+	const std::deque<FaceIndex> &vif = m_vertexFaceConnection[vi];
+    const int nf = vif.size();
+    const int lastF = lastFace - nf;
+    std::deque<FaceIndex>::const_iterator it = vif.begin();
+	for(;it!=vif.end();++it) {
+		const FaceIndex &fi = *it;
+
+		FaceValue *fv = face(fi);
+		if(!fv) continue;
+
+/// cannot connect to face to be relocated
+		if(fv->ind() + nf > lastF)
+		    return true;
+	}
+	return false;
+}
+
+void MeshTopology::getConnectedVertices(std::deque<int> &neivs, int vi) const
+{ m_vertexFaceConnection.getConnectedVertices(neivs, vi); }
+
+bool MeshTopology::getVertexOneRing(std::vector<int> &vring, int vi,
+                    const Vector3F *pos,
+                    const Vector3F &nml) const
+{ return m_vertexFaceConnection.getVertexOneRing(vring, vi, pos, nml); }
+
 void MeshTopology::PrintUnmanifoldEdgeWarning(const FaceIndex &fi, const EdgeValue &e,
                 bool stat)
 { 
@@ -524,6 +540,16 @@ void MeshTopology::PrintAddFaceWarning(const std::deque<FaceIndex> &faces,
 	for(int i=0;i<faces.size();++i)
 		std::cout << " " << faces[i];
 	std::cout << "] ";
+}
+
+void  MeshTopology::printDetail() const
+{
+	std::cout<<"\n n vertex "<<m_numVertices
+		<<" n face "<<m_numFaces
+		<<" n edge "<<numEdges()
+		<<" n vertex-on-border "<<m_numBorderVertices
+		<<" n vertex-face-connection "<<m_vertexFaceConnection.totalSize()
+		<<" n vertex-past-connection "<<m_vertexPastFaceConnection.totalSize();
 }
 
 }

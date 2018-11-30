@@ -94,7 +94,11 @@ bool FaceIndex::isConnectedTo(const FaceIndex &b) const
 { return (hasV(b.v0()) || hasV(b.v1()) || hasV(b.v2()) ); }
 
 bool FaceIndex::hasV(int x) const
-{ return (v0() == x || v1() == x || v2() == x); }
+{ 
+	if(v0() == x) return true;
+	if(v1() == x) return true; 
+	return v2() == x; 
+}
 
 int FaceIndex::getOpposite(const int &a, const int &b) const
 {

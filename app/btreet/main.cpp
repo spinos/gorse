@@ -2,6 +2,7 @@
 #include <string>
 #include <ctime>
 #include <sdb/Types.h>
+#include <sdb/L2Tree.h>
 #include <sdb/L3Tree.h>
 
 using namespace alo;
@@ -10,9 +11,9 @@ struct Visibility {
   bool _isVisible;
 };
 
-bool testArray()
+bool testL2()
 {
-  sdb::L3Tree<sdb::Coord2, Visibility *, 1024, 1024> arr;
+  sdb::L2Tree<sdb::Coord2, Visibility *, 1024, 1024> arr;
   const int g[5] = {4, 0, 3, 5, 2};
   for(int i=0;i<5;++i) {
     for(int j=0;j<21755;++j) {
@@ -56,13 +57,52 @@ bool testArray()
   return true;
 }
 
+bool testL3()
+{
+  sdb::L3Tree<sdb::Coord2, Visibility *, 2048, 256, 1024> arr;
+  const int g[6] = {1, 4, 0, 5, 8, 2};
+  for(int i=0;i<6;++i) {
+    for(int j=0;j<34705;++j) {
+      int k = 999 + j;// + (rand() & 33554431);
+      //std::cout<< "\n add " << k << ", "<< g[i];
+      arr.insert(sdb::Coord2(k, g[i]), new Visibility() );
+
+    }
+  }
+
+  arr.printDetail();
+
+  sdb::L3DataIterator<sdb::Coord2, Visibility *, 1024>dit = arr.begin(sdb::Coord2(0,0));
+  if(dit.done()) std::cout << "(*,0) not found";
+  else std::cout << " begin in 0 " << dit.first;
+  int n0 = 0;
+  for(;!dit.done();dit.next()) {
+      if(dit.first.y > 0) break;
+      n0++;
+  }
+  std::cout << " end in 0 " << dit.first << " count " << n0;
+
+  for(int i=0;i<6;++i) {
+    int n = 34700;
+    if(i>2) n = 34705;
+    for(int j=0;j<n;++j) {
+      int k = 999 + j;// + (rand() & 33554431);
+      //std::cout<< "\n add " << k << ", "<< g[i];
+      arr.remove(sdb::Coord2(k, g[i]) );
+
+    }
+  }
+  arr.printDetail();
+  return true;
+}
+
 int main(int argc, char *argv[])
 {
   std::time_t timer;
   std::time(&timer);
   std::cout << "\n " << std::asctime(std::localtime(&timer));
 
-  if(!testArray()) return 1;
+  if(!testL3()) return 1;
 
   std::time(&timer);
   std::cout << "\n " << std::asctime(std::localtime(&timer));

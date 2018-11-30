@@ -12,7 +12,7 @@
 
 #include <rng/Uniform.h>
 #include <rng/Lehmer.h>
-#include <sdb/L3Tree.h>
+#include <sdb/L2Tree.h>
 #include <QGraphicsScene>
 #include <QJsonObject>
 
@@ -67,7 +67,7 @@ private:
 	GlyphItem *m_activeGlyph;
 	QList<GlyphItem *> m_selectedGlyph;;
 	GroupCollection<QJsonObject> *m_collector;
-	sdb::L3Tree<int, GlyphItem *, 128, 128> m_glyphMap;
+	sdb::L2Tree<int, GlyphItem *, 128, 128> m_glyphMap;
 	Uniform<Lehmer> *m_rng;
 
 };

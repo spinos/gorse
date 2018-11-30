@@ -70,6 +70,9 @@ const bool EdgeIndex::operator<=(const EdgeIndex & another) const
 }
 
 bool EdgeIndex::hasV(int x) const
-{ return v0() == x || v1() == x; }
+{ 
+	if(v0() == x) return true;
+	return v1() == x; 
+}
 
 }

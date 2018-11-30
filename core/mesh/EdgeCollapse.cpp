@@ -49,7 +49,7 @@ void EdgeCollapse::simplify(HistoryMesh *msh)
 	m_mesh->finishUV();
 	m_mesh->finishHistory(numVertices(), numFaces());
 
-	std::cout <<"\n n edge "<<numEdges();
+	printDetail();
 }
 
 int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
@@ -61,7 +61,7 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		EdgeIndex collapseEdgeI = findEdgeToCollapse();
 		if(!collapseEdgeI.isValid()) break;
 
-		int vertRed = getRedVertex(collapseEdgeI);
+		const int vertRed = getRedVertex(collapseEdgeI);
 		const int vertGreen = m_mesh->numVertices() - 1;
 
 /// red -----> 
@@ -77,25 +77,24 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 /// coarse faces to be created
 		std::deque<FaceIndex> blueFaces;
 		if(!m_triangulate->getTriangles(blueFaces)) {
-			std::cout << "\n\n ERROR cannot triangulate";
-			PrintOneRing(vertRed, redRing);
+			std::cout << "\n\n ERROR cannot triangulate polygon around v" << vertRed;
 			return -1;
 		}
 
-		mapConnectedFaces(vred);
+		mapConnectedFaces(vertRed);
 		
 		std::deque<FaceValue> blueUVs;
 		m_triangulate->getTriangleFaces(blueUVs, blueFaces);
 
 		std::deque<FaceIndex> redFaces;
-		vred.getFaces(redFaces);
+		copyFacesTo(redFaces, vertRed);
 
 /// connect red faces to green vertex
 		std::deque<FaceValue> redUVs;
 		reformFaces(redFaces, redUVs, vertRed, vertGreen);
 
 		std::deque<FaceIndex> greenFaces;
-		vgreen.getFaces(greenFaces);
+		copyFacesTo(greenFaces, vertGreen);
 
 /// connect green faces to red vertex
 		std::deque<FaceValue> greenUVs;
@@ -108,35 +107,33 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 
 /// to relocate past face connections 
 		std::vector<FaceIndex> redPast;
-		vred.copyPastFacesTo(redPast);
-		vertex(vertRed).clearPastFaces();
+		copyPastFacesTo(redPast, vertRed);
+		clearPastFaces(vertRed);
 
 		std::vector<FaceIndex> greenPast;
-		vgreen.copyPastFacesTo(greenPast);
-		vertex(vertGreen).clearPastFaces();
+		copyPastFacesTo(greenPast, vertGreen);
+		clearPastFaces(vertGreen);
 
 		removeConnectedEdgeCosts(vertRed);
 		removeConnectedEdgeCosts(vertGreen);
 
 /// remove faces connected to red 
-		if(!removeVertexConnection(vertRed)) {
+		if(!removeVertexEdgeFace(vertRed)) {
 			PrintCollapseEdgeError(vertRed, vertGreen,
 				vred, vgreen);
 			return -1;
 		}
 
 /// remove faces connected to green
-		if(!removeVertexConnection(vertGreen)) {
+		if(!removeVertexEdgeFace(vertGreen)) {
 			PrintCollapseEdgeError(vertRed, vertGreen,
 				vred, vgreen);
 			return -1;
 		}
 
-	
 		if(!addFaces(blueFaces, blueUVs) ) {
 			std::cout << "\n when add blue faces";
 			PrintAddFaceWarning(blueFaces, false);
-			PrintOneRing(vertRed, redRing);
 			return -1;
 		}
 /// no connection to fine faces
@@ -197,11 +194,8 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 void EdgeCollapse::computeEdgeCost()
 {
 	const int lastV = m_mesh->numVertices() - 2;
-	for(int i=0;i<m_mesh->numVertices();++i) {
-		VertexValue &vi = vertex(i);
-		if(!vi.isOnBorder())
-			computeVertexCost(vi);
-	}
+	for(int i=0;i<m_mesh->numVertices();++i)
+		computeVertexCost(i);
 
 	indexEdges();
 
@@ -255,7 +249,8 @@ void EdgeCollapse::removeConnectedEdgeCosts(int vi)
 {
 	const VertexValue &vert = vertex(vi);
 	std::deque<int> neivs;
-	vert.getConnectedVertices(neivs, vi);
+	//vert.getConnectedVertices(neivs, vi);
+	getConnectedVertices(neivs, vi);
 
 	try {
 	std::deque<int>::const_iterator it = neivs.begin();
@@ -296,24 +291,6 @@ EdgeIndex EdgeCollapse::findEdgeToCollapse()
 	    return EdgeIndex();
 	
 	return collapseEdgeI;
-}
-
-bool EdgeCollapse::lastConnectedFaceOor(const VertexValue &vert)
-{
-    const int nf = vert.numConnectedFaces();
-    const int lastF = m_mesh->numTriangles() - 1 - nf;
-    std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
-	for(;it!=vert.facesEnd();++it) {
-		const FaceIndex &fi = *it;
-
-		FaceValue *fv = face(fi);
-		if(!fv) continue;
-
-/// cannot connect to face to be relocated
-		if(fv->ind() + nf > lastF)
-		    return true;
-	}
-	return false;
 }
 
 void EdgeCollapse::relocateVertices(int va, int vb,
@@ -421,15 +398,24 @@ void EdgeCollapse::insertFacesAt(const std::deque<FaceIndex> &faces,
     pushPastFaceIndex(faces.size());
 }
 
-void EdgeCollapse::computeVertexCost(VertexValue &vert)
+void EdgeCollapse::computeVertexCost(int vi)
 {
-	const int faceCount = vert.numConnectedFaces();
+	VertexValue &vert = vertex(vi);
+
+	if(vert.isOnBorder()) {
+		vert.cost() = InvalidCost;
+		return;
+	}
+
+	const std::deque<FaceIndex> &faces = facesConnectedTo(vi);
+
+	const int faceCount = faces.size();
 	std::pair<Vector3F, float> * faceCost = new std::pair<Vector3F, float>[faceCount];
 
 	float totalArea = 0.f;
 	int i=0;
-	std::deque<FaceIndex>::const_iterator it = vert.facesBegin();
-	for(;it != vert.facesEnd(); ++it) {
+	std::deque<FaceIndex>::const_iterator it = faces.begin();
+	for(;it != faces.end(); ++it) {
 		const FaceIndex &fi = *it;
 		const FaceValue *facei = face(fi);
 
@@ -494,39 +480,37 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 	if(va.isOnBorder() || vb.isOnBorder())
 		return false;
 
-	if(va.numConnectedFaces() < 4 
-			|| vb.numConnectedFaces() < 4 )
-		return false;
+	const int nca = numFacesConnectedTo(ei.v0());
+	if(nca < 4 || nca > 10) return false;
 
-	if(va.numConnectedFaces() > 10 
-			|| vb.numConnectedFaces() > 10 )
-		return false;
+	const int ncb = numFacesConnectedTo(ei.v1());
+	if(ncb < 4 || ncb > 10) return false;
 
 	int vci = e->face0().getOpposite(ei.v0(), ei.v1());
 	int vdi = e->face1().getOpposite(ei.v0(), ei.v1());
 	
-	if(vertex(vci).numConnectedFaces() < 4 
-			|| vertex(vdi).numConnectedFaces() < 4 )
+	if(numFacesConnectedTo(vci) < 4 || numFacesConnectedTo(vdi) < 4 )
 		return false;
 
 	const VertexValue &vlast = vertex(nv - 1);
     	
 /// cannot share faces with last v
 /// present or past
-	if(va.hasFaceConnected(vlast))
+	if(hasFaceConnected(ei.v0(), nv - 1))
 		return false; 
-	if(vb.hasFaceConnected(vlast))
+	if(hasFaceConnected(ei.v1(), nv - 1))
 		return false;
 
-    if(va.hasPastConnected(vlast))
+    if(hasPastConnected(ei.v0(), nv - 1))
     	return false;
-    if(vb.hasPastConnected(vlast))
+    if(hasPastConnected(ei.v1(), nv - 1))
     	return false;
 //try {
 /// limite range of connected face for relocate
-    if(lastConnectedFaceOor(va))
+    const int flast = m_mesh->numTriangles() - 1;
+    if(faceConnectedIsOor(ei.v0(), flast))
         return false;
-    if(lastConnectedFaceOor(vb))
+    if(faceConnectedIsOor(ei.v1(), flast))
         return false;
 
 	//} catch (...) {
@@ -541,11 +525,14 @@ bool EdgeCollapse::canEndProcess() const
 	return m_mesh->numVertices() < (numBorderVertices() + (numVertices() >> 4) ); 
 }
 
-void EdgeCollapse::mapConnectedFaces(const VertexValue &v)
+void EdgeCollapse::mapConnectedFaces(int vi)
 {
 	m_triangulate->clearUVLookup();
-	std::deque<FaceIndex>::const_iterator it = v.facesBegin();
-	for(;it!=v.facesEnd();++it) 
+
+	const std::deque<FaceIndex> &faces = facesConnectedTo(vi);
+
+	std::deque<FaceIndex>::const_iterator it = faces.begin();
+	for(;it!=faces.end();++it) 
 		m_triangulate->mapFace(*it, *face(*it));
 }
 
@@ -555,11 +542,11 @@ bool EdgeCollapse::getTriangulatePolygon(int i)
 
 	std::vector<int> &vring = m_triangulate->vertices();
 	vring.clear();
-	const VertexValue &vred = vertex(i);
-	if(!vred.getOneRing(vring, i,
+	//const VertexValue &vred = vertex(i);
+	if(!getVertexOneRing(vring, i,
 		m_mesh->c_positions(),
 		m_mesh->c_normals()[i])) {
-		std::cout << "\n\n ERROR not one ring v" << i << vred;
+		std::cout << "\n\n ERROR cannot get one ring around v" << i;
 		return false;
 	}
 	return true;
@@ -588,26 +575,6 @@ void EdgeCollapse::PrintConnectedPastWarning(int va, int vb,
 {
 	std::cout<<"\n\n WARNING connected past " << va <<" " << vb
 			<<"\n a past [";
-	std::deque<FaceIndex>::const_iterator it = a.pastFacesBegin();
-	for(;it!=a.pastFacesEnd();++it)
-		std::cout<<" "<<*it;
-	std::cout<<"]\n b past [";
-	it = b.pastFacesBegin();
-	for(;it!=b.pastFacesEnd();++it)
-		std::cout<<" "<<*it;
-	std::cout<<"] ";
-
-}
-
-void EdgeCollapse::PrintOneRing(int va, const std::vector<int> &ring)
-{
-	std::cout<<"\n\n INFO one ring around vertex " << va <<" [";
-
-	std::vector<int>::const_iterator it = ring.begin();
-	for(;it!=ring.end();++it)
-		std::cout<<" "<<*it;
-
-	std::cout<<"] ";
 }
 
 }

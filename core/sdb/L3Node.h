@@ -70,8 +70,9 @@ template <typename KeyType, typename DataType, int Dim>
 L3Node<KeyType, DataType, Dim> *L3Node<KeyType, DataType, Dim>::spawn()
 {
 	L3Node *right = new L3Node;
-	int loc = Dim>>1;
-	right->copyFrom(&keys()[loc], &values()[loc], Dim - loc);
+	int loc = count()>>1; 
+
+	right->copyFrom(&keys()[loc], &values()[loc], count() - loc);
 	setCount(loc);
 	return right;
 }
