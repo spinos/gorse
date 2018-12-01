@@ -1,5 +1,8 @@
 /*
  *  BVH.h
+ *  aloe
+ *
+ *  nodes and primitives
  *
  */
 
@@ -7,7 +10,7 @@
 #define ALO_BVH_H
 
 #include <math/SimpleBuffer.h>
-#include "BVHNode.h"
+#include "BVHNodeIterator.h"
 #include "BVHPrimitive.h"
 
 namespace alo {
@@ -28,6 +31,7 @@ public:
 
 	const int &numNodes() const;
 	const int &numPrimitives() const;
+	int numLeafNodes() const;
 	const BoundingBox &aabb() const;
 	BVHNode *rootNode();
 	BVHNode *lastNode();
@@ -35,6 +39,9 @@ public:
 	BVHPrimitive *primitives();
 
 	friend std::ostream& operator<<(std::ostream &output, const BVH & p);
+
+	BVHNodeIterator firstLeaf() const;
+	BVHNodeIterator nextLeaf(BVHNodeIterator x) const;
 
 };
 

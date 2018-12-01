@@ -285,6 +285,15 @@ bool ATriangleMesh::replaceFaceVertex(int i, int a, int b)
     return true;
 }
 
+void ATriangleMesh::getTriangleAabb(BoundingBox &b, int i) const
+{
+    b.reset();
+    const Int3 &fv = c_indices()[i];
+    b.expandBy(c_positions()[fv.x]);
+    b.expandBy(c_positions()[fv.y]);
+    b.expandBy(c_positions()[fv.z]);
+}
+
 bool ATriangleMesh::checkFaceVertex(int i, int a, int b, int c) const
 {
     const Int3 &fv = c_indices()[i];

@@ -55,8 +55,8 @@ public:
 
     void setContext(QOpenGLContext *x);
 
+/// within gl context
     void cleanup();
-
     void initializeScene();
     void draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam);
 

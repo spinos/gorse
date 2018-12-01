@@ -37,6 +37,9 @@ public:
 	const int &begin() const;
 	const int &end() const;
 
+	static int InnerNumPrimitives;
+	static int LeafNumPrimitives;
+
 	friend std::ostream& operator<<(std::ostream &output, const BVHSplit & p);
 
 private:

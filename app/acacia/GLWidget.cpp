@@ -21,7 +21,7 @@ GLWidget::~GLWidget()
 void GLWidget::cleanup()
 {
     makeCurrent();
-
+    m_scene->cleanup();
     doneCurrent();
 }
 

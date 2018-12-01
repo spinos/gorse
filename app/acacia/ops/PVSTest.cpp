@@ -1,7 +1,12 @@
 #include "PVSTest.h"
 #include <qt_ogl/DrawableScene.h>
 #include <qt_ogl/DrawableObject.h>
+#include <qt_ogl/DrawableResource.h>
 #include <geom/AdaptableMesh.h>
+#include <mesh/FrontMesher.h>
+#include <mesh/Fissure.h>
+#include <math/miscfuncs.h>
+#include <bvh/BVHNodeIterator.h>
 #include <qt_base/AFileDlg.h>
 #include <h5/V1H5IO.h>
 #include <h5/V1HBase.h>
@@ -10,14 +15,16 @@
 
 namespace alo {
    
-PVSTest::PVSTest() :
-m_drawLength(0)
+PVSTest::PVSTest()
 {
+    m_mesh = new AdaptableMesh; 
+
+    DrawableResource *rec = createResource();
+    setResource(rec);
 }
 
 PVSTest::~PVSTest()
-{
-}
+{ delete m_mesh; }
     
 void PVSTest::update()
 {
@@ -32,52 +39,114 @@ void PVSTest::update()
     computeMesh();
 
     DrawableScene *scene = drawableScene();
-    DrawableObject *d = drawable();
-    if(m_toRelocate) {
+
+    DrawableResource *rec = resource();
+    DrawableObject *d = rec->drawable();
+
+    if(rec->toRelocate()) {
         scene->enqueueRemoveDrawable(d->drawId(), opsId());
-        setMeshDrawable(scene);
+        DrawableObject *d1 = createDrawable();
+        rec->attachToDrawable(d1, m_mesh->numIndices());
+
+        scene->lock();
+        scene->enqueueCreateDrawable(d1, opsId());
+        scene->unlock();
+        
     } else {
-        d->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
-        d->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
-        d->setDrawArrayLength(m_drawLength);
+        d->setDrawArrayLength(m_mesh->numIndices());
         scene->enqueueEditDrawable(d->drawId(), opsId());
     }
-}
-
-void PVSTest::setMeshDrawable(DrawableScene *scene)
-{
-    DrawableObject *cly = createDrawable();
-    cly->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
-    cly->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
-    cly->setDrawArrayLength(m_drawLength);
-    setDrawable(cly);
-    scene->lock();
-    scene->enqueueCreateDrawable(cly, opsId());
-    scene->unlock();
 }
 
 void PVSTest::addDrawableTo(DrawableScene *scene)
 { 
     computeMesh();
     setDrawableScene(scene);
-    setMeshDrawable(scene);
+    DrawableResource *rec = resource();
+    DrawableObject *d = createDrawable();
+    rec->attachToDrawable(d, m_mesh->numIndices());
+
+    scene->lock();
+    scene->enqueueCreateDrawable(d, opsId());
+    scene->unlock();
 }
 
 void PVSTest::computeMesh()
 {
+    m_mesh->initAdaptableMesh();
+
+    const int nu = 255;
+    const double du = 4.0 / (double)nu;
+    for(int i=0;i<nu;++i) {
+        double xu = -2.0 + du * i;
+        m_mesh->addVertex(Vector3F(xu, tanh(xu), sinh(xu)) * 50.f);
+    }
+
+    FrontLine originLine;
+    FrontLine::EnableMerging = false;
+
+    for(int i=0;i<nu;++i)
+        originLine.addVertex(m_mesh->vertexPositionR(i), i);
+
+    Vector3F up(-.85f, 2.1f, 0.f);
+    const Quaternion lq(-.00972f, Vector3F::ZAxis);
+    const Quaternion tq(.00293f, Vector3F::YAxis);
+    constexpr float cshrinking = .0f;
+    originLine.setWorldSpace(Matrix33F::IdentityMatrix);
+    originLine.rotateLocalBy(lq);
+    originLine.rotateLocalBy(tq);
+    originLine.setShrinking(cshrinking);
+    originLine.setDirection(up);
+    originLine.setMinEdgeLength(du);
+
+    FrontLine *la = &originLine;
+    FrontLine l[255];
+
+    FrontMesher msher;
+    msher.attachMesh(m_mesh);
+
+    for(int i=0;i<255;++i) {
+        msher.setFrontId(i+1);
+
+        l[i].rotateLocalBy(lq);
+        l[i].rotateLocalBy(tq);
+        l[i].setShrinking(cshrinking);
+        up.x += RandomFn11() * .199f;
+        up.y += RandomFn11() * .399f;
+        up.z += RandomFn11() * .499f;
+        l[i].setDirection(up);
+        l[i].setMinEdgeLength(du);
+
+        msher.advanceFront(l[i], *la);
+
+        la = &l[i];
+    }
+
+    m_mesh->calculateVertexNormals();
+
+    std::cout << " mesh nv " << m_mesh->numVertices()
+            << " nt " << m_mesh->numTriangles();
+
+    Fissure fis;
+    fis.granulate(m_mesh);
+
     AdaptableMesh transient;
-    transient.createMinimal();
-    m_drawLength = transient.numIndices();
-    
-    const int oldL = posnml.capacity();
-    transient.createPositionNormalArray(posnml);
-    m_toRelocate = oldL < posnml.capacity();
-    if(m_toRelocate) transient.createBarycentricCoordinates(baryc);
+
+    BVHNodeIterator it = fis.firstPart();
+    while(it._node) {
+
+        fis.reformPart(&transient, it, m_mesh);
+        it = fis.nextPart(it);
+    }
+
+    DrawableResource *rec = resource();
+    updateMeshResouce(rec, m_mesh);
+
 }
 
 void PVSTest::recvCameraChanged(const CameraEvent &x)
 {
-    std::cout << "\n camera frustum " << *(x.frustum());
+   // std::cout << "\n camera frustum " << *(x.frustum());
 }
 
 }

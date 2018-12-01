@@ -5,6 +5,9 @@
 
 namespace alo {
 
+int BVHSplit::InnerNumPrimitives = 64;
+int BVHSplit::LeafNumPrimitives = 16;
+
 BVHSplit::BVHSplit(int ind, BVHNode *nodes, BVHPrimitive *primtives)
 { 
 	m_nodeIndex = ind;
@@ -24,8 +27,8 @@ const int &BVHSplit::nodeIndex() const
 
 bool BVHSplit::compute()
 {
+	if(m_end < m_begin + LeafNumPrimitives) return false;
 	int n = m_end - m_begin;
-	if(n < 5) return false;
 	if(n > 32) n = 32;
 	const float dl = m_aabb.getLongestDistance() / (float)n;
 
@@ -35,6 +38,7 @@ bool BVHSplit::compute()
 
 	m_splitCost = computeLowestCostSplit();
 
+	if(m_end > m_begin + InnerNumPrimitives) return true;
 	return m_splitCost < getNonSplitCost();
 }
 

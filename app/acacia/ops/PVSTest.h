@@ -1,19 +1,24 @@
+/*
+ *  PVSTest.h
+ *  acacia
+ *
+ *  fissure test mesh 
+ *  extract pvs
+ *
+ */
+
 #ifndef ACA_PVS_TEST_H
 #define ACA_PVS_TEST_H
 
 #include "DrawableOps.h"
-#include <math/SimpleBuffer.h>
-#include <math/Vector3F.h>
 
 namespace alo {
 class CameraEvent;
+class AdaptableMesh;
 class PVSTest : public DrawableOps {
     
-    SimpleBuffer<Vector3F> posnml;
-    SimpleBuffer<Vector3F> baryc;
-    int m_drawLength;
-    bool m_toRelocate;
-    
+    AdaptableMesh *m_mesh;
+
 public:
     PVSTest();
     virtual ~PVSTest();
@@ -27,8 +32,7 @@ protected:
     
 private:
     void computeMesh();
-    void setMeshDrawable(DrawableScene *scene);
-    
+   
 };
 
 }

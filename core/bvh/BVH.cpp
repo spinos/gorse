@@ -42,6 +42,16 @@ const int &BVH::numNodes() const
 const int &BVH::numPrimitives() const
 { return m_primitives.count(); }
 
+int BVH::numLeafNodes() const
+{
+	int c = 0;
+	for(int i=0;i<numNodes();++i) {
+		if(m_nodes[i].isLeaf())
+			c++;
+	}
+	return c;
+}
+
 BVHNode *BVH::rootNode()
 { return &m_nodes[0]; }
 
@@ -54,11 +64,46 @@ BVHNode *BVH::nodes()
 BVHPrimitive *BVH::primitives()
 { return m_primitives.data(); }
 
+BVHNodeIterator BVH::firstLeaf() const
+{
+	BVHNodeIterator it;
+	for(int i=0;i<numNodes();++i) {
+		if(m_nodes[i].isLeaf()) {
+			it._node = &m_nodes[i];
+			it._ind = i;
+			return it;
+		}
+	}
+	it._node = 0;
+	return it;
+}
+
+BVHNodeIterator BVH::nextLeaf(BVHNodeIterator x) const
+{
+	BVHNodeIterator it;
+	it._ind = x._ind + 1;
+	if(it._ind >= numNodes()) {
+		it._node = 0;
+		return it;
+	}
+	for(int i=it._ind;i<numNodes();++i) {
+		if(m_nodes[i].isLeaf()) {
+			it._node = &m_nodes[i];
+			it._ind = i;
+			return it;
+		}
+	}
+	
+	it._node = 0;
+	return it;
+}
+
 std::ostream& operator<<(std::ostream &output, const BVH & p) 
 {
     output << " aabb " << p.aabb() 
     	<< " n primitive "<< p.numPrimitives()
-    	<< " n node "<<p.numNodes();
+    	<< " n node "<<p.numNodes()
+    	<< " n leaf "<<p.numLeafNodes();
     return output;
 }
 

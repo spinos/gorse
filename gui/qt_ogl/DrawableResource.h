@@ -3,7 +3,7 @@
  *  aloe
  * 
  *  data can be modified on cpu
- *  once expanded gl resouce must be destroyed and recreated
+ *  once expanded associated gl resouce must be destroyed and recreated
  *
  */
 
@@ -15,14 +15,20 @@
 
 namespace alo {
 
+class DrawableObject;
+
 class DrawableResource {
 
 	SimpleBuffer<Vector3F> m_posnml;
     SimpleBuffer<Vector3F> m_baryc;
+    DrawableObject *m_object;
     bool m_toRelocate;
 
 public:
 	DrawableResource();
+
+	void attachToDrawable(DrawableObject *object, int drawLength);
+	DrawableObject *drawable();
 
 	const int &size() const;
 	bool toRelocate() const;

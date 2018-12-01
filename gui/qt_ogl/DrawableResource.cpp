@@ -5,11 +5,26 @@
  */
 
 #include "DrawableResource.h"
+#include "DrawableObject.h"
 
 namespace alo {
 
-DrawableResource::DrawableResource() : m_toRelocate(0)
+DrawableResource::DrawableResource() : 
+m_object(0),
+m_toRelocate(0)
 {}
+
+void DrawableResource::attachToDrawable(DrawableObject *object, int drawLength)
+{
+	m_object = object;
+	object->setPosnml((const float *)m_posnml.c_data(), m_posnml.capacityByteSize());
+    object->setBarycentric((const float *)m_baryc.c_data(), m_baryc.capacityByteSize());
+    object->setDrawArrayLength(drawLength);
+    m_toRelocate = false;
+}
+
+DrawableObject *DrawableResource::drawable()
+{ return m_object; }
 
 const int &DrawableResource::size() const
 { return m_posnml.capacity(); }
