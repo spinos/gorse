@@ -5,10 +5,9 @@
 
 namespace alo {
 
-DrawableScene::DrawableScene()
-{
-	m_program1 = nullptr;
-}
+DrawableScene::DrawableScene() :
+m_program1(nullptr)
+{}
 
 DrawableScene::~DrawableScene()
 {}
@@ -24,8 +23,15 @@ void DrawableScene::cleanup()
 	delete m_program1;
     m_program1 = nullptr;
 
-    for (auto i : m_drawables)
-    	delete i;
+    DrawDataType *block = m_drawQueue.begin();
+    while(block) {
+        for (int i=0;i<block->count();++i) { 
+            DrawObjectState &it = block->value(i);
+
+            if(it._state >= stWaitDestroy) delete it._object;
+        }
+        block = m_drawQueue.next(block);
+    }
 }
 
 void DrawableScene::initializeScene()
@@ -38,66 +44,80 @@ void DrawableScene::initializeScene()
 
 void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
 {
-    lock();
-    while(m_createQueue.size() > 0) {
-        DrawableObject *i = m_createQueue.front();
-        i->create(m_ctx);
-        m_drawables.push_back(i);
-        m_createQueue.erase(m_createQueue.begin());
-    }
-
-    while(m_editQueue.size() > 0) {
-        DrawableObject *i = m_editQueue.front();
-        i->update(m_ctx);
-        m_editQueue.erase(m_editQueue.begin());
-    }
-
-    while(m_removeQueue.size() > 0) {
-        DrawableObject *i = m_removeQueue.front();
-        removeDrawable(i);
-        m_removeQueue.erase(m_removeQueue.begin());
-    }
-    unlock();
-
     m_program1->beginProgram(proj);
 
-    std::vector<DrawableObject *>::iterator it = m_drawables.begin();
-	for (;it!=m_drawables.end();++it) { 
-		const QMatrix4x4 &world = (*it)->worldMatrix();
-    	const QMatrix4x4 modelView = cam * world;
-    	m_program1->setModelView(world, modelView);
-        (*it)->draw(m_ctx);
-	}
+    lock();
+    DrawDataType *block = m_drawQueue.begin();
+    while(block) {
+        for (int i=0;i<block->count();++i) { 
+            DrawObjectState &it = block->value(i);
+
+            if(it._state <= stDestroyed || it._state == stHidden)
+                continue;
+
+            if(it._state == stWaitDestroy) {
+                delete it._object;
+                it._state = stDestroyed;
+                continue;
+            }
+
+            if(it._state == stWaitEdit) {
+                it._object->update(m_ctx);
+                it._state = stNormal;
+            }
+
+            if(it._state == stWaitCreate) {
+                it._object->create(m_ctx);
+                it._state = stNormal;
+            }
+
+            DrawableObject *d = it._object;
+            const QMatrix4x4 &world = d->worldMatrix();
+            const QMatrix4x4 modelView = cam * world;
+            m_program1->setModelView(world, modelView);
+            d->draw(m_ctx);
+        }
+        block = m_drawQueue.next(block);
+    }
+    unlock();
 
     m_program1->endProgram();
 }
 
 void DrawableScene::enqueueCreateDrawable(DrawableObject *d, int groupId)
 { 
-    m_createQueue.push_back(d); 
+    DrawObjectState a;
+    a._state = stWaitCreate;
+    a._object = d;
+    m_drawQueue.insert(sdb::Coord2(d->drawId(), groupId), a);
 }
 
-void DrawableScene::enqueueEditDrawable(DrawableObject *d)
+void DrawableScene::enqueueEditDrawable(int objectId, int groupId)
 { 
-    m_editQueue.push_back(d); 
+    DrawObjectState *a = m_drawQueue.find(sdb::Coord2(objectId, groupId) );
+    if(a) a->_state = stWaitEdit;
 }
 
-void DrawableScene::enqueueRemoveDrawable(DrawableObject *d)
+void DrawableScene::enqueueRemoveDrawable(int objectId, int groupId)
 { 
-    m_removeQueue.push_back(d);
+    DrawObjectState *a = m_drawQueue.find(sdb::Coord2(objectId, groupId) );
+    if(a) a->_state = stWaitDestroy;
 }
 
-bool DrawableScene::removeDrawable(DrawableObject *k)
+void DrawableScene::enqueueHideDrawable(int objectId, int groupId)
 {
-	std::vector<DrawableObject *>::iterator it = m_drawables.begin();
-	for (;it != m_drawables.end();++it) {
-        if(*it == k) {
-        	delete *it;
-        	m_drawables.erase(it);
-        	return true;
-        }
-	}
-    return false;
+    DrawObjectState *a = m_drawQueue.find(sdb::Coord2(objectId, groupId) );
+    if(a) a->_state = stHidden;
+}
+
+void DrawableScene::enqueueRemoveDrawable(int groupId)
+{
+    DrawIteratorType it = m_drawQueue.begin(sdb::Coord2(-1,groupId));
+    for(;!it.done();it.next()) {
+        if(it.first.y > groupId) break;
+        if(it.first.y < groupId) continue;
+        if(it.second->_state > stWaitDestroy) it.second->_state = stWaitDestroy;
+    }
 }
 
 void DrawableScene::lock()

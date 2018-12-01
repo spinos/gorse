@@ -5,7 +5,8 @@
  *  draw queue 
  *  index (object_id, group_id)
  *  value object
- *  create, edit, remove
+ *  create, edit, destroy
+ *
  */
 
 #ifndef DRAWABLE_SCENE_H
@@ -13,8 +14,8 @@
 
 #include <QMutex>
 #include <QMatrix4x4>
-#include <vector>
-#include <deque>
+#include <sdb/Types.h>
+#include <sdb/L3Tree.h>
 
 QT_FORWARD_DECLARE_CLASS(QOpenGLContext)
 
@@ -26,12 +27,27 @@ class DrawableObject;
 class DrawableScene
 {
 	WireframeProgram *m_program1;
-    std::deque<DrawableObject *> m_createQueue;
-    std::deque<DrawableObject *> m_editQueue;
-    std::deque<DrawableObject *> m_removeQueue;
-    std::vector<DrawableObject *> m_drawables;
     QOpenGLContext *m_ctx;
     QMutex m_mutex;
+
+    enum ObjectState {
+        stUnknown = 0,
+        stDestroyed,
+        stWaitDestroy,
+        stHidden,
+        stWaitEdit,
+        stWaitCreate,
+        stNormal
+    };
+
+    struct DrawObjectState {
+        ObjectState _state;
+        DrawableObject *_object;
+    };
+
+    sdb::L3Tree<sdb::Coord2, DrawObjectState, 2048, 512, 1024 > m_drawQueue;
+    typedef sdb::L3Node<sdb::Coord2, DrawObjectState, 1024> DrawDataType;
+    typedef sdb::L3DataIterator<sdb::Coord2, DrawObjectState, 1024> DrawIteratorType;
     
 public:
     DrawableScene();
@@ -45,8 +61,11 @@ public:
     void draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam);
 
     void enqueueCreateDrawable(DrawableObject *d, int groupId);
-    void enqueueEditDrawable(DrawableObject *d);
-    void enqueueRemoveDrawable(DrawableObject *d);
+    void enqueueEditDrawable(int objectId, int groupId);
+    void enqueueHideDrawable(int objectId, int groupId);
+    void enqueueRemoveDrawable(int objectId, int groupId);
+/// remove entire group
+    void enqueueRemoveDrawable(int groupId);
 
     QOpenGLContext *context();
     
@@ -54,7 +73,6 @@ public:
     void unlock();
 
 private:
-    bool removeDrawable(DrawableObject *k);
 
 };
 

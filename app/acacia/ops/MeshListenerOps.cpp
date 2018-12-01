@@ -83,13 +83,15 @@ void MeshListenerOps::update()
     DrawableObject *d = drawable();
     const DrawableResource *rec = resource();
     if(rec->toRelocate() || dataChanged || meshSelectionChanged) {
-        scene->enqueueRemoveDrawable(d);
+        scene->enqueueRemoveDrawable(d->drawId(), opsId());
         DrawableObject *d1 = setMeshDrawable(m_mesh, rec);
         setDrawable(d1);
+        scene->lock();
         scene->enqueueCreateDrawable(d1, opsId());
+        scene->unlock();
     } else {
         updateDrawableResource(d, rec, m_mesh->numIndices());
-        scene->enqueueEditDrawable(d);
+        scene->enqueueEditDrawable(d->drawId(), opsId());
     }
 }
 
@@ -136,7 +138,9 @@ void MeshListenerOps::addDrawableTo(DrawableScene *scene)
     const DrawableResource *rec = resource();
     DrawableObject *d = setMeshDrawable(m_mesh, rec);
     setDrawable(d);
+    scene->lock();
     scene->enqueueCreateDrawable(d, opsId());
+    scene->unlock();
 }
 
 bool MeshListenerOps::checkBroadcastTime()

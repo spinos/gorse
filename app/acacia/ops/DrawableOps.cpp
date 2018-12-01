@@ -39,9 +39,7 @@ DrawableScene *DrawableOps::drawableScene()
 void DrawableOps::removeDrawableFromScene()
 { 
 	m_scene->lock();
-	std::vector<DrawableObject *>::iterator it = m_drawables.begin();
-	for(;it!=m_drawables.end();++it)
-		m_scene->enqueueRemoveDrawable(*it); 
+	m_scene->enqueueRemoveDrawable(opsId() ); 
 	m_scene->unlock();
 }
 

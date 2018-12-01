@@ -10,6 +10,6 @@ ${GORS_GEOM_SRC}
 ${GORS_MESH_SRC} 
 ${GORS_RNG_SRC}
 ${GORS_QT_OGL_SRC}
-)
+${GORS_SDB_SOURCE})
 
 target_link_libraries (frntm Qt5::OpenGL)

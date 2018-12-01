@@ -34,13 +34,13 @@ void PVSTest::update()
     DrawableScene *scene = drawableScene();
     DrawableObject *d = drawable();
     if(m_toRelocate) {
-        scene->enqueueRemoveDrawable(d);
+        scene->enqueueRemoveDrawable(d->drawId(), opsId());
         setMeshDrawable(scene);
     } else {
         d->setPosnml((const float *)posnml.c_data(), posnml.capacityByteSize());
         d->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
         d->setDrawArrayLength(m_drawLength);
-        scene->enqueueEditDrawable(d);
+        scene->enqueueEditDrawable(d->drawId(), opsId());
     }
 }
 
@@ -51,7 +51,9 @@ void PVSTest::setMeshDrawable(DrawableScene *scene)
     cly->setBarycentric((const float *)baryc.c_data(), baryc.capacityByteSize());
     cly->setDrawArrayLength(m_drawLength);
     setDrawable(cly);
+    scene->lock();
     scene->enqueueCreateDrawable(cly, opsId());
+    scene->unlock();
 }
 
 void PVSTest::addDrawableTo(DrawableScene *scene)
