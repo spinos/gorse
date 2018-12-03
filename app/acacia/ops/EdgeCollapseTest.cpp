@@ -118,21 +118,7 @@ void EdgeCollapseTest::update()
     DrawableScene *scene = drawableScene();
 
     DrawableResource *rec = resource();
-    DrawableObject *d = rec->drawable();
-    
-    if(rec->toRelocate()) {
-        scene->enqueueRemoveDrawable(d->drawId(), opsId());
-        DrawableObject *d1 = createDrawable();
-        rec->attachToDrawable(d1, m_mesh->numIndices());
-
-        scene->lock();
-        scene->enqueueCreateDrawable(d1, opsId());
-        scene->unlock();
-
-    } else {
-        d->setDrawArrayLength(m_mesh->numIndices());
-        scene->enqueueEditDrawable(d->drawId(), opsId());
-    }
+    processResource(rec);
 }
 
 void EdgeCollapseTest::addDrawableTo(DrawableScene *scene)
@@ -140,12 +126,7 @@ void EdgeCollapseTest::addDrawableTo(DrawableScene *scene)
     computeMesh();
     setDrawableScene(scene);
     DrawableResource *rec = resource();
-    DrawableObject *d = createDrawable();
-    rec->attachToDrawable(d, m_mesh->numIndices());
-    
-    scene->lock();
-    scene->enqueueCreateDrawable(d, opsId());
-    scene->unlock();
+    initiateResource(rec);
 }
 
 void EdgeCollapseTest::computeMesh()

@@ -82,21 +82,7 @@ void MeshListenerOps::update()
     DrawableScene *scene = drawableScene();
 
     DrawableResource *rec = resource();
-    DrawableObject *d = rec->drawable();
-
-    if(rec->toRelocate() || dataChanged || meshSelectionChanged) {
-        scene->enqueueRemoveDrawable(d->drawId(), opsId());
-        DrawableObject *d1 = createDrawable();
-        rec->attachToDrawable(d1, m_mesh->numIndices());
-        
-        scene->lock();
-        scene->enqueueCreateDrawable(d1, opsId());
-        scene->unlock();
-        
-    } else {
-        d->setDrawArrayLength(m_mesh->numIndices());
-        scene->enqueueEditDrawable(d->drawId(), opsId());
-    }
+    processResource(rec, dataChanged || meshSelectionChanged);
 }
 
 void MeshListenerOps::postUI()
@@ -140,12 +126,7 @@ void MeshListenerOps::addDrawableTo(DrawableScene *scene)
     computeMesh();
     setDrawableScene(scene);
     DrawableResource *rec = resource();
-    DrawableObject *d = createDrawable();
-    rec->attachToDrawable(d, m_mesh->numIndices());
-
-    scene->lock();
-    scene->enqueueCreateDrawable(d, opsId());
-    scene->unlock();
+    initiateResource(rec);
 }
 
 bool MeshListenerOps::checkBroadcastTime()

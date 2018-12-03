@@ -2,9 +2,12 @@
  *  DrawableOps.h
  *  aloe
  *
- *  drawable object ops
- *  id each object created
+ *  resource[]
+ *  |
+ *  object ---- scene
+ *  id each drawable object created
  *  hold multiple resources
+ *  send associated object to scene
  *
  */
 
@@ -43,6 +46,9 @@ protected:
 	DrawableObject *createDrawable();
 	
 	void updateMeshResouce(DrawableResource *rec, const ver1::ATriangleMesh *mesh, bool showUV=false);
+	void initiateResource(DrawableResource *rec);
+/// relocate or edit associated drawable object
+	void processResource(DrawableResource *rec, bool forcedToRelocate=false);
 
 private:
 	

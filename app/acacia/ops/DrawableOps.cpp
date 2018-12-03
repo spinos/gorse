@@ -49,6 +49,31 @@ void DrawableOps::updateMeshResouce(DrawableResource *rec, const ver1::ATriangle
     if(expanded)
         mesh->createBarycentricCoordinates(rec->barycBuffer());
 
+    rec->setDrawArrayLength(mesh->numIndices());
+}
+
+void DrawableOps::initiateResource(DrawableResource *rec)
+{
+    DrawableObject *d = createDrawable();
+    rec->attachToDrawable(d);
+    
+    m_scene->lock();
+    m_scene->enqueueCreateDrawable(d, opsId());
+    m_scene->unlock();
+}
+
+void DrawableOps::processResource(DrawableResource *rec, bool forcedToRelocate)
+{
+	DrawableObject *d = rec->drawable();
+
+    if(rec->toRelocate() || forcedToRelocate) {
+        m_scene->enqueueRemoveDrawable(d->drawId(), opsId());
+        initiateResource(rec);
+
+    } else {
+        d->setDrawArrayLength(rec->drawArrayLength());
+        m_scene->enqueueEditDrawable(d->drawId(), opsId());
+    }
 }
 
 }

@@ -37,6 +37,7 @@ void EdgeCollapse::simplify(HistoryMesh *msh)
 	buildTopology(m_mesh);
 
 	for(int istage = 0;istage < m_mesh->maxNumStages();++istage) {
+		std::cout << ".";
 		m_mesh->addHistoryStage();
 		int ncoarse = 0, nfine = 0;
 		computeEdgeCost();

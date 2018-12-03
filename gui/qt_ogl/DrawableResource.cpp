@@ -11,15 +11,16 @@ namespace alo {
 
 DrawableResource::DrawableResource() : 
 m_object(0),
+m_drawArrayLength(0),
 m_toRelocate(0)
 {}
 
-void DrawableResource::attachToDrawable(DrawableObject *object, int drawLength)
+void DrawableResource::attachToDrawable(DrawableObject *object)
 {
 	m_object = object;
 	object->setPosnml((const float *)m_posnml.c_data(), m_posnml.capacityByteSize());
     object->setBarycentric((const float *)m_baryc.c_data(), m_baryc.capacityByteSize());
-    object->setDrawArrayLength(drawLength);
+    object->setDrawArrayLength(m_drawArrayLength);
     m_toRelocate = false;
 }
 
@@ -29,8 +30,14 @@ DrawableObject *DrawableResource::drawable()
 const int &DrawableResource::size() const
 { return m_posnml.capacity(); }
 
+const int &DrawableResource::drawArrayLength() const
+{ return m_drawArrayLength; }
+
 bool DrawableResource::toRelocate() const
 { return m_toRelocate; }
+
+void DrawableResource::setDrawArrayLength(int x)
+{ m_drawArrayLength = x; }
 
 void DrawableResource::setToRelocate(bool x)
 { m_toRelocate = x; }

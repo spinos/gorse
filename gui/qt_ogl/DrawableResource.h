@@ -22,16 +22,19 @@ class DrawableResource {
 	SimpleBuffer<Vector3F> m_posnml;
     SimpleBuffer<Vector3F> m_baryc;
     DrawableObject *m_object;
+    int m_drawArrayLength;
     bool m_toRelocate;
 
 public:
 	DrawableResource();
 
-	void attachToDrawable(DrawableObject *object, int drawLength);
+	void attachToDrawable(DrawableObject *object);
 	DrawableObject *drawable();
 
 	const int &size() const;
+	const int &drawArrayLength() const;
 	bool toRelocate() const;
+	void setDrawArrayLength(int x);
 	void setToRelocate(bool x);
 
 	SimpleBuffer<Vector3F> &posnmlBuffer();
