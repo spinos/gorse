@@ -15,6 +15,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
+#include <math/DarkColors.h>
 
 namespace alo {
 

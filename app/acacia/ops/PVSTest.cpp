@@ -38,16 +38,22 @@ void PVSTest::update()
     
     computeMesh();
 
-    DrawableResource *rec = resource();
-    processResource(rec);
+    const int n = numResources();
+    for(int i=0;i<n;++i) {
+        DrawableResource *rec = resource(i);
+        processResource(rec);
+    }
 }
 
 void PVSTest::addDrawableTo(DrawableScene *scene)
 { 
     computeMesh();
     setDrawableScene(scene);
-    DrawableResource *rec = resource();
-    initiateResource(rec);
+    const int n = numResources();
+    for(int i=0;i<n;++i) {
+        DrawableResource *rec = resource(i);
+        initiateResource(rec);
+    }
 }
 
 void PVSTest::computeMesh()
@@ -58,7 +64,7 @@ void PVSTest::computeMesh()
     const double du = 4.0 / (double)nu;
     for(int i=0;i<nu;++i) {
         double xu = -2.0 + du * i;
-        m_mesh->addVertex(Vector3F(xu, tanh(xu), sinh(xu)) * 50.f);
+        m_mesh->addVertex(Vector3F(xu, tanh(xu), sinh(xu)) * 100.f);
     }
 
     FrontLine originLine;
@@ -67,7 +73,7 @@ void PVSTest::computeMesh()
     for(int i=0;i<nu;++i)
         originLine.addVertex(m_mesh->vertexPositionR(i), i);
 
-    Vector3F up(-.85f, 2.1f, 0.f);
+    Vector3F up(-1.85f, 4.1f, 0.f);
     const Quaternion lq(-.00972f, Vector3F::ZAxis);
     const Quaternion tq(.00293f, Vector3F::YAxis);
     constexpr float cshrinking = .0f;
@@ -111,16 +117,21 @@ void PVSTest::computeMesh()
 
     AdaptableMesh transient;
 
+    int meshCount = 0;
     BVHNodeIterator it = fis.firstPart();
     while(it._node) {
-
         fis.reformPart(&transient, it, m_mesh);
+        
+        DrawableResource *rec;
+        if(!hasResource(meshCount)) {
+            rec = createResource();
+            setResource(rec, meshCount);
+        }
+        rec = resource(meshCount);
+        updateMeshResouce(rec, &transient);
+        meshCount++;
         it = fis.nextPart(it);
     }
-
-    DrawableResource *rec = resource();
-    updateMeshResouce(rec, m_mesh);
-
 }
 
 void PVSTest::recvCameraChanged(const CameraEvent &x)

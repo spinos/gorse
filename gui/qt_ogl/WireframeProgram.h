@@ -30,6 +30,7 @@ public:
                     const QMatrix4x4 &modelViewMat);
     void setModelView(const QMatrix4x4 &modelMat,
                                 const QMatrix4x4 &modelViewMat);
+    void setWireColor(const float *c);
     void endProgram();
     
 protected:
@@ -40,7 +41,8 @@ private:
     int m_mvMatrixLoc;
     int m_normalMatrixLoc;
     int m_lightPosLoc;
-
+    int m_wireColorLoc;
+    
 };
 
 }

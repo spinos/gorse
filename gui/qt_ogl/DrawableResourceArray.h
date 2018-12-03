@@ -20,6 +20,8 @@ class DrawableResourceArray {
 public:
 	DrawableResourceArray();
 	virtual ~DrawableResourceArray();
+	
+	int numResources() const;
 
 protected:
 	bool hasResource(int i=0) const;

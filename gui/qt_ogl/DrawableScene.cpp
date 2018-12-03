@@ -75,6 +75,7 @@ void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
             const QMatrix4x4 &world = d->worldMatrix();
             const QMatrix4x4 modelView = cam * world;
             m_program1->setModelView(world, modelView);
+            m_program1->setWireColor(DarkColors[d->drawId() & 15]);
             d->draw(m_ctx);
         }
         block = m_drawQueue.next(block);

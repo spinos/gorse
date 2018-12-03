@@ -35,6 +35,7 @@ public:
 	DataType *insert(const KeyType &x, const DataType &a, bool writeExisting=true);
 	bool remove(const KeyType &x);
 	DataType *find(const KeyType &x);
+	void clear();
 
 	int size() const;
 	void printDetail() const;
@@ -55,13 +56,18 @@ L3Tree<KeyType, DataType, Dim0, Dim1, Dim2>::L3Tree()
 
 template <typename KeyType, typename DataType, int Dim0, int Dim1, int Dim2>
 L3Tree<KeyType, DataType, Dim0, Dim1, Dim2>::~L3Tree()
+{ clear(); }
+
+template <typename KeyType, typename DataType, int Dim0, int Dim1, int Dim2>
+void L3Tree<KeyType, DataType, Dim0, Dim1, Dim2>::clear()
 {
-	for(int i=0;i<m_root.count();++i) {
+    for(int i=0;i<m_root.count();++i) {
 		InnerNodeType *inner = m_root.value(i);
 		for(int j=0;j<inner->count();++j)
 			delete inner->value(j);
 		delete inner;
 	}
+	m_root.setEmpty();
 }
 
 template <typename KeyType, typename DataType, int Dim0, int Dim1, int Dim2>

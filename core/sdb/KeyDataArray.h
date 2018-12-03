@@ -31,6 +31,7 @@ public:
     bool remove(const KeyType &x);
     void copyFrom(const KeyType *ks, const DataType *vs, int n);
     void add(const DataType &x);
+    void setEmpty();
 
     const int &count() const;
     bool isFull() const;
@@ -128,13 +129,6 @@ void KeyDataArray<KeyType, DataType, Dim>::copyFrom(const KeyType *ks, const Dat
 }
 
 template <typename KeyType, typename DataType, int Dim>
-void KeyDataArray<KeyType, DataType, Dim>::add(const DataType &x)
-{
-	for(int i=0;i<m_count;++i)
-		m_data[i] += x;
-}
-
-template <typename KeyType, typename DataType, int Dim>
 bool KeyDataArray<KeyType, DataType, Dim>::remove(const KeyType &x)
 {
 	if(isEmpty()) return false;
@@ -163,6 +157,17 @@ bool KeyDataArray<KeyType, DataType, Dim>::remove(const KeyType &x)
 	m_count--;
 	return true;
 }
+
+template <typename KeyType, typename DataType, int Dim>
+void KeyDataArray<KeyType, DataType, Dim>::add(const DataType &x)
+{
+    for(int i=0;i<m_count;++i)
+        m_data[i] += x;
+}
+
+template <typename KeyType, typename DataType, int Dim>
+void KeyDataArray<KeyType, DataType, Dim>::setEmpty()
+{ m_count = 0; }
 
 template <typename KeyType, typename DataType, int Dim>
 const KeyType &KeyDataArray<KeyType, DataType, Dim>::key(int i) const

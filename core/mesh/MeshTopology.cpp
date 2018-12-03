@@ -413,10 +413,10 @@ void MeshTopology::replaceMeshVertex(ver1::ATriangleMesh *mesh,
 
 void MeshTopology::pushPastFaceIndex(int x)
 {
-	sdb::L3Node<FaceIndex, int, 1024> *d = m_pastFaceInds.begin();
-	while(d) {
-		d->add(x);
-		d = m_pastFaceInds.next(d);
+	sdb::L3Node<FaceIndex, int, 1024> *block = m_pastFaceInds.begin();
+	while(block) {
+	    block->add(x);
+		block = m_pastFaceInds.next(block);
 	}
 }
 

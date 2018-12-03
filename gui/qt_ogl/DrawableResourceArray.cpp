@@ -20,9 +20,12 @@ DrawableResourceArray::~DrawableResourceArray()
 	}
 }
 
+int DrawableResourceArray::numResources() const
+{ return m_resources.size(); }
+
 bool DrawableResourceArray::hasResource(int i) const
 {
-	if(m_resources.size() < i+1) return false;
+	if(numResources() < i+1) return false;
 	return m_resources[i] != 0;
 }
 
@@ -31,7 +34,7 @@ DrawableResource *DrawableResourceArray::createResource()
 
 void DrawableResourceArray::setResource(DrawableResource *x, int i)
 {
-	if(m_resources.size() < i+1)
+	if(numResources() < i+1)
 		m_resources.resize(i+1, 0);
 	m_resources[i] = x; 
 }
