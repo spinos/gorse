@@ -77,9 +77,6 @@ void MeshTopology::buildTopology(const ver1::ATriangleMesh *mesh)
 		} else
 			vi.setOnBorder(false);
 	}
-
-	printDetail();
-
 }
 
 bool MeshTopology::checkTopology(const ver1::ATriangleMesh *mesh)

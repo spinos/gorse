@@ -45,7 +45,7 @@ protected:
 	DrawableScene *drawableScene();
 	DrawableObject *createDrawable();
 	
-	void updateMeshResouce(DrawableResource *rec, const ver1::ATriangleMesh *mesh, bool showUV=false);
+	static void UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangleMesh *mesh, bool showUV=false);
 	void initiateResource(DrawableResource *rec);
 /// relocate or edit associated drawable object
 	void processResource(DrawableResource *rec, bool forcedToRelocate=false);

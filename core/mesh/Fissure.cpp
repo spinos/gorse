@@ -21,7 +21,7 @@ Fissure::Fissure()
 Fissure::~Fissure()
 { delete m_bvh; }
 
-void Fissure::granulate(const AdaptableMesh *inMesh)
+int Fissure::granulate(const AdaptableMesh *inMesh)
 {
 	m_bvh->clear();
 
@@ -41,12 +41,12 @@ void Fissure::granulate(const AdaptableMesh *inMesh)
 
 	m_bvh->setRootLeaf();
 
-	BVHSplit::InnerNumPrimitives = 1<<16;
-	BVHSplit::LeafNumPrimitives = 1<<14;
+	BVHSplit::InnerNumPrimitives = 60000;
+	BVHSplit::LeafNumPrimitives = 15000;
 	BVHBuilder builder;
     builder.build(m_bvh);
 
-    std::cout<<" bvh "<<*m_bvh;
+    return m_bvh->numLeafNodes();
 }
 
 BVHNodeIterator Fissure::firstPart() const

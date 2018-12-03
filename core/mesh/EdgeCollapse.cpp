@@ -49,8 +49,6 @@ void EdgeCollapse::simplify(HistoryMesh *msh)
 
 	m_mesh->finishUV();
 	m_mesh->finishHistory(numVertices(), numFaces());
-
-	printDetail();
 }
 
 int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
@@ -212,8 +210,6 @@ void EdgeCollapse::computeEdgeCost()
 		
 		for(int i=0;i<block->count();++i) {
 			const EdgeIndex &k = block->key(i);
-			if(k.v0() > lastV)
-				break;
 
 			EdgeValue &e = block->value(i);
 			const int &ei = e.ind();
@@ -222,7 +218,10 @@ void EdgeCollapse::computeEdgeCost()
 			ec._ei = k;
 			ec._ind = ei;
 
-			if(!e.isOnBorder() && ec._ei.v1() <= lastV )
+			if(k.v0() > lastV)
+				continue;
+
+			if(!e.isOnBorder() && k.v1() <= lastV )
 				ec._cost = computeEdgeCost(e, ec._ei);
 		}
 

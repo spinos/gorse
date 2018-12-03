@@ -140,11 +140,7 @@ void HistoryMesh::finishHistory(int nv, int nf)
 		stg.setFRange(stageEndHh, stageEndHh - stg.nfine() );
 
 		stageEndHh = stg.fbegin();
-	}
-
-	for(int i =0;i<numStages();++i) 
-		std::cout << "\n stage"<<i<<stage(i);
-	
+	}	
 }
 
 int HistoryMesh::numStages() const

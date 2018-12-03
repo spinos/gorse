@@ -4,15 +4,11 @@
 #include "DrawableOps.h"
 
 namespace alo {
-class AdaptableMesh;
 class HistoryMesh;
-class HistoryReformSrc;
 class EdgeCollapseTest : public DrawableOps {
     
-    AdaptableMesh *m_mesh;
     HistoryMesh *m_stageMesh;
     HistoryMesh *m_sourceMesh;
-    HistoryReformSrc *m_reformer;
     float m_lod;
     static AFileDlgProfile SWriteProfile;
     

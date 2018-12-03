@@ -86,16 +86,6 @@ void ATriangleMesh::createTriangleMesh(int vertexCount, int triangleCount)
     m_indices.createBuffer(m_numTriangles);
 }
 
-void ATriangleMesh::createTriangleMesh(const unsigned *inds,
-        const Vector3F *pos, const Vector3F *nml,
-        int vertexCount, int triangleCount)
-{
-    createTriangleMesh(vertexCount, triangleCount);
-    m_indices.copyFrom((const Int3 *)inds, triangleCount);
-    m_positions.copyFrom(pos, vertexCount);
-    m_normals.copyFrom(nml, vertexCount);
-}
-
 void ATriangleMesh::copyPositionsFrom(const Vector3F *x)
 { m_positions.copyFrom(x, m_numVertices); }
 

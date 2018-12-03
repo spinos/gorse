@@ -14,11 +14,16 @@
 
 namespace alo {
 class CameraEvent;
-class AdaptableMesh;
+class HistoryMesh;
 class PVSTest : public DrawableOps {
-    
-    AdaptableMesh *m_mesh;
 
+	struct MeshReformPair {
+		HistoryMesh *_outMesh;
+		HistoryMesh *_stageMesh;
+	};
+
+	std::vector<MeshReformPair> m_meshes;
+    
 public:
     PVSTest();
     virtual ~PVSTest();
@@ -32,7 +37,9 @@ protected:
     
 private:
     void computeMesh();
-   
+    void addMeshReformPair();
+    static void SimplifyAndReform(MeshReformPair &p, HistoryMesh *srcMesh, DrawableResource *rec);
+
 };
 
 }

@@ -165,9 +165,10 @@ void AdaptableMesh::setNumFaces(int n)
 
 void AdaptableMesh::copyTo(AdaptableMesh *b, const int &nv, const int &nf) const
 {
-    b->createTriangleMesh((const unsigned *)c_indices(), 
-        c_positions(), c_normals(),
-         nv, nf);
+    b->createTriangleMesh(nv, nf);
+    memcpy(b->indices(), c_indices(), nf * 12);
+    memcpy(b->positions(), c_positions(), nv * 12);
+    memcpy(b->normals(), c_normals(), nv * 12);
     b->clearUVSets();
     std::deque<ver1::NamedUV >::const_iterator it = c_uvBegin();
     for(;it!=c_uvEnd();++it) {

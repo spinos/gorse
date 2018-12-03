@@ -35,7 +35,7 @@ DrawableObject *DrawableOps::createDrawable()
 	return d;
 }
 
-void DrawableOps::updateMeshResouce(DrawableResource *rec, const ver1::ATriangleMesh *mesh, bool showUV)
+void DrawableOps::UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangleMesh *mesh, bool showUV)
 {
 	const int oldL = rec->size();
 

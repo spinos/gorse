@@ -34,6 +34,7 @@ public:
 	DataType *insert(const KeyType &x, const DataType &a, bool writeExisting=true);
 	bool remove(const KeyType &x);
 	DataType *find(const KeyType &x);
+	void clear();
 
 	int size() const;
 	void printDetail() const;
@@ -54,9 +55,14 @@ L2Tree<KeyType, DataType, Dim0, Dim1>::L2Tree()
 
 template <typename KeyType, typename DataType, int Dim0, int Dim1>
 L2Tree<KeyType, DataType, Dim0, Dim1>::~L2Tree()
+{ clear(); }
+
+template <typename KeyType, typename DataType, int Dim0, int Dim1>
+void L2Tree<KeyType, DataType, Dim0, Dim1>::clear()
 {
-	for(int i=0;i<m_root.count();++i)
+    for(int i=0;i<m_root.count();++i)
 		delete m_root.value(i);
+	m_root.setEmpty();
 }
 
 template <typename KeyType, typename DataType, int Dim0, int Dim1>

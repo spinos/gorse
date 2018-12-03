@@ -28,12 +28,10 @@ AFileDlgProfile EdgeCollapseTest::SWriteProfile(AFileDlgProfile::FWrite,
    
 EdgeCollapseTest::EdgeCollapseTest()
 {
-    m_mesh = new AdaptableMesh;
     m_sourceMesh = new HistoryMesh;
     m_stageMesh = new HistoryMesh;
     m_stageMesh->createTriangleMesh(1000, 1000);
     m_stageMesh->addHistoryStage();
-    m_reformer = new HistoryReformSrc;
     const int nu = 125;
     const float du = 39.f / (float)nu;
     for(int i=0;i<nu;++i) {
@@ -86,7 +84,17 @@ EdgeCollapseTest::EdgeCollapseTest()
 
     boost::chrono::system_clock::time_point t0 = boost::chrono::system_clock::now();
 
+    const int nv0 = m_sourceMesh->numVertices();
+    const int nt0 = m_sourceMesh->numTriangles();
     ech.simplify(m_sourceMesh);
+
+    for(int i=0;i<m_sourceMesh->numStages();++i)
+        std::cout<<"\n stage"<<i<<m_sourceMesh->stage(i);
+
+    const float nvPercent = (float)(nv0 - m_sourceMesh->numVertices()) / (float)nv0 * 100.f;
+    const float ntPercent = (float)(nt0 - m_sourceMesh->numTriangles()) / (float)nt0 * 100.f;
+    std::cout << "\n n vertex "<<m_sourceMesh->numVertices()<<":"<<nv0<<" reduced by " << nvPercent << " percent "
+        << "\n n face "<<m_sourceMesh->numTriangles()<<":"<<nt0<<" reduced by " << ntPercent << " percent ";
 
     boost::chrono::system_clock::time_point t1 = boost::chrono::system_clock::now();
 
@@ -100,11 +108,9 @@ EdgeCollapseTest::EdgeCollapseTest()
 }
 
 EdgeCollapseTest::~EdgeCollapseTest()
-{ 
-    delete m_mesh; 
+{  
     delete m_sourceMesh;
     delete m_stageMesh;
-    delete m_reformer;
 }
     
 void EdgeCollapseTest::update()
@@ -131,10 +137,12 @@ void EdgeCollapseTest::addDrawableTo(DrawableScene *scene)
 
 void EdgeCollapseTest::computeMesh()
 {
-    m_reformer->reformSrc(m_mesh, m_stageMesh, m_lod, m_sourceMesh);
+    AdaptableMesh transient;
+    HistoryReformSrc reformer;
+    reformer.reformSrc(&transient, m_stageMesh, m_lod, m_sourceMesh);
 
     DrawableResource *rec = resource();
-    updateMeshResouce(rec, m_mesh);
+    UpdateMeshResouce(rec, &transient);
 }
 
 bool EdgeCollapseTest::hasMenu() const

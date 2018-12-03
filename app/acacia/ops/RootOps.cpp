@@ -154,7 +154,7 @@ void RootOps::computeMesh()
     m_mesh->calculateVertexNormals();
 
     DrawableResource *rec = resource();
-    updateMeshResouce(rec, m_mesh);
+    UpdateMeshResouce(rec, m_mesh);
     
 }
 

@@ -70,7 +70,7 @@ void LodMeshIn::computeMesh()
         m_mesh->createMinimal();
     
     DrawableResource *rec = resource();
-    updateMeshResouce(rec, m_mesh, m_shoUV);
+    UpdateMeshResouce(rec, m_mesh, m_shoUV);
 }
 
 }

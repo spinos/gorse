@@ -32,7 +32,7 @@ public:
 	Fissure();
 	virtual ~Fissure();
 
-	void granulate(const AdaptableMesh *inMesh);
+	int granulate(const AdaptableMesh *inMesh);
 
 	BVHNodeIterator firstPart() const;
 	BVHNodeIterator nextPart(BVHNodeIterator x) const;

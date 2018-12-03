@@ -218,7 +218,7 @@ void MeshListenerOps::computeMesh()
         m_reformer->reformSrc(m_mesh, m_stageMesh, m_lod, m_sourceMesh);
 
     DrawableResource *rec = resource();
-    updateMeshResouce(rec, m_mesh, m_shoUV);
+    UpdateMeshResouce(rec, m_mesh, m_shoUV);
 }
 
 bool MeshListenerOps::hasMenu() const
