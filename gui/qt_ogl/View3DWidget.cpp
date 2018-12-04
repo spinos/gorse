@@ -17,9 +17,7 @@ View3DWidget::View3DWidget(QWidget *parent)
 }
 
 View3DWidget::~View3DWidget() 
-{
-    qDebug()<<"~View3DWidget";
-}
+{}
 
 QSize View3DWidget::minimumSizeHint() const
 {
@@ -62,6 +60,9 @@ void View3DWidget::resizeGL(int width, int height)
     calcProjectionMatrix();
     calcCameraMatrix();
     calcCameraFrustum();
+    CameraEvent e = getCameraEvent();
+    e.setProgressMode(CameraEvent::MEnd);
+    emit cameraChanged(e);
     clientResize(width, height);
 }
 

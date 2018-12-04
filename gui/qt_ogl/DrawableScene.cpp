@@ -111,6 +111,12 @@ void DrawableScene::enqueueHideDrawable(int objectId, int groupId)
     if(a) a->_state = stHidden;
 }
 
+void DrawableScene::enqueueShowDrawable(int objectId, int groupId)
+{
+    DrawObjectState *a = m_drawQueue.find(sdb::Coord2(objectId, groupId) );
+    if(a) a->_state = stNormal;
+}
+
 void DrawableScene::enqueueRemoveDrawable(int groupId)
 {
     DrawIteratorType it = m_drawQueue.begin(sdb::Coord2(-1,groupId));

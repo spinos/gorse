@@ -38,8 +38,7 @@ MainWindow::MainWindow()
 
     mbvh->setRootLeaf();
 
-    BVHBuilder builder;
-    builder.build(mbvh);
+    BVHBuilder::Build(mbvh);
 
     std::cout<<" bvh "<<*mbvh;
     

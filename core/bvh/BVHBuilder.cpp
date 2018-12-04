@@ -2,25 +2,22 @@
 #include "BVH.h"
 #include "BVHNode.h"
 #include "BVHSplit.h"
+#include <deque>
 
 namespace alo {
 
-BVHBuilder::BVHBuilder()
-{}
-
-BVHBuilder::~BVHBuilder()
-{}
-
-void BVHBuilder::build(BVH *hierarchy)
+void BVHBuilder::Build(BVH *hierarchy)
 {
+	std::deque<BVHSplit *> buildQueue;
+
 	BVHSplit *split = new BVHSplit(0, hierarchy->nodes(), hierarchy->primitives() );
-	m_buildQueue.push_back(split);
+	buildQueue.push_back(split);
 
 	int maxQLen = 1;
 
 	for(;;) {
 
-		BVHSplit *active = m_buildQueue.front();
+		BVHSplit *active = buildQueue.front();
 		if(active->compute() ) {
 
 			hierarchy->splitNode(active->nodeIndex());
@@ -35,20 +32,20 @@ void BVHBuilder::build(BVH *hierarchy)
 			active->sortPrimitives();
 
 			BVHSplit *lftSplit = new BVHSplit(ileft, hierarchy->nodes(), hierarchy->primitives() );
-			m_buildQueue.push_back(lftSplit);
+			buildQueue.push_back(lftSplit);
 
 			BVHSplit *rgtSplit = new BVHSplit(ileft + 1, hierarchy->nodes(), hierarchy->primitives() );
-			m_buildQueue.push_back(rgtSplit);
+			buildQueue.push_back(rgtSplit);
 
 		}
 		
 		delete active;
-		m_buildQueue.erase(m_buildQueue.begin());
+		buildQueue.erase(buildQueue.begin());
 
-		if(m_buildQueue.size() < 1) break;
+		if(buildQueue.size() < 1) break;
 
-		if(maxQLen < m_buildQueue.size())
-			maxQLen = m_buildQueue.size();
+		if(maxQLen < buildQueue.size())
+			maxQLen = buildQueue.size();
 
 	}
 	std::cout<<" max queued splits "<<maxQLen;

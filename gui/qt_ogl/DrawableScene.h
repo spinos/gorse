@@ -63,6 +63,7 @@ public:
     void enqueueCreateDrawable(DrawableObject *d, int groupId);
     void enqueueEditDrawable(int objectId, int groupId);
     void enqueueHideDrawable(int objectId, int groupId);
+    void enqueueShowDrawable(int objectId, int groupId);
     void enqueueRemoveDrawable(int objectId, int groupId);
 /// remove entire group
     void enqueueRemoveDrawable(int groupId);

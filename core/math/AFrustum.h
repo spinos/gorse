@@ -25,6 +25,8 @@ class AFrustum {
 	
 public:
 	AFrustum();
+/// hfov is tan(fov/2)
+/// aspect ratio is h / w
 /// clip is negative in camera space
 	void set(const float & hfov,
 			const float & aspectRatio,
@@ -49,11 +51,28 @@ public:
     const Vector3F &X(int idx) const;
 	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = 0) const;
 
+/// behind all 6 faces
+	bool isPointInside(const Vector3F &p) const;
+
 	friend std::ostream& operator<<(std::ostream &output, const AFrustum & p);
+
+/// all points of b inside frustum
+	template<typename T>
+	bool enclose(const T &b) const;
     
 private:
 	
 };
+
+template<typename T>
+bool AFrustum::enclose(const T &b) const
+{
+	for(int i=0;i<b.numPoints();++i) {
+		if(!isPointInside(b.X(i)))
+			return false;
+	}
+	return true;
+}
 
 }
 

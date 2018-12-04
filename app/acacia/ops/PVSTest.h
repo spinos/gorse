@@ -2,7 +2,7 @@
  *  PVSTest.h
  *  acacia
  *
- *  fissure test mesh 
+ *  fissure mesh 
  *  extract pvs
  *
  */
@@ -15,6 +15,8 @@
 namespace alo {
 class CameraEvent;
 class HistoryMesh;
+class ViewFrustumCull;
+class VisibleDetail;
 class PVSTest : public DrawableOps {
 
 	struct MeshReformPair {
@@ -23,6 +25,9 @@ class PVSTest : public DrawableOps {
 	};
 
 	std::vector<MeshReformPair> m_meshes;
+    ViewFrustumCull *m_culler;
+    VisibleDetail *m_details;
+    bool m_freeze;
     
 public:
     PVSTest();

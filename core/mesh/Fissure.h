@@ -38,6 +38,8 @@ public:
 	BVHNodeIterator nextPart(BVHNodeIterator x) const;
 	void reformPart(AdaptableMesh *outMesh, BVHNodeIterator x, const AdaptableMesh *inMesh) const;
 
+	const BVH *bvh() const;
+	
 private:
 /// from primitive[begin] to (excluding) primitive[end]
     void mapVertices(sdb::L3Tree<int, int, 2048, 512, 1024> &vertexMap, 

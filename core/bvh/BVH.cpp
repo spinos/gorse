@@ -64,6 +64,9 @@ BVHNode *BVH::nodes()
 BVHPrimitive *BVH::primitives()
 { return m_primitives.data(); }
 
+const BVHNode *BVH::c_nodes() const
+{ return m_nodes.c_data(); }
+
 const BVHPrimitive *BVH::c_primitives() const
 { return m_primitives.c_data(); }
 

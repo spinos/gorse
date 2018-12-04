@@ -2,9 +2,6 @@
  *  BaseCamera.cpp
  *  aloe
  *
- *  Created by jian zhang on 7/25/12.
- *  Copyright 2012 __MyCompanyName__. All rights reserved.
- *
  */
 
 #include "BaseCamera.h"
@@ -210,6 +207,9 @@ float BaseCamera::aspectRatio() const
 {
 	return (float)fPortWidth / (float)fPortHeight;
 }
+
+float BaseCamera::heightWidthRatio() const
+{ return (float)fPortHeight / (float)fPortWidth; }
 
 float BaseCamera::nearClipPlane() const
 {

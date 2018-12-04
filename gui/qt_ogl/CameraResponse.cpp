@@ -81,7 +81,7 @@ const QMatrix4x4 &CameraResponse::calcCameraMatrix()
 void CameraResponse::calcCameraFrustum()
 {
     m_frustum->set(m_persp->tanhfov(),
-           m_persp->aspectRatio(),
+           m_persp->heightWidthRatio(),
            -m_persp->nearClipPlane(),
            -m_persp->farClipPlane(),
            m_persp->fSpace);

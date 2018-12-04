@@ -193,10 +193,10 @@
                     "is_element": true,
                     "attribs" : [
                         {
-                            "name": "cache_path",
-                            "label": "Cache Path",
-                            "typ": 9,
-                            "strtyp": 513
+                            "name": "freeze_view",
+                            "label": "Freeze View",
+                            "typ": 1,
+                            "value": false
                         }
                     ]
                 }

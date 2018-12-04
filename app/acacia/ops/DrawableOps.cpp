@@ -50,6 +50,7 @@ void DrawableOps::UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangle
         mesh->createBarycentricCoordinates(rec->barycBuffer());
 
     rec->setDrawArrayLength(mesh->numIndices());
+    rec->setDirty(true);
 }
 
 void DrawableOps::initiateResource(DrawableResource *rec)
@@ -64,16 +65,53 @@ void DrawableOps::initiateResource(DrawableResource *rec)
 
 void DrawableOps::processResource(DrawableResource *rec, bool forcedToRelocate)
 {
-	DrawableObject *d = rec->drawable();
+    DrawableObject *d = rec->drawable();
+
+    if(rec->shouldRemove() && d) {
+        m_scene->lock();
+        m_scene->enqueueRemoveDrawable(d->drawId(), opsId());
+        m_scene->unlock();
+        rec->dettachDrawable();
+        return;
+    }
+
+    if(rec->isHidden() && d) {
+        m_scene->lock();
+        m_scene->enqueueHideDrawable(d->drawId(), opsId());
+        m_scene->unlock();
+        return;
+    }
+
+    if(!rec->isVisible())
+        return;
+
+    if(!d) {
+        initiateResource(rec);
+        return;
+    }
 
     if(rec->toRelocate() || forcedToRelocate) {
+        m_scene->lock();
         m_scene->enqueueRemoveDrawable(d->drawId(), opsId());
+        m_scene->unlock();
         initiateResource(rec);
+        return;
+    } 
 
-    } else {
+    if(rec->isDirty()) {
         d->setDrawArrayLength(rec->drawArrayLength());
+        m_scene->lock();
         m_scene->enqueueEditDrawable(d->drawId(), opsId());
+        m_scene->unlock();
+        rec->setDirty(false);
     }
+
+    if(rec->isVisiblilityChanged()) {
+        m_scene->lock();
+        m_scene->enqueueShowDrawable(d->drawId(), opsId());
+        m_scene->unlock();
+    }
+
 }
 
 }

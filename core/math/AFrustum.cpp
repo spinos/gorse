@@ -74,12 +74,11 @@ const Vector3F &AFrustum::X(int idx) const
 Vector3F AFrustum::supportPoint(const Vector3F & v, Vector3F * localP) const
 {
 	float maxdotv = -1e8f;
-    float dotv;
 	
-    Vector3F res, q;
+    Vector3F res;
     for(int i=0; i < 8; i++) {
-        q = m_v[i];
-        dotv = q.dot(v);
+        const Vector3F &q = m_v[i];
+        float dotv = q.dot(v);
         if(dotv > maxdotv) {
             maxdotv = dotv;
             res = q;
@@ -88,6 +87,45 @@ Vector3F AFrustum::supportPoint(const Vector3F & v, Vector3F * localP) const
     }
     
     return res;
+}
+
+bool AFrustum::isPointInside(const Vector3F &p) const
+{
+/// left
+	Vector3F ab = m_v[7] - m_v[0];
+	Vector3F ac = m_v[4] - m_v[0];
+	Vector3F nml = ab.cross(ac);
+	if((m_v[0] - p).dot(nml) < 0.f)
+		return false;
+/// right
+	ab = m_v[5] - m_v[1];
+	ac = m_v[6] - m_v[1];
+	nml = ab.cross(ac);
+	if((m_v[1] - p).dot(nml) < 0.f)
+		return false;
+/// bottom
+	ab = m_v[4] - m_v[1];
+	ac = m_v[5] - m_v[1];
+	nml = ab.cross(ac);
+	if((m_v[1] - p).dot(nml) < 0.f)
+		return false;
+/// top
+	ab = m_v[6] - m_v[3];
+	ac = m_v[7] - m_v[3];
+	nml = ab.cross(ac);
+	if((m_v[3] - p).dot(nml) < 0.f)
+		return false;
+/// far
+	ab = m_v[7] - m_v[5];
+	ac = m_v[6] - m_v[5];
+	nml = ab.cross(ac);
+	if((m_v[5] - p).dot(nml) < 0.f)
+		return false;
+/// near
+	ab = m_v[1] - m_v[0];
+	ac = m_v[2] - m_v[0];
+	nml = ab.cross(ac);
+	return (m_v[0] - p).dot(nml) > 0.f;
 }
 
 std::ostream& operator<<(std::ostream &output, const AFrustum & p)

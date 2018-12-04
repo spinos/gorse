@@ -1,3 +1,12 @@
+/*
+ *  GjkIntersection.h
+ *  aloe
+ *
+ *  http://www.dtecta.com/papers/jgt98convex.pdf
+ *  http://www.dtecta.com/papers/jgt04raycast.pdf
+ *
+ */
+
 #ifndef ALO_GJK_INTERSECTION_H
 #define ALO_GJK_INTERSECTION_H
 
@@ -122,11 +131,10 @@ private:
 template<typename T1, typename T2>
 class Intersect1 {
 public:
-    static bool Evaluate(const T1 & A, const T2 & B)
+    static bool Evaluate(const T1 & A, const T2 & B, Vector3F *separateAxis=0)
     {
         Simplex s;
-        float v2;
-        Vector3F w, pa, pb, q;
+        Vector3F w, pa, pb;
     
         Vector3F v = A.X(0);
         if(v.length2() < 1e-2f) v = A.X(1);
@@ -136,11 +144,11 @@ public:
             pa = A.supportPoint(v.reversed());
             pb = B.supportPoint(v);
             w = pa - pb;
-            
+
+            if(v.dot(w) > 0.f) {
     // terminate when v is close enough to v(A - B).
-    // http://www.bulletphysics.com/ftp/pub/test/physics/papers/jgt04raycast.pdf
-            v2 = v.length2();
-            if(v2 - w.dot(v) < 1e-3f * v2) {
+            //v2 = v.length2();
+            //if(v2 - w.dot(v) < 1e-3f * v2) {
     // std::cout<<" v is close to w "<<v2 - w.dot(v)<<"\n";
                 break;
             }
@@ -156,6 +164,7 @@ public:
             s.reduceToSmallest();
         }
         
+        if(separateAxis) *separateAxis = v;
         return false;
     }
 };

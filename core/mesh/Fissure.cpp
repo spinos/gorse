@@ -41,10 +41,10 @@ int Fissure::granulate(const AdaptableMesh *inMesh)
 
 	m_bvh->setRootLeaf();
 
-	BVHSplit::InnerNumPrimitives = 60000;
-	BVHSplit::LeafNumPrimitives = 15000;
-	BVHBuilder builder;
-    builder.build(m_bvh);
+	BVHSplit::InnerNumPrimitives = 32769;
+	BVHSplit::LeafNumPrimitives = 4097;
+
+    BVHBuilder::Build(m_bvh);
 
     return m_bvh->numLeafNodes();
 }
@@ -132,5 +132,8 @@ void Fissure::setMeshFaceIndices(Int3 *outFaces, sdb::L3Tree<int, int, 2048, 512
         outFaces[i - pbegin].set(*v0, *v1, *v2);
     }
 }
+
+const BVH *Fissure::bvh() const
+{ return m_bvh; }
 
 }

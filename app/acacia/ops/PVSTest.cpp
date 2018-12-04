@@ -10,6 +10,8 @@
 #include <mesh/EdgeCollapse.h>
 #include <math/miscfuncs.h>
 #include <bvh/BVHNodeIterator.h>
+#include <cull/ViewFrustumCull.h>
+#include <cull/VisibleDetail.h>
 #include <qt_base/AFileDlg.h>
 #include <h5/V1H5IO.h>
 #include <h5/V1HBase.h>
@@ -21,10 +23,13 @@
 
 namespace alo {
    
-PVSTest::PVSTest()
+PVSTest::PVSTest() :
+m_freeze(false)
 {
     DrawableResource *rec = createResource();
     setResource(rec);
+    m_culler = new ViewFrustumCull;
+    m_details = new VisibleDetail;
 }
 
 PVSTest::~PVSTest()
@@ -34,25 +39,15 @@ PVSTest::~PVSTest()
         delete it->_outMesh;
         delete it->_stageMesh;
     }
+    delete m_culler;
+    delete m_details;
 }
     
 void PVSTest::update()
-{
-    QAttrib * acp = findAttrib("cache_path");
-    StringAttrib *fcp = static_cast<StringAttrib *>(acp);
-    std::string scachePath;
-    fcp->getValue(scachePath);
-    
-    //if(cachePathChanged(scachePath) )
-    //    loadCache(scachePath);
-    
-    computeMesh();
-
-    const int n = numResources();
-    for(int i=0;i<n;++i) {
-        DrawableResource *rec = resource(i);
-        processResource(rec);
-    }
+{    
+    QAttrib * afreeze = findAttrib("freeze_view");
+    BoolAttrib *ffreeze = static_cast<BoolAttrib *>(afreeze);
+    ffreeze->getValue(m_freeze);
 }
 
 void PVSTest::addDrawableTo(DrawableScene *scene)
@@ -123,6 +118,7 @@ void PVSTest::computeMesh()
     Fissure fis;
     const int npart = fis.granulate(&srcMesh);
     std::cout << "\n fissure to " << npart << " parts ";
+    m_culler->create(fis.bvh());
 
     for(int i=0;i<npart;++i) {
         if(m_meshes.size() < i + 1)
@@ -186,6 +182,9 @@ void PVSTest::computeMesh()
 
     boost::chrono::duration<double> sec = t1 - t0;
     std::cout << "\n finished in " << sec.count() << " seconds ";
+
+    m_details->create(npart);
+    m_details->set(true, 0.f);
 }
 
 void PVSTest::addMeshReformPair()
@@ -211,7 +210,14 @@ void PVSTest::SimplifyAndReform(MeshReformPair &p, HistoryMesh *srcMesh, Drawabl
 
 void PVSTest::recvCameraChanged(const CameraEvent &x)
 {
-   // std::cout << "\n camera frustum " << *(x.frustum());
+    if(m_freeze) return;
+    m_culler->compare(m_details->visibilities(), *(x.frustum()));
+    const int n = numResources();
+    for(int i=0;i<n;++i) {
+        DrawableResource *rec = resource(i);
+        rec->setVisible(m_details->c_visibilities()[i]);
+        processResource(rec);
+    }
 }
 
 }

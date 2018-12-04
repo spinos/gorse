@@ -38,6 +38,7 @@ public:
 	BVHNode *nodes();
 	BVHPrimitive *primitives();
 	
+	const BVHNode *c_nodes() const;
 	const BVHPrimitive *c_primitives() const;
 
 	friend std::ostream& operator<<(std::ostream &output, const BVH & p);

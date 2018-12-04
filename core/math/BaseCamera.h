@@ -2,10 +2,9 @@
  *  BaseCamera.h
  *  aloe
  *
- *  Created by jian zhang on 7/25/12.
- *  Copyright 2012 __MyCompanyName__. All rights reserved.
  *
  */
+
 #ifndef ALO_MATH_BASE_CAMERA_H
 #define ALO_MATH_BASE_CAMERA_H
 
@@ -46,12 +45,13 @@ public:
 /// center of focal plane at near clipping depth
 	Vector3F frameCenter() const;
 	
-/// width / height
+/// port width / height
 	float aspectRatio() const;
 	float nearClipPlane() const;
 	float farClipPlane() const;
 	int portWidth() const;
 	int portHeight() const;
+	float heightWidthRatio() const;
 	
 	virtual float fieldOfView() const;
 	virtual float frameWidth() const;
