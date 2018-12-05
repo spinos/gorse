@@ -3,6 +3,7 @@
 #include <qt_ogl/DrawableObject.h>
 #include <qt_ogl/DrawableResource.h>
 #include <geom/V1ATriangleMesh.h>
+#include <cull/VisibilityState.h>
 
 namespace alo {
 
@@ -67,7 +68,33 @@ void DrawableOps::processResource(DrawableResource *rec, bool forcedToRelocate)
 {
     DrawableObject *d = rec->drawable();
 
-    if(rec->shouldRemove() && d) {
+    if(!d) {
+        initiateResource(rec);
+        return;
+    }
+
+    if(rec->toRelocate() || forcedToRelocate) {
+        m_scene->lock();
+        m_scene->enqueueRemoveDrawable(d->drawId(), opsId());
+        m_scene->unlock();
+        initiateResource(rec);
+        return;
+    } 
+
+    if(rec->isDirty()) {
+        d->setDrawArrayLength(rec->drawArrayLength());
+        m_scene->lock();
+        m_scene->enqueueEditDrawable(d->drawId(), opsId());
+        m_scene->unlock();
+        rec->setDirty(false);
+    }
+}
+
+void DrawableOps::processResource(DrawableResource *rec, const VisibilityState &vis, bool forcedToRelocate)
+{
+    DrawableObject *d = rec->drawable();
+
+    if(vis.isDormant() && d) {
         m_scene->lock();
         m_scene->enqueueRemoveDrawable(d->drawId(), opsId());
         m_scene->unlock();
@@ -75,14 +102,14 @@ void DrawableOps::processResource(DrawableResource *rec, bool forcedToRelocate)
         return;
     }
 
-    if(rec->isHidden() && d) {
+    if(vis.isHidden() && d) {
         m_scene->lock();
         m_scene->enqueueHideDrawable(d->drawId(), opsId());
         m_scene->unlock();
         return;
     }
 
-    if(!rec->isVisible())
+    if(!vis.isVisible())
         return;
 
     if(!d) {
@@ -106,12 +133,11 @@ void DrawableOps::processResource(DrawableResource *rec, bool forcedToRelocate)
         rec->setDirty(false);
     }
 
-    if(rec->isVisiblilityChanged()) {
+    if(vis.isStateChanged()) {
         m_scene->lock();
         m_scene->enqueueShowDrawable(d->drawId(), opsId());
         m_scene->unlock();
     }
-
 }
 
 }

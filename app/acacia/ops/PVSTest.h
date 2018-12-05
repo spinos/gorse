@@ -14,17 +14,22 @@
 
 namespace alo {
 class CameraEvent;
+class AdaptableMesh;
 class HistoryMesh;
 class ViewFrustumCull;
 class VisibleDetail;
+class LevelOfDetailSelect;
+class Hexahedron;
+class PerspectiveCamera;
 class PVSTest : public DrawableOps {
 
-	struct MeshReformPair {
-		HistoryMesh *_outMesh;
+	struct MeshReformTrio {
+		AdaptableMesh *_outMesh;
 		HistoryMesh *_stageMesh;
+        HistoryMesh *_srcMesh;
 	};
 
-	std::vector<MeshReformPair> m_meshes;
+	std::vector<MeshReformTrio> m_meshes;
     ViewFrustumCull *m_culler;
     VisibleDetail *m_details;
     bool m_freeze;
@@ -43,7 +48,11 @@ protected:
 private:
     void computeMesh();
     void addMeshReformPair();
-    static void SimplifyAndReform(MeshReformPair &p, HistoryMesh *srcMesh, DrawableResource *rec);
+    void computeLod(const PerspectiveCamera *persp);
+    static void SimplifyAndReform(MeshReformTrio &p, DrawableResource *rec);
+    static void Reform(MeshReformTrio &p, float lod, DrawableResource *rec);
+    static void LodReform(LevelOfDetailSelect &lod, const Hexahedron &hexa, const PerspectiveCamera &camera,
+                MeshReformTrio &p, DrawableResource *rec);
 
 };
 

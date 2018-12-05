@@ -8,6 +8,7 @@
 #include <bvh/BVH.h>
 #include <math/AFrustum.h>
 #include "ViewFrustumEvent.h"
+#include "VisibilityState.h"
 #include <deque>
 
 namespace alo {
@@ -26,10 +27,13 @@ void ViewFrustumCull::create(const BVH *bvh)
 	const BVHNode *ns = bvh->c_nodes();
 	memcpy(m_nodes.data(), ns, n * sizeof(BVHNode) );
 
+	m_leafInds.createBuffer(n);
+
 	int leafCount=0;
 	for(int i=0;i<n;++i) {
 		if(m_nodes[i].isLeaf()) {
 			m_nodes[i].setLeaf(leafCount, leafCount+1);
+			m_leafInds[leafCount] = i;
 			leafCount++;
 		}
 	}
@@ -41,7 +45,7 @@ void ViewFrustumCull::create(const BVH *bvh)
 
 }
 
-void ViewFrustumCull::compare(bool *visibilities, const AFrustum &fru) const
+void ViewFrustumCull::compare(VisibilityState *visibilities, const AFrustum &fru) const
 {
 	ViewFrustumEvent *e = new ViewFrustumEvent(m_nodes[0], m_hexa[0], fru);
 	std::deque<ViewFrustumEvent *> visitQueue;
@@ -64,8 +68,8 @@ void ViewFrustumCull::compare(bool *visibilities, const AFrustum &fru) const
 			visitQueue.push_back(rgtVisit);
 
 		} else {
-			bool &o = visibilities[active->leafInd()];
-			o = res < ViewFrustumEvent::rOutside;
+			VisibilityState &vis = visibilities[active->leafInd()];
+			vis.setVisible(res < ViewFrustumEvent::rOutside);
 		}
 
 		delete active;
@@ -75,5 +79,11 @@ void ViewFrustumCull::compare(bool *visibilities, const AFrustum &fru) const
 	}
 
 }
+
+const Hexahedron *ViewFrustumCull::c_hexahedrons() const
+{ return m_hexa.c_data(); }
+
+const Hexahedron &ViewFrustumCull::leafHexahedron(int i) const
+{ return m_hexa[m_leafInds[i]]; }
 
 }

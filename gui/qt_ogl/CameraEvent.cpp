@@ -20,7 +20,10 @@ const AFrustum *CameraEvent::frustum() const
 const BaseCamera *CameraEvent::camera() const
 { return m_camera; }
 
-CameraEvent::ProgressMode CameraEvent::progressMode() const
-{ return m_mode; }
+bool CameraEvent::progressBegin() const
+{ return m_mode == MBegin; }
+
+bool CameraEvent::progressEnd() const
+{ return m_mode == MEnd; }
 
 }

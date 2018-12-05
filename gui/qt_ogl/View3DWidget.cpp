@@ -61,7 +61,7 @@ void View3DWidget::resizeGL(int width, int height)
     calcCameraMatrix();
     calcCameraFrustum();
     CameraEvent e = getCameraEvent();
-    e.setProgressMode(CameraEvent::MEnd);
+    e.setProgressMode(CameraEvent::MInProgress);
     emit cameraChanged(e);
     clientResize(width, height);
 }
@@ -103,10 +103,6 @@ void View3DWidget::processCamera(QMouseEvent *event)
         track();
     }
 	else if (event->buttons() & Qt::RightButton) {
-		//if(getCamera()->isOrthographic())
-		//	updateOrthoProjection();
-		//else
-		//	updatePerspProjection();
         zoom();
     }
     calcCameraMatrix();

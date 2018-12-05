@@ -48,8 +48,8 @@ void AcaciaScene::postCreation(GlyphItem *item)
 	if(op->hasDrawable()) { 
 		DrawableOps *dop = static_cast<DrawableOps *>(op);
 		dop->addDrawableTo(this);
-        emit sendUpdateDrawable();
 	}
+    emit sendUpdateDrawable();
 }
 
 void AcaciaScene::preDestruction(GlyphItem *item)
@@ -58,9 +58,9 @@ void AcaciaScene::preDestruction(GlyphItem *item)
     if(op->hasDrawable()) { 
         DrawableOps *dop = static_cast<DrawableOps *>(op);
         dop->removeDrawableFromScene();
-        emit sendUpdateDrawable();
     }
     delete op;
+    emit sendUpdateDrawable();
 }
 
 void AcaciaScene::recvCameraChanged(const CameraEvent &x)
@@ -74,4 +74,6 @@ void AcaciaScene::recvCameraChanged(const CameraEvent &x)
         }
         block = nextGlyph(block);
     }
+    if(x.progressEnd())
+        emit sendUpdateDrawable();
 }

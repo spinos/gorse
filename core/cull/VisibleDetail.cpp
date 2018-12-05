@@ -21,25 +21,30 @@ void VisibleDetail::create(int n)
 	m_detail.createBuffer(n); 
 }
 
-void VisibleDetail::set(bool v, float d)
+void VisibleDetail::setVisible(bool v)
 {
 	int n = m_visible.count();
 	for(int i=0;i<n;++i)
-		m_visible[i] = v;
-	for(int i=0;i<n;++i)
-		m_detail[i] = d;
+		m_visible[i].setVisible(v);
 }
 
-bool *VisibleDetail::visibilities()
+void VisibleDetail::setDetail(float x)
+{
+	int n = m_detail.count();
+	for(int i=0;i<n;++i)
+		m_detail[i].set(x);
+}
+
+VisibilityState *VisibleDetail::visibilities()
 { return m_visible.data(); }
 
-float *VisibleDetail::levelOfDetails()
+LevelOfDetailSelect *VisibleDetail::levelOfDetails()
 { return m_detail.data(); }
 
-const bool *VisibleDetail::c_visibilities() const
+const VisibilityState *VisibleDetail::c_visibilities() const
 { return m_visible.c_data(); }
 
-const float *VisibleDetail::c_levelOfDetails() const
+const LevelOfDetailSelect *VisibleDetail::c_levelOfDetails() const
 { return m_detail.c_data(); }
 
 }

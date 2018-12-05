@@ -14,7 +14,6 @@ void HistoryReformSrc::reformSrc(AdaptableMesh *outMesh, HistoryMesh *stageMesh,
 {
 	int istage;
 	int selV;
-
 	sourceMesh->selectStage(istage, selV, lod);
 	
 	const CoarseFineHistory &stage = stageMesh->stage(0);

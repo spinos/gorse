@@ -40,7 +40,8 @@ public:
 
 	const AFrustum *frustum() const;
 	const BaseCamera *camera() const;
-	ProgressMode progressMode() const;
+	bool progressBegin() const;
+	bool progressEnd() const;
 
 private:
 

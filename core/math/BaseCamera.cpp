@@ -11,7 +11,7 @@ namespace alo {
 BaseCamera::BaseCamera() 
 {
     m_nearClipPlane = 0.9f;
-    m_farClipPlane = 9999.9f;
+    m_farClipPlane = 19999.9f;
 	fPortWidth = 400;
 	fPortHeight = 300;
 	reset(Vector3F(0.f, 0.f, 0.f));

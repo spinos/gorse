@@ -25,6 +25,7 @@ class ATriangleMesh;
 
 class DrawableScene;
 class DrawableObject;
+class VisibilityState;
 
 class DrawableOps : public GlyphOps, public DrawableResourceArray
 {
@@ -49,6 +50,7 @@ protected:
 	void initiateResource(DrawableResource *rec);
 /// relocate or edit associated drawable object
 	void processResource(DrawableResource *rec, bool forcedToRelocate=false);
+	void processResource(DrawableResource *rec, const VisibilityState &vis, bool forcedToRelocate=false);
 
 private:
 	

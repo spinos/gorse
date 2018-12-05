@@ -17,11 +17,13 @@ namespace alo {
 
 class BVH;
 class AFrustum;
+class VisibilityState;
 
 class ViewFrustumCull {
 
 	SimpleBuffer<Hexahedron> m_hexa;
 	SimpleBuffer<BVHNode> m_nodes;
+	SimpleBuffer<int> m_leafInds;
 
 public:
 	ViewFrustumCull();
@@ -29,7 +31,11 @@ public:
 
 	void create(const BVH *bvh);
 
-	void compare(bool *visibilities, const AFrustum &fru) const;
+	void compare(VisibilityState *visibilities, const AFrustum &fru) const;
+
+	const Hexahedron *c_hexahedrons() const;
+/// i-th leaf
+	const Hexahedron &leafHexahedron(int i) const;
 
 };
 	

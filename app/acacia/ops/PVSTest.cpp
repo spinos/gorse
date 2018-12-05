@@ -17,6 +17,7 @@
 #include <h5/V1HBase.h>
 #include <qt_ogl/CameraEvent.h>
 #include <math/AFrustum.h>
+#include <math/PerspectiveCamera.h>
 #include <boost/chrono/include.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
@@ -34,10 +35,11 @@ m_freeze(false)
 
 PVSTest::~PVSTest()
 {
-    std::vector<MeshReformPair>::iterator it = m_meshes.begin();
+    std::vector<MeshReformTrio>::iterator it = m_meshes.begin();
     for(;it!=m_meshes.end();++it) {
         delete it->_outMesh;
         delete it->_stageMesh;
+        delete it->_srcMesh;
     }
     delete m_culler;
     delete m_details;
@@ -91,12 +93,12 @@ void PVSTest::computeMesh()
     originLine.setMinEdgeLength(du);
 
     FrontLine *la = &originLine;
-    FrontLine l[266];
+    FrontLine l[286];
 
     FrontMesher msher;
     msher.attachMesh(&srcMesh);
 
-    for(int i=0;i<266;++i) {
+    for(int i=0;i<286;++i) {
         msher.setFrontId(i+1);
 
         l[i].rotateLocalBy(lq);
@@ -132,22 +134,19 @@ void PVSTest::computeMesh()
 
     boost::chrono::system_clock::time_point t0 = boost::chrono::system_clock::now();
 
-    HistoryMesh transient[8];
-
     boost::thread tref[8];
     int ntref = 0;
 
     int meshCount = 0;
     BVHNodeIterator it = fis.firstPart();
     while(it._node) {
-        HistoryMesh *tmesh = &transient[ntref];
-        fis.reformPart(tmesh, it, &srcMesh);
+        
+        MeshReformTrio &p = m_meshes[meshCount];
+        fis.reformPart(p._srcMesh, it, &srcMesh);
 
-        MeshReformPair &p = m_meshes[meshCount];
         DrawableResource *rec = resource(meshCount);
 
-        //SimplifyAndReform(p, &transient, rec);
-        tref[ntref] = boost::thread(boost::bind(&PVSTest::SimplifyAndReform, _1, _2, _3), p, tmesh, rec);
+        tref[ntref] = boost::thread(boost::bind(&PVSTest::SimplifyAndReform, _1, _2), p, rec);
         ntref++;
 
         if(ntref==8) {
@@ -184,39 +183,90 @@ void PVSTest::computeMesh()
     std::cout << "\n finished in " << sec.count() << " seconds ";
 
     m_details->create(npart);
-    m_details->set(true, 0.f);
+    m_details->setVisible(true);
+    m_details->setDetail(0.f);
 }
 
 void PVSTest::addMeshReformPair()
 {
-    m_meshes.push_back(MeshReformPair());
-    MeshReformPair &p = m_meshes.back();
-    p._outMesh = new HistoryMesh;
+    m_meshes.push_back(MeshReformTrio());
+    MeshReformTrio &p = m_meshes.back();
+    p._outMesh = new AdaptableMesh;
     p._stageMesh = new HistoryMesh;
     p._stageMesh->createTriangleMesh(1000, 1000);
     p._stageMesh->addHistoryStage();
+    p._srcMesh = new HistoryMesh;
 }
 
-void PVSTest::SimplifyAndReform(MeshReformPair &p, HistoryMesh *srcMesh, DrawableResource *rec)
+void PVSTest::SimplifyAndReform(MeshReformTrio &p, DrawableResource *rec)
 {
     EdgeCollapse ech;
-    ech.simplify(srcMesh);
+    ech.simplify(p._srcMesh);
+    Reform(p, 0.f, rec);
+}
 
+void PVSTest::Reform(MeshReformTrio &p, float lod, DrawableResource *rec)
+{
     HistoryReformSrc reformer;
-    reformer.reformSrc(p._outMesh, p._stageMesh, 0.f, srcMesh);
-
+    reformer.reformSrc(p._outMesh, p._stageMesh, lod, p._srcMesh);
     UpdateMeshResouce(rec, p._outMesh);
+}
+
+void PVSTest::LodReform(LevelOfDetailSelect &lod, const Hexahedron &hexa, const PerspectiveCamera &camera,
+                MeshReformTrio &p, DrawableResource *rec)
+{
+    lod.select(hexa, camera);
+    if(lod.isStateChanged()) 
+        Reform(p, lod.value(), rec);
 }
 
 void PVSTest::recvCameraChanged(const CameraEvent &x)
 {
     if(m_freeze) return;
     m_culler->compare(m_details->visibilities(), *(x.frustum()));
+
+    if(x.progressEnd()) {
+        const PerspectiveCamera *persp = static_cast<const PerspectiveCamera *>(x.camera());
+        computeLod(persp);
+    }
+
     const int n = numResources();
     for(int i=0;i<n;++i) {
         DrawableResource *rec = resource(i);
-        rec->setVisible(m_details->c_visibilities()[i]);
-        processResource(rec);
+        const VisibilityState &vis = m_details->c_visibilities()[i];
+        processResource(rec, vis);
+    }
+}
+
+void PVSTest::computeLod(const PerspectiveCamera *persp)
+{
+    boost::thread tref[12];
+    int ntref = 0;
+    
+    const int n = numResources();
+    for(int i=0;i<n;++i) {
+        const VisibilityState &vis = m_details->c_visibilities()[i];
+        
+        if(vis.isVisible()) {
+            DrawableResource *rec = resource(i);
+            LevelOfDetailSelect &lod = m_details->levelOfDetails()[i];
+
+            MeshReformTrio &p = m_meshes[i];
+            tref[ntref] = boost::thread(boost::bind(&PVSTest::LodReform, _1, _2, _3, _4, _5), 
+                                    lod, m_culler->leafHexahedron(i), *persp, p, rec);
+            ntref++;
+        } 
+
+        if(ntref==12) {
+            for(int i=0;i<ntref;++i)
+                tref[i].join();
+            ntref = 0;
+        } 
+    }
+
+    if(ntref>0) {
+        for(int i=0;i<ntref;++i)
+            tref[i].join();
     }
 }
 

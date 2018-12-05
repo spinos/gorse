@@ -10,25 +10,28 @@
 #define ALO_VISIBLE_DETAIL_H
 
 #include <math/SimpleBuffer.h>
+#include "VisibilityState.h"
+#include "LevelOfDetailSelect.h"
 
 namespace alo {
 
 class VisibleDetail {
 
-	SimpleBuffer<bool> m_visible;
-	SimpleBuffer<float> m_detail;
+	SimpleBuffer<VisibilityState> m_visible;
+	SimpleBuffer<LevelOfDetailSelect> m_detail;
 
 public:
 	VisibleDetail();
 	virtual ~VisibleDetail();
 
 	void create(int n);
-	void set(bool v, float d);
+	void setVisible(bool v);
+	void setDetail(float x);
 
-	bool *visibilities();
-	float *levelOfDetails();
-	const bool *c_visibilities() const;
-	const float *c_levelOfDetails() const;
+	VisibilityState *visibilities();
+	LevelOfDetailSelect *levelOfDetails();
+	const VisibilityState *c_visibilities() const;
+	const LevelOfDetailSelect *c_levelOfDetails() const;
 
 };
 

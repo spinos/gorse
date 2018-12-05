@@ -31,6 +31,7 @@ public:
 	Hexahedron();
 	void set(const BoundingBox &aabb);
 
+	Vector3F center() const;
 	float size() const;
 
 	Vector3F supportPoint(const Vector3F & v, Vector3F * localP = 0) const;
