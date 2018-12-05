@@ -132,9 +132,9 @@ void PVSTest::computeMesh()
 
     boost::chrono::system_clock::time_point t0 = boost::chrono::system_clock::now();
 
-    HistoryMesh transient[4];
+    HistoryMesh transient[8];
 
-    boost::thread tref[4];
+    boost::thread tref[8];
     int ntref = 0;
 
     int meshCount = 0;
@@ -150,7 +150,7 @@ void PVSTest::computeMesh()
         tref[ntref] = boost::thread(boost::bind(&PVSTest::SimplifyAndReform, _1, _2, _3), p, tmesh, rec);
         ntref++;
 
-        if(ntref==4) {
+        if(ntref==8) {
             for(int i=0;i<ntref;++i)
                 tref[i].join();
             ntref = 0;
