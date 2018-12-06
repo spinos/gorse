@@ -3,6 +3,7 @@
  *  aloe
  *
  *  SoA (visible, level-of-detail) 
+ *  track view direction, eye postion, screen width changes
  *
  */
 
@@ -21,6 +22,7 @@ class VisibleDetail {
 	SimpleBuffer<VisibilityState> m_visible;
 	SimpleBuffer<LevelOfDetailSelect> m_detail;
 	Vector3F m_viewPoint;
+	int m_screenWidth;
 	Vector3F m_viewDirection;
 	float m_deltaD;
 
@@ -31,6 +33,7 @@ public:
 	void create(int n);
 	void setVisible(bool v);
 	void setDetail(float x);
+	void setMinDetail(int x, int i);
 	void setDeltaDistance(float x);
 
 	bool updateView(const BaseCamera &cam);

@@ -12,6 +12,7 @@ namespace alo {
 DrawableResource::DrawableResource() : 
 m_object(0),
 m_drawArrayLength(0),
+m_changedOnFrame(-999999),
 m_isDirty(false),
 m_toRelocate(false)
 {}
@@ -28,6 +29,7 @@ void DrawableResource::attachToDrawable(DrawableObject *object)
 
 void DrawableResource::dettachDrawable()
 {
+	m_object->setDrawArrayLength(0);
 	m_object = 0;
 	m_isDirty = false;
 	m_toRelocate = false;
@@ -41,6 +43,9 @@ const int &DrawableResource::size() const
 
 const int &DrawableResource::drawArrayLength() const
 { return m_drawArrayLength; }
+
+const int &DrawableResource::changedOnFrame() const
+{ return m_changedOnFrame; }
 
 bool DrawableResource::toRelocate() const
 { return m_toRelocate; }
@@ -68,5 +73,8 @@ void DrawableResource::setDirty(bool x)
 
 bool DrawableResource::isDirty() const
 { return m_isDirty; }
+
+void DrawableResource::setChangedOnFrame(int x)
+{ m_changedOnFrame = x; }
 
 }

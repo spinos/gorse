@@ -36,6 +36,9 @@ DrawableObject *DrawableOps::createDrawable()
 	return d;
 }
 
+const int &DrawableOps::frameNumber() const
+{ return m_scene->frameNumber(); }
+
 void DrawableOps::UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangleMesh *mesh, bool showUV)
 {
 	const int oldL = rec->size();
@@ -56,6 +59,7 @@ void DrawableOps::UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangle
 
 void DrawableOps::initiateResource(DrawableResource *rec)
 {
+    rec->setChangedOnFrame(frameNumber());
     DrawableObject *d = createDrawable();
     rec->attachToDrawable(d);
     
@@ -105,20 +109,22 @@ void DrawableOps::processResource(DrawableResource *rec, const VisibilityState &
         return;
     }
 
-    if(!vis.isVisible())
-        return;
+    if(!vis.isVisible()) return;
 
     if(!d) {
         d = createDrawable();
         rec->attachToDrawable(d);
+        rec->setChangedOnFrame(frameNumber());
         m_scene->enqueueCreateDrawable(d, opsId());
         return;
     }
 
     if(rec->toRelocate() || forcedToRelocate) {
         m_scene->enqueueRemoveDrawable(d->drawId(), opsId());
+        rec->dettachDrawable();
         d = createDrawable();
         rec->attachToDrawable(d);
+        rec->setChangedOnFrame(frameNumber());
         m_scene->enqueueCreateDrawable(d, opsId());
         return;
     } 
@@ -127,6 +133,7 @@ void DrawableOps::processResource(DrawableResource *rec, const VisibilityState &
         d->setDrawArrayLength(rec->drawArrayLength());
         m_scene->enqueueEditDrawable(d->drawId(), opsId());
         rec->setDirty(false);
+        rec->setChangedOnFrame(frameNumber());
     }
 
     if(vis.isStateChanged())

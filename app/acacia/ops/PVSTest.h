@@ -50,7 +50,7 @@ private:
     void addMeshReformPair();
     void computeLod(const PerspectiveCamera *persp);
     static void SimplifyAndReform(MeshReformTrio &p, DrawableResource *rec);
-    static void Reform(MeshReformTrio &p, float lod, DrawableResource *rec);
+    static void Reform(MeshReformTrio &p, int nt, DrawableResource *rec);
     static void LodReform(LevelOfDetailSelect &lod, const Hexahedron &hexa, const PerspectiveCamera &camera,
                 MeshReformTrio &p, DrawableResource *rec);
 

@@ -6,7 +6,8 @@
 namespace alo {
 
 DrawableScene::DrawableScene() :
-m_program1(nullptr)
+m_program1(nullptr),
+m_frameNumber(0)
 {}
 
 DrawableScene::~DrawableScene()
@@ -44,9 +45,9 @@ void DrawableScene::initializeScene()
 
 void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
 {
+    lock();
     m_program1->beginProgram(proj);
 
-    lock();
     DrawDataType *block = m_drawQueue.begin();
     while(block) {
         for (int i=0;i<block->count();++i) { 
@@ -55,9 +56,14 @@ void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
             if(it._state <= stDestroyed || it._state == stHidden)
                 continue;
 
-            if(it._state == stWaitDestroy) {
+            if(it._state == stCanDestroy) {
                 delete it._object;
                 it._state = stDestroyed;
+                continue;
+            }
+
+            if(it._state <= stWaitDestroy) {
+                it._state--;
                 continue;
             }
 
@@ -79,10 +85,11 @@ void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
             d->draw(m_ctx);
         }
         block = m_drawQueue.next(block);
-    }
-    unlock();
-
+    } 
+    
     m_program1->endProgram();
+    m_frameNumber++;
+    unlock();
 }
 
 void DrawableScene::enqueueCreateDrawable(DrawableObject *d, int groupId)
@@ -132,5 +139,8 @@ void DrawableScene::lock()
 
 void DrawableScene::unlock()
 { m_mutex.unlock(); }
+
+const int &DrawableScene::frameNumber() const
+{ return m_frameNumber; }
 
 }

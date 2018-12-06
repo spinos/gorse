@@ -31,8 +31,8 @@ private:
 	
 	enum VisibleTag {
 		vtUnknown = 0,
-		vtSleep = 244,
-		vtDormant = 245,
+		vtSleep = 233,
+		vtDormant = 234,
 		vtHidden = 254,
 		vtNormal = 255 
 	};

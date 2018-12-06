@@ -23,6 +23,7 @@ class DrawableResource {
     SimpleBuffer<Vector3F> m_baryc;
     DrawableObject *m_object;
     int m_drawArrayLength;
+    int m_changedOnFrame;
     bool m_isDirty;
     bool m_toRelocate;
 
@@ -35,8 +36,10 @@ public:
 
 	const int &size() const;
 	const int &drawArrayLength() const;
+	const int &changedOnFrame() const;
 	bool toRelocate() const;
 	void setDrawArrayLength(int x);
+	void setChangedOnFrame(int x);
 	void setToRelocate(bool x);
 	void setDirty(bool x);
 	bool isDirty() const;

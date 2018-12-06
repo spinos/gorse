@@ -3,10 +3,7 @@
 
 namespace alo {
 
-HistoryReformSrc::HistoryReformSrc() : m_selectedStage(-1)
-{}
-
-HistoryReformSrc::~HistoryReformSrc()
+HistoryReformSrc::HistoryReformSrc()
 {}
 
 void HistoryReformSrc::reformSrc(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
@@ -18,11 +15,26 @@ void HistoryReformSrc::reformSrc(AdaptableMesh *outMesh, HistoryMesh *stageMesh,
 	
 	const CoarseFineHistory &stage = stageMesh->stage(0);
 	
-	if(istage != m_selectedStage) {
+	if(istage != stageMesh->cachedStageId() ) {
 		sourceMesh->copyStageTo(stageMesh, istage);
 		sortCoarseFaces(stageMesh, 0, stage.coarseMax(), stage.c_value() );
-		//stageMesh->printHistoryStage(0); 
-		m_selectedStage = istage;
+	}
+
+	reform(outMesh, stageMesh, selV, istage, stage);
+}
+
+void HistoryReformSrc::reformSrc1(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
+					const int &lodNv, const HistoryMesh *sourceMesh)
+{
+	int istage;
+	int selV;
+	sourceMesh->selectStageByVertexCount(istage, selV, lodNv);
+	
+	const CoarseFineHistory &stage = stageMesh->stage(0);
+	
+	if(istage != stageMesh->cachedStageId() ) {
+		sourceMesh->copyStageTo(stageMesh, istage);
+		sortCoarseFaces(stageMesh, 0, stage.coarseMax(), stage.c_value() );
 	}
 
 	reform(outMesh, stageMesh, selV, istage, stage);

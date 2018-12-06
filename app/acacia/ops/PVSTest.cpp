@@ -27,8 +27,6 @@ namespace alo {
 PVSTest::PVSTest() :
 m_freeze(false)
 {
-    DrawableResource *rec = createResource();
-    setResource(rec);
     m_culler = new ViewFrustumCull;
     m_details = new VisibleDetail;
 }
@@ -185,8 +183,11 @@ void PVSTest::computeMesh()
 
     m_details->create(npart);
     m_details->setVisible(true);
-    m_details->setDetail(0.f);
+    m_details->setDetail(0);
     m_details->setDeltaDistance(m_culler->getMeanSize() / 12.f);
+    for(int i=0;i<npart;++i) {
+        m_details->setMinDetail(m_meshes[i]._outMesh->numVertices(), i);
+    }
 }
 
 void PVSTest::addMeshReformPair()
@@ -207,10 +208,10 @@ void PVSTest::SimplifyAndReform(MeshReformTrio &p, DrawableResource *rec)
     Reform(p, 0.f, rec);
 }
 
-void PVSTest::Reform(MeshReformTrio &p, float lod, DrawableResource *rec)
+void PVSTest::Reform(MeshReformTrio &p, int nt, DrawableResource *rec)
 {
     HistoryReformSrc reformer;
-    reformer.reformSrc(p._outMesh, p._stageMesh, lod, p._srcMesh);
+    reformer.reformSrc1(p._outMesh, p._stageMesh, nt, p._srcMesh);
     UpdateMeshResouce(rec, p._outMesh);
 }
 
@@ -218,7 +219,7 @@ void PVSTest::LodReform(LevelOfDetailSelect &lod, const Hexahedron &hexa, const 
                 MeshReformTrio &p, DrawableResource *rec)
 {
     lod.select(hexa, camera);
-    if(lod.isStateChanged()) 
+    if(lod.isStateChanged())
         Reform(p, lod.value(), rec);
 }
 
@@ -231,11 +232,9 @@ void PVSTest::recvCameraChanged(const CameraEvent &x)
     m_culler->compare(m_details->visibilities(), *(x.frustum()));
 
     const PerspectiveCamera *persp = static_cast<const PerspectiveCamera *>(x.camera());
-
-    drawableScene()->lock();
-
     computeLod(persp);
 
+    drawableScene()->lock();
     const int n = numResources();
     for(int i=0;i<n;++i) {
         DrawableResource *rec = resource(i);
@@ -247,15 +246,16 @@ void PVSTest::recvCameraChanged(const CameraEvent &x)
 
 void PVSTest::computeLod(const PerspectiveCamera *persp)
 {
-    boost::thread tref[8];
+    boost::thread tref[12];
     int ntref = 0;
     
+    const int beforeFrame = frameNumber() - 2;
     const int n = numResources();
     for(int i=0;i<n;++i) {
         const VisibilityState &vis = m_details->c_visibilities()[i];
-        
-        if(vis.isVisible()) {
-            DrawableResource *rec = resource(i);
+        DrawableResource *rec = resource(i);
+
+        if(vis.isVisible() && rec->changedOnFrame() < beforeFrame) {
             LevelOfDetailSelect &lod = m_details->levelOfDetails()[i];
 
             MeshReformTrio &p = m_meshes[i];
@@ -264,7 +264,7 @@ void PVSTest::computeLod(const PerspectiveCamera *persp)
             ntref++;
         } 
 
-        if(ntref==8) {
+        if(ntref==12) {
             for(int i=0;i<ntref;++i)
                 tref[i].join();
             ntref = 0;

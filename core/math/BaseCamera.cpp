@@ -143,9 +143,11 @@ void BaseCamera::moveForward(int y)
 	Vector3F view = eye - fCenterOfInterest;
 	const float dist = view.length();
 	
-	const float fra = (float)y/100.f;
+	const float fra = (float)y * .01f;
 	
-	eye += front * dist * -fra;
+	eye += front * (dist * -fra);
+	if(y > 0 && dist < 20.f ) 
+		fCenterOfInterest += front * (dist * -fra);
 	fSpace.setTranslation(eye);
 	updateInverseSpace();
 }

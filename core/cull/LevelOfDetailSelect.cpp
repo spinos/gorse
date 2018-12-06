@@ -11,43 +11,52 @@
 namespace alo {
 
 LevelOfDetailSelect::LevelOfDetailSelect() :
-m_val(0.f),
+m_val(0),
+m_minValue(0),
 m_state(stUnknown)
 {}
 
-const float &LevelOfDetailSelect::value() const
+const int &LevelOfDetailSelect::value() const
 { return m_val; }
 
 bool LevelOfDetailSelect::isStateChanged() const
 { return m_state > stNoChange; }
 
-void LevelOfDetailSelect::set(float x)
+void LevelOfDetailSelect::set(int x)
 { m_val = x; }
+
+void LevelOfDetailSelect::setMin(int x)
+{
+	if(x > 65535) m_minValue = 65535;
+	else m_minValue = x;
+}
 
 void LevelOfDetailSelect::select(const Hexahedron &hexa, const PerspectiveCamera &camera)
 {
 	float r = hexa.size() * .5f;
-	float d = camera.eyePosition().distanceTo(hexa.center()) - r * 2.1f;
+	float d = camera.eyePosition().distanceTo(hexa.center()) - r;
 	if(d < 0.f) {
-		select(1.f);
+		select(1<<24);
 		return;
 	}
 	float lod = r / (d * camera.tanhfov() );
-	lod = .9f * lod + .1f *(lod * lod);
-	if(lod > .99f) lod = 1.f;
-	if(lod < .01f) lod = 0.f;
-	select(lod);
+	if(lod > 1.f) lod = 1.f;
+	if(lod < 0.f) lod = 0.f;
+	int s = camera.portWidth() * lod;
+	s = s * s * .03125f;
+	if(s < m_minValue) s = m_minValue;
+	select(s);
 }
 
-void LevelOfDetailSelect::select(float x)
+void LevelOfDetailSelect::select(int x)
 {
-	if(x < m_val - .014f) {
+	if(x < m_val - 8) {
 		m_state = stDecline;
 		m_val = x;
 		return;
 	} 
 
-	if(x > m_val + .01f) {
+	if(x > m_val + 8) {
 		m_state = stIncrease;
 		m_val = x;
 		return;

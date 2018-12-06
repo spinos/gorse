@@ -46,6 +46,8 @@ protected:
 	DrawableScene *drawableScene();
 	DrawableObject *createDrawable();
 	
+	const int &frameNumber() const;
+
 	static void UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangleMesh *mesh, bool showUV=false);
 	void initiateResource(DrawableResource *rec);
 /// relocate or edit associated drawable object

@@ -15,14 +15,14 @@ namespace alo {
 
 class HistoryReformSrc : public HistoryReform {
 
-	int m_selectedStage;
-
 public:
 	HistoryReformSrc();
-	~HistoryReformSrc();
 
 	void reformSrc(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
 		const float &lod, const HistoryMesh *sourceMesh);
+
+	void reformSrc1(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
+		const int &lodNv, const HistoryMesh *sourceMesh);
 	
 protected:
 

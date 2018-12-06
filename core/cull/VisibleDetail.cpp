@@ -11,6 +11,7 @@ namespace alo {
 
 VisibleDetail::VisibleDetail() :
 m_viewPoint(Vector3F(-1e9f,-1e9f,-1e9f)),
+m_screenWidth(0),
 m_viewDirection(Vector3F(0.f,0.f,0.f)),
 m_deltaD(1.f)
 {}
@@ -38,6 +39,9 @@ void VisibleDetail::setDetail(float x)
 		m_detail[i].set(x);
 }
 
+void VisibleDetail::setMinDetail(int x, int i)
+{ m_detail[i].setMin(x); }
+
 void VisibleDetail::setDeltaDistance(float x)
 { m_deltaD = x; }
 
@@ -57,13 +61,16 @@ bool VisibleDetail::updateView(const BaseCamera &cam)
 {
 	const Vector3F p = cam.eyePosition();
 	const Vector3F d = cam.eyeDirection();
+	int s = cam.portWidth() - m_screenWidth;
 
 	bool pChanged = p.distanceTo(m_viewPoint) > m_deltaD;
 	bool dChanged = d.dot(m_viewDirection) < .991f;
+	bool sChanged = (s < -10 || s > 10);
 
 	if(pChanged) m_viewPoint = p;
 	if(dChanged) m_viewDirection = d;
-	return pChanged || dChanged;
+	if(sChanged) m_screenWidth = cam.portWidth();
+	return pChanged || dChanged || sChanged;
 }
 
 }

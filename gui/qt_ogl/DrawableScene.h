@@ -6,6 +6,8 @@
  *  index (object_id, group_id)
  *  value object
  *  create, edit, destroy
+ *  wait for 3 frames allowing drawable 
+ *  to finish unsynchronized buffer before dstruction
  *
  */
 
@@ -33,7 +35,8 @@ class DrawableScene
     enum ObjectState {
         stUnknown = 0,
         stDestroyed,
-        stWaitDestroy,
+        stCanDestroy,
+        stWaitDestroy=5,
         stHidden,
         stWaitEdit,
         stWaitCreate,
@@ -41,13 +44,14 @@ class DrawableScene
     };
 
     struct DrawObjectState {
-        ObjectState _state;
+        int _state;
         DrawableObject *_object;
     };
 
     sdb::L3Tree<sdb::Coord2, DrawObjectState, 2048, 512, 1024 > m_drawQueue;
     typedef sdb::L3Node<sdb::Coord2, DrawObjectState, 1024> DrawDataType;
     typedef sdb::L3DataIterator<sdb::Coord2, DrawObjectState, 1024> DrawIteratorType;
+    int m_frameNumber;
     
 public:
     DrawableScene();
@@ -72,6 +76,8 @@ public:
     
     void lock();
     void unlock();
+
+    const int &frameNumber() const;
 
 private:
 

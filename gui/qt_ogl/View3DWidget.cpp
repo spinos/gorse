@@ -60,10 +60,10 @@ void View3DWidget::resizeGL(int width, int height)
     calcProjectionMatrix();
     calcCameraMatrix();
     calcCameraFrustum();
+    clientResize(width, height);
     CameraEvent e = getCameraEvent();
     e.setProgressMode(CameraEvent::MInProgress);
     emit cameraChanged(e);
-    clientResize(width, height);
 }
 
 void View3DWidget::mousePressEvent(QMouseEvent *event)

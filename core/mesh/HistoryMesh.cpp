@@ -9,7 +9,8 @@
 
 namespace alo {
 	
-HistoryMesh::HistoryMesh()
+HistoryMesh::HistoryMesh() :
+m_cachedStageId(-1)
 {}
 
 HistoryMesh::~HistoryMesh()
@@ -185,6 +186,25 @@ const CoarseFineHistory &HistoryMesh::selectStage(int &istage, int &nv,
 	return m_stages[istage];
 }
 
+const CoarseFineHistory &HistoryMesh::selectStageByVertexCount(int &istage, int &nv,
+                const int &vcount) const
+{
+	const int vmin = m_stages.front().vbegin();
+	const int vmax = m_stages.back().vend();
+	if(vcount <= vmin) {
+		istage = 0;
+		nv = vmin;
+	} else if(vcount >= vmax) {
+		istage = numStages() - 1;
+		nv = vmax;
+	} else {
+		nv = vcount;
+		istage = findStage(nv);
+	}
+	return m_stages[istage];
+}
+
+
 int HistoryMesh::findStage(const int &nv) const
 {
 	int high = numStages() - 1;
@@ -206,7 +226,14 @@ void HistoryMesh::copyStageTo(HistoryMesh *b, int i) const
 	int nf = m_stages[i].fend();
 	copyTo(b, nv, nf);
 	b->stage(0) = m_stages[i];
+	b->setCachedStageId(i);
 }
+
+const int &HistoryMesh::cachedStageId() const
+{ return m_cachedStageId; }
+
+void HistoryMesh::setCachedStageId(int x)
+{ m_cachedStageId = x; }
 
 void HistoryMesh::printHistoryStage(int i) const
 { 

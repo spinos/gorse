@@ -2,13 +2,14 @@
  *  LevelOfDetailSelect.h
  *  aloe
  *
- *  compute lod value
- *  screen-space radius
- *  s = r / (d tan(theta/2))
+ *  compute lod value in vertex count
+ *  screen-space size
+ *  s = w r / (d tan(theta/2))
  *  d is distance from camera to object
  *  theta is horizontal field of view in radians
  *  r is radius of object
- *
+ *  w is image width
+ *  desired vertex count is proportional to s * s
  */
 
 #ifndef ALO_LEVEL_OF_DETAIL_SELECT_H
@@ -29,17 +30,19 @@ class LevelOfDetailSelect {
 		stIncrease
 	};
 
-	float m_val;
+	int m_val;
+	unsigned short m_minValue;
 	unsigned char m_state;
-	char m_padding[3];
+	char m_padding;
 
 public:
 
 	LevelOfDetailSelect();
 
-	void set(float x);
+	void set(int x);
+	void setMin(int x);
 
-	const float &value() const;
+	const int &value() const;
 	bool isStateChanged() const;
 
 	void select(const Hexahedron &hexa, const PerspectiveCamera &camera);
@@ -47,7 +50,7 @@ public:
 	friend std::ostream& operator<<(std::ostream &output, const LevelOfDetailSelect & p);
 
 private:
-	void select(float x);
+	void select(int x);
 
 };
 	

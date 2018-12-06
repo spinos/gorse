@@ -1,7 +1,8 @@
 /*
  *  HistoryMesh.h
  *
- *  coarse/fine history to sort faces in stages
+ *  build coarse/fine history in stages
+ *  or single stage as cache to reform
  *
  */
 
@@ -20,6 +21,7 @@ class HistoryMesh : public AdaptableMesh {
     std::deque<CoarseFineHistory> m_stages;
 /// face-varying uv indices
     SimpleBuffer<Int3> m_uvIndices;
+    int m_cachedStageId;
 
 public:
 	HistoryMesh();
@@ -58,13 +60,19 @@ public:
 /// lod [0,1]
     const CoarseFineHistory &selectStage(int &istage, int &nv,
                 const float &lod) const;
-
+/// vcount desired n vertex
+    const CoarseFineHistory &selectStageByVertexCount(int &istage, int &nv,
+                const int &vcount) const;
+/// to stage i to stage 0 of b
     void copyStageTo(HistoryMesh *b, int i) const;
 
 	void printHistoryStage(int i) const;
 
-protected:
+    const int &cachedStageId() const;
+    void setCachedStageId(int x);
 
+protected:
+    
 private:
     int findStage(const int &nv) const;
     int lookupUVIndex(const std::deque<FaceValue> &faceUVs, int vi) const;
