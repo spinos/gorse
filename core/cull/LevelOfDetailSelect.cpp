@@ -27,7 +27,7 @@ void LevelOfDetailSelect::set(float x)
 void LevelOfDetailSelect::select(const Hexahedron &hexa, const PerspectiveCamera &camera)
 {
 	float r = hexa.size() * .5f;
-	float d = camera.eyePosition().distanceTo(hexa.center()) - r * 2.f;
+	float d = camera.eyePosition().distanceTo(hexa.center()) - r * 2.1f;
 	if(d < 0.f) {
 		select(1.f);
 		return;
@@ -41,7 +41,7 @@ void LevelOfDetailSelect::select(const Hexahedron &hexa, const PerspectiveCamera
 
 void LevelOfDetailSelect::select(float x)
 {
-	if(x < m_val - .013f) {
+	if(x < m_val - .014f) {
 		m_state = stDecline;
 		m_val = x;
 		return;

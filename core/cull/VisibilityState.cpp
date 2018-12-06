@@ -18,11 +18,10 @@ void VisibilityState::setVisible(bool x)
 	if(x) {
 		m_changed = (m_val < vtNormal);
 		m_val = vtNormal;
-	}
-	else {
+	} else {
 		m_changed = (m_val > vtHidden);
 		m_val--;
-		if(m_val == vtUnknown) m_val = vtDormant;
+		if(m_val == vtUnknown) m_val = vtSleep;
 	}
 }
 	
