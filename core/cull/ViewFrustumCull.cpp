@@ -45,6 +45,20 @@ void ViewFrustumCull::create(const BVH *bvh)
 
 }
 
+float ViewFrustumCull::getMeanSize() const
+{
+	float s = 0.f;
+	int leafCount=0;
+	const int &n = m_nodes.count();
+	for(int i=0;i<n;++i) {
+		if(m_nodes[i].isLeaf()) {
+			s += m_hexa[i].size();
+			leafCount++;
+		}
+	}
+	return s / (float)leafCount;
+}
+
 void ViewFrustumCull::compare(VisibilityState *visibilities, const AFrustum &fru) const
 {
 	ViewFrustumEvent *e = new ViewFrustumEvent(m_nodes[0], m_hexa[0], fru);

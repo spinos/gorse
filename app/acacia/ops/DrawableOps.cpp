@@ -95,17 +95,13 @@ void DrawableOps::processResource(DrawableResource *rec, const VisibilityState &
     DrawableObject *d = rec->drawable();
 
     if(vis.isDormant() && d) {
-        m_scene->lock();
         m_scene->enqueueRemoveDrawable(d->drawId(), opsId());
-        m_scene->unlock();
         rec->dettachDrawable();
         return;
     }
 
     if(vis.isHidden() && d) {
-        m_scene->lock();
         m_scene->enqueueHideDrawable(d->drawId(), opsId());
-        m_scene->unlock();
         return;
     }
 
@@ -113,31 +109,28 @@ void DrawableOps::processResource(DrawableResource *rec, const VisibilityState &
         return;
 
     if(!d) {
-        initiateResource(rec);
+        d = createDrawable();
+        rec->attachToDrawable(d);
+        m_scene->enqueueCreateDrawable(d, opsId());
         return;
     }
 
     if(rec->toRelocate() || forcedToRelocate) {
-        m_scene->lock();
         m_scene->enqueueRemoveDrawable(d->drawId(), opsId());
-        m_scene->unlock();
-        initiateResource(rec);
+        d = createDrawable();
+        rec->attachToDrawable(d);
+        m_scene->enqueueCreateDrawable(d, opsId());
         return;
     } 
 
     if(rec->isDirty()) {
         d->setDrawArrayLength(rec->drawArrayLength());
-        m_scene->lock();
         m_scene->enqueueEditDrawable(d->drawId(), opsId());
-        m_scene->unlock();
         rec->setDirty(false);
     }
 
-    if(vis.isStateChanged()) {
-        m_scene->lock();
+    if(vis.isStateChanged())
         m_scene->enqueueShowDrawable(d->drawId(), opsId());
-        m_scene->unlock();
-    }
 }
 
 }

@@ -74,6 +74,4 @@ void AcaciaScene::recvCameraChanged(const CameraEvent &x)
         }
         block = nextGlyph(block);
     }
-    if(x.progressEnd())
-        emit sendUpdateDrawable();
 }

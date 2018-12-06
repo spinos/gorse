@@ -119,7 +119,8 @@ void PVSTest::computeMesh()
 
     Fissure fis;
     const int npart = fis.granulate(&srcMesh);
-    std::cout << "\n fissure to " << npart << " parts ";
+    std::cout << "\n granulate to " << npart << " parts ";
+            
     m_culler->create(fis.bvh());
 
     for(int i=0;i<npart;++i) {
@@ -185,6 +186,7 @@ void PVSTest::computeMesh()
     m_details->create(npart);
     m_details->setVisible(true);
     m_details->setDetail(0.f);
+    m_details->setDeltaDistance(m_culler->getMeanSize() / 12.f);
 }
 
 void PVSTest::addMeshReformPair()
@@ -223,12 +225,16 @@ void PVSTest::LodReform(LevelOfDetailSelect &lod, const Hexahedron &hexa, const 
 void PVSTest::recvCameraChanged(const CameraEvent &x)
 {
     if(m_freeze) return;
+    if(x.progressBegin() || x.progressEnd()) return;
+    if(!m_details->updateView(*x.camera())) return;
+
     m_culler->compare(m_details->visibilities(), *(x.frustum()));
 
-    if(x.progressEnd()) {
-        const PerspectiveCamera *persp = static_cast<const PerspectiveCamera *>(x.camera());
-        computeLod(persp);
-    }
+    const PerspectiveCamera *persp = static_cast<const PerspectiveCamera *>(x.camera());
+
+    drawableScene()->lock();
+
+    computeLod(persp);
 
     const int n = numResources();
     for(int i=0;i<n;++i) {
@@ -236,11 +242,12 @@ void PVSTest::recvCameraChanged(const CameraEvent &x)
         const VisibilityState &vis = m_details->c_visibilities()[i];
         processResource(rec, vis);
     }
+    drawableScene()->unlock();
 }
 
 void PVSTest::computeLod(const PerspectiveCamera *persp)
 {
-    boost::thread tref[12];
+    boost::thread tref[8];
     int ntref = 0;
     
     const int n = numResources();
@@ -257,7 +264,7 @@ void PVSTest::computeLod(const PerspectiveCamera *persp)
             ntref++;
         } 
 
-        if(ntref==12) {
+        if(ntref==8) {
             for(int i=0;i<ntref;++i)
                 tref[i].join();
             ntref = 0;

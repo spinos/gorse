@@ -33,7 +33,7 @@ void LevelOfDetailSelect::select(const Hexahedron &hexa, const PerspectiveCamera
 		return;
 	}
 	float lod = r / (d * camera.tanhfov() );
-	lod = .7f * lod + .3f *(lod * lod);
+	lod = .9f * lod + .1f *(lod * lod);
 	if(lod > .99f) lod = 1.f;
 	if(lod < .01f) lod = 0.f;
 	select(lod);
@@ -41,7 +41,7 @@ void LevelOfDetailSelect::select(const Hexahedron &hexa, const PerspectiveCamera
 
 void LevelOfDetailSelect::select(float x)
 {
-	if(x < m_val - .01f) {
+	if(x < m_val - .013f) {
 		m_state = stDecline;
 		m_val = x;
 		return;

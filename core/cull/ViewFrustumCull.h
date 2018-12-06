@@ -30,7 +30,7 @@ public:
 	virtual ~ViewFrustumCull();
 
 	void create(const BVH *bvh);
-
+	float getMeanSize() const;
 	void compare(VisibilityState *visibilities, const AFrustum &fru) const;
 
 	const Hexahedron *c_hexahedrons() const;
