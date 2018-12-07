@@ -139,7 +139,7 @@ public:
         Vector3F v = A.X(0);
         if(v.length2() < 1e-2f) v = A.X(1);
     
-        for(int i=0; i < 10; i++) {
+        for(int i=0; i < 20; i++) {
     // SA-B(-v)
             pa = A.supportPoint(v.reversed());
             pb = B.supportPoint(v);

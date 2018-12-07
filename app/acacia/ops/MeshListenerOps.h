@@ -18,7 +18,6 @@ class MeshListenerOps : public GranulateReduce {
     unsigned m_upd;
     float m_lod;
     bool m_shoUV;
-    static AFileDlgProfile SWriteProfile;
     
 public:
     MeshListenerOps();
@@ -28,11 +27,10 @@ public:
     virtual void postUI() override;
  	virtual void addDrawableTo(DrawableScene *scene) override;
     virtual bool hasMenu() const override;
-    virtual void getMenuItems(std::vector<std::pair<std::string, int > > &ks) const override;
-    virtual void recvAction(int x) override;
-    virtual AFileDlgProfile *writeFileProfileR () const override;
 
 protected:
+
+    virtual std::string meshCacheName() const override;
     
 private:
     bool checkBroadcastTime();
@@ -40,7 +38,6 @@ private:
     bool loadMeshMaster();
     void computeMesh();
     void listAvailableMeshes(QListWidget *wig);
-    bool saveToFile(const std::string &fileName);
     
 };
 

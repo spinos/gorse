@@ -80,6 +80,8 @@ public:
     const int &frameNumber() const;
 
 private:
+/// remove destroyed ones
+    void compressQueue();
 
 };
 

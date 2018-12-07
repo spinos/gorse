@@ -17,8 +17,22 @@
 #include <boost/chrono/include.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
+#include <qt_base/AFileDlg.h>
+#include <h5/V1H5IO.h>
+#include <h5/V1HBase.h>
+#include <h5_mesh/HHistoryMesh.h>
+#include <boost/format.hpp>
 
 namespace alo {
+
+AFileDlgProfile GranulateReduce::SWriteProfile(AFileDlgProfile::FWrite,
+        "Choose File To Save",
+        ":images/save_big.png",
+        "Save mesh",
+        "Save .hes",
+        ".hes",
+        "./",
+        "untitled");
     
 GranulateReduce::GranulateReduce()
 {}
@@ -73,7 +87,7 @@ int GranulateReduce::reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMes
 
     boost::chrono::system_clock::time_point t0 = boost::chrono::system_clock::now();
 
-    boost::thread tref[12];
+    boost::thread tref[8];
     int ntref = 0;
 
     int meshCount = 0;
@@ -88,7 +102,7 @@ int GranulateReduce::reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMes
         tref[ntref] = boost::thread(boost::bind(&GranulateReduce::SimplifyAndReform, _1, _2), p, rec);
         ntref++;
 
-        if(ntref==12) {
+        if(ntref==8) {
             for(int i=0;i<ntref;++i)
                 tref[i].join();
             ntref = 0;
@@ -103,18 +117,18 @@ int GranulateReduce::reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMes
             tref[i].join();
     }
 
-    int nv1 =0;
-    int nt1 =0;
+    m_nv1 =0;
+    m_nt1 =0;
     for(int i=0;i<npart;++i) {
-        nv1 += m_meshes[i]._outMesh->numVertices();
-        nt1 += m_meshes[i]._outMesh->numTriangles();
+        m_nv1 += m_meshes[i]._outMesh->numVertices();
+        m_nt1 += m_meshes[i]._outMesh->numTriangles();
     }
-    const int nv0 = srcMesh->numVertices();
-    const int nt0 = srcMesh->numTriangles();
-    const float nvPercent = (float)(nv0 - nv1) / (float)nv0 * 100.f;
-    const float ntPercent = (float)(nt0 - nt1) / (float)nt0 * 100.f;
-    std::cout << "\n n vertex "<<nv1<<":"<<nv0<<" reduced by " << nvPercent << " percent "
-        << "\n n face "<<nt1<<":"<<nt0<<" reduced by " << ntPercent << " percent ";
+    m_nv0 = srcMesh->numVertices();
+    m_nt0 = srcMesh->numTriangles();
+    const float nvPercent = (float)(m_nv0 - m_nv1) / (float)m_nv0 * 100.f;
+    const float ntPercent = (float)(m_nt0 - m_nt1) / (float)m_nt0 * 100.f;
+    std::cout << "\n n vertex ["<<m_nv1<<":"<<m_nv0<<"] reduced by " << nvPercent << " percent "
+        << "\n n face ["<<m_nt1<<":"<<m_nt0<<"] reduced by " << ntPercent << " percent ";
 
     boost::chrono::system_clock::time_point t1 = boost::chrono::system_clock::now();
 
@@ -126,7 +140,7 @@ int GranulateReduce::reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMes
 void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
                               const ViewFrustumCull *culler, VisibleDetail *details)
 {
-    boost::thread tref[16];
+    boost::thread tref[8];
     int ntref = 0;
     
     const int beforeFrame = frameNumber() - 2;
@@ -143,7 +157,7 @@ void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
             ntref++;
         } 
 
-        if(ntref==16) {
+        if(ntref==8) {
             for(int i=0;i<ntref;++i)
                 tref[i].join();
             ntref = 0;
@@ -158,7 +172,7 @@ void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
 
 void GranulateReduce::simpleReform(const float &lod, bool shoAsUV)
 {
-    boost::thread tref[16];
+    boost::thread tref[8];
     int ntref = 0;
     
     const int beforeFrame = frameNumber() - 2;
@@ -172,7 +186,7 @@ void GranulateReduce::simpleReform(const float &lod, bool shoAsUV)
             ntref++;
         }
 
-        if(ntref==16) {
+        if(ntref==8) {
             for(int i=0;i<ntref;++i)
                 tref[i].join();
             ntref = 0;
@@ -210,7 +224,60 @@ void GranulateReduce::LodReform(LevelOfDetailSelect &lod, const Hexahedron &hexa
 void GranulateReduce::LodReform1(const float &lod, bool shoAsUV,
                 MeshReformTrio &p, DrawableResource *rec)
 {
+    HistoryReformSrc reformer;
+    reformer.reformSrc(p._outMesh, p._stageMesh, lod, p._srcMesh);
+    UpdateMeshResouce(rec, p._outMesh, shoAsUV);
 }
 
+bool GranulateReduce::hasMenu() const
+{ return numMeshTrios() > 0; }
+
+void GranulateReduce::getMenuItems(std::vector<std::pair<std::string, int > > &ks) const 
+{
+    ks.push_back(std::make_pair("Save", AFileDlgProfile::FWrite));
 }
 
+void GranulateReduce::recvAction(int x) 
+{
+    if(x == AFileDlgProfile::FWrite) saveToFile(SWriteProfile.getFilePath());
+}
+
+AFileDlgProfile *GranulateReduce::writeFileProfileR () const
+{
+    SWriteProfile._notice = boost::str(boost::format("level-of-detail mesh cache \n name %1%\n n vertices [%2%:%3%] \n n faces [%4%:%5%] ") 
+        % meshCacheName() % m_nv1 % m_nv0 % m_nt1 % m_nt0 );
+    return &SWriteProfile; 
+}
+
+bool GranulateReduce::saveToFile(const std::string &fileName)
+{
+    ver1::H5IO hio;
+    bool stat = hio.begin(fileName, HDocument::oCreate);
+    if(!stat) return false;
+
+    ver1::HBase w("/world");
+    ver1::HBase b("/world/meshes");
+
+    const std::string mcName = meshCacheName();
+    const int n = numMeshTrios();
+    for(int i=0;i<n;++i) {
+        const std::string mciName = boost::str(boost::format("/world/meshes/%1%_part%2%") % mcName % i);
+        HHistoryMesh hmh(mciName);
+        
+        const MeshReformTrio &p = meshTrio(i);
+        hmh.save(p._srcMesh);
+        hmh.close();
+    }
+
+    b.close();
+    w.close();
+
+    hio.end();
+    std::cout << " finished saving file " << fileName;
+    return true; 
+}
+
+std::string GranulateReduce::meshCacheName() const
+{ return "test"; }
+
+}

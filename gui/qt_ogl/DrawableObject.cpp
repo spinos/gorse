@@ -67,12 +67,8 @@ void DrawableObject::create(QOpenGLContext *ctx)
 
 void DrawableObject::update(QOpenGLContext *ctx)
 {
-    if(m_drawArraySize < 1) {
-        std::cout << " zero size update drawable obj";
-        return;
-    } 
+    if(m_drawArraySize < 1) return;
 
-    try {
     m_posnmlVbo.bind();
 
     QOpenGLExtraFunctions *f = ctx->extraFunctions();
@@ -88,9 +84,6 @@ void DrawableObject::update(QOpenGLContext *ctx)
     f->glUnmapBuffer(GL_ARRAY_BUFFER);
 
     m_posnmlVbo.release();
-    } catch (...) {
-        std::cout << " err update drawable obj ";
-    }
 }
 
 QOpenGLBuffer &DrawableObject::posnmlVbo()

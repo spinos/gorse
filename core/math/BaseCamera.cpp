@@ -147,7 +147,7 @@ void BaseCamera::moveForward(int y)
 	
 	eye += front * (dist * -fra);
 	if(y > 0 && dist < 20.f ) 
-		fCenterOfInterest += front * (dist * -fra);
+		fCenterOfInterest += front * (20.f * -fra);
 	fSpace.setTranslation(eye);
 	updateInverseSpace();
 }

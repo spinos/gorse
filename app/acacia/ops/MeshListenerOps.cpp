@@ -11,25 +11,12 @@
 #include <jsn/JMesh.h>
 #include <mesh/HistoryMesh.h>
 #include <mesh/HistoryReformSrc.h>
-#include <qt_base/AFileDlg.h>
-#include <h5/V1H5IO.h>
-#include <h5/V1HBase.h>
-#include <h5_mesh/HHistoryMesh.h>
 
 using namespace boost::interprocess;
 using namespace boost::property_tree;
     
 namespace alo {
 
-AFileDlgProfile MeshListenerOps::SWriteProfile(AFileDlgProfile::FWrite,
-        "Choose File To Save",
-        ":images/save_big.png",
-        "Save mesh",
-        "Save .hes",
-        ".hes",
-        "./",
-        "untitled");
-   
 MeshListenerOps::MeshListenerOps() : m_upd(0), 
 m_meshName("unknown"),
 m_lod(.5f),
@@ -206,15 +193,6 @@ void MeshListenerOps::computeMesh()
         processResourceNoLock(rec);
     }
     drawableScene()->unlock();
-    /*if(m_meshName == "unknown")
-        m_mesh->createMinimal();
-    else {
-        HistoryReformSrc reformer;
-        reformer.reformSrc(m_mesh, m_stageMesh, m_lod, m_sourceMesh);
-    }
-
-    DrawableResource *rec = resource();
-    UpdateMeshResouce(rec, m_mesh, m_shoUV);*/
 }
 
 bool MeshListenerOps::hasMenu() const
@@ -223,42 +201,7 @@ bool MeshListenerOps::hasMenu() const
     return true; 
 }
 
-void MeshListenerOps::getMenuItems(std::vector<std::pair<std::string, int > > &ks) const 
-{
-    ks.push_back(std::make_pair("Save", AFileDlgProfile::FWrite));
-}
-
-void MeshListenerOps::recvAction(int x) 
-{
-    if(x == AFileDlgProfile::FWrite) saveToFile(SWriteProfile.getFilePath());
-}
-
-AFileDlgProfile *MeshListenerOps::writeFileProfileR () const
-{/*
-    SWriteProfile._notice = boost::str(boost::format("level-of-detail mesh cache \nn vertices [%1%:%2%] \nn faces [%3%:%4%] ") 
-        % m_sourceMesh->minNumVertices() % m_sourceMesh->maxNumVertices() 
-        % m_sourceMesh->minNumTriangles() % m_sourceMesh->maxNumTriangles() );*/
-    return &SWriteProfile; 
-}
-
-bool MeshListenerOps::saveToFile(const std::string &fileName)
-{
-    ver1::H5IO hio;
-    bool stat = hio.begin(fileName, HDocument::oCreate);
-    if(!stat) return false;
-
-    ver1::HBase w("/world");
-    ver1::HBase b("/world/meshes");
-
-    HHistoryMesh hmh("/world/meshes/" + m_meshName);
-    //hmh.save(m_sourceMesh);
-    hmh.close();
-
-    b.close();
-    w.close();
-
-    hio.end();
-    return true; 
-}
+std::string MeshListenerOps::meshCacheName() const
+{ return m_meshName; }
 
 }

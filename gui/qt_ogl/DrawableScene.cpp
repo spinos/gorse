@@ -48,13 +48,17 @@ void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
     lock();
     m_program1->beginProgram(proj);
 
+    int destoyedCount = 0;
+
     DrawDataType *block = m_drawQueue.begin();
     while(block) {
         for (int i=0;i<block->count();++i) { 
             DrawObjectState &it = block->value(i);
 
-            if(it._state <= stDestroyed || it._state == stHidden)
+            if(it._state <= stDestroyed) {
+                destoyedCount++;
                 continue;
+            }
 
             if(it._state == stCanDestroy) {
                 delete it._object;
@@ -66,6 +70,9 @@ void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
                 it._state--;
                 continue;
             }
+
+            if(it._state == stHidden)
+                continue;
 
             if(it._state == stWaitEdit) {
                 it._object->update(m_ctx);
@@ -89,6 +96,7 @@ void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
     
     m_program1->endProgram();
     m_frameNumber++;
+    if(destoyedCount > 31) compressQueue();
     unlock();
 }
 
@@ -142,5 +150,23 @@ void DrawableScene::unlock()
 
 const int &DrawableScene::frameNumber() const
 { return m_frameNumber; }
+
+void DrawableScene::compressQueue()
+{
+    DrawDataType *block = m_drawQueue.begin();
+    while(block) {
+        for (int i=0;i<block->count();++i) { 
+            if(block->isSingular()) break;
+
+            DrawObjectState &it = block->value(i);
+
+            if(it._state <= stDestroyed) {
+                block->remove(block->key(i));
+                i--;
+            }
+        }
+        block = m_drawQueue.next(block);
+    } 
+}
 
 }

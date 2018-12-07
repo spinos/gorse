@@ -4,18 +4,12 @@
 #include <qt_ogl/DrawableResource.h>
 #include <geom/AdaptableMesh.h>
 #include <mesh/FrontMesher.h>
-#include <mesh/HistoryMesh.h>
 #include <math/miscfuncs.h>
 #include <cull/ViewFrustumCull.h>
 #include <cull/VisibleDetail.h>
-#include <qt_base/AFileDlg.h>
-#include <h5/V1H5IO.h>
-#include <h5/V1HBase.h>
 #include <qt_ogl/CameraEvent.h>
 #include <math/AFrustum.h>
 #include <math/PerspectiveCamera.h>
-#include <boost/bind.hpp>
-#include <boost/thread.hpp>
 
 namespace alo {
    
@@ -109,7 +103,7 @@ void PVSTest::computeMesh()
     m_details->create(npart);
     m_details->setVisible(true);
     m_details->setDetail(0);
-    m_details->setDeltaDistance(m_culler->getMeanSize() / 10.f);
+    m_details->setDeltaDistance(m_culler->getMeanSize() / 16.f);
     for(int i=0;i<npart;++i) {
         m_details->setMinDetail(outMeshNv(i), i);
     }
