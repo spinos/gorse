@@ -52,7 +52,8 @@ protected:
 	void initiateResource(DrawableResource *rec);
 /// relocate or edit associated drawable object
 	void processResource(DrawableResource *rec, bool forcedToRelocate=false);
-	void processResource(DrawableResource *rec, const VisibilityState &vis, bool forcedToRelocate=false);
+	void processResourceNoLock(DrawableResource *rec);
+	void processResource(DrawableResource *rec, const VisibilityState &vis);
 
 private:
 	

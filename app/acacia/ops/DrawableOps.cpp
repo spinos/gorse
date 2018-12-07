@@ -83,7 +83,7 @@ void DrawableOps::processResource(DrawableResource *rec, bool forcedToRelocate)
         m_scene->unlock();
         initiateResource(rec);
         return;
-    } 
+    }
 
     if(rec->isDirty()) {
         d->setDrawArrayLength(rec->drawArrayLength());
@@ -94,7 +94,37 @@ void DrawableOps::processResource(DrawableResource *rec, bool forcedToRelocate)
     }
 }
 
-void DrawableOps::processResource(DrawableResource *rec, const VisibilityState &vis, bool forcedToRelocate)
+void DrawableOps::processResourceNoLock(DrawableResource *rec)
+{
+    DrawableObject *d = rec->drawable();
+
+    if(!d) {
+        d = createDrawable();
+        rec->attachToDrawable(d);
+        rec->setChangedOnFrame(frameNumber());
+        m_scene->enqueueCreateDrawable(d, opsId());
+        return;
+    }
+
+    if(rec->toRelocate()) {
+        m_scene->enqueueRemoveDrawable(d->drawId(), opsId());
+        rec->dettachDrawable();
+        d = createDrawable();
+        rec->attachToDrawable(d);
+        rec->setChangedOnFrame(frameNumber());
+        m_scene->enqueueCreateDrawable(d, opsId());
+        return;
+    }
+
+    if(rec->isDirty()) {
+        d->setDrawArrayLength(rec->drawArrayLength());
+        m_scene->enqueueEditDrawable(d->drawId(), opsId());
+        rec->setDirty(false);
+        rec->setChangedOnFrame(frameNumber());
+    }
+}
+
+void DrawableOps::processResource(DrawableResource *rec, const VisibilityState &vis)
 {
     DrawableObject *d = rec->drawable();
 
@@ -119,7 +149,7 @@ void DrawableOps::processResource(DrawableResource *rec, const VisibilityState &
         return;
     }
 
-    if(rec->toRelocate() || forcedToRelocate) {
+    if(rec->toRelocate()) {
         m_scene->enqueueRemoveDrawable(d->drawId(), opsId());
         rec->dettachDrawable();
         d = createDrawable();

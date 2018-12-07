@@ -9,7 +9,6 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 #include <jsn/JMesh.h>
-#include <mesh/EdgeCollapse.h>
 #include <mesh/HistoryMesh.h>
 #include <mesh/HistoryReformSrc.h>
 #include <qt_base/AFileDlg.h>
@@ -35,24 +34,10 @@ MeshListenerOps::MeshListenerOps() : m_upd(0),
 m_meshName("unknown"),
 m_lod(.5f),
 m_shoUV(false)
-{ 
-    m_mesh = new AdaptableMesh; 
-    m_stageMesh = new HistoryMesh;
-    m_stageMesh->createTriangleMesh(1024, 1024);
-    m_stageMesh->addHistoryStage();
-    m_sourceMesh = new HistoryMesh;
-    m_reformer = new HistoryReformSrc;
-    DrawableResource *rec = createResource();
-    setResource(rec);
-}
+{}
 
 MeshListenerOps::~MeshListenerOps()
-{ 
-    delete m_mesh; 
-    delete m_stageMesh;
-    delete m_sourceMesh;
-    delete m_reformer;
-}
+{}
     
 void MeshListenerOps::update()
 {
@@ -123,10 +108,7 @@ void MeshListenerOps::listAvailableMeshes(QListWidget *wig)
 
 void MeshListenerOps::addDrawableTo(DrawableScene *scene)
 { 
-    computeMesh();
     setDrawableScene(scene);
-    DrawableResource *rec = resource();
-    initiateResource(rec);
 }
 
 bool MeshListenerOps::checkBroadcastTime()
@@ -185,40 +167,54 @@ bool MeshListenerOps::loadMesh(bool dataChanged)
         
     const int &nv = msh.nv();
     const int &nt = msh.nt();
-    m_sourceMesh->createTriangleMesh(nv, nt);
+    
+    AdaptableMesh transient;
+    transient.createTriangleMesh(nv, nt);
     
     const char *mem = static_cast<const char*>(region.get_address());
     const Vector3F *pos = (const Vector3F *)&mem[msh.getPosLoc()];
-    m_sourceMesh->copyPositionsFrom(pos);
+    transient.copyPositionsFrom(pos);
     const unsigned *ind = (const unsigned *)&mem[msh.getIndLoc()];
-    m_sourceMesh->copyIndicesFrom(ind);
+    transient.copyIndicesFrom(ind);
     
-    m_sourceMesh->clearUVSets();
+    transient.clearUVSets();
 
     std::vector<JMesh::UVSet>::const_iterator uvit = msh.uvSetBegin();
     for(;uvit!=msh.uvSetEnd();++uvit) {
-        Float2 *uvd = m_sourceMesh->addUVSet(uvit->_name);
+        Float2 *uvd = transient.addUVSet(uvit->_name);
         const Float2 *uvs = (const Float2 *)&mem[uvit->_uv];
         memcpy(uvd, uvs, nt * 24);
     }
 
-    m_sourceMesh->calculateVertexNormals();
+    transient.calculateVertexNormals();
     
-    EdgeCollapse ech;
-    ech.simplify(m_sourceMesh);
+    int npart = reduce(0, &transient);
     
     return true;
 }
 
 void MeshListenerOps::computeMesh()
 {
-    if(m_meshName == "unknown")
+    const int n = numResources();
+    if(n<1) return;
+    
+    simpleReform(m_lod, m_shoUV);
+    
+    drawableScene()->lock();
+    for(int i=0;i<n;++i) {
+        DrawableResource *rec = resource(i);
+        processResourceNoLock(rec);
+    }
+    drawableScene()->unlock();
+    /*if(m_meshName == "unknown")
         m_mesh->createMinimal();
-    else
-        m_reformer->reformSrc(m_mesh, m_stageMesh, m_lod, m_sourceMesh);
+    else {
+        HistoryReformSrc reformer;
+        reformer.reformSrc(m_mesh, m_stageMesh, m_lod, m_sourceMesh);
+    }
 
     DrawableResource *rec = resource();
-    UpdateMeshResouce(rec, m_mesh, m_shoUV);
+    UpdateMeshResouce(rec, m_mesh, m_shoUV);*/
 }
 
 bool MeshListenerOps::hasMenu() const
@@ -238,10 +234,10 @@ void MeshListenerOps::recvAction(int x)
 }
 
 AFileDlgProfile *MeshListenerOps::writeFileProfileR () const
-{
+{/*
     SWriteProfile._notice = boost::str(boost::format("level-of-detail mesh cache \nn vertices [%1%:%2%] \nn faces [%3%:%4%] ") 
         % m_sourceMesh->minNumVertices() % m_sourceMesh->maxNumVertices() 
-        % m_sourceMesh->minNumTriangles() % m_sourceMesh->maxNumTriangles() );
+        % m_sourceMesh->minNumTriangles() % m_sourceMesh->maxNumTriangles() );*/
     return &SWriteProfile; 
 }
 
@@ -255,7 +251,7 @@ bool MeshListenerOps::saveToFile(const std::string &fileName)
     ver1::HBase b("/world/meshes");
 
     HHistoryMesh hmh("/world/meshes/" + m_meshName);
-    hmh.save(m_sourceMesh);
+    //hmh.save(m_sourceMesh);
     hmh.close();
 
     b.close();

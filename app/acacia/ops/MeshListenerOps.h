@@ -1,7 +1,7 @@
 #ifndef ACA_MESH_LISTENER_OPS_H
 #define ACA_MESH_LISTENER_OPS_H
 
-#include "DrawableOps.h"
+#include "GranulateReduce.h"
 
 QT_BEGIN_NAMESPACE
 class QListWidget;
@@ -10,16 +10,11 @@ QT_END_NAMESPACE
 namespace alo {
 class AdaptableMesh;
 class HistoryMesh;
-class HistoryReformSrc;
 class JMesh;
-class MeshListenerOps : public DrawableOps {
+class MeshListenerOps : public GranulateReduce {
     
     std::map<std::string, JMesh> m_meshMap;
     std::string m_meshName;
-    HistoryMesh *m_sourceMesh;
-    HistoryMesh *m_stageMesh;
-    HistoryReformSrc *m_reformer;
-    AdaptableMesh *m_mesh;
     unsigned m_upd;
     float m_lod;
     bool m_shoUV;
