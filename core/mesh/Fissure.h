@@ -23,7 +23,7 @@ struct Int3;
 class AdaptableMesh;
 struct BVHNodeIterator;
 class BVH;
-	
+struct Float2;
 class Fissure {
 
 	BVH *m_bvh;
@@ -50,6 +50,9 @@ private:
     void setMeshFaceIndices(Int3 *outFaces, 
                         sdb::L3Tree<int, int, 2048, 512, 1024> &vertexMap, 
                         int pbegin, int pend, const Int3 *faces) const;
+    void setMeshUVs(Float2 *outUVs, 
+                        int pbegin, int pend, const Float2 *inUVs) const;
+
 };
 
 }

@@ -7,21 +7,21 @@
 #include <h5/V1H5IO.h>
 #include <h5/V1HBase.h>
 #include <h5_mesh/HHistoryMesh.h>
+#include <h5_mesh/LodMeshCache.h>
 
 namespace alo {
    
 LodMeshIn::LodMeshIn() :
 m_lod(.5f),
 m_shoUV(false)
-{
-    m_mesh = new AdaptableMesh;
-    DrawableResource *rec = createResource();
-    setResource(rec);
-}
+{}
 
 LodMeshIn::~LodMeshIn()
 { 
-    delete m_mesh; 
+    std::vector<LodMeshCache *>::iterator it = m_cacheList.begin();
+    for(;it!=m_cacheList.end();++it)
+        delete *it;
+    m_cacheList.clear(); 
 }
     
 void LodMeshIn::update()
@@ -32,7 +32,7 @@ void LodMeshIn::update()
     fcp->getValue(scachePath);
     
     if(cachePathChanged(scachePath) )
-        loadCache(scachePath);
+        LodMeshCache::Load(m_cacheList, scachePath);
     
     QAttrib * al = findAttrib("lod");
     FloatAttrib *fl = static_cast<FloatAttrib *>(al);
@@ -43,34 +43,58 @@ void LodMeshIn::update()
     fshouv->getValue(m_shoUV);
     
     computeMesh();
-
-    DrawableScene *scene = drawableScene();
-    
-    DrawableResource *rec = resource();
-    processResource(rec);
 }
 
 void LodMeshIn::addDrawableTo(DrawableScene *scene)
 { 
-    computeMesh();
     setDrawableScene(scene);
-    DrawableResource *rec = resource();
-    initiateResource(rec);
 }
 
 void LodMeshIn::computeMesh()
 {
-    if(LodMeshCache::isValid()) {
-        int istage, nv;
-        selectStage(istage, nv, m_lod);
-        reformStage(m_mesh, nv, istage);
-
-    }
-    else
-        m_mesh->createMinimal();
+    const int n = m_cacheList.size();
+    if(n<1) return;
     
-    DrawableResource *rec = resource();
-    UpdateMeshResouce(rec, m_mesh, m_shoUV);
+    for(int i=0;i<n;++i) {
+        if(!hasResource(i)) {
+            DrawableResource *rec = createResource();
+            setResource(rec, i);
+        }
+    }
+    
+    ver1::H5IO hio;
+    bool stat = hio.begin(m_cacheList[0]->cacheFilePath());
+    if(!stat) return;
+    
+    AdaptableMesh transient;
+    for(int i=0;i<n;++i) {
+        LodMeshCache &ci = *m_cacheList[i];
+        if(!ci.isValid()) continue;
+            
+        int istage, nv;
+        ci.selectStage(istage, nv, m_lod);
+        ci.reformStage(&transient, nv, istage);
+
+        DrawableResource *rec = resource(i);
+        UpdateMeshResouce(rec, &transient, m_shoUV);
+    }
+    
+    hio.end();
+    
+    drawableScene()->lock();
+    for(int i=0;i<n;++i) {
+        DrawableResource *rec = resource(i);
+        processResourceNoLock(rec);
+    }
+    drawableScene()->unlock();
+    
+}
+
+bool LodMeshIn::cachePathChanged(const std::string &x) const
+{
+    if(m_cacheList.size() < 1) return true;
+    if(x == m_cacheList[0]->cacheFilePath()) return false;
+    return true;
 }
 
 }

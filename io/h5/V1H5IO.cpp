@@ -28,13 +28,13 @@ bool H5IO::begin(const std::string & filename,
 		return false;
 	}
 	m_doc = HObject::FileIO;
-	std::cout<<"\n h5io open file "<<m_doc.fileName()<<"\n";
+	//std::cout<<"\n h5io open file "<<m_doc.fileName()<<"\n";
 	return true;
 }
 
 void H5IO::end()
 {
-	std::cout<<"\n h5io close file "<<m_doc.fileName()<<"\n";
+	//std::cout<<"\n h5io close file "<<m_doc.fileName()<<"\n";
 	m_doc.close();
 }
 

@@ -50,11 +50,6 @@ void MeshListenerOps::update()
     fshouv->getValue(m_shoUV);
 
     computeMesh();
-
-    DrawableScene *scene = drawableScene();
-
-    DrawableResource *rec = resource();
-    processResource(rec, dataChanged || meshSelectionChanged);
 }
 
 void MeshListenerOps::postUI()

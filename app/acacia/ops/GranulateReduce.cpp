@@ -175,7 +175,7 @@ void GranulateReduce::simpleReform(const float &lod, bool shoAsUV)
     boost::thread tref[8];
     int ntref = 0;
     
-    const int beforeFrame = frameNumber() - 2;
+    const int beforeFrame = frameNumber() - 1;
     const int n = numResources();
     for(int i=0;i<n;++i) {
         DrawableResource *rec = resource(i);
@@ -261,6 +261,7 @@ bool GranulateReduce::saveToFile(const std::string &fileName)
     const std::string mcName = meshCacheName();
     const int n = numMeshTrios();
     for(int i=0;i<n;++i) {
+        std::cout << ".";
         const std::string mciName = boost::str(boost::format("/world/meshes/%1%_part%2%") % mcName % i);
         HHistoryMesh hmh(mciName);
         

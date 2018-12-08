@@ -65,10 +65,19 @@ void Fissure::reformPart(AdaptableMesh *outMesh, BVHNodeIterator x, const Adapta
 	
 	const int nv = vertexMap.size();
 	const int nt = e - b;
+	outMesh->purgeMesh();
 	outMesh->createTriangleMesh(nv, nt);
 	
 	setMeshVertices(outMesh, vertexMap, b, e, inMesh);
 	setMeshFaceIndices(outMesh->indices(), vertexMap, b, e, inMesh->c_indices() );
+	
+	const int nuv = inMesh->numUVSets();
+    for(int i=0;i<nuv;++i) {
+        const std::string uvName = inMesh->c_uvName(i);
+        const Float2 *uvs = inMesh->c_uvSet(i);
+        Float2 *outUV = outMesh->addUVSet(uvName);
+        setMeshUVs(outUV, b, e, uvs);
+    }
 }
 
 void Fissure::mapVertices(sdb::L3Tree<int, int, 2048, 512, 1024> &vertexMap, 
@@ -130,6 +139,16 @@ void Fissure::setMeshFaceIndices(Int3 *outFaces, sdb::L3Tree<int, int, 2048, 512
         int *v1 = vertexMap.find(fv.y);
         int *v2 = vertexMap.find(fv.z);
         outFaces[i - pbegin].set(*v0, *v1, *v2);
+    }
+}
+
+void Fissure::setMeshUVs(Float2 *outUVs, 
+                        int pbegin, int pend, const Float2 *inUVs) const
+{
+    for(int i=pbegin;i<pend;++i) {
+        const BVHPrimitive &p = m_bvh->c_primitives()[i];
+        const int &fv = p.index();
+        memcpy(&outUVs[(i - pbegin)*3], &inUVs[fv*3], 24);
     }
 }
 

@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef ALO_H5_IO_H
-#define ALO_H5_IO_H
+#ifndef ALO_V1_H5_IO_H
+#define ALO_V1_H5_IO_H
 
 #include "HDocument.h"
 
