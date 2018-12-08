@@ -98,15 +98,10 @@ void PVSTest::computeMesh()
 
     srcMesh.calculateVertexNormals();
 
-    int npart = reduce(m_culler, &srcMesh);
+    int npart = reduce(m_culler, m_details, &srcMesh);
 
-    m_details->create(npart);
     m_details->setVisible(true);
-    m_details->setDetail(0);
-    m_details->setDeltaDistance(m_culler->getMeanSize() / 16.f);
-    for(int i=0;i<npart;++i) {
-        m_details->setMinDetail(outMeshNv(i), i);
-    }
+    m_details->setDeltaDistance(m_culler->getMeanSize() / 32.f);
 }
 
 void PVSTest::recvCameraChanged(const CameraEvent &x)

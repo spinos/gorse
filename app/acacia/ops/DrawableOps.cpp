@@ -139,7 +139,10 @@ void DrawableOps::processResource(DrawableResource *rec, const VisibilityState &
         return;
     }
 
-    if(!vis.isVisible()) return;
+    if(!vis.isVisible()) {
+        rec->setDeferred(true);
+        return;
+    }
 
     if(!d) {
         d = createDrawable();
@@ -168,6 +171,30 @@ void DrawableOps::processResource(DrawableResource *rec, const VisibilityState &
 
     if(vis.isStateChanged())
         m_scene->enqueueShowDrawable(d->drawId(), opsId());
+
+    rec->setDeferred(false);
+}
+
+void DrawableOps::setDrawableSize(int n)
+{
+    for(int i=0;i<n;++i) {
+        if(!hasResource(i)) {
+            DrawableResource *rec = createResource();
+            setResource(rec, i);
+        }
+    }
+
+    if(numResources() == n) return;
+
+    m_scene->lock();
+    while(numResources() > n) {
+        DrawableResource *r = lastResource();
+        DrawableObject *d = r->drawable();
+        if(d) m_scene->enqueueRemoveDrawable(d->drawId(), opsId());
+        
+        removeLastResource();
+    }
+    m_scene->unlock();
 }
 
 }

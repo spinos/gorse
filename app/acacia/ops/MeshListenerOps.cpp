@@ -170,7 +170,7 @@ bool MeshListenerOps::loadMesh(bool dataChanged)
 
     transient.calculateVertexNormals();
     
-    int npart = reduce(0, &transient);
+    int npart = reduce(0, 0, &transient);
     
     return true;
 }

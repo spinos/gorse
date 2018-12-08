@@ -1,16 +1,12 @@
 #include "LodMeshCache.h"
 #include <iostream>
-#include <h5/V1H5IO.h>
-#include <h5/V1HBase.h>
 #include "HHistoryMeshRecord.h"
 #include <mesh/HistoryMesh.h>
-#include <algorithm>
 
 namespace alo {
 
 LodMeshCache::LodMeshCache() :
 m_meshName("unknown"),
-m_cachePath("unknown"),
 m_curStage(-1),
 m_curNv(-1)
 {
@@ -26,43 +22,6 @@ LodMeshCache::~LodMeshCache()
 bool LodMeshCache::isValid() const
 {
     if(m_meshName=="unknown") return false;
-    return m_cachePath!="unknown";
-}
-
-bool LodMeshCache::cachePathChanged(const std::string &x) const
-{ return m_cachePath != x; }
-
-bool LodMeshCache::loadCache(const std::string &fileName, const std::string &meshName)
-{
-    ver1::H5IO hio;
-    
-    bool stat = hio.begin(fileName);
-    if(!stat) {
-        m_cachePath = "unknown";
-        m_meshName = "unknown";
-        return false;
-    }
-    
-    ver1::HBase g("/world/meshes");
-    
-    std::vector<std::string> meshNames;
-    g.lsTypedChild<HHistoryMeshRecord>(meshNames);
-    std::vector<std::string>::iterator it;
-    
-    it = std::find(meshNames.begin(),meshNames.end(), meshName);
-    stat = (it != meshNames.end());
-    if(stat) {
-        HHistoryMeshRecord hrec(meshName);
-        hrec.load(m_stageDescs);
-        hrec.close();
-        m_meshName = meshName;
-    }  
-
-    g.close();
-    
-    hio.end();
-    
-    m_cachePath = fileName;
     return true;
 }
 
@@ -124,11 +83,8 @@ bool LodMeshCache::loadStage(int x)
     return true;
 }
 
-void LodMeshCache::reformStage(AdaptableMesh *outMesh, const int &nv, const int &istage)
+void LodMeshCache::reformInCore(AdaptableMesh *outMesh, const int &nv, const int &istage)
 {
-    if(stageChanged(istage))
-        loadStage(istage);
-
     reform(outMesh, m_meshInCore, nv, istage, m_meshInCore->stage(0) );
 }
 
@@ -146,53 +102,13 @@ void LodMeshCache::printStages() const
     }
 }
 
-void LodMeshCache::setCacheFilePath(const std::string &x)
-{ m_cachePath = x; }
-
 void LodMeshCache::setMeshName(const std::string &x)
 { m_meshName = x; }
-
-const std::string &LodMeshCache::cacheFilePath() const
-{ return m_cachePath; }
 
 const std::string &LodMeshCache::meshName() const
 { return m_meshName; }
 
 std::deque<CoarseFineHistoryDesc> &LodMeshCache::stageDescs()
 { return m_stageDescs; }
-
-bool LodMeshCache::Load(std::vector<LodMeshCache *> &dst, const std::string &fileName)
-{
-    ver1::H5IO hio;
-    
-    bool stat = hio.begin(fileName);
-    if(!stat) return false;
-    
-    ver1::HBase g("/world/meshes");
-    
-    std::vector<std::string> meshNames;
-    g.lsTypedChild<HHistoryMeshRecord>(meshNames);
-    const int n = meshNames.size();
-    
-    for(int i=0;i<n;++i) {
-        HHistoryMeshRecord hrec(meshNames[i]);
-        
-        if(dst.size() < i + 1) 
-            dst.push_back(new LodMeshCache);
-        
-        LodMeshCache &c = *dst[i];
-        hrec.load(c.stageDescs());
-        c.setCacheFilePath(fileName);
-        c.setMeshName(meshNames[i]);
-        
-        hrec.close();
-    }
-    
-    g.close();
-    
-    hio.end();
-    
-    return true;
-}
 
 }

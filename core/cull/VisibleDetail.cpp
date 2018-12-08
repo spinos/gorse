@@ -39,8 +39,8 @@ void VisibleDetail::setDetail(float x)
 		m_detail[i].set(x);
 }
 
-void VisibleDetail::setMinDetail(int x, int i)
-{ m_detail[i].setMin(x); }
+void VisibleDetail::setDetail(int x, int i)
+{ m_detail[i].set(x); }
 
 void VisibleDetail::setDeltaDistance(float x)
 { m_deltaD = x; }

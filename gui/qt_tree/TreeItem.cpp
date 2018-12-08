@@ -15,7 +15,12 @@ TreeItem::TreeItem(const QJsonObject &obj, TreeItem *parent)
     m_parentItem = parent;
     m_obj = obj;
 /// col 0:2
-    QPixmap pix = ImageCollector::CollectPixmap(":/images/unknown.png");
+    QString iconName;
+    if(obj.find("icon") == obj.end()) 
+        iconName = ":/images/unknown.png";
+    else 
+        iconName = obj["icon"].toString();
+    QPixmap pix = ImageCollector::CollectPixmap(iconName);
     m_itemData<<QIcon(pix); 
     m_itemData<<obj["label"].toString(); 
     m_itemData<<obj["id"].toInt(); 

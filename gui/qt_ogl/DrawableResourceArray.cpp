@@ -42,4 +42,14 @@ void DrawableResourceArray::setResource(DrawableResource *x, int i)
 DrawableResource *DrawableResourceArray::resource(int i)
 { return m_resources[i]; }
 
+DrawableResource *DrawableResourceArray::lastResource()
+{ return m_resources.back(); }
+
+void DrawableResourceArray::removeLastResource()
+{
+	DrawableResource *r = lastResource();
+	delete r;
+	m_resources.pop_back();
+}
+
 }

@@ -34,7 +34,7 @@ public:
     virtual AFileDlgProfile *writeFileProfileR () const override;
     
 protected:
-    int reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMesh);
+    int reduce(ViewFrustumCull *culler, VisibleDetail *details, const AdaptableMesh *srcMesh);
     void viewDependentReform(const PerspectiveCamera *persp,
                 const ViewFrustumCull *culler, VisibleDetail *details);
     void simpleReform(const float &lod, bool shoAsUV);
@@ -54,9 +54,7 @@ protected:
 	
 	const int &outMeshNv(int i) const;
 	static void SimplifyAndReform(MeshReformTrio &p, DrawableResource *rec);
-    static void Reform(MeshReformTrio &p, int nt, DrawableResource *rec);
-    static void LodReform(LevelOfDetailSelect &lod, const Hexahedron &hexa, const PerspectiveCamera &camera,
-                MeshReformTrio &p, DrawableResource *rec);
+    static void Reform(MeshReformTrio &p, int nv, DrawableResource *rec);
     static void LodReform1(const float &lod, bool shoAsUV,
                 MeshReformTrio &p, DrawableResource *rec);
 

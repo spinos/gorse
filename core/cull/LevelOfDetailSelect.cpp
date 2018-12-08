@@ -12,7 +12,7 @@ namespace alo {
 
 LevelOfDetailSelect::LevelOfDetailSelect() :
 m_val(0),
-m_minValue(0),
+m_preVal(0),
 m_state(stUnknown)
 {}
 
@@ -25,43 +25,44 @@ bool LevelOfDetailSelect::isStateChanged() const
 void LevelOfDetailSelect::set(int x)
 { m_val = x; }
 
-void LevelOfDetailSelect::setMin(int x)
-{
-	if(x > 65535) m_minValue = 65535;
-	else m_minValue = x;
-}
-
 void LevelOfDetailSelect::select(const Hexahedron &hexa, const PerspectiveCamera &camera)
 {
 	float r = hexa.size() * .5f;
 	float d = camera.eyePosition().distanceTo(hexa.center()) - r;
 	if(d < 0.f) {
-		select(1<<24);
+		select(16777216);
 		return;
 	}
 	float lod = r / (d * camera.tanhfov() );
 	if(lod > 1.f) lod = 1.f;
 	if(lod < 0.f) lod = 0.f;
 	int s = camera.portWidth() * lod;
-	s = s * s * .03025f;
-	if(s < m_minValue) s = m_minValue;
+	s = s * s * .03125f;
 	select(s);
 }
 
 void LevelOfDetailSelect::select(int x)
 {
-	if(x < m_val - 8) {
+	if(x < m_val) {
 		m_state = stDecline;
+		m_preVal = m_val;
 		m_val = x;
 		return;
 	} 
 
-	if(x > m_val + 8) {
+	if(x > m_val) {
 		m_state = stIncrease;
+		m_preVal = m_val;
 		m_val = x;
 		return;
 	} 
 
+	m_state = stNoChange;
+}
+
+void LevelOfDetailSelect::revert()
+{ 
+	m_val = m_preVal; 
 	m_state = stNoChange;
 }
 

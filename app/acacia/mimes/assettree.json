@@ -6,12 +6,14 @@
         {
             "id": 135109,
             "name": "mesher",
-            "label": "Meshers",
+            "label": "Mesher",
+            "icon": ":images/mesh_small.png",
             "children": [
                 {
                     "id": 694285,
                     "name": "static_mesher",
-                    "label": "Static Meshers",
+                    "label": "Static Mesher",
+                    "icon": ":images/mesh_small.png",
                     "children": [
                         {
                             "id": 277635,
@@ -40,14 +42,7 @@
                                     "value": false
                                 }
                             ]
-                        }
-                    ]
-                },
-                {
-                    "id": 703426,
-                    "name": "adaptive_mesher",
-                    "label": "Adaptive Meshers",
-                    "children": [
+                        },
                         {
                             "id": 828635,
                             "name": "edge_collapse_test",
@@ -64,36 +59,15 @@
                                     "max": 1.0
                                 }
                             ]
-                        },
-                        {
-                            "id": 828636,
-                            "name": "lod_mesh_in",
-                            "label": "LOD Mesh In",
-                            "icon": ":images/test.png",
-                            "is_element": true,
-                            "attribs" : [
-                                {
-                                    "name": "cache_path",
-                                    "label": "Cache Path",
-                                    "typ": 9,
-                                    "strtyp": 513
-                                },
-                                {
-                                    "name": "lod",
-                                    "label": "Level of Detail",
-                                    "typ": 3,
-                                    "value": 0.5,
-                                    "min": 0.0,
-                                    "max": 1.0
-                                },
-                                {
-                                    "name": "sho_uv",
-                                    "label": "Show As UV",
-                                    "typ": 1,
-                                    "value": false
-                                }
-                            ]
-                        },
+                        }
+                    ]
+                },
+                {
+                    "id": 703426,
+                    "name": "adaptive_mesher",
+                    "label": "Adaptive Mesher",
+                    "icon": ":images/mesh_adaptable_small.png",
+                    "children": [
                         {
                             "id": 872960,
                             "name": "tree_root",
@@ -182,9 +156,39 @@
         },
         {
             "id": 513556,
-            "name": "scene",
-            "label": "Scene",
+            "name": "cache",
+            "label": "Cache",
+            "icon": ":images/cache_small.png",
             "children": [
+                {
+                    "id": 828636,
+                    "name": "lod_mesh_in",
+                    "label": "LOD Mesh In",
+                    "icon": ":images/cache.png",
+                    "is_element": true,
+                    "attribs" : [
+                        {
+                            "name": "cache_path",
+                            "label": "Cache Path",
+                            "typ": 9,
+                            "strtyp": 513
+                        },
+                        {
+                            "name": "lod",
+                            "label": "Level of Detail",
+                            "typ": 3,
+                            "value": 0.5,
+                            "min": 0.0,
+                            "max": 1.0
+                        },
+                        {
+                            "name": "sho_uv",
+                            "label": "Show As UV",
+                            "typ": 1,
+                            "value": false
+                        }
+                    ]
+                },
                 {
                     "id": 716941,
                     "name": "pvs_test",

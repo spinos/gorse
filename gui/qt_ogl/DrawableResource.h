@@ -26,6 +26,7 @@ class DrawableResource {
     int m_changedOnFrame;
     bool m_isDirty;
     bool m_toRelocate;
+    bool m_deferred;
 
 public:
 	DrawableResource();
@@ -43,6 +44,8 @@ public:
 	void setToRelocate(bool x);
 	void setDirty(bool x);
 	bool isDirty() const;
+    void setDeferred(bool x);
+    bool isDeferred() const;
 
 	SimpleBuffer<Vector3F> &posnmlBuffer();
 	SimpleBuffer<Vector3F> &barycBuffer();

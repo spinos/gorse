@@ -6,12 +6,13 @@ namespace alo {
 HistoryReformSrc::HistoryReformSrc()
 {}
 
-void HistoryReformSrc::reformSrc(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
+bool HistoryReformSrc::reformSrc(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
 					const float &lod, const HistoryMesh *sourceMesh)
 {
 	int istage;
 	int selV;
 	sourceMesh->selectStage(istage, selV, lod);
+    if(selV == stageMesh->cachedNv()) return false;
 	
 	const CoarseFineHistory &stage = stageMesh->stage(0);
 	
@@ -21,15 +22,17 @@ void HistoryReformSrc::reformSrc(AdaptableMesh *outMesh, HistoryMesh *stageMesh,
 	}
 
 	reform(outMesh, stageMesh, selV, istage, stage);
+    return true;
 }
 
-void HistoryReformSrc::reformSrc1(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
+bool HistoryReformSrc::reformSrc1(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
 					const int &lodNv, const HistoryMesh *sourceMesh)
 {
 	int istage;
 	int selV;
 	sourceMesh->selectStageByVertexCount(istage, selV, lodNv);
-	
+	if(selV == stageMesh->cachedNv()) return false;
+    
 	const CoarseFineHistory &stage = stageMesh->stage(0);
 	
 	if(istage != stageMesh->cachedStageId() ) {
@@ -38,6 +41,7 @@ void HistoryReformSrc::reformSrc1(AdaptableMesh *outMesh, HistoryMesh *stageMesh
 	}
 
 	reform(outMesh, stageMesh, selV, istage, stage);
+    return true;
 }
 
 }

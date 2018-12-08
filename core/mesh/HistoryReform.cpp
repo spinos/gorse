@@ -13,6 +13,7 @@ void HistoryReform::reform(AdaptableMesh *outMesh, HistoryMesh *stageMesh,
 					const int &selV, const int &istage, const CoarseFineHistory &stage)
 {
 	stageMesh->copyTo(outMesh, selV, stage.fbegin());
+    stageMesh->setCachedNv(selV);
 
 	if(selV > stage.vbegin() || istage > 0) {
 

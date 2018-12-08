@@ -14,7 +14,8 @@ m_object(0),
 m_drawArrayLength(0),
 m_changedOnFrame(-999999),
 m_isDirty(false),
-m_toRelocate(false)
+m_toRelocate(false),
+m_deferred(false)
 {}
 
 void DrawableResource::attachToDrawable(DrawableObject *object)
@@ -25,6 +26,7 @@ void DrawableResource::attachToDrawable(DrawableObject *object)
     object->setDrawArrayLength(m_drawArrayLength);
     m_isDirty = false;
     m_toRelocate = false;
+    m_deferred = false;
 }
 
 void DrawableResource::dettachDrawable()
@@ -33,6 +35,7 @@ void DrawableResource::dettachDrawable()
 	m_object = 0;
 	m_isDirty = false;
 	m_toRelocate = false;
+    m_deferred = false;
 }
 
 DrawableObject *DrawableResource::drawable()
@@ -76,5 +79,11 @@ bool DrawableResource::isDirty() const
 
 void DrawableResource::setChangedOnFrame(int x)
 { m_changedOnFrame = x; }
+
+void DrawableResource::setDeferred(bool x)
+{ m_deferred = x; }
+
+bool DrawableResource::isDeferred() const
+{ return m_deferred; }
 
 }

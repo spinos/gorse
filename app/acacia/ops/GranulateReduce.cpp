@@ -59,7 +59,7 @@ void GranulateReduce::addMeshReformTrio()
     MeshReformTrio &p = m_meshes.back();
     p._outMesh = new AdaptableMesh;
     p._stageMesh = new HistoryMesh;
-    p._stageMesh->createTriangleMesh(1000, 1000);
+    p._stageMesh->createTriangleMesh(500, 500);
     p._stageMesh->addHistoryStage();
     p._srcMesh = new HistoryMesh;
 }
@@ -67,23 +67,21 @@ void GranulateReduce::addMeshReformTrio()
 const int &GranulateReduce::outMeshNv(int i) const
 { return m_meshes[i]._outMesh->numVertices(); }
 
-int GranulateReduce::reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMesh)
+int GranulateReduce::reduce(ViewFrustumCull *culler, VisibleDetail *details, const AdaptableMesh *srcMesh)
 {
     Fissure fis;
     const int npart = fis.granulate(srcMesh);
     std::cout << "\n granulate to " << npart << " parts ";
             
     if(culler) culler->create(fis.bvh());
+    if(details) details->create(npart);
 
     for(int i=0;i<npart;++i) {
         if(numMeshTrios() < i + 1)
             addMeshReformTrio();
-
-        if(!hasResource(i)) {
-            DrawableResource *rec = createResource();
-            setResource(rec, i);
-        }
     }
+
+    setDrawableSize(npart);
 
     boost::chrono::system_clock::time_point t0 = boost::chrono::system_clock::now();
 
@@ -120,8 +118,13 @@ int GranulateReduce::reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMes
     m_nv1 =0;
     m_nt1 =0;
     for(int i=0;i<npart;++i) {
-        m_nv1 += m_meshes[i]._outMesh->numVertices();
-        m_nt1 += m_meshes[i]._outMesh->numTriangles();
+        const MeshReformTrio &p = m_meshes[i];
+        const int &lo = p._outMesh->numVertices();
+        m_nv1 += lo;
+        if(details) {
+            details->setDetail(lo, i);
+        }
+        m_nt1 += p._outMesh->numTriangles();
     }
     m_nv0 = srcMesh->numVertices();
     m_nt0 = srcMesh->numTriangles();
@@ -146,20 +149,31 @@ void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
     const int beforeFrame = frameNumber() - 2;
     const int n = numResources();
     for(int i=0;i<n;++i) {
+        LevelOfDetailSelect &lod = details->levelOfDetails()[i];
         const VisibilityState &vis = details->c_visibilities()[i];
+        if(!vis.isVisible()) {
+            lod.select(0);
+            continue;
+        }
+        
+        lod.select(culler->leafHexahedron(i), *persp);
+        
         DrawableResource *rec = resource(i);
+        if(!lod.isStateChanged() && !rec->isDeferred()) continue;
 
-        if(vis.isVisible() && rec->changedOnFrame() < beforeFrame) {
-            LevelOfDetailSelect &lod = details->levelOfDetails()[i];
-
-            MeshReformTrio &p = meshTrio(i);
-            tref[ntref] = boost::thread(boost::bind(&GranulateReduce::LodReform, _1, _2, _3, _4, _5), lod, culler->leafHexahedron(i), *persp, p, rec);
-            ntref++;
-        } 
+        if(rec->changedOnFrame() > beforeFrame) {
+            rec->setDeferred(true);
+            lod.revert();
+            continue;
+        }
+        
+        MeshReformTrio &p = meshTrio(i);
+        tref[ntref] = boost::thread(boost::bind(&GranulateReduce::Reform, _1, _2, _3), p, lod.value(), rec);
+        ntref++; 
 
         if(ntref==8) {
-            for(int i=0;i<ntref;++i)
-                tref[i].join();
+            for(int j=0;j<ntref;++j)
+                tref[j].join();
             ntref = 0;
         } 
     }
@@ -187,8 +201,8 @@ void GranulateReduce::simpleReform(const float &lod, bool shoAsUV)
         }
 
         if(ntref==8) {
-            for(int i=0;i<ntref;++i)
-                tref[i].join();
+            for(int j=0;j<ntref;++j)
+                tref[j].join();
             ntref = 0;
         } 
     }
@@ -206,27 +220,19 @@ void GranulateReduce::SimplifyAndReform(MeshReformTrio &p, DrawableResource *rec
     Reform(p, 0, rec);
 }
 
-void GranulateReduce::Reform(MeshReformTrio &p, int nt, DrawableResource *rec)
+void GranulateReduce::Reform(MeshReformTrio &p, int nv, DrawableResource *rec)
 {
     HistoryReformSrc reformer;
-    reformer.reformSrc1(p._outMesh, p._stageMesh, nt, p._srcMesh);
-    UpdateMeshResouce(rec, p._outMesh);
-}
-
-void GranulateReduce::LodReform(LevelOfDetailSelect &lod, const Hexahedron &hexa, const PerspectiveCamera &camera,
-                MeshReformTrio &p, DrawableResource *rec)
-{
-    lod.select(hexa, camera);
-    if(lod.isStateChanged())
-        Reform(p, lod.value(), rec);
+    bool stat = reformer.reformSrc1(p._outMesh, p._stageMesh, nv, p._srcMesh);
+    if(stat) UpdateMeshResouce(rec, p._outMesh);
 }
 
 void GranulateReduce::LodReform1(const float &lod, bool shoAsUV,
                 MeshReformTrio &p, DrawableResource *rec)
 {
     HistoryReformSrc reformer;
-    reformer.reformSrc(p._outMesh, p._stageMesh, lod, p._srcMesh);
-    UpdateMeshResouce(rec, p._outMesh, shoAsUV);
+    bool stat = reformer.reformSrc(p._outMesh, p._stageMesh, lod, p._srcMesh);
+    if(stat) UpdateMeshResouce(rec, p._outMesh, shoAsUV);
 }
 
 bool GranulateReduce::hasMenu() const

@@ -15,6 +15,10 @@
     <file>images/edgeCollapseTest.png</file>
     <file>images/listener.png</file>
     <file>images/mesh_decimation.png</file>
+    <file>images/cache.png</file>
+    <file>images/cache_small.png</file>
+    <file>images/mesh_small.png</file>
+    <file>images/mesh_adaptable_small.png</file>
     <file>mimes/assettree.json</file>
 </qresource>
 </RCC>

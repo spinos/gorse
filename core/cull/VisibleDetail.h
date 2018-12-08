@@ -33,7 +33,7 @@ public:
 	void create(int n);
 	void setVisible(bool v);
 	void setDetail(float x);
-	void setMinDetail(int x, int i);
+	void setDetail(int x, int i);
 	void setDeltaDistance(float x);
 
 	bool updateView(const BaseCamera &cam);

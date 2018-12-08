@@ -29,6 +29,9 @@ protected:
 	DrawableResource *createResource();
 	void setResource(DrawableResource *x, int i=0);
 	DrawableResource *resource(int i=0);
+	DrawableResource *lastResource();
+
+	void removeLastResource();
 
 private:
 	

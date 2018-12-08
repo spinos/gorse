@@ -2,14 +2,17 @@
 #define ACA_LOD_MESH_IN_H
 
 #include "DrawableOps.h"
+#include <h5_mesh/LodMeshGroup.h>
+#include <boost/thread.hpp>
 
 namespace alo {
 class LodMeshCache;
 class LodMeshIn : public DrawableOps {
     
-    std::vector<LodMeshCache *> m_cacheList;
+    LodMeshGroup m_cache;
     float m_lod;
     bool m_shoUV;
+    boost::mutex m_mtx;
     
 public:
     LodMeshIn();
@@ -23,7 +26,7 @@ protected:
     
 private:
     void computeMesh();
-    bool cachePathChanged(const std::string &fileName) const;
+    void reformMesh(LodMeshCache *c, AdaptableMesh *mesh, DrawableResource *rec);
 
 };
 

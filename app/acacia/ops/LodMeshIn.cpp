@@ -2,12 +2,11 @@
 #include <qt_ogl/DrawableScene.h>
 #include <qt_ogl/DrawableObject.h>
 #include <qt_ogl/DrawableResource.h>
-#include <mesh/HistoryMesh.h>
 #include <qt_base/AFileDlg.h>
 #include <h5/V1H5IO.h>
-#include <h5/V1HBase.h>
-#include <h5_mesh/HHistoryMesh.h>
 #include <h5_mesh/LodMeshCache.h>
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 
 namespace alo {
    
@@ -17,12 +16,7 @@ m_shoUV(false)
 {}
 
 LodMeshIn::~LodMeshIn()
-{ 
-    std::vector<LodMeshCache *>::iterator it = m_cacheList.begin();
-    for(;it!=m_cacheList.end();++it)
-        delete *it;
-    m_cacheList.clear(); 
-}
+{}
     
 void LodMeshIn::update()
 {
@@ -31,8 +25,8 @@ void LodMeshIn::update()
     std::string scachePath;
     fcp->getValue(scachePath);
     
-    if(cachePathChanged(scachePath) )
-        LodMeshCache::Load(m_cacheList, scachePath);
+    if(m_cache.cacheFilePath() != scachePath )
+        m_cache.load(scachePath);
     
     QAttrib * al = findAttrib("lod");
     FloatAttrib *fl = static_cast<FloatAttrib *>(al);
@@ -52,31 +46,38 @@ void LodMeshIn::addDrawableTo(DrawableScene *scene)
 
 void LodMeshIn::computeMesh()
 {
-    const int n = m_cacheList.size();
+    const int n = m_cache.numMeshes();
     if(n<1) return;
-    
-    for(int i=0;i<n;++i) {
-        if(!hasResource(i)) {
-            DrawableResource *rec = createResource();
-            setResource(rec, i);
-        }
-    }
+
+    setDrawableSize(n);
     
     ver1::H5IO hio;
-    bool stat = hio.begin(m_cacheList[0]->cacheFilePath());
+    bool stat = hio.begin(m_cache.cacheFilePath());
     if(!stat) return;
     
-    AdaptableMesh transient;
+    boost::thread tref[16];
+    int ntref = 0;
+    AdaptableMesh transient[16];
     for(int i=0;i<n;++i) {
-        LodMeshCache &ci = *m_cacheList[i];
+        LodMeshCache &ci = *m_cache.mesh(i);
         if(!ci.isValid()) continue;
-            
-        int istage, nv;
-        ci.selectStage(istage, nv, m_lod);
-        ci.reformStage(&transient, nv, istage);
-
+   
         DrawableResource *rec = resource(i);
-        UpdateMeshResouce(rec, &transient, m_shoUV);
+        
+        tref[ntref] = boost::thread(boost::bind( &LodMeshIn::reformMesh, this, _1, _2, _3 ), 
+                            &ci, &transient[ntref], rec);
+        ntref++;
+        
+        if(ntref==16) {
+            for(int j=0;j<ntref;++j)
+                tref[j].join();
+            ntref = 0;
+        }
+    }
+
+    if(ntref>0) {
+        for(int i=0;i<ntref;++i)
+            tref[i].join();
     }
     
     hio.end();
@@ -90,11 +91,18 @@ void LodMeshIn::computeMesh()
     
 }
 
-bool LodMeshIn::cachePathChanged(const std::string &x) const
+void LodMeshIn::reformMesh(LodMeshCache *c, AdaptableMesh *mesh, DrawableResource *rec)
 {
-    if(m_cacheList.size() < 1) return true;
-    if(x == m_cacheList[0]->cacheFilePath()) return false;
-    return true;
+    int istage, nv;
+    c->selectStage(istage, nv, m_lod);
+    if(c->stageChanged(istage)) {
+        m_mtx.lock();
+        c->loadStage(istage);
+        m_mtx.unlock();
+    }
+    c->reformInCore(mesh, nv, istage);
+
+    UpdateMeshResouce(rec, mesh, m_shoUV);
 }
 
 }
