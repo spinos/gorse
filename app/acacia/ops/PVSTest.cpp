@@ -113,16 +113,16 @@ void PVSTest::recvCameraChanged(const CameraEvent &x)
     m_culler->compare(m_details->visibilities(), *(x.frustum()));
 
     const PerspectiveCamera *persp = static_cast<const PerspectiveCamera *>(x.camera());
+    lockScene();
     viewDependentReform(persp, m_culler, m_details);
 
-    drawableScene()->lock();
     const int n = numResources();
     for(int i=0;i<n;++i) {
         DrawableResource *rec = resource(i);
         const VisibilityState &vis = m_details->c_visibilities()[i];
         processResource(rec, vis);
     }
-    drawableScene()->unlock();
+    unlockScene();
 }
 
 }

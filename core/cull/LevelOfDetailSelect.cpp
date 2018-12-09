@@ -37,7 +37,7 @@ void LevelOfDetailSelect::select(const Hexahedron &hexa, const PerspectiveCamera
 	if(lod > 1.f) lod = 1.f;
 	if(lod < 0.f) lod = 0.f;
 	int s = camera.portWidth() * lod;
-	s = s * s * .03125f;
+	s = s * s * .033f;
 	select(s);
 }
 

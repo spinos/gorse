@@ -56,6 +56,8 @@ protected:
 	void processResource(DrawableResource *rec, const VisibilityState &vis);
 /// n resouce remove redundant ones
 	void setDrawableSize(int n);
+	void lockScene();
+	void unlockScene();
 
 private:
 	

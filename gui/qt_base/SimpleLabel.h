@@ -14,6 +14,13 @@ public:
 
 	QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
+    
+    void setLableText(bool shortened);
+    void setShortText(const QString &x);
+    
+private:
+    QString m_longText;
+    QString m_shortText;
 
 };
 

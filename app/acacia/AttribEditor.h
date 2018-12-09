@@ -36,7 +36,8 @@ private slots:
 	void recvListItemSelection(QPair<std::string, std::string> x);
 	void recvBoolValue(QPair<std::string, bool> x);
 	void recvStringValue(QPair<std::string, std::string> x);
-	
+	void recvSplitMove(int pos, int index);
+    
 private:
 	void clearAttribs();
 	void lsAttribs(alo::GlyphOps *ops);

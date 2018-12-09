@@ -137,18 +137,17 @@ public:
         Vector3F w, pa, pb;
     
         Vector3F v = A.X(0);
-        if(v.length2() < 1e-2f) v = A.X(1);
+        if(v.length2() < .01f) v = A.X(1);
     
-        for(int i=0; i < 20; i++) {
+        for(int i=0; i < 16; i++) {
     // SA-B(-v)
             pa = A.supportPoint(v.reversed());
             pb = B.supportPoint(v);
             w = pa - pb;
 
-            if(v.dot(w) > 0.f) {
     // terminate when v is close enough to v(A - B).
-            //v2 = v.length2();
-            //if(v2 - w.dot(v) < 1e-3f * v2) {
+            float v2 = v.length2();
+            if(v2 - w.dot(v) < 1e-3f * v2) {
     // std::cout<<" v is close to w "<<v2 - w.dot(v)<<"\n";
                 break;
             }

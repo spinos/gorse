@@ -6,6 +6,7 @@ namespace alo {
 DrawableObject::DrawableObject()
 {
 	m_drawArraySize = 0;
+    m_editArrayLength = 0;
     m_count[0] = 0;
     m_count[1] = 0;
     m_drawId = 0;
@@ -73,7 +74,7 @@ void DrawableObject::update(QOpenGLContext *ctx)
 
     QOpenGLExtraFunctions *f = ctx->extraFunctions();
 
-    const int length = 24 * m_drawArraySize;
+    const int length = 24 * m_editArrayLength;
     
     void *oldData = f->glMapBufferRange(GL_ARRAY_BUFFER, 0, length,
         GL_MAP_WRITE_BIT |  QOpenGLBuffer::RangeUnsynchronized );
@@ -84,6 +85,8 @@ void DrawableObject::update(QOpenGLContext *ctx)
     f->glUnmapBuffer(GL_ARRAY_BUFFER);
 
     m_posnmlVbo.release();
+    
+    m_drawArraySize = m_editArrayLength;
 }
 
 QOpenGLBuffer &DrawableObject::posnmlVbo()
@@ -97,6 +100,9 @@ void DrawableObject::setDrawArrayLength(int x)
 
 const int &DrawableObject::drawArrayLength() const
 { return m_drawArraySize; }
+
+void DrawableObject::setEditDrawArrayLength(int x)
+{ m_editArrayLength = x; }
 
 void DrawableObject::draw(QOpenGLContext *ctx)
 { 

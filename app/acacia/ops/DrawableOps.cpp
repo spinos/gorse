@@ -86,7 +86,7 @@ void DrawableOps::processResource(DrawableResource *rec, bool forcedToRelocate)
     }
 
     if(rec->isDirty()) {
-        d->setDrawArrayLength(rec->drawArrayLength());
+        d->setEditDrawArrayLength(rec->drawArrayLength());
         m_scene->lock();
         m_scene->enqueueEditDrawable(d->drawId(), opsId());
         m_scene->unlock();
@@ -117,7 +117,7 @@ void DrawableOps::processResourceNoLock(DrawableResource *rec)
     }
 
     if(rec->isDirty()) {
-        d->setDrawArrayLength(rec->drawArrayLength());
+        d->setEditDrawArrayLength(rec->drawArrayLength());
         m_scene->enqueueEditDrawable(d->drawId(), opsId());
         rec->setDirty(false);
         rec->setChangedOnFrame(frameNumber());
@@ -163,7 +163,7 @@ void DrawableOps::processResource(DrawableResource *rec, const VisibilityState &
     } 
 
     if(rec->isDirty()) {
-        d->setDrawArrayLength(rec->drawArrayLength());
+        d->setEditDrawArrayLength(rec->drawArrayLength());
         m_scene->enqueueEditDrawable(d->drawId(), opsId());
         rec->setDirty(false);
         rec->setChangedOnFrame(frameNumber());
@@ -196,5 +196,11 @@ void DrawableOps::setDrawableSize(int n)
     }
     m_scene->unlock();
 }
+
+void DrawableOps::lockScene()
+{ m_scene->lock(); }
+
+void DrawableOps::unlockScene()
+{ m_scene->unlock(); }
 
 }

@@ -143,10 +143,10 @@ int GranulateReduce::reduce(ViewFrustumCull *culler, VisibleDetail *details, con
 void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
                               const ViewFrustumCull *culler, VisibleDetail *details)
 {
-    boost::thread tref[8];
+    boost::thread tref[12];
     int ntref = 0;
     
-    const int beforeFrame = frameNumber() - 2;
+    const int beforeFrame = frameNumber() - 4;
     const int n = numResources();
     for(int i=0;i<n;++i) {
         LevelOfDetailSelect &lod = details->levelOfDetails()[i];
@@ -171,7 +171,7 @@ void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
         tref[ntref] = boost::thread(boost::bind(&GranulateReduce::Reform, _1, _2, _3), p, lod.value(), rec);
         ntref++; 
 
-        if(ntref==8) {
+        if(ntref==12) {
             for(int j=0;j<ntref;++j)
                 tref[j].join();
             ntref = 0;

@@ -48,6 +48,10 @@ AttribEditor::AttribEditor(AcaciaScene *scene, QWidget *parent) : QWidget(parent
     mainLayout->setContentsMargins(2,2,2,2);
     mainLayout->addWidget(scroll);
 	setLayout(mainLayout);
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)    
+    connect(splt, &QSplitter::splitterMoved,
+            this, &AttribEditor::recvSplitMove );
+#endif
 }
 
 void AttribEditor::recvSelectGlyph(bool isSelecting)
@@ -128,6 +132,7 @@ void AttribEditor::lsAttr(QAttrib *attr)
 void AttribEditor::lsFloatAttr(alo::QAttrib *attr)
 {
 	SimpleLabel *lab = new SimpleLabel(QString(attr->label().c_str()));
+    lab->setShortText(QString(attr->attrName().c_str()));
 	FieldSlider* sld = new FieldSlider();
 	
     m_leftCollWigs.enqueue(lab);
@@ -150,6 +155,7 @@ void AttribEditor::lsFloatAttr(alo::QAttrib *attr)
 void AttribEditor::lsFloat2Attr(alo::QAttrib *attr)
 {
 	SimpleLabel *lab = new SimpleLabel(QString(attr->label().c_str()));
+    lab->setShortText(QString(attr->attrName().c_str()));
 	FieldSlider* xsld = new FieldSlider();
 	FieldSlider* ysld = new FieldSlider();
 	
@@ -180,7 +186,7 @@ void AttribEditor::lsFloat2Attr(alo::QAttrib *attr)
 void AttribEditor::lsListAttr(alo::QAttrib *attr)
 {
 	SimpleLabel *lab = new SimpleLabel(QString(attr->label().c_str()));
-	
+	lab->setShortText(QString(attr->attrName().c_str()));
 	m_leftCollWigs.enqueue(lab);
     m_leftCollWigs.enqueue(new SimpleLabel(tr("")));
     m_leftCollWigs.enqueue(new SimpleLabel(tr("")));
@@ -200,6 +206,7 @@ void AttribEditor::lsListAttr(alo::QAttrib *attr)
 void AttribEditor::lsBoolAttr(alo::QAttrib *attr)
 {
     SimpleLabel *lab = new SimpleLabel(QString(attr->label().c_str()));
+    lab->setShortText(QString(attr->attrName().c_str()));
 	CheckLabel* chk = new CheckLabel();
 	
     m_leftCollWigs.enqueue(lab);
@@ -220,6 +227,7 @@ void AttribEditor::lsBoolAttr(alo::QAttrib *attr)
 void AttribEditor::lsStringAttr(alo::QAttrib *attr)
 {
 	SimpleLabel *lab = new SimpleLabel(QString(attr->label().c_str()));
+    lab->setShortText(QString(attr->attrName().c_str()));
 	StringEdit *fld = new StringEdit();
 	m_leftCollWigs.enqueue(lab);
     m_rightCollWigs.enqueue(fld);
@@ -270,4 +278,13 @@ void AttribEditor::recvStringValue(QPair<std::string, std::string> x)
 
 	if(ops->setStringAttrValue(x.first, x.second) )
 		emit sendAttribChanged();
+}
+
+void AttribEditor::recvSplitMove(int pos, int index)
+{
+    bool isShort = pos < 50;
+    foreach (QWidget *widget, m_leftCollWigs) {
+        SimpleLabel *lab = dynamic_cast<SimpleLabel *>(widget);
+        if(lab) lab->setLableText(isShort);
+    }
 }

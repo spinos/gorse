@@ -31,7 +31,7 @@ void DrawableResource::attachToDrawable(DrawableObject *object)
 
 void DrawableResource::dettachDrawable()
 {
-	m_object->setDrawArrayLength(0);
+	//m_object->setDrawArrayLength(0);
 	m_object = 0;
 	m_isDirty = false;
 	m_toRelocate = false;
