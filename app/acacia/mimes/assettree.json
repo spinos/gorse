@@ -14,11 +14,18 @@
                     "name": "static_mesher",
                     "label": "Static Mesher",
                     "icon": ":images/mesh_small.png",
+                    "children": []
+                },
+                {
+                    "id": 703426,
+                    "name": "adaptive_mesher",
+                    "label": "Adaptive Mesher",
+                    "icon": ":images/mesh_adaptable_small.png",
                     "children": [
                         {
                             "id": 277635,
                             "name": "listen_mesh",
-                            "label": "Listener",
+                            "label": "LOD Listener",
                             "icon": ":images/mesh_decimation.png",
                             "is_element": true,
                             "attribs" : [
@@ -42,113 +49,6 @@
                                     "value": false
                                 }
                             ]
-                        },
-                        {
-                            "id": 828635,
-                            "name": "edge_collapse_test",
-                            "label": "Edge Collapse Test",
-                            "icon": ":images/edgeCollapseTest.png",
-                            "is_element": true,
-                            "attribs" : [
-                                {
-                                    "name": "lod",
-                                    "label": "Level of Detail",
-                                    "typ": 3,
-                                    "value": 0.5,
-                                    "min": 0.0,
-                                    "max": 1.0
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": 703426,
-                    "name": "adaptive_mesher",
-                    "label": "Adaptive Mesher",
-                    "icon": ":images/mesh_adaptable_small.png",
-                    "children": [
-                        {
-                            "id": 872960,
-                            "name": "tree_root",
-                            "label": "Root",
-                            "is_element": true,
-                            "attribs" : [
-                                {
-                                    "name": "a",
-                                    "label": "A Semi Major Axis",
-                                    "typ": 3,
-                                    "value": 10.0,
-                                    "min": 0.1,
-                                    "max": 1000.0
-                                },
-                                {
-                                    "name": "b",
-                                    "label": "B Semi Minor Axis",
-                                    "typ": 3,
-                                    "value": 10.0,
-                                    "min": 0.1,
-                                    "max": 1000.0
-                                },
-                                {
-                                    "name": "len",
-                                    "label": "Length",
-                                    "typ": 3,
-                                    "value": 40.0,
-                                    "min": 0.1,
-                                    "max": 1000.0
-                                },
-                                {
-                                    "name": "shr",
-                                    "label": "Shrinking",
-                                    "typ": 3,
-                                    "value": 0.5,
-                                    "min": 0.1,
-                                    "max": 1.99
-                                },
-                                {
-                                    "name": "tws",
-                                    "label": "Twisting",
-                                    "typ": 3,
-                                    "value": 0.0,
-                                    "min": -6.28,
-                                    "max": 6.28
-                                },
-                                {
-                                    "name": "lob",
-                                    "label": "Lobe Number",
-                                    "typ": 3,
-                                    "value": 8.0,
-                                    "min": 4.0,
-                                    "max": 20.0
-                                },
-                                {
-                                    "name": "bend",
-                                    "label": "Bending",
-                                    "typ": 4,
-                                    "value": [0.0, 0.0],
-                                    "min": [-3.14, -3.14],
-                                    "max": [3.14, 3.14]
-                                },
-                                {
-                                    "name": "bump",
-                                    "label": "Bump Out/In",
-                                    "typ": 4,
-                                    "value": [0.5, 0.5],
-                                    "min": [0.0, 0.0],
-                                    "max": [1.0, 1.0]
-                                },
-                                {
-                                    "name": "out_mesh",
-                                    "typ": 11,
-                                    "port": {
-                                        "outgoing": true,
-                                        "side": 3,
-                                        "px": 18,
-                                        "py": -2
-                                    }
-                                }
-                            ]
                         }
                     ]
                 }
@@ -169,7 +69,7 @@
                     "attribs" : [
                         {
                             "name": "cache_path",
-                            "label": "Cache Path",
+                            "label": "Cache File Path",
                             "typ": 9,
                             "strtyp": 513
                         },
@@ -188,7 +88,14 @@
                             "value": false
                         }
                     ]
-                },
+                }
+            ]
+        },
+        {
+            "id": 220171,
+            "name": "test",
+            "label": "Test",
+            "children": [
                 {
                     "id": 716941,
                     "name": "pvs_test",
@@ -201,6 +108,105 @@
                             "label": "Freeze View",
                             "typ": 1,
                             "value": false
+                        }
+                    ]
+                },
+                {
+                    "id": 828635,
+                    "name": "edge_collapse_test",
+                    "label": "Edge Collapse Test",
+                    "icon": ":images/edgeCollapseTest.png",
+                    "is_element": true,
+                    "attribs" : [
+                        {
+                            "name": "lod",
+                            "label": "Level of Detail",
+                            "typ": 3,
+                            "value": 0.5,
+                            "min": 0.0,
+                            "max": 1.0
+                        }
+                    ]
+                },
+                {
+                    "id": 872960,
+                    "name": "tree_root",
+                    "label": "Root",
+                    "is_element": true,
+                    "attribs" : [
+                        {
+                            "name": "a",
+                            "label": "A Semi Major Axis",
+                            "typ": 3,
+                            "value": 10.0,
+                            "min": 0.1,
+                            "max": 1000.0
+                        },
+                        {
+                            "name": "b",
+                            "label": "B Semi Minor Axis",
+                            "typ": 3,
+                            "value": 10.0,
+                            "min": 0.1,
+                            "max": 1000.0
+                        },
+                        {
+                            "name": "len",
+                            "label": "Length",
+                            "typ": 3,
+                            "value": 40.0,
+                            "min": 0.1,
+                            "max": 1000.0
+                        },
+                        {
+                            "name": "shr",
+                            "label": "Shrinking",
+                            "typ": 3,
+                            "value": 0.5,
+                            "min": 0.1,
+                            "max": 1.99
+                        },
+                        {
+                            "name": "tws",
+                            "label": "Twisting",
+                            "typ": 3,
+                            "value": 0.0,
+                            "min": -6.28,
+                            "max": 6.28
+                        },
+                        {
+                            "name": "lob",
+                            "label": "Lobe Number",
+                            "typ": 3,
+                            "value": 8.0,
+                            "min": 4.0,
+                            "max": 20.0
+                        },
+                        {
+                            "name": "bend",
+                            "label": "Bending",
+                            "typ": 4,
+                            "value": [0.0, 0.0],
+                            "min": [-3.14, -3.14],
+                            "max": [3.14, 3.14]
+                        },
+                        {
+                            "name": "bump",
+                            "label": "Bump Out/In",
+                            "typ": 4,
+                            "value": [0.5, 0.5],
+                            "min": [0.0, 0.0],
+                            "max": [1.0, 1.0]
+                        },
+                        {
+                            "name": "out_mesh",
+                            "typ": 11,
+                            "port": {
+                                "outgoing": true,
+                                "side": 3,
+                                "px": 18,
+                                "py": -2
+                            }
                         }
                     ]
                 }

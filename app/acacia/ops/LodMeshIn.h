@@ -4,6 +4,7 @@
 #include "DrawableOps.h"
 #include <h5_mesh/LodMeshGroup.h>
 #include <boost/thread.hpp>
+#include <h5/V1H5IO.h>
 
 namespace alo {
 class LodMeshCache;
@@ -13,6 +14,7 @@ class LodMeshIn : public DrawableOps {
     float m_lod;
     bool m_shoUV;
     boost::mutex m_mtx;
+    ver1::H5IO m_hio;
     
 public:
     LodMeshIn();
@@ -27,6 +29,7 @@ protected:
 private:
     void computeMesh();
     void reformMesh(LodMeshCache *c, AdaptableMesh *mesh, DrawableResource *rec);
+    bool loadCache(const std::string &fileName);
 
 };
 

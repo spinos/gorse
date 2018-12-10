@@ -25,7 +25,7 @@ public:
 	LodMeshGroup();
 	virtual ~LodMeshGroup();
 
-	bool load(const std::string &fileName);
+	bool loadMeshes(const std::string &fileName);
 
 	const std::string &cacheFilePath() const;
 	int numMeshes() const;

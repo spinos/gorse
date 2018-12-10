@@ -5,7 +5,6 @@
 #include <qt_base/AFileDlg.h>
 #include <h5/V1H5IO.h>
 #include <h5_mesh/LodMeshCache.h>
-#include <boost/function.hpp>
 #include <boost/bind.hpp>
 
 namespace alo {
@@ -16,7 +15,10 @@ m_shoUV(false)
 {}
 
 LodMeshIn::~LodMeshIn()
-{}
+{
+    if(m_cache.cacheFilePath() != "unknown")
+        m_hio.end();
+}
     
 void LodMeshIn::update()
 {
@@ -26,7 +28,7 @@ void LodMeshIn::update()
     fcp->getValue(scachePath);
     
     if(m_cache.cacheFilePath() != scachePath )
-        m_cache.load(scachePath);
+        loadCache(scachePath);
     
     QAttrib * al = findAttrib("lod");
     FloatAttrib *fl = static_cast<FloatAttrib *>(al);
@@ -50,10 +52,6 @@ void LodMeshIn::computeMesh()
     if(n<1) return;
 
     setDrawableSize(n);
-    
-    ver1::H5IO hio;
-    bool stat = hio.begin(m_cache.cacheFilePath());
-    if(!stat) return;
     
     boost::thread tref[16];
     int ntref = 0;
@@ -80,8 +78,6 @@ void LodMeshIn::computeMesh()
             tref[i].join();
     }
     
-    hio.end();
-    
     drawableScene()->lock();
     for(int i=0;i<n;++i) {
         DrawableResource *rec = resource(i);
@@ -103,6 +99,17 @@ void LodMeshIn::reformMesh(LodMeshCache *c, AdaptableMesh *mesh, DrawableResourc
     c->reformInCore(mesh, nv, istage);
 
     UpdateMeshResouce(rec, mesh, m_shoUV);
+}
+
+bool LodMeshIn::loadCache(const std::string &fileName)
+{
+    if(m_cache.cacheFilePath() != "unknown")
+        m_hio.end();
+
+    bool stat = m_hio.begin(fileName);
+    if(!stat) return false;
+
+    return m_cache.loadMeshes(fileName);
 }
 
 }

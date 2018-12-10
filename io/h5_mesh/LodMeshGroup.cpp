@@ -8,7 +8,6 @@
 #include "LodMeshCache.h"
 #include "HHistoryMesh.h"
 #include "HHistoryMeshRecord.h"
-#include <h5/V1H5IO.h>
 #include <h5/V1HBase.h>
 
 namespace alo {
@@ -37,14 +36,9 @@ int LodMeshGroup::numMeshes() const
 LodMeshCache *LodMeshGroup::mesh(int i)
 { return m_cacheList[i]; }
 
-bool LodMeshGroup::load(const std::string &fileName)
+bool LodMeshGroup::loadMeshes(const std::string &fileName)
 {
     clear();
-
-    ver1::H5IO hio;
-    
-    bool stat = hio.begin(fileName);
-    if(!stat) return false;
     
     ver1::HBase g("/world/meshes");
     
@@ -53,6 +47,7 @@ bool LodMeshGroup::load(const std::string &fileName)
     const int n = meshNames.size();
     
     for(int i=0;i<n;++i) {
+        std::cout << ".";
         HHistoryMeshRecord hrec(meshNames[i]);
         
         if(m_cacheList.size() < i + 1) 
@@ -66,8 +61,11 @@ bool LodMeshGroup::load(const std::string &fileName)
     }
     
     g.close();
-    
-    hio.end();
+
+    if(numMeshes() < 1) {
+        m_cacheFilePath = "unknown";
+        return false;
+    }
     
     m_cacheFilePath = fileName;
     return true;
