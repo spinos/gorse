@@ -41,16 +41,18 @@ void MeshTopology::buildTopology(const ver1::ATriangleMesh *mesh)
 	}
 
 	const Vector3F *pos = mesh->c_positions();
+	const Vector3F *nml = mesh->c_normals();
 
 	bool stat;
-	for(int i=0;i<mesh->numIndices();i+=3) {
-		const int j = i/3;
-		const Int3 &fv = mesh->c_indices()[j];
+	for(int i=0;i<m_numFaces;++i) {
+		if((i+1 & 4095) == 0) std::cout << ".";
+		const int i3 = i * 3;
+		const Int3 &fv = mesh->c_indices()[i];
 		FaceIndex fi(fv.x, fv.y, fv.z);
-		FaceValue *f = m_tris.insert(fi, FaceValue(j) );
-		f->setVertexUV(fv.x, i, fv.y, i + 1, fv.z, i + 2);
-		f->setArea(mesh->getTriangleArea(j));
-		f->setNormal(mesh->getTriangleNormal(j));
+		FaceValue *f = m_tris.insert(fi, FaceValue(i) );
+		f->setVertexUV(fv.x, i3, fv.y, i3 + 1, fv.z, i3 + 2);
+		f->setArea(mesh->getTriangleArea(i));
+		f->setNormal(mesh->getTriangleNormal(i));
 
 		EdgeValue *e0 = m_edges.find(EdgeIndex(fv.x, fv.y));
 		stat = e0->connectToFace(fi);
@@ -76,6 +78,9 @@ void MeshTopology::buildTopology(const ver1::ATriangleMesh *mesh)
 			m_numBorderVertices++;
 		} else
 			vi.setOnBorder(false);
+
+		bool ringStat = checkConcaveRing(i, pos, nml[i]);
+		vi.setRingConcave(ringStat);
 	}
 }
 
@@ -521,6 +526,44 @@ bool MeshTopology::getVertexOneRing(std::vector<int> &vring, int vi,
                     const Vector3F *pos,
                     const Vector3F &nml) const
 { return m_vertexFaceConnection.getVertexOneRing(vring, vi, pos, nml); }
+
+bool MeshTopology::checkConcaveRing(int vi, 
+                    const Vector3F *pos,
+                    const Vector3F &nml)
+{ 
+	std::vector<int> vring;
+	bool stat = m_vertexFaceConnection.getVertexOneRing(vring, vi, pos, nml);
+	if(!stat) return false;
+
+	const int n = vring.size();
+	for(int i=0;i<n;++i) {
+		int v0 = vring[i];
+		int v1 = vring[(i+2) % n];
+		if(m_edges.find(EdgeIndex(v0, v1))) return true;
+	}
+	return false; 
+}
+
+void MeshTopology::expandVertexRing(std::vector<int> &bigRing,
+                    const std::vector<int> &smallRing) const
+{
+	std::vector<int>::const_iterator it = smallRing.begin();
+	for(;it!=smallRing.end();++it)
+		m_vertexFaceConnection.addVertexRingTo(bigRing, smallRing, *it);
+}
+
+void MeshTopology::updateVertexConcaveState(const std::vector<int> &vertexInds,
+					const Vector3F *pos, const Vector3F *nml)
+{
+	std::vector<int>::const_iterator it = vertexInds.begin();
+	for(;it!=vertexInds.end();++it) {
+		const int i = *it;
+		VertexValue &vi = vertex(i);
+		if(vi.isRingConcave()) continue;
+		bool ringStat = checkConcaveRing(i, pos, nml[i]);
+		vi.setRingConcave(ringStat);
+	}
+}
 
 void MeshTopology::PrintUnmanifoldEdgeWarning(const FaceIndex &fi, const EdgeValue &e,
                 bool stat)

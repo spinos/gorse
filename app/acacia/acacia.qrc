@@ -19,6 +19,7 @@
     <file>images/cache_small.png</file>
     <file>images/mesh_small.png</file>
     <file>images/mesh_adaptable_small.png</file>
+    <file>images/cube.png</file>
     <file>mimes/assettree.json</file>
 </qresource>
 </RCC>

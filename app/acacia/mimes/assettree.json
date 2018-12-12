@@ -14,7 +14,28 @@
                     "name": "static_mesher",
                     "label": "Static Mesher",
                     "icon": ":images/mesh_small.png",
-                    "children": []
+                    "children": [
+                        {
+                            "id": 299105,
+                            "name": "static_mesh_listener",
+                            "label": "Static Mesh",
+                            "icon": ":images/cube.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "ipc_mesh_list",
+                                    "label": "Meshes Available",
+                                    "typ": 12
+                                },
+                                {
+                                    "name": "sho_uv",
+                                    "label": "Show As UV",
+                                    "typ": 1,
+                                    "value": false
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "id": 703426,
@@ -24,8 +45,8 @@
                     "children": [
                         {
                             "id": 277635,
-                            "name": "listen_mesh",
-                            "label": "LOD Listener",
+                            "name": "lod_mesh_listener",
+                            "label": "LOD Mesh",
                             "icon": ":images/mesh_decimation.png",
                             "is_element": true,
                             "attribs" : [

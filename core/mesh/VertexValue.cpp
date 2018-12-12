@@ -12,7 +12,8 @@ namespace alo {
 
 VertexValue::VertexValue() : m_cost(1e28f),
 m_locked(false),
-m_onborder(false)
+m_onborder(false),
+m_isRingConcave(false)
 {}
 	
 VertexValue::~VertexValue()
@@ -27,6 +28,9 @@ const float &VertexValue::cost() const
 void VertexValue::setOnBorder(bool x)
 { m_onborder = x; }
 
+void VertexValue::setRingConcave(bool x)
+{ m_isRingConcave = x; }
+
 const bool &VertexValue::isOnBorder() const
 { return m_onborder; }
 
@@ -38,6 +42,9 @@ void VertexValue::unlock()
 
 const bool &VertexValue::isLocked() const
 { return m_locked; }
+
+const bool &VertexValue::isRingConcave() const
+{ return m_isRingConcave; }
 
 std::ostream& operator<<(std::ostream &output, const VertexValue & p)
 {

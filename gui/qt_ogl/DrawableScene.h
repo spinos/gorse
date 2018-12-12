@@ -23,12 +23,12 @@ QT_FORWARD_DECLARE_CLASS(QOpenGLContext)
 
 namespace alo {
 
-class WireframeProgram;
+class BaseProgram;
 class DrawableObject;
 
 class DrawableScene
 {
-	WireframeProgram *m_program1;
+	BaseProgram *m_program[2];
     QOpenGLContext *m_ctx;
     QMutex m_mutex;
 

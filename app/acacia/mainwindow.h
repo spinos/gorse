@@ -29,12 +29,19 @@ public:
 private slots:
     void save();
     void about();
+
+private slots:
+    void recvDisplaySolidChanged(bool checked);
+    void recvDisplayWireChanged(bool checked);
     
 private:
     void createActions();
     void createStatusBar();
 
     QMenu *viewMenu;
+    QMenu *displayMenu;
+    QAction *m_displaySolidAct;
+    QAction *m_displayWireAct;
     
     alo::SceneGraph *m_graphView;
     AcaciaScene *m_scene;

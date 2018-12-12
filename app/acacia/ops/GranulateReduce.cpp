@@ -146,7 +146,7 @@ void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
     boost::thread tref[12];
     int ntref = 0;
     
-    const int beforeFrame = frameNumber() - 4;
+    const int beforeFrame = frameNumber() - 3;
     const int n = numResources();
     for(int i=0;i<n;++i) {
         LevelOfDetailSelect &lod = details->levelOfDetails()[i];
@@ -159,7 +159,9 @@ void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
         lod.select(culler->leafHexahedron(i), *persp);
         
         DrawableResource *rec = resource(i);
-        if(!lod.isStateChanged() && !rec->isDeferred()) continue;
+        if(!lod.isStateChanged() && !rec->isDeferred()) {
+            continue;
+        }
 
         if(rec->changedOnFrame() > beforeFrame) {
             rec->setDeferred(true);

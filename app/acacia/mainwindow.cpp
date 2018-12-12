@@ -80,7 +80,7 @@ void MainWindow::about()
 void MainWindow::createActions()
 {
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    //QToolBar *fileToolBar = addToolBar(tr("File"));
+    /*QToolBar *fileToolBar = addToolBar(tr("File"));
 
     const QIcon saveIcon = QIcon::fromTheme("document-save", QIcon(":/images/save.png"));
     QAction *saveAct = new QAction(saveIcon, tr("&Save..."), this);
@@ -88,15 +88,32 @@ void MainWindow::createActions()
     saveAct->setStatusTip(tr("Save the current form letter"));
     connect(saveAct, &QAction::triggered, this, &MainWindow::save);
     fileMenu->addAction(saveAct);
-    //fileToolBar->addAction(saveAct);
-
-    fileMenu->addSeparator();
+    
+    fileMenu->addSeparator();*/
 
     QAction *quitAct = fileMenu->addAction(tr("&Quit"), this, &QWidget::close);
     quitAct->setShortcuts(QKeySequence::Quit);
     quitAct->setStatusTip(tr("Quit the application"));
 
     viewMenu = menuBar()->addMenu(tr("&View"));
+    displayMenu = menuBar()->addMenu(tr("&Display"));
+
+    m_displaySolidAct = new QAction(tr("&Solid"), this);
+    m_displaySolidAct->setCheckable(true);
+    m_displaySolidAct->setChecked(true);
+    m_displayWireAct = new QAction(tr("&Wireframe"), this);
+    m_displayWireAct->setCheckable(true);
+    m_displayWireAct->setChecked(false);
+
+    displayMenu->addAction(m_displaySolidAct);
+    displayMenu->addAction(m_displayWireAct);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    connect(m_displaySolidAct, &QAction::triggered,
+            this, &MainWindow::recvDisplaySolidChanged );   
+    connect(m_displayWireAct, &QAction::triggered,
+            this, &MainWindow::recvDisplayWireChanged );   
+#endif
 
     menuBar()->addSeparator();
 
@@ -110,4 +127,24 @@ void MainWindow::createActions()
 void MainWindow::createStatusBar()
 {
     statusBar()->showMessage(tr("Ready"));
+}
+
+void MainWindow::recvDisplaySolidChanged(bool checked)
+{
+    if(!checked) {
+        m_displaySolidAct->setChecked(true);
+        return;
+    }
+    m_displayWireAct->setChecked(false);
+    std::cout << " todo set display solid ";
+}
+
+void MainWindow::recvDisplayWireChanged(bool checked)
+{
+    if(!checked) {
+        m_displayWireAct->setChecked(true);
+        return;
+    }
+    m_displaySolidAct->setChecked(false);
+    std::cout << " todo set display wireframe ";
 }

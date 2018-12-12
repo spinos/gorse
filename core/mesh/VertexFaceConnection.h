@@ -42,6 +42,8 @@ public:
 				const Vector3F *pos, const Vector3F &nv) const;
 	const std::deque<FaceIndex> &operator[](int v) const;
 	int totalSize() const;
+	void addVertexRingTo(std::vector<int> &vertInds, 
+				const std::vector<int> &smallRing, int vi) const;
 
 private:
 	void connectFace(std::deque<FaceIndex> &c, const FaceIndex &x);
@@ -50,6 +52,7 @@ private:
 	void addToVector(std::deque<int> &vs, int x) const;
 /// opposite to (b, vi) but not a
 	bool findNextVertex(int &c, const int &a, const int &b, const int &vi) const;
+	void expandExclude(std::vector<int> &a, const std::vector<int> &b, int vi) const;
 
 };
 	

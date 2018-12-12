@@ -59,6 +59,11 @@ protected:
 	QAttrib *addListAttribute(const QJsonObject &content);
 	QAttrib *addStringAttribute(const QJsonObject &content);
 
+	bool getFloatAttribValue(float &val, const std::string &attrName);
+	bool getFloat2AttribValue(float *val, const std::string &attrName);
+	bool getBoolAttribValue(bool &val, const std::string &attrName);
+	bool getListAttribValue(std::string &val, const std::string &attrName);
+
 private:
 	void addConnection(QAttrib *b, const QJsonObject &content);
 	void setFloatComponentAttrValue(QAttrib *attr, const int &component, const float &x);

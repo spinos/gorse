@@ -114,6 +114,15 @@ protected:
     bool getVertexOneRing(std::vector<int> &vring, int vi,
                     const Vector3F *pos,
                     const Vector3F &nml) const;
+/// if any inner connection of ring exists
+    bool checkConcaveRing(int vi, 
+                    const Vector3F *pos,
+                    const Vector3F &nml);
+/// assuming no vertex within small ring
+    void expandVertexRing(std::vector<int> &bigRing,
+                    const std::vector<int> &smallRing) const;
+    void updateVertexConcaveState(const std::vector<int> &vertexInds,
+                    const Vector3F *pos, const Vector3F *nml);
 
 	static void PrintUnmanifoldEdgeWarning(const FaceIndex &fi, 
                 const EdgeValue &e,

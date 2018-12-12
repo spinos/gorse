@@ -1,5 +1,11 @@
-#ifndef ACA_MESH_LISTENER_OPS_H
-#define ACA_MESH_LISTENER_OPS_H
+/*
+ *  MeshListener.h
+ *  acacia
+ *
+ */
+
+#ifndef ACA_MESH_LISTENER_H
+#define ACA_MESH_LISTENER_H
 
 #include "GranulateReduce.h"
 
@@ -8,35 +14,30 @@ class QListWidget;
 QT_END_NAMESPACE
 
 namespace alo {
-class AdaptableMesh;
-class HistoryMesh;
 class JMesh;
-class MeshListenerOps : public GranulateReduce {
+class AdaptableMesh;
+class MeshListener : public GranulateReduce {
     
     std::map<std::string, JMesh> m_meshMap;
     std::string m_meshName;
     unsigned m_upd;
-    float m_lod;
-    bool m_shoUV;
     
 public:
-    MeshListenerOps();
-    virtual ~MeshListenerOps();
+    MeshListener();
+    virtual ~MeshListener();
 
-    virtual void update() override;
     virtual void postUI() override;
  	virtual void addDrawableTo(DrawableScene *scene) override;
     virtual bool hasMenu() const override;
 
 protected:
-
+    bool checkMeshChange(bool &dataChanged);
     virtual std::string meshCacheName() const override;
+    bool loadMesh(AdaptableMesh *transient, bool dataChanged);
     
 private:
     bool checkBroadcastTime();
-    bool loadMesh(bool dataChanged);
     bool loadMeshMaster();
-    void computeMesh();
     void listAvailableMeshes(QListWidget *wig);
     
 };

@@ -1,6 +1,6 @@
 /*
  *  AcaciaScene.cpp
- *  
+ *  acacia
  *
  *  Created by jian zhang on 3/30/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
@@ -28,8 +28,10 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
     switch(k) {
     case AcaciaOpsType::AoRoot :
         return new RootOps;
-    case AcaciaOpsType::AoMeshListener :
-        return new MeshListenerOps;
+    case AcaciaOpsType::AoLodMesh :
+        return new LodMeshOps;
+    case AcaciaOpsType::AoStaticMesh :
+        return new SimpleMeshOps;
     case AcaciaOpsType::AoEdgeCollapseTest :
         return new EdgeCollapseTest;
     case AcaciaOpsType::AoLodMeshIn :

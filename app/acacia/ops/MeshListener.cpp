@@ -1,58 +1,45 @@
-#include "MeshListenerOps.h"
+/*
+ *  MeshListener.cpp
+ *  acacia
+ *
+ */
+
+#include "MeshListener.h"
 #include <QListWidget>
 #include <qt_ogl/DrawableScene.h>
-#include <qt_ogl/DrawableObject.h>
-#include <qt_ogl/DrawableResource.h>
 #include <boost/interprocess/mapped_region.hpp>
 #include <ipc/SharedMemoryObject.h>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 #include <jsn/JMesh.h>
-#include <mesh/HistoryMesh.h>
-#include <mesh/HistoryReformSrc.h>
 
 using namespace boost::interprocess;
 using namespace boost::property_tree;
     
 namespace alo {
 
-MeshListenerOps::MeshListenerOps() : m_upd(0), 
-m_meshName("unknown"),
-m_lod(.5f),
-m_shoUV(false)
+MeshListener::MeshListener() : m_upd(0), 
+m_meshName("unknown")
 {}
 
-MeshListenerOps::~MeshListenerOps()
+MeshListener::~MeshListener()
 {}
     
-void MeshListenerOps::update()
+bool MeshListener::checkMeshChange(bool &dataChanged)
 {
-    QAttrib * ameshes = findAttrib("ipc_mesh_list");
-    ListAttrib *fmeshes = static_cast<ListAttrib *>(ameshes);
     std::string meshName;
-    fmeshes->getValue(meshName);
+    getListAttribValue(meshName, "ipc_mesh_list");
     
     const bool meshSelectionChanged = (m_meshName != meshName);
     m_meshName = meshName;
     
-    const bool dataChanged = checkBroadcastTime();
+    dataChanged = checkBroadcastTime();
     
-    if( dataChanged || meshSelectionChanged)
-        loadMesh(dataChanged);
-        
-    QAttrib * alod = findAttrib("lod");
-    FloatAttrib *flod = static_cast<FloatAttrib *>(alod);
-    flod->getValue(m_lod);
-    
-    QAttrib * ashouv = findAttrib("sho_uv");
-    BoolAttrib *fshouv = static_cast<BoolAttrib *>(ashouv);
-    fshouv->getValue(m_shoUV);
-
-    computeMesh();
+    return dataChanged || meshSelectionChanged;
 }
 
-void MeshListenerOps::postUI()
+void MeshListener::postUI()
 {
     QAttrib * ameshes = findAttrib("ipc_mesh_list");
     ListAttrib *fmeshes = static_cast<ListAttrib *>(ameshes);
@@ -61,21 +48,24 @@ void MeshListenerOps::postUI()
     listAvailableMeshes(lmeshes);
 }
 
-void MeshListenerOps::listAvailableMeshes(QListWidget *wig)
+void MeshListener::listAvailableMeshes(QListWidget *wig)
 {
     m_meshMap.clear();
-    m_meshName = "unknown";
     
     wig->clear();
 
     SharedMemoryObject shm;
     mapped_region region = shm.readRegion("MySharedMemory");
-    if(region.get_size() < 1) return;
+    if(region.get_size() < 1) {
+        m_meshName = "unknown";
+        return;
+    }
 
     const char *mem = static_cast<const char*>(region.get_address());
     std::stringstream sst(mem);
     std::cout<<" "<<sst.str();
     
+    bool found = false;
     ptree pt;
     json_parser::read_json(sst, pt);
     BOOST_FOREACH(ptree::value_type const&v, pt.get_child("meshes")) {
@@ -85,15 +75,20 @@ void MeshListenerOps::listAvailableMeshes(QListWidget *wig)
         m_meshMap[meshName].readPtree(v.second);
         
         wig->addItem(QString(meshName.c_str()) );
+
+        if(meshName == m_meshName) found = true;
     }
+
+    if(!found) m_meshName = "unknown";
+    
 }
 
-void MeshListenerOps::addDrawableTo(DrawableScene *scene)
+void MeshListener::addDrawableTo(DrawableScene *scene)
 { 
     setDrawableScene(scene);
 }
 
-bool MeshListenerOps::checkBroadcastTime()
+bool MeshListener::checkBroadcastTime()
 {
     SharedMemoryObject shm;
     mapped_region region = shm.readRegion("MySharedMemory");
@@ -112,7 +107,7 @@ bool MeshListenerOps::checkBroadcastTime()
     return changed;
 }
 
-bool MeshListenerOps::loadMeshMaster()
+bool MeshListener::loadMeshMaster()
 {
     SharedMemoryObject shm;
     mapped_region region = shm.readRegion("MySharedMemory");
@@ -134,7 +129,7 @@ bool MeshListenerOps::loadMeshMaster()
     return false;
 }
 
-bool MeshListenerOps::loadMesh(bool dataChanged)
+bool MeshListener::loadMesh(AdaptableMesh *transient, bool dataChanged)
 {
     if(dataChanged) {
         if(!loadMeshMaster())
@@ -150,53 +145,34 @@ bool MeshListenerOps::loadMesh(bool dataChanged)
     const int &nv = msh.nv();
     const int &nt = msh.nt();
     
-    AdaptableMesh transient;
-    transient.createTriangleMesh(nv, nt);
+    transient->createTriangleMesh(nv, nt);
     
     const char *mem = static_cast<const char*>(region.get_address());
     const Vector3F *pos = (const Vector3F *)&mem[msh.getPosLoc()];
-    transient.copyPositionsFrom(pos);
+    transient->copyPositionsFrom(pos);
     const unsigned *ind = (const unsigned *)&mem[msh.getIndLoc()];
-    transient.copyIndicesFrom(ind);
+    transient->copyIndicesFrom(ind);
     
-    transient.clearUVSets();
+    transient->clearUVSets();
 
     std::vector<JMesh::UVSet>::const_iterator uvit = msh.uvSetBegin();
     for(;uvit!=msh.uvSetEnd();++uvit) {
-        Float2 *uvd = transient.addUVSet(uvit->_name);
+        Float2 *uvd = transient->addUVSet(uvit->_name);
         const Float2 *uvs = (const Float2 *)&mem[uvit->_uv];
         memcpy(uvd, uvs, nt * 24);
     }
 
-    transient.calculateVertexNormals();
-    
-    int npart = reduce(0, 0, &transient);
-    
+    transient->calculateVertexNormals();
     return true;
 }
 
-void MeshListenerOps::computeMesh()
-{
-    const int n = numResources();
-    if(n<1) return;
-    
-    simpleReform(m_lod, m_shoUV);
-    
-    drawableScene()->lock();
-    for(int i=0;i<n;++i) {
-        DrawableResource *rec = resource(i);
-        processResourceNoLock(rec);
-    }
-    drawableScene()->unlock();
-}
-
-bool MeshListenerOps::hasMenu() const
+bool MeshListener::hasMenu() const
 {
     if(m_meshName == "unknown") return false;
     return true; 
 }
 
-std::string MeshListenerOps::meshCacheName() const
+std::string MeshListener::meshCacheName() const
 { return m_meshName; }
 
 }

@@ -1,14 +1,17 @@
 #include "DrawableScene.h"
-#include <qt_ogl/WireframeProgram.h>
-#include <qt_ogl/DrawableObject.h>
+#include "WireframeProgram.h"
+#include "SolidProgram.h"
+#include "DrawableObject.h"
 #include <QDebug>
 
 namespace alo {
 
 DrawableScene::DrawableScene() :
-m_program1(nullptr),
 m_frameNumber(0)
-{}
+{
+    m_program[0] = nullptr;
+    m_program[1] = nullptr;
+}
 
 DrawableScene::~DrawableScene()
 {}
@@ -21,8 +24,10 @@ QOpenGLContext *DrawableScene::context()
 
 void DrawableScene::cleanup()
 {  
-	delete m_program1;
-    m_program1 = nullptr;
+	delete m_program[0];
+    m_program[0] = nullptr;
+    delete m_program[1];
+    m_program[1] = nullptr;
 
     DrawDataType *block = m_drawQueue.begin();
     while(block) {
@@ -37,16 +42,21 @@ void DrawableScene::cleanup()
 
 void DrawableScene::initializeScene()
 {
-    if(!m_program1) {
-        m_program1 = new WireframeProgram;
-        m_program1->initializeProgram(m_ctx);
+    if(!m_program[0]) {
+        m_program[0] = new WireframeProgram;
+        m_program[0]->initializeProgram(m_ctx);
+    }
+    if(!m_program[1]) {
+        m_program[1] = new SolidProgram;
+        m_program[1]->initializeProgram(m_ctx);
     }
 }
 
 void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
 {
     lock();
-    m_program1->beginProgram(proj);
+    BaseProgram *program = m_program[0];
+    program->beginProgram(proj);
 
     int destoyedCount = 0;
 
@@ -87,14 +97,14 @@ void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
             DrawableObject *d = it._object;
             const QMatrix4x4 &world = d->worldMatrix();
             const QMatrix4x4 modelView = cam * world;
-            m_program1->setModelView(world, modelView);
-            m_program1->setWireColor(DarkColors[d->drawId() & 15]);
+            program->setModelView(world, modelView);
+            program->setWireColor(DarkColors[d->drawId() & 15]);
             d->draw(m_ctx);
         }
         block = m_drawQueue.next(block);
     } 
     
-    m_program1->endProgram();
+    program->endProgram();
     m_frameNumber++;
     if(destoyedCount > 31) compressQueue();
     unlock();

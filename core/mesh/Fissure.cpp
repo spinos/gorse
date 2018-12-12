@@ -30,7 +30,7 @@ int Fissure::granulate(const AdaptableMesh *inMesh)
 
 	const int &nt = inMesh->numTriangles();
 	for(int i=0;i<nt;++i) {
-
+        if((i+1 & 4095) == 0) std::cout << ".";
 		inMesh->getTriangleAabb(box, i);
 
 		ap.setAABB(box);

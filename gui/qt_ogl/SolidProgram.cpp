@@ -1,65 +1,54 @@
 /*
- *  WireframeProgram.cpp
- *
- *  http://codeflow.org/entries/2012/aug/02/easy-wireframe-display-with-barycentric-coordinates/
+ *  SolidProgram.cpp
+ *  aloe
  *
  */
 
-#include "WireframeProgram.h"
+#include "SolidProgram.h"
 #include <QOpenGLShaderProgram>
 #include <QMatrix4x4>
 #include <QDebug>
 
 namespace alo {
 
-WireframeProgram::WireframeProgram()
+SolidProgram::SolidProgram()
 {}
 
-WireframeProgram::~WireframeProgram()
+SolidProgram::~SolidProgram()
 {}
 
-static const char *wfrm_vertexShaderSource =
+static const char *solid_vertexShaderSource =
     "attribute vec4 vertex;\n"
     "attribute vec3 normal;\n"
     "attribute mediump vec3 bary;\n"
     "varying vec3 vert;\n"
     "varying vec3 vertNormal;\n"
-    "varying vec3 baryc;\n"
     "uniform mat4 projMatrix;\n"
     "uniform mat4 mvMatrix;\n"
     "uniform mat3 normalMatrix;\n"
     "void main() {\n"
     "   vert = vertex.xyz;\n"
     "   vertNormal = normalMatrix * normal;\n"
-    "   baryc = bary;"
     "   gl_Position = projMatrix * mvMatrix * vertex;\n"
     "}\n";
 
-static const char *wfrm_fragmentShaderSource =
+static const char *solid_fragmentShaderSource =
     "varying highp vec3 vert;\n"
     "varying highp vec3 vertNormal;\n"
-    "varying mediump vec3 baryc;\n"
     "uniform highp vec3 lightPos;\n"
-    "uniform highp vec3 wireCol;\n"
     "uniform highp vec3 surfaceCol;\n"
-    "#extension GL_OES_standard_derivatives  : enable\n"
-    "mediump float edgeFactor() { \n"
-    "   mediump vec3 d = fwidth(baryc);\n"
-    "   mediump vec3 a3 = smoothstep(vec3(0.0), d * 1.25, baryc);\n"
-    "   return min(min(a3.x, a3.y), a3.z);\n"
-    "}\n"
     "void main() {\n"
     "   highp vec3 L = normalize(lightPos - vert);\n"
     "   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
     "   highp vec3 col = clamp(surfaceCol * 0.2 + surfaceCol * 0.8 * NL, 0.0, 1.0);\n"
-    "   gl_FragColor = mix(vec4(wireCol.x, wireCol.y, wireCol.z, 1.0), vec4(col, 1.0), edgeFactor());\n"
+    "   gl_FragColor = vec4(col, 1.0);\n"
     "}\n";
 
-void WireframeProgram::initializeProgram(QOpenGLContext *ctx)
+void SolidProgram::initializeProgram(QOpenGLContext *ctx)
 {
     QOpenGLShaderProgram *program = new QOpenGLShaderProgram(ctx);
-    program->addShaderFromSourceCode(QOpenGLShader::Vertex, wfrm_vertexShaderSource );
-    program->addShaderFromSourceCode(QOpenGLShader::Fragment, wfrm_fragmentShaderSource);
+    program->addShaderFromSourceCode(QOpenGLShader::Vertex, solid_vertexShaderSource );
+    program->addShaderFromSourceCode(QOpenGLShader::Fragment, solid_fragmentShaderSource);
     program->bindAttributeLocation("vertex", 0);
     program->bindAttributeLocation("normal", 1);
     program->bindAttributeLocation("bary", 2);
@@ -68,11 +57,9 @@ void WireframeProgram::initializeProgram(QOpenGLContext *ctx)
     program->bind();
     
     m_lightPosLoc = program->uniformLocation("lightPos");
-    m_wireColorLoc = program->uniformLocation("wireCol");
     m_surfaceColorLoc = program->uniformLocation("surfaceCol");
     
     program->setUniformValue(m_lightPosLoc, QVector3D(0, 9000, 9000));
-    program->setUniformValue(m_wireColorLoc, QVector3D(0, 0, 0));
     program->setUniformValue(m_surfaceColorLoc, QVector3D(1, 1, 1));
 
     program->release();
@@ -80,10 +67,10 @@ void WireframeProgram::initializeProgram(QOpenGLContext *ctx)
     setShaderProgram(program);
 }
 
-void WireframeProgram::setWireColor(const float *c)
-{ shaderProgram()->setUniformValue(m_wireColorLoc, QVector3D(c[0], c[1], c[2])); }
+void SolidProgram::setWireColor(const float *c)
+{}
 
-void WireframeProgram::setSurfaceColor(const float *c)
+void SolidProgram::setSurfaceColor(const float *c)
 { shaderProgram()->setUniformValue(m_surfaceColorLoc, QVector3D(c[0], c[1], c[2])); }
 
 }

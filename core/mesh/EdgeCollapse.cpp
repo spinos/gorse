@@ -183,6 +183,10 @@ int EdgeCollapse::processStage(int &numCoarseFaces, int &numFineFaces)
 		updateFaces(blueFaces);
 		lockVertices(redRing);
 		updateFaces(greenFaces);
+
+		std::vector<int> cyanRing;
+		expandVertexRing(cyanRing, redRing);
+		updateVertexConcaveState(cyanRing, m_mesh->c_positions(), m_mesh->c_normals());
 #if 0		
 		if(!checkTopology(m_mesh) ) return -1;
 #endif
@@ -478,6 +482,9 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 		return false;
 
 	if(va.isOnBorder() || vb.isOnBorder())
+		return false;
+
+	if(va.isRingConcave() || vb.isRingConcave())
 		return false;
 
 	const int nca = numFacesConnectedTo(ei.v0());

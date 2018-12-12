@@ -273,4 +273,44 @@ AFileDlgProfile *GlyphOps::writeFileProfileR () const
 AFileDlgProfile *GlyphOps::readFileProfileR () const
 { return 0; }
 
+bool GlyphOps::getFloatAttribValue(float &val, const std::string &attrName)
+{
+	QAttrib * attr = findAttrib(attrName);
+	if(!attr) return false;
+
+    FloatAttrib *fattr = static_cast<FloatAttrib *>(attr);
+    fattr->getValue(val);
+    return true;
+}
+
+bool GlyphOps::getFloat2AttribValue(float *val, const std::string &attrName)
+{
+	QAttrib * attr = findAttrib(attrName);
+	if(!attr) return false;
+
+    Float2Attrib *fattr = static_cast<Float2Attrib *>(attr);
+    fattr->getValue(val);
+    return true;
+}
+
+bool GlyphOps::getBoolAttribValue(bool &val, const std::string &attrName)
+{
+	QAttrib * attr = findAttrib(attrName);
+	if(!attr) return false;
+	
+    BoolAttrib *fattr = static_cast<BoolAttrib *>(attr);
+    fattr->getValue(val);
+    return true;
+}
+
+bool GlyphOps::getListAttribValue(std::string &val, const std::string &attrName)
+{
+	QAttrib * attr = findAttrib(attrName);
+	if(!attr) return false;
+
+    ListAttrib *fattr = static_cast<ListAttrib *>(attr);
+    fattr->getValue(val);
+    return true;
+}
+
 }

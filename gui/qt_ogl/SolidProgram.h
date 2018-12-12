@@ -1,25 +1,24 @@
 /*
- *  WireframeProgram.h
+ *  SolidProgram.h
  *  aloe
  *
  */
 
-#ifndef OGL_WIREFRAME_PROGRAM_H
-#define OGL_WIREFRAME_PROGRAM_H
+#ifndef OGL_SOLID_PROGRAM_H
+#define OGL_SOLID_PROGRAM_H
 
 #include "BaseProgram.h"
 
 namespace alo {
 
-class WireframeProgram : public BaseProgram
+class SolidProgram : public BaseProgram
 {
     int m_lightPosLoc;
-    int m_wireColorLoc;
     int m_surfaceColorLoc;
-    
+
 public:
-    WireframeProgram();
-    virtual ~WireframeProgram();
+    SolidProgram();
+    virtual ~SolidProgram();
     
     virtual void initializeProgram(QOpenGLContext *ctx) override;
     virtual void setWireColor(const float *c) override;

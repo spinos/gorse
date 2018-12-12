@@ -7,6 +7,7 @@
 
 #include "VertexFaceConnection.h"
 #include <math/Vector3F.h>
+#include <algorithm>
 
 namespace alo {
 
@@ -222,6 +223,28 @@ int VertexFaceConnection::totalSize() const
 	for(;it!=m_connections.end();++it)
 		s += it->size();
 	return s;
+}
+
+void VertexFaceConnection::addVertexRingTo(std::vector<int> &vertInds, 
+							const std::vector<int> &smallRing, int vi) const
+{
+	const std::deque<FaceIndex> &faces = m_connections[vi];
+	std::deque<FaceIndex>::const_iterator it = faces.begin();
+	for(;it!=faces.end();++it) {
+		const FaceIndex &fi = *it;
+		if(fi.v0() != vi) expandExclude(vertInds, smallRing, fi.v0());
+		if(fi.v1() != vi) expandExclude(vertInds, smallRing, fi.v1());
+		if(fi.v2() != vi) expandExclude(vertInds, smallRing, fi.v2());
+	}
+}
+
+void VertexFaceConnection::expandExclude(std::vector<int> &a, const std::vector<int> &b, int vi) const
+{
+	if(std::find(std::begin(b), std::end(b), vi) != std::end(b))
+		return;
+
+	if(std::find(std::begin(a), std::end(a), vi) == std::end(a))
+		a.push_back(vi);
 }
 
 }

@@ -28,30 +28,14 @@ RootOps::~RootOps()
     
 void RootOps::update()
 {
-    QAttrib * aa = findAttrib("a");
-    FloatAttrib *fa = static_cast<FloatAttrib *>(aa);
-    QAttrib * ab = findAttrib("b");
-    FloatAttrib *fb = static_cast<FloatAttrib *>(ab);
-    QAttrib * ashr = findAttrib("shr");
-    FloatAttrib *fshr = static_cast<FloatAttrib *>(ashr);
-    QAttrib * alen = findAttrib("len");
-    FloatAttrib *flen = static_cast<FloatAttrib *>(alen);
-    QAttrib * atws = findAttrib("tws");
-    FloatAttrib *ftws = static_cast<FloatAttrib *>(atws);
-    QAttrib * abend = findAttrib("bend");
-    Float2Attrib *fbend = static_cast<Float2Attrib *>(abend);
-    QAttrib * abump = findAttrib("bump");
-    Float2Attrib *fbump = static_cast<Float2Attrib *>(abump);
-    QAttrib * alob = findAttrib("lob");
-    FloatAttrib *flob = static_cast<FloatAttrib *>(alob);
-    fa->getValue(m_profile._a);
-    fb->getValue(m_profile._b);
-    flen->getValue(m_profile._len);
-    fshr->getValue(m_profile._shr);
-    ftws->getValue(m_profile._tws);
-    fbend->getValue(m_profile._bend);
-    fbump->getValue(m_profile._bump);
-    flob->getValue(m_profile._lob);
+    getFloatAttribValue(m_profile._a, "a");
+    getFloatAttribValue(m_profile._b, "b");
+    getFloat2AttribValue(m_profile._bend, "bend");
+    getFloat2AttribValue(m_profile._bump, "bump");
+    getFloatAttribValue(m_profile._len, "len");
+    getFloatAttribValue(m_profile._lob, "lob");
+    getFloatAttribValue(m_profile._shr, "shr");
+    getFloatAttribValue(m_profile._tws, "tws");
     
     computeMesh();
 
