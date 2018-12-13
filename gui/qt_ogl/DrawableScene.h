@@ -52,6 +52,7 @@ class DrawableScene
     typedef sdb::L3Node<sdb::Coord2, DrawObjectState, 1024> DrawDataType;
     typedef sdb::L3DataIterator<sdb::Coord2, DrawObjectState, 1024> DrawIteratorType;
     int m_frameNumber;
+    int m_programId;
     
 public:
     DrawableScene();
@@ -78,6 +79,13 @@ public:
     void unlock();
 
     const int &frameNumber() const;
+
+    enum ShaderProgramId {
+        WireShaderProgramId = 0,
+        SolidShaderProgramId
+    };
+
+    void selectProgram(ShaderProgramId x);
 
 private:
 /// remove destroyed ones

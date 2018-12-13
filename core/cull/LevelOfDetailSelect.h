@@ -45,6 +45,7 @@ public:
 
 	const int &value() const;
 	bool isStateChanged() const;
+	bool isIncreased() const;
 
 	void select(const Hexahedron &hexa, const PerspectiveCamera &camera);
 	void select(int x);

@@ -39,7 +39,6 @@ static const char *wfrm_fragmentShaderSource =
     "varying highp vec3 vert;\n"
     "varying highp vec3 vertNormal;\n"
     "varying mediump vec3 baryc;\n"
-    "uniform highp vec3 lightPos;\n"
     "uniform highp vec3 wireCol;\n"
     "uniform highp vec3 surfaceCol;\n"
     "#extension GL_OES_standard_derivatives  : enable\n"
@@ -49,10 +48,7 @@ static const char *wfrm_fragmentShaderSource =
     "   return min(min(a3.x, a3.y), a3.z);\n"
     "}\n"
     "void main() {\n"
-    "   highp vec3 L = normalize(lightPos - vert);\n"
-    "   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
-    "   highp vec3 col = clamp(surfaceCol * 0.2 + surfaceCol * 0.8 * NL, 0.0, 1.0);\n"
-    "   gl_FragColor = mix(vec4(wireCol.x, wireCol.y, wireCol.z, 1.0), vec4(col, 1.0), edgeFactor());\n"
+    "   gl_FragColor = mix(vec4(wireCol.x, wireCol.y, wireCol.z, 1.0), vec4(surfaceCol, 1.0), edgeFactor());\n"
     "}\n";
 
 void WireframeProgram::initializeProgram(QOpenGLContext *ctx)
@@ -67,13 +63,11 @@ void WireframeProgram::initializeProgram(QOpenGLContext *ctx)
 
     program->bind();
     
-    m_lightPosLoc = program->uniformLocation("lightPos");
     m_wireColorLoc = program->uniformLocation("wireCol");
     m_surfaceColorLoc = program->uniformLocation("surfaceCol");
     
-    program->setUniformValue(m_lightPosLoc, QVector3D(0, 9000, 9000));
     program->setUniformValue(m_wireColorLoc, QVector3D(0, 0, 0));
-    program->setUniformValue(m_surfaceColorLoc, QVector3D(1, 1, 1));
+    program->setUniformValue(m_surfaceColorLoc, QVector3D(.8, .8, .8));
 
     program->release();
 

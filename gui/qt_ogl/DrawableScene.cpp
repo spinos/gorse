@@ -7,7 +7,8 @@
 namespace alo {
 
 DrawableScene::DrawableScene() :
-m_frameNumber(0)
+m_frameNumber(0),
+m_programId(0)
 {
     m_program[0] = nullptr;
     m_program[1] = nullptr;
@@ -55,7 +56,7 @@ void DrawableScene::initializeScene()
 void DrawableScene::draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
 {
     lock();
-    BaseProgram *program = m_program[0];
+    BaseProgram *program = m_program[m_programId];
     program->beginProgram(proj);
 
     int destoyedCount = 0;
@@ -178,5 +179,8 @@ void DrawableScene::compressQueue()
         block = m_drawQueue.next(block);
     } 
 }
+
+void DrawableScene::selectProgram(ShaderProgramId x)
+{ m_programId = x; }
 
 }

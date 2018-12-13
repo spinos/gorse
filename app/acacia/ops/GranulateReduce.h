@@ -54,7 +54,7 @@ protected:
 	
 	const int &outMeshNv(int i) const;
 	static void SimplifyAndReform(MeshReformTrio &p, DrawableResource *rec);
-    static void Reform(MeshReformTrio &p, int nv, DrawableResource *rec);
+    static void Reform(MeshReformTrio &p, int nv, bool forcedUpdate, DrawableResource *rec);
     static void LodReform1(const float &lod, bool shoAsUV,
                 MeshReformTrio &p, DrawableResource *rec);
 

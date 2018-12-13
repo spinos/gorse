@@ -211,12 +211,11 @@ int HistoryMesh::findStage(const int &nv) const
 	int high = numStages() - 1;
 	if(m_stages[high].vbegin() <= nv) return high;
 	int low = 0;
-	int mid = (low + high)>>1;
 	while(high > low+1) {
+		int mid = (low + high)>>1;
 		const CoarseFineHistory &his = m_stages[mid];
 		if(his.vbegin() < nv) low = mid;
 		else high = mid;
-		mid = (low + high)>>1;
 	}
 	return low;
 }

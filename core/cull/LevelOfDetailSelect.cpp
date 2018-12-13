@@ -34,9 +34,8 @@ void LevelOfDetailSelect::select(const Hexahedron &hexa, const PerspectiveCamera
 		return;
 	}
 	float lod = r * .5f / (d * camera.tanhfov() );
-	if(lod < 0.f) lod = 0.f;
 	int s = camera.portWidth() * lod;
-	s = s * s * .031f;
+	s = s * s * .03125f;
 	select(s);
 }
 
@@ -64,6 +63,9 @@ void LevelOfDetailSelect::revert()
 	m_val = m_preVal; 
 	m_state = stNoChange;
 }
+
+bool LevelOfDetailSelect::isIncreased() const
+{ return m_state == stIncrease; }
 
 std::ostream& operator<<(std::ostream &output, const LevelOfDetailSelect & p) 
 {

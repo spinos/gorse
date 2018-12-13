@@ -71,7 +71,7 @@ int GranulateReduce::reduce(ViewFrustumCull *culler, VisibleDetail *details, con
 {
     Fissure fis;
     const int npart = fis.granulate(srcMesh);
-    std::cout << "\n granulate to " << npart << " parts ";
+    std::cout << " granulate to " << npart << " parts ";
             
     if(culler) culler->create(fis.bvh());
     if(details) details->create(npart);
@@ -159,9 +159,6 @@ void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
         lod.select(culler->leafHexahedron(i), *persp);
         
         DrawableResource *rec = resource(i);
-        if(!lod.isStateChanged() && !rec->isDeferred()) {
-            continue;
-        }
 
         if(rec->changedOnFrame() > beforeFrame) {
             rec->setDeferred(true);
@@ -170,7 +167,7 @@ void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
         }
         
         MeshReformTrio &p = meshTrio(i);
-        tref[ntref] = boost::thread(boost::bind(&GranulateReduce::Reform, _1, _2, _3), p, lod.value(), rec);
+        tref[ntref] = boost::thread(boost::bind(&GranulateReduce::Reform, _1, _2, _3, _4), p, lod.value(), lod.isIncreased(), rec);
         ntref++; 
 
         if(ntref==12) {
@@ -188,7 +185,7 @@ void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
 
 void GranulateReduce::simpleReform(const float &lod, bool shoAsUV)
 {
-    boost::thread tref[8];
+    boost::thread tref[12];
     int ntref = 0;
     
     const int beforeFrame = frameNumber() - 1;
@@ -202,7 +199,7 @@ void GranulateReduce::simpleReform(const float &lod, bool shoAsUV)
             ntref++;
         }
 
-        if(ntref==8) {
+        if(ntref==12) {
             for(int j=0;j<ntref;++j)
                 tref[j].join();
             ntref = 0;
@@ -219,14 +216,15 @@ void GranulateReduce::SimplifyAndReform(MeshReformTrio &p, DrawableResource *rec
 {
     EdgeCollapse ech;
     ech.simplify(p._srcMesh);
-    Reform(p, 0, rec);
+    Reform(p, 0, false, rec);
 }
 
-void GranulateReduce::Reform(MeshReformTrio &p, int nv, DrawableResource *rec)
+void GranulateReduce::Reform(MeshReformTrio &p, int nv, bool forcedUpdate, DrawableResource *rec)
 {
     HistoryReformSrc reformer;
     bool stat = reformer.reformSrc1(p._outMesh, p._stageMesh, nv, p._srcMesh);
-    if(stat) UpdateMeshResouce(rec, p._outMesh);
+    if(rec->drawArrayLength() == p._srcMesh->maxNumTriangles() * 3) return;
+    if(stat || forcedUpdate) UpdateMeshResouce(rec, p._outMesh);
 }
 
 void GranulateReduce::LodReform1(const float &lod, bool shoAsUV,

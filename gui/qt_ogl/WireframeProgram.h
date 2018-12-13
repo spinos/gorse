@@ -13,7 +13,6 @@ namespace alo {
 
 class WireframeProgram : public BaseProgram
 {
-    int m_lightPosLoc;
     int m_wireColorLoc;
     int m_surfaceColorLoc;
     

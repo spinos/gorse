@@ -82,7 +82,6 @@ void MainWindow::createActions()
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     /*QToolBar *fileToolBar = addToolBar(tr("File"));
 
-    const QIcon saveIcon = QIcon::fromTheme("document-save", QIcon(":/images/save.png"));
     QAction *saveAct = new QAction(saveIcon, tr("&Save..."), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save the current form letter"));
@@ -98,12 +97,14 @@ void MainWindow::createActions()
     viewMenu = menuBar()->addMenu(tr("&View"));
     displayMenu = menuBar()->addMenu(tr("&Display"));
 
-    m_displaySolidAct = new QAction(tr("&Solid"), this);
+    QIcon solidIcon(":/images/solid_ball.png");
+    m_displaySolidAct = new QAction(solidIcon, tr("&Solid"), this);
     m_displaySolidAct->setCheckable(true);
-    m_displaySolidAct->setChecked(true);
-    m_displayWireAct = new QAction(tr("&Wireframe"), this);
+    m_displaySolidAct->setChecked(false);
+    QIcon wireIcon(":/images/wire_ball.png");
+    m_displayWireAct = new QAction(wireIcon, tr("&Wireframe"), this);
     m_displayWireAct->setCheckable(true);
-    m_displayWireAct->setChecked(false);
+    m_displayWireAct->setChecked(true);
 
     displayMenu->addAction(m_displaySolidAct);
     displayMenu->addAction(m_displayWireAct);
@@ -136,7 +137,7 @@ void MainWindow::recvDisplaySolidChanged(bool checked)
         return;
     }
     m_displayWireAct->setChecked(false);
-    std::cout << " todo set display solid ";
+    m_glview->setDisplaySolid();
 }
 
 void MainWindow::recvDisplayWireChanged(bool checked)
@@ -146,5 +147,5 @@ void MainWindow::recvDisplayWireChanged(bool checked)
         return;
     }
     m_displaySolidAct->setChecked(false);
-    std::cout << " todo set display wireframe ";
+    m_glview->setDisplayWire();
 }

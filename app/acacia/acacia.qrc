@@ -20,6 +20,8 @@
     <file>images/mesh_small.png</file>
     <file>images/mesh_adaptable_small.png</file>
     <file>images/cube.png</file>
+    <file>images/solid_ball.png</file>
+    <file>images/wire_ball.png</file>
     <file>mimes/assettree.json</file>
 </qresource>
 </RCC>

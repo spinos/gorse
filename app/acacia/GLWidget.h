@@ -16,6 +16,9 @@ public:
     GLWidget(alo::DrawableScene *scene, QWidget *parent = 0);
     ~GLWidget();
 
+    void setDisplaySolid();
+    void setDisplayWire();
+
 public slots:
     void cleanup();
     void recvAttribChanged();

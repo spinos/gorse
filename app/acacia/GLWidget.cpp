@@ -39,3 +39,15 @@ void GLWidget::clientDraw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
 {
     m_scene->draw(proj, cam);
 }
+
+void GLWidget::setDisplaySolid()
+{
+    m_scene->selectProgram(DrawableScene::SolidShaderProgramId);
+    update();
+}
+
+void GLWidget::setDisplayWire()
+{
+    m_scene->selectProgram(DrawableScene::WireShaderProgramId);
+    update();
+}
