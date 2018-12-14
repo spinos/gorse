@@ -5,32 +5,22 @@
 #include <geom/AdaptableMesh.h>
 #include <mesh/FrontMesher.h>
 #include <math/miscfuncs.h>
-#include <cull/ViewFrustumCull.h>
-#include <cull/VisibleDetail.h>
 #include <qt_ogl/CameraEvent.h>
-#include <math/AFrustum.h>
 #include <math/PerspectiveCamera.h>
 
 namespace alo {
    
-PVSTest::PVSTest() :
-m_freeze(false)
-{
-    m_culler = new ViewFrustumCull;
-    m_details = new VisibleDetail;
-}
+PVSTest::PVSTest()
+{}
 
 PVSTest::~PVSTest()
-{
-    delete m_culler;
-    delete m_details;
-}
+{}
     
 void PVSTest::update()
 {    
-    QAttrib * afreeze = findAttrib("freeze_view");
-    BoolAttrib *ffreeze = static_cast<BoolAttrib *>(afreeze);
-    ffreeze->getValue(m_freeze);
+    bool fz;
+    getBoolAttribValue(fz, "freeze_view");
+    setFreezeView(fz);
 }
 
 void PVSTest::addDrawableTo(DrawableScene *scene)
@@ -98,28 +88,25 @@ void PVSTest::computeMesh()
 
     srcMesh.calculateVertexNormals();
 
-    int npart = reduce(m_culler, m_details, &srcMesh);
+    int npart = reduce(culler(), &srcMesh);
 
-    m_details->setVisible(true);
-    m_details->setDeltaDistance(m_culler->getMeanSize() / 32.f);
+    initializeDetails();
 }
 
 void PVSTest::recvCameraChanged(const CameraEvent &x)
 {
-    if(m_freeze) return;
+    if(freezeView()) return;
     if(x.progressBegin() || x.progressEnd()) return;
-    if(!m_details->updateView(*x.camera())) return;
-
-    m_culler->compare(m_details->visibilities(), *(x.frustum()));
-
+    if(!updateView(*x.camera(), *x.frustum())) return;
+    
     const PerspectiveCamera *persp = static_cast<const PerspectiveCamera *>(x.camera());
     lockScene();
-    viewDependentReform(persp, m_culler, m_details);
+    viewDependentReform(persp, culler(), details());
 
     const int n = numResources();
     for(int i=0;i<n;++i) {
         DrawableResource *rec = resource(i);
-        const VisibilityState &vis = m_details->c_visibilities()[i];
+        const VisibilityState &vis = visibility(i);
         processResource(rec, vis);
     }
     unlockScene();

@@ -15,7 +15,7 @@
 #include <mesh/HistoryReform.h>
 
 namespace alo {
-    
+class BoundingBox;  
 class HistoryMesh;
     
 class LodMeshCache : public HistoryReform {
@@ -23,8 +23,10 @@ class LodMeshCache : public HistoryReform {
     std::string m_meshName;
     std::deque<CoarseFineHistoryDesc> m_stageDescs;
     HistoryMesh *m_meshInCore;
-    int m_curStage;
-    int m_curNv;
+    int m_minNv;
+    int m_maxNv;
+    int m_minNt;
+    int m_maxNt;
     
 public:
     LodMeshCache();
@@ -34,14 +36,21 @@ public:
     const std::string &meshName() const;
     
     bool selectStage(int &istage, int &nv, const float &lod);
+    bool selectStageByNv(int &istage, int &nv, const int &lod);
+    bool nvChanged(int x) const;
     bool stageChanged(int x) const;
     bool loadStage(int x);
     void reformInCore(AdaptableMesh *outMesh, const int &nv, const int &istage);
+    const int &minNumTriangles() const;
+    const int &maxNumTriangles() const;
     
     void printStages() const;
     
     std::deque<CoarseFineHistoryDesc> &stageDescs();
     void setMeshName(const std::string &x);
+    void setLimit();
+
+    void getAabb(BoundingBox &box) const;
     
 protected:
 

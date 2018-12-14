@@ -5,7 +5,7 @@
 #include "LodMeshOps.h"
 #include "SimpleMeshOps.h"
 #include "EdgeCollapseTest.h"
-#include "LodMeshIn.h"
+#include "LodMeshInOps.h"
 #include "PVSTest.h"
 
 namespace alo {

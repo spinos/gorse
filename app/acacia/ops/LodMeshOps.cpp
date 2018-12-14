@@ -26,7 +26,7 @@ void LodMeshOps::update()
     if(checkMeshChange(dataChanged) ) {
         AdaptableMesh transient;
         loadMesh(&transient, dataChanged);
-        reduce(0, 0, &transient);
+        reduce(0, &transient);
     }
         
     getFloatAttribValue(m_lod, "lod");

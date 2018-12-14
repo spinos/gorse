@@ -6,9 +6,7 @@
 namespace alo {
 
 LodMeshCache::LodMeshCache() :
-m_meshName("unknown"),
-m_curStage(-1),
-m_curNv(-1)
+m_meshName("unknown")
 {
     m_meshInCore = new HistoryMesh;
     m_meshInCore->createTriangleMesh(1000,1000);
@@ -25,21 +23,44 @@ bool LodMeshCache::isValid() const
     return true;
 }
 
+void LodMeshCache::setLimit()
+{
+    m_minNv = m_stageDescs.front()._vbegin;
+    m_minNt = m_stageDescs.front()._fbegin;
+    m_maxNv = m_stageDescs.back()._vend;
+    m_maxNt = m_stageDescs.back()._fend;
+}
+
 bool LodMeshCache::selectStage(int &istage, int &nv, const float &lod)
 {
     if(!isValid()) return false;
     if(lod <= 0.f) {
 		istage = 0;
-		nv = m_stageDescs.front()._vbegin;
+		nv = m_minNv;
 	} else if(lod >= 1.f) {
 		istage = m_stageDescs.size() - 1;
-		nv = m_stageDescs.back()._vend;
+		nv = m_maxNv;
 	} else {
-		const int vmin = m_stageDescs.front()._vbegin;
-		const int vmax = m_stageDescs.back()._vend;
-		nv = vmin + (float)(vmax - vmin + 1) * lod;
+		nv = m_minNv + (float)(m_maxNv - m_minNv) * lod;
 		istage = findStage(nv);
 	}
+    return true;
+}
+
+bool LodMeshCache::selectStageByNv(int &istage, int &nv, const int &lod)
+{
+    if(!isValid()) return false;
+
+    if(lod <= m_minNv) {
+        istage = 0;
+        nv = m_minNv;
+    } else if(lod >= m_maxNv) {
+        istage = m_stageDescs.size() - 1;
+        nv = m_maxNv;
+    } else {
+        nv = lod;
+        istage = findStage(nv);
+    }
     return true;
 }
 
@@ -58,8 +79,17 @@ int LodMeshCache::findStage(const int &nv) const
 	return low;
 }
 
+bool LodMeshCache::nvChanged(int x) const
+{ return m_meshInCore->cachedNv() != x; }
+
 bool LodMeshCache::stageChanged(int x) const
-{ return m_curStage != x; }
+{ return m_meshInCore->cachedStageId() != x; }
+
+const int &LodMeshCache::minNumTriangles() const
+{ return m_minNt; }
+
+const int &LodMeshCache::maxNumTriangles() const
+{ return m_maxNt; }
 
 bool LodMeshCache::loadStage(int x)
 {
@@ -76,8 +106,8 @@ bool LodMeshCache::loadStage(int x)
     hrec.load(&stg, hl, x);
 
     hrec.close();
-    
-    m_curStage = x;
+
+    m_meshInCore->setCachedStageId(x);
 
     sortCoarseFaces(m_meshInCore, 0, stg.coarseMax(), stg.c_value() );
     return true;
@@ -110,5 +140,8 @@ const std::string &LodMeshCache::meshName() const
 
 std::deque<CoarseFineHistoryDesc> &LodMeshCache::stageDescs()
 { return m_stageDescs; }
+
+void LodMeshCache::getAabb(BoundingBox &box) const
+{ m_meshInCore->getAabb(box); }
 
 }

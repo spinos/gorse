@@ -31,14 +31,21 @@ public:
 	ViewFrustumEvent(const BVHNode &node, CompareResult r);
 
 	CompareResult result() const;
+	bool hasChildren() const;
 	const int &leftChildInd() const;
-	const int &leafInd() const;
+	const int &leafBegin() const;
+	int leafEnd() const;
 
 	static ViewFrustumEvent *Create(const BVHNode &node, const Hexahedron &hexa, 
 										const AFrustum &fru, CompareResult r);
 
 private:
 	CompareResult m_result;
+
+	enum IndMask {
+		InnerNodeMask = 268435455,
+		LeafNodeMask /// 2^28
+	};
 };
 
 }

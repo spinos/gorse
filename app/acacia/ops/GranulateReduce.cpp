@@ -67,14 +67,13 @@ void GranulateReduce::addMeshReformTrio()
 const int &GranulateReduce::outMeshNv(int i) const
 { return m_meshes[i]._outMesh->numVertices(); }
 
-int GranulateReduce::reduce(ViewFrustumCull *culler, VisibleDetail *details, const AdaptableMesh *srcMesh)
+int GranulateReduce::reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMesh)
 {
     Fissure fis;
     const int npart = fis.granulate(srcMesh);
     std::cout << " granulate to " << npart << " parts ";
             
     if(culler) culler->create(fis.bvh());
-    if(details) details->create(npart);
 
     for(int i=0;i<npart;++i) {
         if(numMeshTrios() < i + 1)
@@ -121,9 +120,6 @@ int GranulateReduce::reduce(ViewFrustumCull *culler, VisibleDetail *details, con
         const MeshReformTrio &p = m_meshes[i];
         const int &lo = p._outMesh->numVertices();
         m_nv1 += lo;
-        if(details) {
-            details->setDetail(lo, i);
-        }
         m_nt1 += p._outMesh->numTriangles();
     }
     m_nv0 = srcMesh->numVertices();
@@ -156,7 +152,7 @@ void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
             continue;
         }
         
-        lod.select(culler->leafHexahedron(i), *persp);
+        lod.select(culler->primitiveHexahedron(i), *persp);
         
         DrawableResource *rec = resource(i);
 
@@ -221,9 +217,11 @@ void GranulateReduce::SimplifyAndReform(MeshReformTrio &p, DrawableResource *rec
 
 void GranulateReduce::Reform(MeshReformTrio &p, int nv, bool forcedUpdate, DrawableResource *rec)
 {
+    if(rec->drawArrayLength() == p._srcMesh->maxNumTriangles() * 3 && forcedUpdate) return;
+    if(rec->drawArrayLength() == p._srcMesh->minNumTriangles() * 3 && !forcedUpdate) return;
+
     HistoryReformSrc reformer;
     bool stat = reformer.reformSrc1(p._outMesh, p._stageMesh, nv, p._srcMesh);
-    if(rec->drawArrayLength() == p._srcMesh->maxNumTriangles() * 3) return;
     if(stat || forcedUpdate) UpdateMeshResouce(rec, p._outMesh);
 }
 

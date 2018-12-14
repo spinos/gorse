@@ -11,14 +11,11 @@
 #define ACA_PVS_TEST_H
 
 #include "GranulateReduce.h"
+#include <cull/ViewDependentFunction.h>
 
 namespace alo {
 class CameraEvent;
-class PVSTest : public GranulateReduce {
-
-    ViewFrustumCull *m_culler;
-    VisibleDetail *m_details;
-    bool m_freeze;
+class PVSTest : public GranulateReduce, public ViewDependentFunction {
     
 public:
     PVSTest();

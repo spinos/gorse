@@ -328,6 +328,13 @@ std::deque<NamedUV >::const_iterator ATriangleMesh::c_uvEnd() const
 SimpleBuffer<Float2> &ATriangleMesh::uvBuffer(int i)
 { return m_uvSets[i].second; }
 
+void ATriangleMesh::getAabb(BoundingBox &b) const
+{
+    b.reset();
+    for(int i=0;i<m_numVertices;++i)
+        b.expandBy(m_positions[i]);
+}
+
 }
 
 }

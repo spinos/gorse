@@ -140,7 +140,6 @@ void DrawableOps::processResource(DrawableResource *rec, const VisibilityState &
     }
 
     if(!vis.isVisible()) {
-        rec->setDeferred(true);
         return;
     }
 
@@ -169,8 +168,9 @@ void DrawableOps::processResource(DrawableResource *rec, const VisibilityState &
         rec->setChangedOnFrame(frameNumber());
     }
 
-    if(vis.isStateChanged())
+    if(vis.isStateChanged()) {
         m_scene->enqueueShowDrawable(d->drawId(), opsId());
+    }
 
     rec->setDeferred(false);
 }

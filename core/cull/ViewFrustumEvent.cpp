@@ -28,7 +28,7 @@ ViewFrustumEvent::ViewFrustumEvent(const BVHNode &node, const Hexahedron &hexa, 
 
 	if(node.isLeaf()) {
 		m_leafInd = node.leafBegin();
-		m_leftChildInd = -1;
+		m_leftChildInd = node.leafEnd() | LeafNodeMask;
 	}
 	else
 		m_leftChildInd = node.leftChild();
@@ -39,11 +39,14 @@ m_result(r)
 {
 	if(node.isLeaf()) {
 		m_leafInd = node.leafBegin();
-		m_leftChildInd = -1;
+		m_leftChildInd = node.leafEnd() | LeafNodeMask;
 	}
 	else
 		m_leftChildInd = node.leftChild();
 }
+
+bool ViewFrustumEvent::hasChildren() const
+{ return m_leftChildInd < InnerNodeMask; }
 
 ViewFrustumEvent::CompareResult ViewFrustumEvent::result() const
 { return m_result; }
@@ -51,8 +54,11 @@ ViewFrustumEvent::CompareResult ViewFrustumEvent::result() const
 const int &ViewFrustumEvent::leftChildInd() const
 { return m_leftChildInd; }
 
-const int &ViewFrustumEvent::leafInd() const
+const int &ViewFrustumEvent::leafBegin() const
 { return m_leafInd; }
+
+int ViewFrustumEvent::leafEnd() const
+{ return m_leftChildInd & InnerNodeMask; }
 
 ViewFrustumEvent *ViewFrustumEvent::Create(const BVHNode &node, const Hexahedron &hexa, 
 										const AFrustum &fru, CompareResult r)

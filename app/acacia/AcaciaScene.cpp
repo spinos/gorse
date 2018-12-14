@@ -35,7 +35,7 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
     case AcaciaOpsType::AoEdgeCollapseTest :
         return new EdgeCollapseTest;
     case AcaciaOpsType::AoLodMeshIn :
-        return new LodMeshIn;
+        return new LodMeshInOps;
     case AcaciaOpsType::AoPVSTest :
         return new PVSTest;
     default:

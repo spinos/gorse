@@ -63,6 +63,7 @@ public:
     void createUVNormalArray(SimpleBuffer<Vector3F>& posnml) const;
     void createBarycentricCoordinates(SimpleBuffer<Vector3F>& baryc) const;
     
+    void getAabb(BoundingBox &b) const;
     void reverseTriangleNormals();
     void calculateVertexNormals();
     Vector3F getTriangleNormalMultArea(int i) const;

@@ -1,14 +1,22 @@
-#ifndef ACA_LOD_MESH_IN_H
-#define ACA_LOD_MESH_IN_H
+/*
+ *  LodMeshInOps.h
+ *  acacia
+ *
+ */
+
+#ifndef ACA_LOD_MESH_IN_OPS_H
+#define ACA_LOD_MESH_IN_OPS_H
 
 #include "DrawableOps.h"
 #include <h5_mesh/LodMeshGroup.h>
 #include <boost/thread.hpp>
 #include <h5/V1H5IO.h>
+#include <cull/ViewDependentFunction.h>
 
 namespace alo {
 class LodMeshCache;
-class LodMeshIn : public DrawableOps {
+class PerspectiveCamera;
+class LodMeshInOps : public DrawableOps, public ViewDependentFunction {
     
     LodMeshGroup m_cache;
     float m_lod;
@@ -17,19 +25,22 @@ class LodMeshIn : public DrawableOps {
     ver1::H5IO m_hio;
     
 public:
-    LodMeshIn();
-    virtual ~LodMeshIn();
+    LodMeshInOps();
+    virtual ~LodMeshInOps();
 
     virtual void update() override;
 
  	virtual void addDrawableTo(DrawableScene *scene) override;
-
+    virtual void recvCameraChanged(const CameraEvent &x) override;
+    
 protected:
     
 private:
     void computeMesh();
     void reformMesh(LodMeshCache *c, AdaptableMesh *mesh, DrawableResource *rec);
+    void reformMesh1(LodMeshCache *c, AdaptableMesh *mesh, int nv, bool forcedUpdate, DrawableResource *rec);
     bool loadCache(const std::string &fileName);
+    void viewDependentReform(const PerspectiveCamera *persp);
 
 };
 

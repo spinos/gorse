@@ -18,24 +18,34 @@ namespace alo {
 class BVH;
 class AFrustum;
 class VisibilityState;
+class BVHPrimitive;
 
 class ViewFrustumCull {
 
-	SimpleBuffer<Hexahedron> m_hexa;
+	SimpleBuffer<Hexahedron> m_nodeHexa;
+	SimpleBuffer<Hexahedron> m_primHexa;
 	SimpleBuffer<BVHNode> m_nodes;
-	SimpleBuffer<int> m_leafInds;
+/// node-to-primitive map
+	SimpleBuffer<int> m_primInd;
+/// internal bvh multiple primitives for each leaf
+	BVH *m_bvh;
 
 public:
 	ViewFrustumCull();
 	virtual ~ViewFrustumCull();
 
+/// from reducer one primitive for each leaf in order
 	void create(const BVH *bvh);
 	float getMeanSize() const;
 	void compare(VisibilityState *visibilities, const AFrustum &fru) const;
 
-	const Hexahedron *c_hexahedrons() const;
-/// i-th leaf
-	const Hexahedron &leafHexahedron(int i) const;
+/// i-th primitve
+	const Hexahedron &primitiveHexahedron(int i) const;
+	const int &numPrimitives() const;
+
+	void clearBvh();
+	void addBvhPrimitive(const BVHPrimitive &x);
+	void buildBvh();
 
 };
 	

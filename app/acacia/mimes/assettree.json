@@ -57,7 +57,7 @@
                                 },
                                 {
                                     "name": "lod",
-                                    "label": "Level of Detail",
+                                    "label": "Level Of Detail",
                                     "typ": 3,
                                     "value": 0.5,
                                     "min": 0.0,
@@ -95,8 +95,14 @@
                             "strtyp": 513
                         },
                         {
+                            "name": "freeze_view",
+                            "label": "Freeze View",
+                            "typ": 1,
+                            "value": true
+                        },
+                        {
                             "name": "lod",
-                            "label": "Level of Detail",
+                            "label": "Level Of Detail",
                             "typ": 3,
                             "value": 0.5,
                             "min": 0.0,

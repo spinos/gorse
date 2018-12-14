@@ -34,7 +34,7 @@ public:
     virtual AFileDlgProfile *writeFileProfileR () const override;
     
 protected:
-    int reduce(ViewFrustumCull *culler, VisibleDetail *details, const AdaptableMesh *srcMesh);
+    int reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMesh);
     void viewDependentReform(const PerspectiveCamera *persp,
                 const ViewFrustumCull *culler, VisibleDetail *details);
     void simpleReform(const float &lod, bool shoAsUV);

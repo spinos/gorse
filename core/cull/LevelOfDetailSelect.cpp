@@ -28,14 +28,13 @@ void LevelOfDetailSelect::set(int x)
 void LevelOfDetailSelect::select(const Hexahedron &hexa, const PerspectiveCamera &camera)
 {
 	float r = hexa.size();
-	float d = camera.eyePosition().distanceTo(hexa.center()) - r;
-	if(d < 0.f) {
-		select(16777216 - 2 * (d + r));
+	float d = camera.eyePosition().distanceTo(hexa.center());
+	if(d < r) {
+		select(16777217 - d);
 		return;
 	}
-	float lod = r * .5f / (d * camera.tanhfov() );
-	int s = camera.portWidth() * lod;
-	s = s * s * .03125f;
+	int s = camera.portWidth() * r / ((d - r) * camera.tanhfov() );
+	s = s * s * .05f;
 	select(s);
 }
 

@@ -55,9 +55,13 @@ bool LodMeshGroup::loadMeshes(const std::string &fileName)
         
         LodMeshCache &c = *m_cacheList[i];
         hrec.load(c.stageDescs());
+        c.setLimit();
         c.setMeshName(meshNames[i]);
-        
+
         hrec.close();
+
+/// need for aabb
+        c.loadStage(0);
     }
     
     g.close();
@@ -69,6 +73,12 @@ bool LodMeshGroup::loadMeshes(const std::string &fileName)
     
     m_cacheFilePath = fileName;
     return true;
+}
+
+void LodMeshGroup::getMeshAabb(BoundingBox &box, int i) const
+{
+    const LodMeshCache *c = m_cacheList[i];
+    c->getAabb(box);
 }
 
 }

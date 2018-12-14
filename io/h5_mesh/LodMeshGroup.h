@@ -15,6 +15,7 @@
 namespace alo {
 
 class LodMeshCache;
+class BoundingBox;
 
 class LodMeshGroup {
 	
@@ -30,6 +31,8 @@ public:
 	const std::string &cacheFilePath() const;
 	int numMeshes() const;
 	LodMeshCache *mesh(int i);
+
+	void getMeshAabb(BoundingBox &box, int i) const;
 
 protected:
 
