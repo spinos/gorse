@@ -534,11 +534,22 @@ bool MeshTopology::checkConcaveRing(int vi,
 	std::vector<int> vring;
 	bool stat = m_vertexFaceConnection.getVertexOneRing(vring, vi, pos, nml);
 	if(!stat) return false;
+	
+	if(checkInnerEdges(vring, 2)) return true;
+	
+	if(vring.size() < 6) return false;
+	
+	if(checkInnerEdges(vring, 3)) return true;
+	
+	return false;
+}
 
+bool MeshTopology::checkInnerEdges(const std::vector<int> &vring, int jump)
+{
 	const int n = vring.size();
 	for(int i=0;i<n;++i) {
 		int v0 = vring[i];
-		int v1 = vring[(i+2) % n];
+		int v1 = vring[(i+jump) % n];
 		if(m_edges.find(EdgeIndex(v0, v1))) return true;
 	}
 	return false; 
@@ -569,14 +580,14 @@ void MeshTopology::PrintUnmanifoldEdgeWarning(const FaceIndex &fi, const EdgeVal
                 bool stat)
 { 
     if(!stat) 
-        std::cout << "\n\n WARNING avoid unmanifold edge " << e << " face " << fi; 
+        std::cout << "\n WARNING avoid unmanifold edge " << e << " face " << fi; 
 }
 
 void MeshTopology::PrintAddFaceWarning(const std::deque<FaceIndex> &faces, 
                 bool stat)
 {
 	if(stat) return;
-	std::cout << "\n\n WARNING cannot add faces [";
+	std::cout << "\n WARNING cannot add faces [";
 	for(int i=0;i<faces.size();++i)
 		std::cout << " " << faces[i];
 	std::cout << "] ";

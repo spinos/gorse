@@ -118,6 +118,7 @@ protected:
     bool checkConcaveRing(int vi, 
                     const Vector3F *pos,
                     const Vector3F &nml);
+    bool checkInnerEdges(const std::vector<int> &vring, int jump);
 /// assuming no vertex within small ring
     void expandVertexRing(std::vector<int> &bigRing,
                     const std::vector<int> &smallRing) const;
