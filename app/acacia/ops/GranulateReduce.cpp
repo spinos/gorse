@@ -22,6 +22,8 @@
 #include <h5/V1HBase.h>
 #include <h5_mesh/HHistoryMesh.h>
 #include <boost/format.hpp>
+#include <QProgressDialog>
+#include <QApplication>
 
 namespace alo {
 
@@ -84,13 +86,17 @@ int GranulateReduce::reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMes
 
     boost::chrono::system_clock::time_point t0 = boost::chrono::system_clock::now();
 
-    boost::thread tref[8];
+    QProgressDialog progress("Processing...", QString(), 0, npart, QApplication::activeWindow() );
+    progress.setWindowModality(Qt::ApplicationModal);
+    progress.show();
+
+    boost::thread tref[12];
     int ntref = 0;
 
     int meshCount = 0;
     BVHNodeIterator it = fis.firstPart();
     while(it._node) {
-        
+
         MeshReformTrio &p = meshTrio(meshCount);
         fis.reformPart(p._srcMesh, it, srcMesh);
 
@@ -98,11 +104,12 @@ int GranulateReduce::reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMes
 
         tref[ntref] = boost::thread(boost::bind(&GranulateReduce::SimplifyAndReform, _1, _2), p, rec);
         ntref++;
-
-        if(ntref==8) {
+        
+        if(ntref==12) {
             for(int i=0;i<ntref;++i)
                 tref[i].join();
             ntref = 0;
+            progress.setValue(meshCount); 
         }
 
         meshCount++;
@@ -113,6 +120,7 @@ int GranulateReduce::reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMes
         for(int i=0;i<ntref;++i)
             tref[i].join();
     }
+    progress.setValue(npart);
 
     m_nv1 =0;
     m_nt1 =0;
@@ -262,10 +270,16 @@ bool GranulateReduce::saveToFile(const std::string &fileName)
     ver1::HBase w("/world");
     ver1::HBase b("/world/meshes");
 
-    const std::string mcName = meshCacheName();
     const int n = numMeshTrios();
+    
+    QProgressDialog progress("Saving...", QString(), 0, n, QApplication::activeWindow() );
+    progress.setWindowModality(Qt::ApplicationModal);
+    progress.show();
+
+    const std::string mcName = meshCacheName();
     for(int i=0;i<n;++i) {
         std::cout << ".";
+        progress.setValue(i);
         const std::string mciName = boost::str(boost::format("/world/meshes/%1%_part%2%") % mcName % i);
         HHistoryMesh hmh(mciName);
         
@@ -273,12 +287,14 @@ bool GranulateReduce::saveToFile(const std::string &fileName)
         hmh.save(p._srcMesh);
         hmh.close();
     }
+    progress.setValue(n);
 
     b.close();
     w.close();
 
     hio.end();
     std::cout << " finished saving file " << fileName;
+
     return true; 
 }
 

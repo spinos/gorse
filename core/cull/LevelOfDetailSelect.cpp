@@ -34,7 +34,7 @@ void LevelOfDetailSelect::select(const Hexahedron &hexa, const PerspectiveCamera
 		return;
 	}
 	int s = camera.portWidth() * r / ((d - r) * camera.tanhfov() );
-	s = s * s * .05f;
+	s *= logf(.23f * (s * s) + 1.f);
 	select(s);
 }
 

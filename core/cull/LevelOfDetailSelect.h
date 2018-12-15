@@ -7,9 +7,10 @@
  *  s = w r / (d tan(theta/2))
  *  d is distance from camera to object
  *  theta is horizontal field of view in radians
- *  r is radius of object
+ *  r is size of object
  *  w is image width
- *  desired vertex count is proportional to s * s
+ *  desired vertex count equals s * log(1 + s * s / k )
+ *  k is weight
  *
  */
 

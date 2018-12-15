@@ -65,8 +65,6 @@ void LodMeshInOps::computeMesh()
 {
     const int n = m_cache.numMeshes();
     if(n<1) return;
-
-    setDrawableSize(n);
     
     boost::thread tref[16];
     int ntref = 0;
@@ -127,6 +125,8 @@ bool LodMeshInOps::loadCache(const std::string &fileName)
     if(!m_cache.loadMeshes(fileName) ) return false;
 
     const int n = m_cache.numMeshes();
+
+    setDrawableSize(n);
 
     clearBvh();
     BoundingBox box;

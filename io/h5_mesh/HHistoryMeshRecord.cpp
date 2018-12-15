@@ -81,6 +81,7 @@ bool HHistoryMeshRecord::readF3Data(const std::string &name,
     int nc = Round32(count)>>5;
     
     vec->readColumns(data, 0, nc);
+    delete vec;
     return true;
 }
 
@@ -98,6 +99,7 @@ bool HHistoryMeshRecord::readI3Data(const std::string &name,
     int nc = Round32(count)>>5;
     
     ind->readColumns(data, 0, nc);
+    delete ind;
     return true;
 }
 

@@ -30,6 +30,7 @@ bool HCoarseFineHistory::save(const CoarseFineHistory *his)
     int nc = Round32(attrs[0])>>5;
     
     ind->writeColumns((char *)his->c_value(), 0, nc);
+    delete ind;
     return true; 
 }
 
@@ -53,6 +54,7 @@ bool HCoarseFineHistory::load(CoarseFineHistory *his, int count)
     int nc = Round32(count)>>5;
     
     ind->readColumns((char *)his->value(), 0, nc);
+    delete ind;
     return true;
 }
 

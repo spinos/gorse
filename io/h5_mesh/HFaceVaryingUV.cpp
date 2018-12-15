@@ -37,6 +37,7 @@ bool HFaceVaryingUV::writeUVData(const std::string &name,
     int nc = Round32(count)>>5;
     
     uvd->writeColumns(data, 0, nc);
+    delete uvd;
     return true;
 }
 
@@ -72,7 +73,6 @@ bool HFaceVaryingUV::readUVData(const std::string &name,
     
     uvd->readColumns(data, 0, nc);
     delete uvd;
-
     return true;
 }
 

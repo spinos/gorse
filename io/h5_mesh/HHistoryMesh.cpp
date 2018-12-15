@@ -100,6 +100,7 @@ bool HHistoryMesh::writeF3Data(const std::string &name,
     int nc = Round32(count)>>5;
     
     vec->writeColumns(data, 0, nc);
+    delete vec;
 	return true;
 }
 
@@ -117,6 +118,7 @@ bool HHistoryMesh::writeI3Data(const std::string &name,
     int nc = Round32(count)>>5;
     
     ind->writeColumns(data, 0, nc);
+    delete ind;
 	return true;
 }
 
