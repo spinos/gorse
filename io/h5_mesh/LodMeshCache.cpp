@@ -6,16 +6,24 @@
 namespace alo {
 
 LodMeshCache::LodMeshCache() :
-m_meshName("unknown")
+m_meshName("unknown"),
+m_currentCacheId(0)
 {
-    m_meshInCore = new HistoryMesh;
-    m_meshInCore->createTriangleMesh(1000,1000);
+    m_outMesh = new AdaptableMesh;
+    for(int i=0;i<2;++i) {
+        m_historyInCore[i] = new HistoryMesh;
+        m_historyInCore[i]->createTriangleMesh(1000,1000);
 /// only stage
-    m_meshInCore->addHistoryStage();
+        m_historyInCore[i]->addHistoryStage();
+    }
 }
 
 LodMeshCache::~LodMeshCache()
-{ delete m_meshInCore; }
+{ 
+    delete m_outMesh;
+    for(int i=0;i<2;++i)
+        delete m_historyInCore[i]; 
+}
 
 bool LodMeshCache::isValid() const
 {
@@ -31,9 +39,9 @@ void LodMeshCache::setLimit()
     m_maxNt = m_stageDescs.back()._fend;
 }
 
-bool LodMeshCache::selectStage(int &istage, int &nv, const float &lod)
+int LodMeshCache::selectStage(int &nv, const float &lod) const
 {
-    if(!isValid()) return false;
+    int istage;
     if(lod <= 0.f) {
 		istage = 0;
 		nv = m_minNv;
@@ -44,24 +52,22 @@ bool LodMeshCache::selectStage(int &istage, int &nv, const float &lod)
 		nv = m_minNv + (float)(m_maxNv - m_minNv) * lod;
 		istage = findStage(nv);
 	}
-    return true;
+    return istage;
 }
 
-bool LodMeshCache::selectStageByNv(int &istage, int &nv, const int &lod)
+int LodMeshCache::selectStageByNv(int &nv) const
 {
-    if(!isValid()) return false;
-
-    if(lod <= m_minNv) {
+    int istage;
+    if(nv <= m_minNv) {
         istage = 0;
         nv = m_minNv;
-    } else if(lod >= m_maxNv) {
+    } else if(nv >= m_maxNv) {
         istage = m_stageDescs.size() - 1;
         nv = m_maxNv;
     } else {
-        nv = lod;
         istage = findStage(nv);
     }
-    return true;
+    return istage;
 }
 
 int LodMeshCache::findStage(const int &nv) const
@@ -80,10 +86,7 @@ int LodMeshCache::findStage(const int &nv) const
 }
 
 bool LodMeshCache::nvChanged(int x) const
-{ return m_meshInCore->cachedNv() != x; }
-
-bool LodMeshCache::stageChanged(int x) const
-{ return m_meshInCore->cachedStageId() != x; }
+{ return c_currentCache()->cachedNv() != x; }
 
 const int &LodMeshCache::minNumTriangles() const
 { return m_minNt; }
@@ -93,29 +96,36 @@ const int &LodMeshCache::maxNumTriangles() const
 
 bool LodMeshCache::loadStage(int x)
 {
+    HistoryMesh *meshInCore = selectCurrentCache(x);
     HHistoryMeshRecord hrec(m_meshName);
 /// load a stage?
     const CoarseFineHistoryDesc &d = m_stageDescs[x];
     const int nv = d._vend;
     const int nf = d._fend;
-    hrec.load(m_meshInCore, nv, nf);
+    hrec.load(meshInCore, nv, nf);
 
     const int hl = d._length;
-    CoarseFineHistory &stg = m_meshInCore->stage(0);
+    CoarseFineHistory &stg = meshInCore->stage(0);
     stg.setDesc(d);
     hrec.load(&stg, hl, x);
 
     hrec.close();
 
-    m_meshInCore->setCachedStageId(x);
+    meshInCore->setCachedStageId(x);
 
-    sortCoarseFaces(m_meshInCore, 0, stg.coarseMax(), stg.c_value() );
     return true;
 }
 
-void LodMeshCache::reformInCore(AdaptableMesh *outMesh, const int &nv, const int &istage)
+void LodMeshCache::sortCurrentStage()
 {
-    reform(outMesh, m_meshInCore, nv, istage, m_meshInCore->stage(0) );
+    CoarseFineHistory &stg = currentCache()->stage(0);
+    sortCoarseFaces(currentCache(), 0, stg.coarseMax(), stg.c_value() );
+}
+
+void LodMeshCache::reformInCore(const int &nv, const int &istage)
+{
+    HistoryMesh *meshInCore = currentCache();
+    reform(m_outMesh, meshInCore, nv, istage, meshInCore->stage(0) );
 }
 
 void LodMeshCache::printStages() const
@@ -142,6 +152,46 @@ std::deque<CoarseFineHistoryDesc> &LodMeshCache::stageDescs()
 { return m_stageDescs; }
 
 void LodMeshCache::getAabb(BoundingBox &box) const
-{ m_meshInCore->getAabb(box); }
+{ c_currentCache()->getAabb(box); }
+
+AdaptableMesh *LodMeshCache::c_outMesh() const
+{ return m_outMesh; }
+
+HistoryMesh *LodMeshCache::currentCache()
+{ return m_historyInCore[m_currentCacheId]; }
+
+const HistoryMesh *LodMeshCache::c_currentCache() const
+{ return m_historyInCore[m_currentCacheId]; }
+
+bool LodMeshCache::switchToStage(int x)
+{
+    for(int i=0;i<2;++i) {
+        if(m_historyInCore[i]->cachedStageId() == x) {
+            m_currentCacheId = i;
+            return true;
+        }
+    }
+    return false;
+}
+
+HistoryMesh *LodMeshCache::selectCurrentCache(int x)
+{
+    m_currentCacheId = 0; 
+    int md = 0;
+    for(int i=0;i<2;++i) {
+        int ci = m_historyInCore[i]->cachedStageId();
+        if(ci < 0) {
+            m_currentCacheId = i;
+            return m_historyInCore[i];
+        }
+        int d = ci - x;
+        if(d < 0) d = -d;
+        if(md < d) {
+            md = d;
+            m_currentCacheId = i;
+        }
+    }
+    return m_historyInCore[m_currentCacheId];
+}
 
 }

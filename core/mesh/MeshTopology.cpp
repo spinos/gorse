@@ -534,19 +534,27 @@ bool MeshTopology::checkConcaveRing(int vi,
 	std::vector<int> vring;
 	bool stat = m_vertexFaceConnection.getVertexOneRing(vring, vi, pos, nml);
 	if(!stat) return false;
+
+	const int n = vring.size();
+
+	if(n < 4) return false;
 	
-	if(checkInnerEdges(vring, 2)) return true;
+	if(checkInnerEdges(vring, n, 2)) return true;
 	
-	if(vring.size() < 6) return false;
+	if(n < 6) return false;
 	
-	if(checkInnerEdges(vring, 3)) return true;
+	if(checkInnerEdges(vring, n, 3)) return true;
+
+	if(n < 8) return false;
+
+	if(checkInnerEdges(vring, n, 4)) return true;
 	
+/// limited n to 9
 	return false;
 }
 
-bool MeshTopology::checkInnerEdges(const std::vector<int> &vring, int jump)
+bool MeshTopology::checkInnerEdges(const std::vector<int> &vring, int n, int jump)
 {
-	const int n = vring.size();
 	for(int i=0;i<n;++i) {
 		int v0 = vring[i];
 		int v1 = vring[(i+jump) % n];

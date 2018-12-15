@@ -2,7 +2,8 @@
  *  LodMeshCache.h
  *  aloe
  *
- *  mesh_path, reform cache and function
+ *  history cache and reform function
+ *  two in-core stage to reduce read
  *
  */
 
@@ -16,13 +17,16 @@
 
 namespace alo {
 class BoundingBox;  
+class AdaptableMesh;
 class HistoryMesh;
     
 class LodMeshCache : public HistoryReform {
 
     std::string m_meshName;
     std::deque<CoarseFineHistoryDesc> m_stageDescs;
-    HistoryMesh *m_meshInCore;
+    AdaptableMesh *m_outMesh;
+    HistoryMesh *m_historyInCore[2];
+    int m_currentCacheId;
     int m_minNv;
     int m_maxNv;
     int m_minNt;
@@ -34,15 +38,20 @@ public:
 
     bool isValid() const;
     const std::string &meshName() const;
-    
-    bool selectStage(int &istage, int &nv, const float &lod);
-    bool selectStageByNv(int &istage, int &nv, const int &lod);
-    bool nvChanged(int x) const;
-    bool stageChanged(int x) const;
-    bool loadStage(int x);
-    void reformInCore(AdaptableMesh *outMesh, const int &nv, const int &istage);
     const int &minNumTriangles() const;
     const int &maxNumTriangles() const;
+    
+    int selectStage(int &nv, const float &lod) const;
+    int selectStageByNv(int &nv) const;
+
+/// false if stage x is not cached
+    bool switchToStage(int x);
+    bool nvChanged(int x) const;
+
+/// hdf5 read cannot parallel
+    bool loadStage(int x);
+    void sortCurrentStage();
+    void reformInCore(const int &nv, const int &istage);
     
     void printStages() const;
     
@@ -51,11 +60,17 @@ public:
     void setLimit();
 
     void getAabb(BoundingBox &box) const;
+
+    AdaptableMesh *c_outMesh() const;
     
 protected:
 
 private:
     int findStage(const int &nv) const;
+    HistoryMesh *currentCache();
+    const HistoryMesh *c_currentCache() const;
+/// empty or furthest from x
+    HistoryMesh *selectCurrentCache(int x);
     
 };
 

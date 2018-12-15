@@ -37,8 +37,8 @@ protected:
     
 private:
     void computeMesh();
-    void reformMesh(LodMeshCache *c, AdaptableMesh *mesh, DrawableResource *rec);
-    void reformMesh1(LodMeshCache *c, AdaptableMesh *mesh, int nv, bool forcedUpdate, DrawableResource *rec);
+    void reformMesh(LodMeshCache *c, DrawableResource *rec);
+    void reformMesh1(LodMeshCache *c, int nv, bool forcedUpdate, DrawableResource *rec);
     bool loadCache(const std::string &fileName);
     void viewDependentReform(const PerspectiveCamera *persp);
 
