@@ -224,7 +224,7 @@ void HistoryMesh::copyStageTo(HistoryMesh *b, int i) const
 {
 	int nv = m_stages[i].vend();
 	int nf = m_stages[i].fend();
-	copyTo(b, nv, nf);
+	copyMeshTo(b, nv, nf);
 	b->stage(0) = m_stages[i];
 	b->setCachedStageId(i);
 }

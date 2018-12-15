@@ -488,19 +488,17 @@ bool EdgeCollapse::canEdgeCollapse(const EdgeIndex &ei)
 		return false;
 
 	const int nca = numFacesConnectedTo(ei.v0());
-	if(nca < 4 || nca > 10) return false;
+	if(nca < 4 || nca > 9) return false;
 
 	const int ncb = numFacesConnectedTo(ei.v1());
-	if(ncb < 4 || ncb > 10) return false;
-
+	if(ncb < 4 || ncb > 9) return false;
+/*
 	int vci = e->face0().getOpposite(ei.v0(), ei.v1());
 	int vdi = e->face1().getOpposite(ei.v0(), ei.v1());
 	
 	if(numFacesConnectedTo(vci) < 4 || numFacesConnectedTo(vdi) < 4 )
 		return false;
-
-	const VertexValue &vlast = vertex(nv - 1);
-    	
+*/   	
 /// cannot share faces with last v
 /// present or past
 	if(hasFaceConnected(ei.v0(), nv - 1))

@@ -62,7 +62,7 @@ public:
 
 /// within gl context
     void cleanup();
-    void initializeScene();
+    void initializeDrawable();
     void draw(const QMatrix4x4 &proj, const QMatrix4x4 &cam);
 
     void enqueueCreateDrawable(DrawableObject *d, int groupId);
@@ -72,6 +72,8 @@ public:
     void enqueueRemoveDrawable(int objectId, int groupId);
 /// remove entire group
     void enqueueRemoveDrawable(int groupId);
+    void enqueueShowDrawable(int groupId);
+    void enqueueHideDrawable(int groupId);
 
     QOpenGLContext *context();
     

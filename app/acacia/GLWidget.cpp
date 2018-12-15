@@ -32,7 +32,7 @@ void GLWidget::clientInit()
 {
     //connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLWidget::cleanup);
 	m_scene->setContext(QOpenGLContext::globalShareContext());
-    m_scene->initializeScene();
+    m_scene->initializeDrawable();
 }
 
 void GLWidget::clientDraw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)

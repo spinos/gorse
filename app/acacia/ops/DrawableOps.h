@@ -37,6 +37,7 @@ public:
 	virtual ~DrawableOps();
 
 	virtual bool hasDrawable() const override;
+	virtual void setDrawableVisible(bool x) override;
 
 	virtual void addDrawableTo(DrawableScene *scene) = 0;
 	virtual void removeDrawableFromScene();

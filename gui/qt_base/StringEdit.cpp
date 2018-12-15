@@ -4,11 +4,14 @@
 #include <QPushButton>
 #include <QIcon>
 #include <QFileDialog>
+#include <QDebug>
+#include "AFileDlg.h"
 #include "ImageCollector.h"
 
 namespace alo {
 
-StringEdit::StringEdit(QWidget *parent) : QWidget(parent)
+StringEdit::StringEdit(QWidget *parent) : QWidget(parent),
+m_readFileProfile(0)
 {
     m_edit = new QLineEdit(this);
     m_btn = new QPushButton(this);
@@ -36,6 +39,9 @@ void StringEdit::setValue(const std::string &x)
 void StringEdit::setName(const std::string &name)
 { m_name = name; }
 
+void StringEdit::setReadFileProfile(AFileDlgProfile *prof)
+{ m_readFileProfile = prof; }
+
 QSize StringEdit::minimumSizeHint() const
 {
     return QSize(24, 24);
@@ -55,9 +61,20 @@ void StringEdit::notifyValueChange(const QString &t)
 
 void StringEdit::selectFile()
 {
-    QString fn = QFileDialog::getOpenFileName(this, tr("Open File"));
-    if(fn.size() < 1)
-        return;
+    QString fn;
+    if(m_readFileProfile) {
+        AFileDlg d(*m_readFileProfile, this);
+        int res = d.exec();
+        if(res == QDialog::Rejected) {
+            qDebug()<<"abort open file";
+            return;
+        }
+        fn = tr(m_readFileProfile->getFilePath().c_str());
+        
+    } else
+        fn = QFileDialog::getOpenFileName(this, tr("Open File"));
+    
+    if(fn.size() < 3) return;
 
     if(fn != tr(m_val.c_str()) ) {
         m_edit->setText(fn);

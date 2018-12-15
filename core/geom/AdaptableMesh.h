@@ -53,7 +53,8 @@ public:
 /// n faces to i-th uv set to end
     void appendFaceUVs(const Float2 *faceUVs, int i, int n);
     void setNumFaces(int n);
-    void copyTo(AdaptableMesh *b, const int &nv, const int &nf) const;
+/// nv vertices nf faces to b
+    void copyMeshTo(AdaptableMesh *b, const int &nv, const int &nf) const;
  
 protected:
     

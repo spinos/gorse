@@ -46,12 +46,16 @@ public:
 	bool isDirty() const;
     void setDeferred(bool x);
     bool isDeferred() const;
+    void createBarycentricCoordinates(int numIndices);
 
 	SimpleBuffer<Vector3F> &posnmlBuffer();
 	SimpleBuffer<Vector3F> &barycBuffer();
 
 	const SimpleBuffer<Vector3F> &c_posnmlBuffer() const;
 	const SimpleBuffer<Vector3F> &c_barycBuffer() const;
+
+private:
+	static const float FaceBarycentricCoordinate[12];
 
 };
 

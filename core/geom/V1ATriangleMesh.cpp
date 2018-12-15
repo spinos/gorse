@@ -81,9 +81,9 @@ void ATriangleMesh::createTriangleMesh(int vertexCount, int triangleCount)
     m_numVertices = vertexCount;
     m_numTriangles = triangleCount;
     m_numIndices = triangleCount * 3;
-    m_positions.createBuffer(vertexCount);
-    m_normals.createBuffer(vertexCount);
-    m_indices.createBuffer(m_numTriangles);
+    m_positions.resetBuffer(vertexCount);
+    m_normals.resetBuffer(vertexCount);
+    m_indices.resetBuffer(m_numTriangles);
 }
 
 void ATriangleMesh::copyPositionsFrom(const Vector3F *x)
@@ -97,8 +97,32 @@ Float2 *ATriangleMesh::addUVSet(const std::string &name)
     m_uvSets.push_front(NamedUV());
     NamedUV &fuv = m_uvSets.front();
     fuv.first = name;
-    fuv.second.createBuffer(m_numIndices);
+    fuv.second.resetBuffer(m_numIndices);
     return fuv.second.data();
+}
+
+void ATriangleMesh::setUVSetName(const std::string &name, int i)
+{ m_uvSets[i].first = name; }
+
+Float2 *ATriangleMesh::uvSetValue(int i)
+{ return m_uvSets[i].second.data(); }
+
+void ATriangleMesh::createUVSets(int n)
+{
+    if(m_uvSets.size() < n) {
+        for(;;) {
+            addUVSet("unknown");
+            if(m_uvSets.size() == n) 
+                return;
+        }
+    } 
+    if(m_uvSets.size() > n) {
+        for(;;) {
+            m_uvSets.pop_back();
+            if(m_uvSets.size() == n) 
+                return;
+        }
+    }
 }
 
 void ATriangleMesh::clearUVSets()
@@ -218,7 +242,7 @@ void ATriangleMesh::createPositionNormalArray(SimpleBuffer<Vector3F>& posnml) co
 {
     const Vector3F* p = c_positions();
     const Vector3F* n = c_normals();
-    posnml.createBuffer(m_numIndices * 2);
+    posnml.resetBuffer(m_numIndices * 2);
     for(int i=0;i<m_numTriangles;++i) {
         const Int3 &fv = c_indices()[i];
         const int i6 = i * 6;
@@ -234,7 +258,7 @@ void ATriangleMesh::createPositionNormalArray(SimpleBuffer<Vector3F>& posnml) co
 void ATriangleMesh::createUVNormalArray(SimpleBuffer<Vector3F>& posnml) const
 {
     const Float2 *uvs = c_uvSet(0);
-    posnml.createBuffer(m_numIndices * 2);
+    posnml.resetBuffer(m_numIndices * 2);
     for(int i=0;i<m_numTriangles;++i) {
         const Float2 &uv0 = uvs[i*3];
         const Float2 &uv1 = uvs[i*3 + 1];
@@ -246,17 +270,6 @@ void ATriangleMesh::createUVNormalArray(SimpleBuffer<Vector3F>& posnml) const
         posnml[i6+3] = Vector3F::ZAxis;
         posnml[i6+4].set(uv2.x, uv2.y, 0.f);
         posnml[i6+5] = Vector3F::ZAxis;
-    }
-}
-
-void ATriangleMesh::createBarycentricCoordinates(SimpleBuffer<Vector3F>& baryc) const
-{
-    baryc.createBuffer(m_numIndices);
-    const int n = baryc.capacity() / 3;
-    for(int i=0;i<n;++i) {
-        baryc[i*3].set(1.f, 0.f, 0.f);
-        baryc[i*3+1].set(0.f, 1.f, 0.f);
-        baryc[i*3+2].set(0.f, 0.f, 1.f);
     }
 }
 

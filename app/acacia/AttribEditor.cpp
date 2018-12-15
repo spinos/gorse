@@ -229,6 +229,11 @@ void AttribEditor::lsStringAttr(alo::QAttrib *attr)
 	SimpleLabel *lab = new SimpleLabel(QString(attr->label().c_str()));
     lab->setShortText(QString(attr->attrName().c_str()));
 	StringEdit *fld = new StringEdit();
+/// open only
+    GlyphOps *ops = m_scene->getActiveOps();
+    AFileDlgProfile *rp = ops->readFileProfileR();
+    if(rp) fld->setReadFileProfile(rp);
+    
 	m_leftCollWigs.enqueue(lab);
     m_rightCollWigs.enqueue(fld);
 

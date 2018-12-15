@@ -19,6 +19,15 @@
 #include <boost/bind.hpp>
 
 namespace alo {
+    
+AFileDlgProfile LodMeshInOps::SReadProfile(AFileDlgProfile::FRead,
+        "Choose File To Open",
+        ":images/open_big.png",
+        "Open LOD Mesh Cache File",
+        "Open .hes",
+        ".hes",
+        "./",
+        "");
    
 LodMeshInOps::LodMeshInOps() :
 m_lod(.5f),
@@ -68,15 +77,14 @@ void LodMeshInOps::computeMesh()
     
     boost::thread tref[16];
     int ntref = 0;
-    AdaptableMesh transient[16];
     for(int i=0;i<n;++i) {
         LodMeshCache &ci = *m_cache.mesh(i);
         if(!ci.isValid()) continue;
    
         DrawableResource *rec = resource(i);
         
-        tref[ntref] = boost::thread(boost::bind( &LodMeshInOps::reformMesh, this, _1, _2, _3 ), 
-                            &ci, &transient[ntref], rec);
+        tref[ntref] = boost::thread(boost::bind( &LodMeshInOps::reformMesh, this, _1, _2 ), 
+                            &ci, rec);
         ntref++;
         
         if(ntref==16) {
@@ -100,18 +108,19 @@ void LodMeshInOps::computeMesh()
     
 }
 
-void LodMeshInOps::reformMesh(LodMeshCache *c, AdaptableMesh *mesh, DrawableResource *rec)
+void LodMeshInOps::reformMesh(LodMeshCache *c, DrawableResource *rec)
 {
-    int istage, nv;
-    c->selectStage(istage, nv, m_lod);
-    if(c->stageChanged(istage)) {
+    int nv;
+    int istage = c->selectStage(nv, m_lod);
+    if(!c->switchToStage(istage)) {
         m_mtx.lock();
         c->loadStage(istage);
         m_mtx.unlock();
+        c->sortCurrentStage();
     }
-    c->reformInCore(mesh, nv, istage);
+    c->reformInCore(nv, istage);
 
-    UpdateMeshResouce(rec, mesh, m_shoUV);
+    UpdateMeshResouce(rec, c->c_outMesh(), m_shoUV);
 }
 
 bool LodMeshInOps::loadCache(const std::string &fileName)
@@ -172,7 +181,6 @@ void LodMeshInOps::viewDependentReform(const PerspectiveCamera *persp)
    
     boost::thread tref[16];
     int ntref = 0;
-    AdaptableMesh transient[16];
     const int beforeFrame = frameNumber() - 3;
     for(int i=0;i<n;++i) {
         LodMeshCache &ci = *m_cache.mesh(i);
@@ -194,8 +202,8 @@ void LodMeshInOps::viewDependentReform(const PerspectiveCamera *persp)
             continue;
         }
       
-        tref[ntref] = boost::thread(boost::bind( &LodMeshInOps::reformMesh1, this, _1, _2, _3, _4, _5 ), 
-                            &ci, &transient[ntref], lod.value(), lod.isIncreased(), rec);
+        tref[ntref] = boost::thread(boost::bind( &LodMeshInOps::reformMesh1, this, _1, _2, _3, _4 ), 
+                            &ci, lod.value(), lod.isIncreased(), rec);
         ntref++;
         
         if(ntref==16) {
@@ -211,21 +219,25 @@ void LodMeshInOps::viewDependentReform(const PerspectiveCamera *persp)
     }
 }
 
-void LodMeshInOps::reformMesh1(LodMeshCache *c, AdaptableMesh *mesh, int lodNv, bool forcedUpdate, DrawableResource *rec)
+void LodMeshInOps::reformMesh1(LodMeshCache *c, int lodNv, bool forcedUpdate, DrawableResource *rec)
 {
     if(rec->drawArrayLength() == c->maxNumTriangles() * 3 && forcedUpdate) return;
     if(rec->drawArrayLength() == c->minNumTriangles() * 3 && !forcedUpdate) return;
     
-    int istage, nv;
-    c->selectStageByNv(istage, nv, lodNv);
+    int nv = lodNv;
+    int istage = c->selectStageByNv(nv);
     if(!c->nvChanged(nv) && !forcedUpdate) return;
-    if(c->stageChanged(istage)) {
+    if(!c->switchToStage(istage)) {
         m_mtx.lock();
         c->loadStage(istage);
         m_mtx.unlock();
+        c->sortCurrentStage();
     }
-    c->reformInCore(mesh, nv, istage);
-    UpdateMeshResouce(rec, mesh);
+    c->reformInCore(nv, istage);
+    UpdateMeshResouce(rec, c->c_outMesh() );
 }
+
+AFileDlgProfile *LodMeshInOps::readFileProfileR () const
+{ return &SReadProfile; }
 
 }

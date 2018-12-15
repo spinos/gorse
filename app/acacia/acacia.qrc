@@ -6,6 +6,7 @@
     <file>images/save.png</file>
     <file>images/undo.png</file>
     <file>images/save_big.png</file>
+    <file>images/open_big.png</file>
     <file>images/unknown.png</file>
     <file>images/field_body.png</file>
     <file>images/field_head.png</file>
@@ -22,6 +23,9 @@
     <file>images/cube.png</file>
     <file>images/solid_ball.png</file>
     <file>images/wire_ball.png</file>
+    <file>images/eyeOpen.png</file>
+    <file>images/eyeHalf.png</file>
+    <file>images/eyeClose.png</file>
     <file>mimes/assettree.json</file>
 </qresource>
 </RCC>

@@ -40,6 +40,7 @@ public:
 	
 	virtual void update();
 	virtual bool hasDrawable() const;
+	virtual void setDrawableVisible(bool x);
 	virtual void onSelection();
 	virtual void postUI();
 	virtual bool hasMenu() const;

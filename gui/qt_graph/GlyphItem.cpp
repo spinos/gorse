@@ -1,9 +1,6 @@
 /*
  *  GlyphItem.cpp
- *  
- *
- *  Created by jian zhang on 3/31/17.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
+ *  aloe
  *
  */
 
@@ -13,6 +10,7 @@
 #include "GlyphPort.h"
 #include "GlyphHalo.h"
 #include "GlyphOps.h"
+#include "VisibilityControlItem.h"
 #include "Attrib.h"
 #include <qt_base/AFileDlg.h>
 
@@ -21,16 +19,21 @@ namespace alo {
 GlyphItem::GlyphItem(const QPixmap & iconPix, int gtyp,
 			QGraphicsItem * parent) : QGraphicsPathItem(parent)
 {
-	//setFlag(QGraphicsItem::ItemIsSelectable);
 	resizeBlock(120, 40);
 	setPen(QPen(Qt::darkGray));
 	setBrush(Qt::lightGray);
 	setZValue(1);
-	//m_halo->setPos(60-50, 18-50);
 	m_icon = new QGraphicsPixmapItem(iconPix.scaled(32,32), this);
 	m_icon->setPos(4, 4);
 	m_glyphType = gtyp;
 	m_ops = 0;
+	m_halo = 0;
+	m_visibility = 0;
+}
+
+GlyphItem::~GlyphItem()
+{
+	if(m_visibility) delete m_visibility;
 }
 
 void GlyphItem::setGlyphId(int x)
@@ -43,11 +46,6 @@ void GlyphItem::resizeBlock(int bx, int by)
 	setPath(p);
 	m_blockWidth = bx;
 	m_blockHeight = by;
-}
-
-void GlyphItem::centerIcon()
-{
-	m_icon->setPos(m_blockWidth/2 - 16, m_blockHeight/2 - 16);
 }	
 
 GlyphPort * GlyphItem::addPort(const QString & name, 
@@ -81,6 +79,9 @@ const int &GlyphItem::glyphId() const
 { return m_glyphId; }
 
 void GlyphItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
+{ event->ignore(); }
+
+void GlyphItem::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
 { event->ignore(); }
 
 void GlyphItem::mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event )
@@ -119,6 +120,12 @@ void GlyphItem::showHalo()
 void GlyphItem::hideHalo()
 { m_halo->hide(); }
 
+void GlyphItem::activateHalo()
+{ m_halo->setHightVisible(true); }
+
+void GlyphItem::deactivateHalo()
+{ m_halo->setHightVisible(false); }
+
 GlyphHalo* GlyphItem::halo()
 { return m_halo; }
 
@@ -129,7 +136,7 @@ GlyphOps *GlyphItem::ops()
 { return m_ops; }
 
 QPointF GlyphItem::localCenter() const
-{ return QPointF(m_blockWidth / 2, m_blockHeight / 2); }
+{ return QPointF(m_blockWidth >> 1, m_blockHeight >> 1); }
 
 void GlyphItem::setOps(GlyphOps *ops)
 { 
@@ -193,6 +200,26 @@ void GlyphItem::processContextMenu(int k)
     	
 }
 
+void GlyphItem::addVisibilityControl()
+{
+	m_visibility = new VisibilityControlItem(this);
+	m_visibility->setPos(m_blockWidth - 24 - 8, 8);
+}
+
+void GlyphItem::beginEditState(QGraphicsItem *item)
+{
+	if(item == m_visibility)
+		m_visibility->beginEditState();
+}
+
+void GlyphItem::endEditState(QGraphicsItem *item)
+{
+	if(item == m_visibility) {
+		m_visibility->endEditState();
+		m_ops->setDrawableVisible(m_visibility->isStateVisible());
+	}
+}
+
 const std::string& GlyphItem::glyphName() const
 { return "";//m_ops->glyphName(); 
 }
@@ -205,7 +232,7 @@ void GlyphItem::postConnection(GlyphItem* another, GlyphPort* viaPort)
 
 void GlyphItem::postSelection()
 { 
-    showHalo();
+	showHalo();
     m_ops->onSelection();
 }
 

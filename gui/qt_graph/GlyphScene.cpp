@@ -14,6 +14,7 @@
 #include "GlyphConnection.h"
 #include "GlyphItem.h"
 #include "GlyphOps.h"
+#include "VisibilityControlItem.h"
 #include <math/GroupCollection.h>
 #include <ctime>
 
@@ -33,6 +34,11 @@ GlyphScene::GlyphScene(GroupCollection<QJsonObject> *collector,
 GlyphScene::~GlyphScene()
 {
 	delete m_rng;
+}
+
+void GlyphScene::initializeGraphics()
+{
+	VisibilityControlItem::InitializeStates();
 }
 
 void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
@@ -56,6 +62,7 @@ void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
 	GlyphOps *ops = createOps(content);
 	ops->addAttributes(content);
 	g->setOps(ops);
+	if(ops->hasDrawable()) g->addVisibilityControl();
 	postCreation(g);
 }
 
@@ -64,8 +71,14 @@ GlyphOps *GlyphScene::createOps(const QJsonObject &content)
 
 void GlyphScene::selectGlyph(GlyphItem *item)
 {
+    foreach(GlyphItem * glh, m_selectedGlyph)
+		glh->deactivateHalo();
+
 	if(!m_selectedGlyph.contains(item) )
 		m_selectedGlyph<<item; 
+    
+    item->activateHalo();
+    
 	if(m_activeGlyph != item) {
 		m_activeGlyph = item;
 		item->postSelection();
@@ -75,8 +88,8 @@ void GlyphScene::selectGlyph(GlyphItem *item)
 
 void GlyphScene::deselectAllGlyph()
 {
-	foreach(GlyphItem * gl, m_selectedGlyph) {
-		gl->hideHalo();
+	foreach(GlyphItem * glh, m_selectedGlyph) {
+		glh->hideHalo();
 	}
 	m_activeGlyph = 0;
 	m_selectedGlyph.clear();

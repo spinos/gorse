@@ -20,6 +20,7 @@ MainWindow::MainWindow()
     viewMenu->addAction(assetDock->toggleViewAction());
 
     m_scene = new AcaciaScene(m_palette->assetCollector());
+    m_scene->initializeGraphics();
     m_glview = new GLWidget(m_scene, this);
     setCentralWidget(m_glview);
 
@@ -52,9 +53,13 @@ MainWindow::MainWindow()
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     connect(m_glview, &alo::View3DWidget::cameraChanged,
             m_scene, &AcaciaScene::recvCameraChanged );
+    connect(m_graphView, &alo::SceneGraph::sendGraphChanged,
+            m_glview, &GLWidget::recvAttribChanged );
 #else
     connect(m_glview, SIGNAL(cameraChanged(alo::CameraEvent)),
-    m_scene, SLOT(recvCameraChanged(alo::CameraEvent)));
+            m_scene, SLOT(recvCameraChanged(alo::CameraEvent)));
+    connect(m_graphView, SIGNAL(sendGraphChanged()),
+            m_glview, SLOT(recvAttribChanged()));
 #endif
 
     setWindowTitle(tr("Acacia"));

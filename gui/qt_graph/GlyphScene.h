@@ -38,6 +38,8 @@ public:
 				QObject *parent = 0);
 	virtual ~GlyphScene();
 
+	void initializeGraphics();
+
 	void createGlyph(const QPixmap &pix, int typ, const QPointF & pos);
 	void selectGlyph(GlyphItem *item);
 	void deselectGlyph(GlyphItem *item);

@@ -1,10 +1,8 @@
 /*
  *  GlyphHalo.h
+ *  aloe
  *
  *  selection representation
- *
- *  Created by jian zhang on 8/4/17.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
  *
  */
 
@@ -17,6 +15,7 @@ namespace alo {
 
 class GlyphHalo : public QGraphicsEllipseItem
 {
+	QGraphicsEllipseItem *m_highlight;
 
 public:
 	enum { Type = UserType + 4 };
@@ -25,6 +24,8 @@ public:
 	virtual ~GlyphHalo();
 	
 	int type() const { return Type; }
+
+	void setHightVisible(bool x);
 	
 protected:
 	

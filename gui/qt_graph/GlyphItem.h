@@ -22,6 +22,7 @@ class GlyphPort;
 class GlyphHalo;
 class GlyphOps;
 struct Connectable;
+class VisibilityControlItem;
 
 class GlyphItem : public QGraphicsPathItem
 {
@@ -33,6 +34,7 @@ public:
 	
 	GlyphItem(const QPixmap & iconPix, int gtyp,
 			QGraphicsItem * parent = 0 );
+	virtual ~GlyphItem();
 
 	void setGlyphId(int x);
 							
@@ -46,6 +48,8 @@ public:
 	void setHalo(GlyphHalo* hal);
 	void showHalo();
 	void hideHalo();
+	void activateHalo();
+	void deactivateHalo();
 	GlyphHalo *halo();
 	GlyphOps *getOps() const;
 	GlyphOps *ops();
@@ -60,16 +64,21 @@ public:
 	void postDisconnection(GlyphPort* viaPort);
 	void postSelection();
 
+	void addVisibilityControl();
+
+	void beginEditState(QGraphicsItem *item);
+	void endEditState(QGraphicsItem *item);
+
 protected:
 	GlyphPort *addPort(const QString & name, 
 							bool isOutgoing);
 	void resizeBlock(int bx, int by);
 	virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
+	virtual void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
 	virtual void mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event );
 	virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent * event);
 	
 private:
-	void centerIcon();
 	void movePort(GlyphPort *pt, const Connectable *c);
 	void processContextMenu(int k);
 	
@@ -77,6 +86,7 @@ private:
 	QGraphicsPixmapItem *m_icon;
 	GlyphOps *m_ops;
 	GlyphHalo *m_halo;
+	VisibilityControlItem *m_visibility;
 	int m_blockWidth, m_blockHeight;
 
 };

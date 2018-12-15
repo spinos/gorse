@@ -42,7 +42,10 @@ public:
 
     void copyPositionsFrom(const Vector3F *x);
     void copyIndicesFrom(const unsigned *x);
+    void createUVSets(int n);
+    void setUVSetName(const std::string &name, int i);
     Float2 *addUVSet(const std::string &name);
+    Float2 *uvSetValue(int i);
     void clearUVSets();
 
     const int& numVertices() const;
@@ -61,8 +64,7 @@ public:
 /// face-varying vertex attribute
     void createPositionNormalArray(SimpleBuffer<Vector3F>& posnml) const;
     void createUVNormalArray(SimpleBuffer<Vector3F>& posnml) const;
-    void createBarycentricCoordinates(SimpleBuffer<Vector3F>& baryc) const;
-    
+
     void getAabb(BoundingBox &b) const;
     void reverseTriangleNormals();
     void calculateVertexNormals();

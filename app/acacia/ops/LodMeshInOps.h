@@ -23,6 +23,7 @@ class LodMeshInOps : public DrawableOps, public ViewDependentFunction {
     bool m_shoUV;
     boost::mutex m_mtx;
     ver1::H5IO m_hio;
+    static AFileDlgProfile SReadProfile;
     
 public:
     LodMeshInOps();
@@ -32,13 +33,14 @@ public:
 
  	virtual void addDrawableTo(DrawableScene *scene) override;
     virtual void recvCameraChanged(const CameraEvent &x) override;
+    virtual AFileDlgProfile *readFileProfileR () const override;
     
 protected:
     
 private:
     void computeMesh();
-    void reformMesh(LodMeshCache *c, AdaptableMesh *mesh, DrawableResource *rec);
-    void reformMesh1(LodMeshCache *c, AdaptableMesh *mesh, int nv, bool forcedUpdate, DrawableResource *rec);
+    void reformMesh(LodMeshCache *c, DrawableResource *rec);
+    void reformMesh1(LodMeshCache *c, int nv, bool forcedUpdate, DrawableResource *rec);
     bool loadCache(const std::string &fileName);
     void viewDependentReform(const PerspectiveCamera *persp);
 

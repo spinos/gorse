@@ -45,12 +45,14 @@ protected:
 	GlyphScene * asGlyphScene();
 	
 signals:
+	void sendGraphChanged();
 	
 private:
     void processSelect(const QPoint& pos);
 	void processRemove(const QPoint& pos);
 	void beginProcessView(QMouseEvent *event);
 	void beginProcessItem(QMouseEvent *event);
+	void endProcessItem(QGraphicsItem *item);
 	void processItem(QMouseEvent *event);
 	void panView(QMouseEvent *event);
 	void doMoveItem(const QPoint& mousePos);
@@ -61,10 +63,11 @@ private:
 	
 	enum Mode {
 		mNone = 0,
-		mPanView = 1,
-		mMoveItem = 2,
-		mConnectItems = 3,
-		mRemoveConnection = 4,
+		mPanView,
+		mMoveItem,
+		mEditState,
+		mConnectItems,
+		mRemoveConnection
 	}; 
 	
 	Mode m_mode;

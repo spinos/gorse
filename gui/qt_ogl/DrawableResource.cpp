@@ -9,6 +9,11 @@
 
 namespace alo {
 
+const float DrawableResource::FaceBarycentricCoordinate[12] = {1.f, 0.f, 0.f,
+0.f, 1.f, 0.f,
+0.f, 0.f, 1.f,
+1.f, 1.f, 1.f};
+
 DrawableResource::DrawableResource() : 
 m_object(0),
 m_drawArrayLength(0),
@@ -85,5 +90,16 @@ void DrawableResource::setDeferred(bool x)
 
 bool DrawableResource::isDeferred() const
 { return m_deferred; }
+
+void DrawableResource::createBarycentricCoordinates(int numIndices)
+{
+	m_baryc.resetBuffer(numIndices);
+	Vector3F *d = m_baryc.data();
+    const int n = m_baryc.capacity() / 3;
+    for(int i=0;i<n;++i) {
+    	memcpy(d, FaceBarycentricCoordinate, 36);
+    	d += 3;
+    }
+}
 
 }

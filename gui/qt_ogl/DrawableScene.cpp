@@ -41,7 +41,7 @@ void DrawableScene::cleanup()
     }
 }
 
-void DrawableScene::initializeScene()
+void DrawableScene::initializeDrawable()
 {
     if(!m_program[0]) {
         m_program[0] = new WireframeProgram;
@@ -150,6 +150,26 @@ void DrawableScene::enqueueRemoveDrawable(int groupId)
         if(it.first.y > groupId) break;
         if(it.first.y < groupId) continue;
         if(it.second->_state > stWaitDestroy) it.second->_state = stWaitDestroy;
+    }
+}
+
+void DrawableScene::enqueueShowDrawable(int groupId)
+{
+    DrawIteratorType it = m_drawQueue.begin(sdb::Coord2(-1,groupId));
+    for(;!it.done();it.next()) {
+        if(it.first.y > groupId) break;
+        if(it.first.y < groupId) continue;
+        if(it.second->_state > stWaitDestroy) it.second->_state = stNormal;
+    }
+}
+
+void DrawableScene::enqueueHideDrawable(int groupId)
+{
+    DrawIteratorType it = m_drawQueue.begin(sdb::Coord2(-1,groupId));
+    for(;!it.done();it.next()) {
+        if(it.first.y > groupId) break;
+        if(it.first.y < groupId) continue;
+        if(it.second->_state > stWaitDestroy) it.second->_state = stHidden;
     }
 }
 

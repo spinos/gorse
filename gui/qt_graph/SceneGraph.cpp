@@ -14,6 +14,7 @@
 #include "GlyphHalo.h"
 #include "GlyphPort.h"
 #include "GlyphItem.h"
+#include "StateControlItem.h"
 
 namespace alo {
 
@@ -23,7 +24,6 @@ SceneGraph::SceneGraph(GlyphScene *scene, QWidget * parent) : QGraphicsView(scen
 	setMinimumSize(400, 300);
 	setRenderHint(QPainter::Antialiasing);
 	setSceneRect(	frameRect() );
-	//m_selectedItem = 0;
 	m_selectedConnection = 0;
 }
 
@@ -88,8 +88,8 @@ void SceneGraph::mouseReleaseEvent(QMouseEvent *event)
 	QGraphicsItem *item = itemAt(mousePos);
 	
 	switch (m_mode) {
-		case mMoveItem :
-			doMoveItem(mousePos);
+		case mEditState :
+			endProcessItem(item);
 			break;
 		case mConnectItems :
 			doConnectItem(item);
@@ -167,14 +167,21 @@ void SceneGraph::processSelect(const QPoint & pos)
 			m_selectedConnection->setPort0(pt);
 			
 			scene()->addItem(m_selectedConnection);
-			
-		 } else {
-		     QGraphicsItem *ti = item->topLevelItem();
+
+		} else {
+		    QGraphicsItem *ti = item->topLevelItem();
 			
 			if(ti->type() == GlyphItem::Type ) {
-				m_mode = mMoveItem;
+				
 				GlyphItem *selectedItem = static_cast<GlyphItem *>(ti);
-				asGlyphScene()->selectGlyph(selectedItem);				
+				asGlyphScene()->selectGlyph(selectedItem);	
+
+				if (item->type() == StateControlItem::Type) {
+					selectedItem->beginEditState(item);
+					m_mode = mEditState;
+				} else
+					m_mode = mMoveItem;
+						
 			}
 		 }
      } else {
@@ -274,6 +281,22 @@ void SceneGraph::beginProcessItem(QMouseEvent *event)
 		default:
 		;
 	}
+}
+
+void SceneGraph::endProcessItem(QGraphicsItem *item)
+{
+	if (!item) return;
+	QGraphicsItem *ti = item->topLevelItem();
+			
+	if(ti->type() != GlyphItem::Type ) return;
+		
+	GlyphItem *selectedItem = static_cast<GlyphItem *>(ti);
+		
+	if (item->type() == StateControlItem::Type) {
+		selectedItem->endEditState(item);
+		emit sendGraphChanged();
+	}
+
 }
 
 void SceneGraph::keyPressEvent(QKeyEvent *event)

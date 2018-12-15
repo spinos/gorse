@@ -48,10 +48,10 @@ void DrawableOps::UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangle
     else
     	mesh->createPositionNormalArray(rec->posnmlBuffer());
 
-    const bool expanded = oldL < rec->size();
+    const bool expanded = (oldL < rec->size() || rec->size() <= (oldL>>1) );
     rec->setToRelocate(expanded);
     if(expanded)
-        mesh->createBarycentricCoordinates(rec->barycBuffer());
+        rec->createBarycentricCoordinates(mesh->numIndices());
 
     rec->setDrawArrayLength(mesh->numIndices());
     rec->setDirty(true);
@@ -202,5 +202,13 @@ void DrawableOps::lockScene()
 
 void DrawableOps::unlockScene()
 { m_scene->unlock(); }
+
+void DrawableOps::setDrawableVisible(bool x)
+{
+    m_scene->lock();
+    if(x) m_scene->enqueueShowDrawable(opsId() ); 
+    else m_scene->enqueueHideDrawable(opsId() ); 
+    m_scene->unlock();
+}
 
 }

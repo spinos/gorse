@@ -32,7 +32,9 @@ public:
     ~SimpleBuffer();
     
     void purgeBuffer();
+/// extend and relocate existing data if needed
     void createBuffer(int count);
+/// extend or shrink and destroy existing data if needed
     void resetBuffer(int count);
 /// insert n elements at loc
     void insert(const T *b, int n, int loc);
@@ -83,21 +85,24 @@ SimpleBuffer<T>::~SimpleBuffer()
 }
 
 template<typename T>
-void SimpleBuffer<T>::resetBuffer(int count)
-{
-    if(m_data)
-        delete[] m_data;
-
-    m_cap = Round1024(count);
-    m_data = new T[m_cap];
-    m_count = count;
-}
-
-template<typename T>
 void SimpleBuffer<T>::createBuffer(int count)
 {
     if(m_cap < count)
         extendBuffer(count);
+    m_count = count;
+}
+
+template<typename T>
+void SimpleBuffer<T>::resetBuffer(int count)
+{
+    const int cap1 = Round1024(count);
+    if(m_cap < count || (cap1 <= (m_cap>>1)) ) {
+        if(m_data) delete[] m_data;
+
+        m_cap = cap1;
+        m_data = new T[m_cap];
+    }
+    
     m_count = count;
 }
 

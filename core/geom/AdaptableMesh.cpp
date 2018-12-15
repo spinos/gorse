@@ -163,17 +163,26 @@ void AdaptableMesh::appendFaceUVs(const Float2 *faceUVs, int i, int n)
 void AdaptableMesh::setNumFaces(int n)
 { setNumTriangles(n); }
 
-void AdaptableMesh::copyTo(AdaptableMesh *b, const int &nv, const int &nf) const
+void AdaptableMesh::copyMeshTo(AdaptableMesh *b, const int &nv, const int &nf) const
 {
     b->createTriangleMesh(nv, nf);
     memcpy(b->indices(), c_indices(), nf * 12);
     memcpy(b->positions(), c_positions(), nv * 12);
     memcpy(b->normals(), c_normals(), nv * 12);
-    b->clearUVSets();
+    
+    int nuv = numUVSets();
+    if(nuv < 1) {
+        b->clearUVSets();
+        return;
+    }
+
+    b->createUVSets(nuv);
+
     std::deque<ver1::NamedUV >::const_iterator it = c_uvBegin();
-    for(;it!=c_uvEnd();++it) {
-        Float2 *uvs = b->addUVSet(it->first);
-        memcpy(uvs, it->second.c_data(), nf * 3 * 8);
+    for(int i=0;it!=c_uvEnd();++it,++i) {
+        b->setUVSetName(it->first, i);
+        Float2 *uvs = b->uvSetValue(i);
+        memcpy(uvs, it->second.c_data(), nf * 24);
     }
 }
 

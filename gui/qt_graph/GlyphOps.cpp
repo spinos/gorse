@@ -27,6 +27,9 @@ void GlyphOps::update()
 bool GlyphOps::hasDrawable() const
 { return false; }
 
+void GlyphOps::setDrawableVisible(bool x)
+{}
+
 void GlyphOps::addAttributes(const QJsonObject &content)
 {
 	QJsonArray attrArray = content["attribs"].toArray();

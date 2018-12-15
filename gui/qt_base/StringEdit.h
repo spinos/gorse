@@ -9,7 +9,7 @@ class QPushButton;
 QT_END_NAMESPACE
 
 namespace alo {
-
+struct AFileDlgProfile;
 class StringEdit : public QWidget {
 
 	Q_OBJECT
@@ -19,6 +19,7 @@ public:
 	
 	void setValue(const std::string &x);
     void setName(const std::string &name);
+    void setReadFileProfile(AFileDlgProfile *prof);
 
 	QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
@@ -33,6 +34,7 @@ private slots:
 private:
     QLineEdit *m_edit;
     QPushButton *m_btn;
+    AFileDlgProfile *m_readFileProfile;
     std::string m_name;
     std::string m_val;
 
