@@ -2,14 +2,18 @@
  *  EdgeCollapse.h
  *  aloe
  *
- *  Mesh simplification by edge collapsing
- *
+ *  mesh simplification by incremental decimation
+ *  topological operator is half edge collapse
+ *  vertex list does not expand
  *  sort edges by cost
- *  select lowest cost edge at the beginning to collapse
- *  relocate remove vertex and faces to end
- *  no vertex will be added or removed, they just shuffle
+ *  select lowest cost edge (p, q) at the list beginning
+ *  collapse q to p where cost of p > q
+ *  removing faces around q creates a hold
+ *  re-triangulate the hole reducing number of faces by two
+ *  relocate removed vertex and faces to end
  *  cost of collapes a vertex <- max (1 - Na dot Nb)
  *  Na, Nb is normal of any face pair connected to the vertex
+ *  keep edges on border
  *
  */
 

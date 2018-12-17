@@ -31,6 +31,7 @@ class DrawableOps : public GlyphOps, public DrawableResourceArray
 {
 	DrawableScene *m_scene;
 	int m_drawCounter;
+	bool m_drawableVisible;
 
 public:
 	DrawableOps();
@@ -48,6 +49,7 @@ protected:
 	DrawableObject *createDrawable();
 	
 	const int &frameNumber() const;
+	const bool &drawableVisible() const;
 
 	static void UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangleMesh *mesh, bool showUV=false);
 	void initiateResource(DrawableResource *rec);

@@ -157,6 +157,7 @@ bool LodMeshInOps::loadCache(const std::string &fileName)
 
 void LodMeshInOps::recvCameraChanged(const CameraEvent &x)
 {
+    if(!drawableVisible()) return;
     if(m_cache.numMeshes() < 1) return;
     if(freezeView()) return;
     if(x.progressBegin() || x.progressEnd()) return;

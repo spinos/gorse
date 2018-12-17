@@ -7,7 +7,8 @@
 
 namespace alo {
 
-DrawableOps::DrawableOps() : m_drawCounter(0)
+DrawableOps::DrawableOps() : m_drawCounter(0),
+m_drawableVisible(true)
 {}
 
 DrawableOps::~DrawableOps()
@@ -38,6 +39,9 @@ DrawableObject *DrawableOps::createDrawable()
 
 const int &DrawableOps::frameNumber() const
 { return m_scene->frameNumber(); }
+
+const bool &DrawableOps::drawableVisible() const
+{ return m_drawableVisible; }
 
 void DrawableOps::UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangleMesh *mesh, bool showUV)
 {
@@ -209,6 +213,7 @@ void DrawableOps::setDrawableVisible(bool x)
     if(x) m_scene->enqueueShowDrawable(opsId() ); 
     else m_scene->enqueueHideDrawable(opsId() ); 
     m_scene->unlock();
+    m_drawableVisible = x;
 }
 
 }

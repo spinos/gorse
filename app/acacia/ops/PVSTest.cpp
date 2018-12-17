@@ -95,6 +95,7 @@ void PVSTest::computeMesh()
 
 void PVSTest::recvCameraChanged(const CameraEvent &x)
 {
+    if(!drawableVisible()) return;
     if(freezeView()) return;
     if(x.progressBegin() || x.progressEnd()) return;
     if(!updateView(*x.camera(), *x.frustum())) return;
