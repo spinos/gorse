@@ -46,7 +46,7 @@ void DrawableResource::dettachDrawable()
 DrawableObject *DrawableResource::drawable()
 { return m_object; }
 
-const int &DrawableResource::size() const
+int DrawableResource::size() const
 { return m_posnml.capacity(); }
 
 const int &DrawableResource::drawArrayLength() const

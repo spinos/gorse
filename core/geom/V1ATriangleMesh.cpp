@@ -242,7 +242,7 @@ void ATriangleMesh::createPositionNormalArray(SimpleBuffer<Vector3F>& posnml) co
 {
     const Vector3F* p = c_positions();
     const Vector3F* n = c_normals();
-    posnml.resetBuffer(m_numIndices * 2);
+    posnml.resetBuffer(m_numTriangles * 6);
     for(int i=0;i<m_numTriangles;++i) {
         const Int3 &fv = c_indices()[i];
         const int i6 = i * 6;

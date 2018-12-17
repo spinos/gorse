@@ -35,7 +35,7 @@ public:
 	void dettachDrawable();
 	DrawableObject *drawable();
 
-	const int &size() const;
+	int size() const;
 	const int &drawArrayLength() const;
 	const int &changedOnFrame() const;
 	bool toRelocate() const;

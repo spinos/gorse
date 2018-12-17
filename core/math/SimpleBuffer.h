@@ -33,9 +33,9 @@ public:
     
     void purgeBuffer();
 /// extend and relocate existing data if needed
-    void createBuffer(int count);
+    void createBuffer(int n);
 /// extend or shrink and destroy existing data if needed
-    void resetBuffer(int count);
+    void resetBuffer(int n);
 /// insert n elements at loc
     void insert(const T *b, int n, int loc);
 /// swap n elements between location a and b
@@ -59,7 +59,7 @@ public:
     void operator<<(const T& x);
     
 private:
-    void extendBuffer(int count);
+    void extendBuffer(int n);
     
 };
 
@@ -85,31 +85,27 @@ SimpleBuffer<T>::~SimpleBuffer()
 }
 
 template<typename T>
-void SimpleBuffer<T>::createBuffer(int count)
+void SimpleBuffer<T>::createBuffer(int n)
 {
-    if(m_cap < count)
-        extendBuffer(count);
-    m_count = count;
+	if (m_cap < n) {
+		extendBuffer(n);
+	}
+    m_count = n;
 }
 
 template<typename T>
-void SimpleBuffer<T>::resetBuffer(int count)
+void SimpleBuffer<T>::resetBuffer(int n)
 {
-    const int cap1 = Round1024(count);
-    if(m_cap < count || (cap1 <= (m_cap>>1)) ) {
-        if(m_data) delete[] m_data;
-
-        m_cap = cap1;
-        m_data = new T[m_cap];
-    }
-    
-    m_count = count;
+	if (m_cap < n) {
+		extendBuffer(n);
+	}
+    m_count = n;
 }
 
 template<typename T>
-void SimpleBuffer<T>::extendBuffer(int count)
+void SimpleBuffer<T>::extendBuffer(int n)
 {
-    m_cap = Round1024(count);
+    m_cap = Round1024(n);
     T* d = new T[m_cap];
     if(m_data && m_count) {
         memcpy(d, m_data, sizeof(T) * m_count);

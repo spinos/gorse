@@ -45,14 +45,24 @@ bool HFaceVaryingUV::load(ver1::ATriangleMesh *msh, const int &ntri)
 { 
     std::vector<std::string> uvNames;
     lsData(uvNames);
+    
+    int nuv = uvNames.size();
+    if(nuv < 1) {
+        msh->clearUVSets();
+        return false;
+    }
+    
+    msh->createUVSets(nuv);
+    
     std::vector<std::string>::const_iterator it = uvNames.begin();
-    for(;it!=uvNames.end();++it) {
+    for(int i=0;it!=uvNames.end();++it,++i) {
         PathList pl(*it);
         const std::string &uvs = pl.lastName();
-        Float2 *uvd = msh->addUVSet(uvs);
+        msh->setUVSetName(uvs, i);
+        Float2 *uvd = msh->uvSetValue(i);
         readUVData(uvs, (char *)uvd, ntri);
     }
-        
+    
     return true; 
 }
 

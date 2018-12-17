@@ -52,7 +52,7 @@ void DrawableOps::UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangle
     else
     	mesh->createPositionNormalArray(rec->posnmlBuffer());
 
-    const bool expanded = (oldL < rec->size() || rec->size() <= (oldL>>1) );
+    const bool expanded = (oldL < rec->size() );
     rec->setToRelocate(expanded);
     if(expanded)
         rec->createBarycentricCoordinates(mesh->numIndices());
