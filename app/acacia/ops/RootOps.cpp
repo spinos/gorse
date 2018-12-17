@@ -53,7 +53,7 @@ void RootOps::addDrawableTo(DrawableScene *scene)
 
 void RootOps::computeMesh()
 {
-    m_mesh->initAdaptableMesh();
+    m_mesh->purgeMesh();
     
     Uniform<Lehmer> ur(7999999);
 

@@ -17,7 +17,7 @@ ATriangleMesh::ATriangleMesh() : m_numVertices(0),
 {}
 
 ATriangleMesh::~ATriangleMesh() 
-{ m_uvSets.clear(); }
+{}
 
 const int& ATriangleMesh::numVertices() const
 { return m_numVertices; }
@@ -28,8 +28,8 @@ const int& ATriangleMesh::numTriangles() const
 const int& ATriangleMesh::numIndices() const
 { return m_numIndices; }
 
-int ATriangleMesh::numUVSets() const
-{ return m_uvSets.size(); }
+const int &ATriangleMesh::numUVSets() const
+{ return m_uvSets.count(); }
 
 const Vector3F* ATriangleMesh::c_positions() const
 { return m_positions.c_data(); }
@@ -94,61 +94,48 @@ void ATriangleMesh::copyIndicesFrom(const unsigned *x)
 
 Float2 *ATriangleMesh::addUVSet(const std::string &name)
 {
-    m_uvSets.push_front(NamedUV());
-    NamedUV &fuv = m_uvSets.front();
-    fuv.first = name;
-    fuv.second.resetBuffer(m_numIndices);
-    return fuv.second.data();
+    int n = numUVSets();
+    if(n < 8) {
+        m_uvSets.resize(n+1, m_numIndices);
+        m_uvSets.setName(name, n);
+    } else {
+        std::cout << " WARNING max 8 uv set ";
+        n = 7;
+    }
+    SimpleBuffer<Float2> *d = m_uvSets.buffer(n);
+    return d->data();
 }
 
 void ATriangleMesh::setUVSetName(const std::string &name, int i)
-{ m_uvSets[i].first = name; }
+{ m_uvSets.setName(name, i); }
 
-Float2 *ATriangleMesh::uvSetValue(int i)
-{ return m_uvSets[i].second.data(); }
+Float2 *ATriangleMesh::uvSet(int i)
+{ 
+    SimpleBuffer<Float2> *d = m_uvSets.buffer(i);
+    return d->data(); 
+}
 
 void ATriangleMesh::createUVSets(int n)
-{
-    if(m_uvSets.size() < n) {
-        for(;;) {
-            addUVSet("unknown");
-            if(m_uvSets.size() == n) 
-                return;
-        }
-    } 
-    if(m_uvSets.size() > n) {
-        for(;;) {
-            m_uvSets.pop_back();
-            if(m_uvSets.size() == n) 
-                return;
-        }
-    }
-}
+{ m_uvSets.resize(n, m_numIndices); }
 
 void ATriangleMesh::clearUVSets()
 { m_uvSets.clear(); }
 
 const Float2 *ATriangleMesh::c_uvSet(const std::string &name) const
 {
-    std::deque<NamedUV >::const_iterator it = m_uvSets.begin();
-    for(;it!=m_uvSets.end();++it) {
-        const NamedUV &auv = *it;
-        if(auv.first == name) 
-            return auv.second.c_data();
-    }
-    return 0;
+    int i = m_uvSets.findName(name);
+    if(i<0) return 0;
+
+    return c_uvSet(i);
 }
 
 const std::string &ATriangleMesh::c_uvName(int i) const
-{
-    const NamedUV &auv = m_uvSets[i];
-    return auv.first;
-}
+{ return m_uvSets.c_name(i); }
 
 const Float2 *ATriangleMesh::c_uvSet(int i) const
 {
-    const NamedUV &auv = m_uvSets[i];
-    return auv.second.c_data();
+    const SimpleBuffer<Float2> *d = m_uvSets.c_buffer(i);
+    return d->c_data();
 }
 
 void ATriangleMesh::reverseTriangleNormals()
@@ -326,26 +313,41 @@ void ATriangleMesh::printFace(int i) const
     std::cout << " face "<<i<<" (" << fv.x << "," << fv.y << "," << fv.z << ") ";               
 }
 
-std::deque<NamedUV >::iterator ATriangleMesh::uvBegin()
-{ return m_uvSets.begin(); }
-
-std::deque<NamedUV >::iterator ATriangleMesh::uvEnd()
-{ return m_uvSets.end(); }
-
-std::deque<NamedUV >::const_iterator ATriangleMesh::c_uvBegin() const
-{ return m_uvSets.begin(); }
-
-std::deque<NamedUV >::const_iterator ATriangleMesh::c_uvEnd() const
-{ return m_uvSets.end(); }
-
 SimpleBuffer<Float2> &ATriangleMesh::uvBuffer(int i)
-{ return m_uvSets[i].second; }
+{ return *m_uvSets.buffer(i); }
 
 void ATriangleMesh::getAabb(BoundingBox &b) const
 {
     b.reset();
     for(int i=0;i<m_numVertices;++i)
         b.expandBy(m_positions[i]);
+}
+
+void ATriangleMesh::scaleBy(float x)
+{
+    for(int i=0;i<m_numVertices;++i)
+        m_positions[i] *= x;
+}
+
+void ATriangleMesh::copyMeshTo(ATriangleMesh *b, const int &nv, const int &nf) const
+{
+    b->createTriangleMesh(nv, nf);
+    memcpy(b->indices(), c_indices(), nf * 12);
+    memcpy(b->positions(), c_positions(), nv * 12);
+    memcpy(b->normals(), c_normals(), nv * 12);
+    
+    const int &nuv = numUVSets();
+    if(nuv < 1) {
+        b->clearUVSets();
+        return;
+    }
+
+    b->createUVSets(nuv);
+
+    for(int i=0;i<nuv;++i) {
+        b->setUVSetName(c_uvName(i), i);
+        memcpy(b->uvSet(i), c_uvSet(i), nf * 24);
+    }
 }
 
 }

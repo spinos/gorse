@@ -11,6 +11,7 @@
 
 #include <geom/AdaptableMesh.h>
 #include "CoarseFineHistory.h"
+#include <deque>
 
 namespace alo {
 

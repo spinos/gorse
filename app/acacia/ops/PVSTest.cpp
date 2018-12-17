@@ -37,7 +37,6 @@ void PVSTest::addDrawableTo(DrawableScene *scene)
 void PVSTest::computeMesh()
 {
     AdaptableMesh srcMesh;
-    srcMesh.initAdaptableMesh();
 
     const int nu = 256;
     const double du = 4.0 / (double)nu;

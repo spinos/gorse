@@ -32,6 +32,7 @@ public slots:
 	void recvSelectGlyph(bool isSelecting);
 	
 private slots:
+	void recvIntValue(QPair<std::string, float> x);
 	void recvFloatValue(QPair<std::string, float> x);
 	void recvListItemSelection(QPair<std::string, std::string> x);
 	void recvBoolValue(QPair<std::string, bool> x);
@@ -42,6 +43,7 @@ private:
 	void clearAttribs();
 	void lsAttribs(alo::GlyphOps *ops);
 	void lsAttr(alo::QAttrib *attr);
+	void lsIntAttr(alo::QAttrib *attr);
 	void lsFloatAttr(alo::QAttrib *attr);
 	void lsFloat2Attr(alo::QAttrib *attr);
 	void lsListAttr(alo::QAttrib *attr);

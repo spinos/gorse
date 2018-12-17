@@ -13,21 +13,13 @@
 namespace alo {
 
 AdaptableMesh::AdaptableMesh() 
-{ initAdaptableMesh(); }
+{}
 
 AdaptableMesh::~AdaptableMesh() 
 {}
 
-void AdaptableMesh::initAdaptableMesh()
-{
-    createTriangleMesh(1000, 2000);
-    setNumVertices(0);
-    setNumTriangles(0);
-}
-
 void AdaptableMesh::createMinimal()
 {
-    initAdaptableMesh();
     addVertex(Vector3F(0.f, 0.f, 0.f));
     addVertex(Vector3F(8.f, 0.f, 0.f));
     addVertex(Vector3F(8.f, 8.f, 0.f));
@@ -123,10 +115,8 @@ void AdaptableMesh::swapFace(int fromFace, int toFace)
 
 void AdaptableMesh::swapFaceUV(int fromFace, int toFace)
 {
-    std::deque<ver1::NamedUV >::iterator it = uvBegin();
-    for(;it!=uvEnd();++it) {
-        it->second.swap(fromFace * 3, toFace * 3, 3);
-    }
+    for(int i=0;i<numUVSets();++i)
+        uvBuffer(i).swap(fromFace * 3, toFace * 3, 3);
 }
 
 void AdaptableMesh::insertFaces(const std::vector<int> &faceVertices, int toFirstFace)
@@ -162,29 +152,6 @@ void AdaptableMesh::appendFaceUVs(const Float2 *faceUVs, int i, int n)
 
 void AdaptableMesh::setNumFaces(int n)
 { setNumTriangles(n); }
-
-void AdaptableMesh::copyMeshTo(AdaptableMesh *b, const int &nv, const int &nf) const
-{
-    b->createTriangleMesh(nv, nf);
-    memcpy(b->indices(), c_indices(), nf * 12);
-    memcpy(b->positions(), c_positions(), nv * 12);
-    memcpy(b->normals(), c_normals(), nv * 12);
-    
-    int nuv = numUVSets();
-    if(nuv < 1) {
-        b->clearUVSets();
-        return;
-    }
-
-    b->createUVSets(nuv);
-
-    std::deque<ver1::NamedUV >::const_iterator it = c_uvBegin();
-    for(int i=0;it!=c_uvEnd();++it,++i) {
-        b->setUVSetName(it->first, i);
-        Float2 *uvs = b->uvSetValue(i);
-        memcpy(uvs, it->second.c_data(), nf * 24);
-    }
-}
 
 }
 //:~

@@ -37,7 +37,6 @@ bool HHistoryMeshRecord::load(std::deque<CoarseFineHistoryDesc> &stageDescs)
 
 bool HHistoryMeshRecord::load(HistoryMesh *msh, int nv, int nt)
 {
-    msh->purgeMesh();
     msh->createTriangleMesh(nv, nt);
 
     readF3Data(".pos", (char *)msh->positions(), nv);
@@ -48,11 +47,17 @@ bool HHistoryMeshRecord::load(HistoryMesh *msh, int nv, int nt)
 
     readIntAttr(".nuvs", &nuvs);
 
-    if(nuvs>0) {
-        HFaceVaryingUV fuv(childPath("face_varying_uv"));
-        fuv.load(msh, nt);
-        fuv.close();
+    if(nuvs < 1) {
+        msh->clearUVSets();
+        return true;
     }
+
+    msh->createUVSets(nuvs);
+
+    HFaceVaryingUV fuv(childPath("face_varying_uv"));
+    fuv.load(msh, nt);
+    fuv.close();
+
     return true;
 }
 

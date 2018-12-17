@@ -21,7 +21,6 @@ public:
 	AdaptableMesh();
 	virtual ~AdaptableMesh();
     
-    void initAdaptableMesh();
     void createMinimal();
     
     int addVertex(const Vector3F& pos);
@@ -53,9 +52,7 @@ public:
 /// n faces to i-th uv set to end
     void appendFaceUVs(const Float2 *faceUVs, int i, int n);
     void setNumFaces(int n);
-/// nv vertices nf faces to b
-    void copyMeshTo(AdaptableMesh *b, const int &nv, const int &nf) const;
- 
+
 protected:
     
 private:

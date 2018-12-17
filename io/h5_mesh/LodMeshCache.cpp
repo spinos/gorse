@@ -10,7 +10,7 @@ m_meshName("unknown"),
 m_currentCacheId(0)
 {
     m_outMesh = new AdaptableMesh;
-    for(int i=0;i<2;++i) {
+    for(int i=0;i<3;++i) {
         m_historyInCore[i] = new HistoryMesh;
         m_historyInCore[i]->createTriangleMesh(1000,1000);
 /// only stage
@@ -21,7 +21,7 @@ m_currentCacheId(0)
 LodMeshCache::~LodMeshCache()
 { 
     delete m_outMesh;
-    for(int i=0;i<2;++i)
+    for(int i=0;i<3;++i)
         delete m_historyInCore[i]; 
 }
 
@@ -165,7 +165,7 @@ const HistoryMesh *LodMeshCache::c_currentCache() const
 
 bool LodMeshCache::switchToStage(int x)
 {
-    for(int i=0;i<2;++i) {
+    for(int i=0;i<3;++i) {
         if(m_historyInCore[i]->cachedStageId() == x) {
             m_currentCacheId = i;
             return true;
@@ -178,7 +178,7 @@ HistoryMesh *LodMeshCache::selectCurrentCache(int x)
 {
     m_currentCacheId = 0; 
     int md = 0;
-    for(int i=0;i<2;++i) {
+    for(int i=0;i<3;++i) {
         int ci = m_historyInCore[i]->cachedStageId();
         if(ci < 0) {
             m_currentCacheId = i;

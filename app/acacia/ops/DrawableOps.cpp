@@ -52,13 +52,15 @@ void DrawableOps::UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangle
     else
     	mesh->createPositionNormalArray(rec->posnmlBuffer());
 
-    const bool expanded = (oldL < rec->size() );
-    rec->setToRelocate(expanded);
-    if(expanded)
+    const bool relocated = (oldL < rec->size() || oldL > rec->size() + 2048);
+
+    rec->setToRelocate(relocated);
+    if(relocated)
         rec->createBarycentricCoordinates(mesh->numIndices());
 
     rec->setDrawArrayLength(mesh->numIndices());
     rec->setDirty(true);
+
 }
 
 void DrawableOps::initiateResource(DrawableResource *rec)
@@ -66,7 +68,7 @@ void DrawableOps::initiateResource(DrawableResource *rec)
     rec->setChangedOnFrame(frameNumber());
     DrawableObject *d = createDrawable();
     rec->attachToDrawable(d);
-    
+
     m_scene->lock();
     m_scene->enqueueCreateDrawable(d, opsId());
     m_scene->unlock();

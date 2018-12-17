@@ -173,6 +173,18 @@ QAttrib *GlyphOps::findAttrib(const std::string &attrName)
 	return it->second;
 }
 
+bool GlyphOps::setIntAttrValue(const std::string &attrName, const int &x)
+{
+	QAttrib *attr = findAttrib(attrName);
+	if(!attr) return false;
+	
+	IntAttrib *fattr = static_cast<IntAttrib *>(attr);
+	fattr->setValue(x);
+	
+	update();
+	return true;
+}
+
 bool GlyphOps::setFloatAttrValue(const std::string &attrName, const float &x)
 {
 	std::string realAttrName = attrName;
@@ -275,6 +287,16 @@ AFileDlgProfile *GlyphOps::writeFileProfileR () const
 
 AFileDlgProfile *GlyphOps::readFileProfileR () const
 { return 0; }
+
+bool GlyphOps::getIntAttribValue(int &val, const std::string &attrName)
+{
+	QAttrib * attr = findAttrib(attrName);
+	if(!attr) return false;
+
+    IntAttrib *fattr = static_cast<IntAttrib *>(attr);
+    fattr->getValue(val);
+    return true;
+}
 
 bool GlyphOps::getFloatAttribValue(float &val, const std::string &attrName)
 {

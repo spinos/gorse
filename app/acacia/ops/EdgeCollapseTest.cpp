@@ -14,6 +14,7 @@
 #include <boost/format.hpp>
 #include <boost/chrono/include.hpp>
 #include <ctime>
+#include <geom/GeodesicSphere.h>
 
 namespace alo {
 
@@ -32,6 +33,8 @@ EdgeCollapseTest::EdgeCollapseTest()
     m_stageMesh = new HistoryMesh;
     m_stageMesh->createTriangleMesh(1000, 1000);
     m_stageMesh->addHistoryStage();
+
+#if 0
     const int nu = 125;
     const float du = 39.f / (float)nu;
     for(int i=0;i<nu;++i) {
@@ -79,6 +82,11 @@ EdgeCollapseTest::EdgeCollapseTest()
     }
 
     m_sourceMesh->calculateVertexNormals();
+#else
+    GeodesicSphere sphere(70);
+    sphere.scaleBy(18.f);
+    sphere.copyMeshTo(m_sourceMesh, sphere.numVertices(), sphere.numTriangles());
+#endif
     
     EdgeCollapse ech;
 

@@ -26,6 +26,8 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
 { 
     int k = content["id"].toInt();
     switch(k) {
+    case AcaciaOpsType::AoSphere :
+        return new SphereOps;
     case AcaciaOpsType::AoRoot :
         return new RootOps;
     case AcaciaOpsType::AoLodMesh :

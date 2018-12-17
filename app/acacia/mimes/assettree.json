@@ -34,6 +34,37 @@
                                     "value": false
                                 }
                             ]
+                        },
+                        {
+                            "id": 214496,
+                            "name": "geodesic_sphere",
+                            "label": "Sphere",
+                            "icon": ":images/sphere.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "r",
+                                    "label": "Radius",
+                                    "typ": 3,
+                                    "value": 10.0,
+                                    "min": 1.0,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "l",
+                                    "label": "Level",
+                                    "typ": 2,
+                                    "value": 6,
+                                    "min": 1,
+                                    "max": 100.0
+                                },
+                                {
+                                    "name": "sho_uv",
+                                    "label": "Show As UV",
+                                    "typ": 1,
+                                    "value": false
+                                }
+                            ]
                         }
                     ]
                 },

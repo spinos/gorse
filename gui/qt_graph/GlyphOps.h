@@ -30,7 +30,8 @@ public:
 	std::map<std::string, QAttrib * >::iterator attribBegin();
 	std::map<std::string, QAttrib * >::iterator attribEnd();
 	QAttrib *findAttrib(const std::string &attrName);
-	bool setFloatAttrValue(const std::string &attrName, const float &x);
+	bool setIntAttrValue(const std::string &attrName, const int &x);
+    bool setFloatAttrValue(const std::string &attrName, const float &x);
     bool setBoolAttrValue(const std::string &attrName, const bool &x);
 	bool setListAttrValue(const std::string &attrName, const std::string &itemName);
 	bool setStringAttrValue(const std::string &attrName, const std::string &x);
@@ -60,6 +61,7 @@ protected:
 	QAttrib *addListAttribute(const QJsonObject &content);
 	QAttrib *addStringAttribute(const QJsonObject &content);
 
+	bool getIntAttribValue(int &val, const std::string &attrName);
 	bool getFloatAttribValue(float &val, const std::string &attrName);
 	bool getFloat2AttribValue(float *val, const std::string &attrName);
 	bool getBoolAttribValue(bool &val, const std::string &attrName);

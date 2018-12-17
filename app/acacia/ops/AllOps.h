@@ -7,11 +7,13 @@
 #include "EdgeCollapseTest.h"
 #include "LodMeshInOps.h"
 #include "PVSTest.h"
+#include "SphereOps.h"
 
 namespace alo {
 
 enum AcaciaOpsType {
     AoUnknown = 0,
+    AoSphere = 214496,
     AoLodMesh = 277635,
     AoStaticMesh = 299105,
     AoRoot = 872960,

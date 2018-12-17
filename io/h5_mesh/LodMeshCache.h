@@ -25,7 +25,7 @@ class LodMeshCache : public HistoryReform {
     std::string m_meshName;
     std::deque<CoarseFineHistoryDesc> m_stageDescs;
     AdaptableMesh *m_outMesh;
-    HistoryMesh *m_historyInCore[2];
+    HistoryMesh *m_historyInCore[3];
     int m_currentCacheId;
     int m_minNv;
     int m_maxNv;

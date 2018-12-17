@@ -26,6 +26,7 @@
     <file>images/eyeOpen.png</file>
     <file>images/eyeHalf.png</file>
     <file>images/eyeClose.png</file>
+    <file>images/sphere.png</file>
     <file>mimes/assettree.json</file>
 </qresource>
 </RCC>

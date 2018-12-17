@@ -14,24 +14,22 @@
 #include <math/BoundingBox.h>
 #include <math/Float2.h>
 #include <math/Int3.h>
-#include <deque>
+#include <math/NamedBufferArray.h>
 
 namespace alo {
        
 namespace ver1 {
-
-/// uv set name and face-varying texture coordinate
-typedef std::pair<std::string, SimpleBuffer<Float2> > NamedUV;
 
 class ATriangleMesh {
 	
     SimpleBuffer<Vector3F> m_positions;
     SimpleBuffer<Vector3F> m_normals;
     SimpleBuffer<Int3> m_indices;
+/// name and face-varying texture coordinate
+    NamedBufferArray<Float2, 8> m_uvSets;
     int m_numVertices;
     int m_numTriangles;
     int m_numIndices;
-    std::deque<NamedUV > m_uvSets;
     
 public:
 	ATriangleMesh();
@@ -45,13 +43,13 @@ public:
     void createUVSets(int n);
     void setUVSetName(const std::string &name, int i);
     Float2 *addUVSet(const std::string &name);
-    Float2 *uvSetValue(int i);
+    Float2 *uvSet(int i);
     void clearUVSets();
 
     const int& numVertices() const;
     const int& numTriangles() const;
     const int& numIndices() const;
-    int numUVSets() const;
+    const int &numUVSets() const;
     
     const Int3* c_indices() const;
     const Vector3F* c_positions() const;
@@ -80,7 +78,11 @@ public:
     Int3* indices();
     Vector3F* positions();
     Vector3F* normals();
-    
+
+    void scaleBy(float x);
+/// nv vertices nf faces to b
+    void copyMeshTo(ATriangleMesh *b, const int &nv, const int &nf) const;
+
 protected:
     void setNumVertices(int x);
     void setNumTriangles(int x);
@@ -88,10 +90,6 @@ protected:
     SimpleBuffer<Vector3F>& positionBuffer();
     SimpleBuffer<Vector3F>& normalBuffer();
     SimpleBuffer<Int3>& indexBuffer();
-    std::deque<NamedUV >::iterator uvBegin();
-    std::deque<NamedUV >::iterator uvEnd();
-    std::deque<NamedUV >::const_iterator c_uvBegin() const;
-    std::deque<NamedUV >::const_iterator c_uvEnd() const;
     SimpleBuffer<Float2> &uvBuffer(int i);
     
 private:

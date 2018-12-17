@@ -60,6 +60,7 @@ public:
     
 private:
     void extendBuffer(int n);
+    void relocateBuffer(int n);
     
 };
 
@@ -96,8 +97,9 @@ void SimpleBuffer<T>::createBuffer(int n)
 template<typename T>
 void SimpleBuffer<T>::resetBuffer(int n)
 {
-	if (m_cap < n) {
-		extendBuffer(n);
+    int nr = Round1024(n);
+	if (m_cap < nr || m_cap > nr + 2048) {
+		relocateBuffer(nr);
 	}
     m_count = n;
 }
@@ -112,6 +114,16 @@ void SimpleBuffer<T>::extendBuffer(int n)
         delete[] m_data;
     }
     m_data = d;
+}
+
+template<typename T>
+void SimpleBuffer<T>::relocateBuffer(int n)
+{
+    m_cap = n;
+    if(m_data && m_count) {
+        delete[] m_data;
+    }
+    m_data = new T[m_cap];
 }
 
 template<typename T>

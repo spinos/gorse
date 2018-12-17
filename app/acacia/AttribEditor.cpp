@@ -121,12 +121,42 @@ void AttribEditor::lsAttr(QAttrib *attr)
 		case QAttrib::AtBool :
 			lsBoolAttr(attr);
 		break;
+		case QAttrib::AtInt :
+			lsIntAttr(attr);
+		break;
 		case QAttrib::AtString :
 			lsStringAttr(attr);
 		break;
 		default :
 		break;
 	}
+}
+
+void AttribEditor::lsIntAttr(alo::QAttrib *attr)
+{
+	SimpleLabel *lab = new SimpleLabel(QString(attr->label().c_str()));
+    lab->setShortText(QString(attr->attrName().c_str()));
+	FieldSlider* sld = new FieldSlider();
+	
+    m_leftCollWigs.enqueue(lab);
+    m_rightCollWigs.enqueue(sld);
+
+	IntAttrib *fattr = static_cast<IntAttrib *>(attr);
+	int val, val0, val1;
+	fattr->getValue(val);
+	fattr->getMin(val0);
+	fattr->getMax(val1);
+	sld->setLimit(val0, val1);
+	sld->setValue(val);
+	sld->setName(attr->attrName());
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+	connect(sld, &FieldSlider::valueChanged,
+            this, &AttribEditor::recvIntValue);
+#else	
+	connect(sld, SIGNAL(valueChanged(QPair<std::string, float>)),
+            this, SLOT(recvIntValue(QPair<std::string, float>)));
+#endif			
 }
 
 void AttribEditor::lsFloatAttr(alo::QAttrib *attr)
@@ -247,6 +277,15 @@ void AttribEditor::lsStringAttr(alo::QAttrib *attr)
 	connect(fld, SIGNAL(valueChanged(QPair<std::string, std::string>)),
            this, SLOT(recvStringValue(QPair<std::string, std::string>)));
 
+}
+
+void AttribEditor::recvIntValue(QPair<std::string, float> x)
+{
+	GlyphOps *ops = m_scene->getActiveOps();
+	if(!ops) return;
+
+	if(ops->setIntAttrValue(x.first, x.second) )
+		emit sendAttribChanged();
 }
 
 void AttribEditor::recvFloatValue(QPair<std::string, float> x)
