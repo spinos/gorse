@@ -63,43 +63,6 @@ void DrawableOps::UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangle
 
 }
 
-void DrawableOps::initiateResource(DrawableResource *rec)
-{
-    rec->setChangedOnFrame(frameNumber());
-    DrawableObject *d = createDrawable();
-    rec->attachToDrawable(d);
-
-    m_scene->lock();
-    m_scene->enqueueCreateDrawable(d, opsId());
-    m_scene->unlock();
-}
-
-void DrawableOps::processResource(DrawableResource *rec, bool forcedToRelocate)
-{
-    DrawableObject *d = rec->drawable();
-
-    if(!d) {
-        initiateResource(rec);
-        return;
-    }
-
-    if(rec->toRelocate() || forcedToRelocate) {
-        m_scene->lock();
-        m_scene->enqueueRemoveDrawable(d->drawId(), opsId());
-        m_scene->unlock();
-        initiateResource(rec);
-        return;
-    }
-
-    if(rec->isDirty()) {
-        d->setEditDrawArrayLength(rec->drawArrayLength());
-        m_scene->lock();
-        m_scene->enqueueEditDrawable(d->drawId(), opsId());
-        m_scene->unlock();
-        rec->setDirty(false);
-    }
-}
-
 void DrawableOps::processResourceNoLock(DrawableResource *rec)
 {
     DrawableObject *d = rec->drawable();

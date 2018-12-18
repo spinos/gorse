@@ -6,7 +6,6 @@
 
 #include "LevelOfDetailSelect.h"
 #include <math/Hexahedron.h>
-#include <math/PerspectiveCamera.h>
 
 namespace alo {
 
@@ -25,15 +24,15 @@ bool LevelOfDetailSelect::isStateChanged() const
 void LevelOfDetailSelect::set(int x)
 { m_val = x; }
 
-void LevelOfDetailSelect::select(const Hexahedron &hexa, const PerspectiveCamera &camera)
+void LevelOfDetailSelect::select(const Hexahedron &hexa, const LevelOfDetailParam &param)
 {
 	float r = hexa.size();
-	float d = camera.eyePosition().distanceTo(hexa.center());
+	float d = param._viewPoint.distanceTo(hexa.center());
 	if(d < r) {
 		select(16777217 - d);
 		return;
 	}
-	int s = camera.portWidth() * r / ((d - r) * camera.tanhfov() );
+	int s = param._screenWidth * r / ((d - r) * param._tanhfov );
 	s *= logf(.23f * (s * s) + 1.f);
 	select(s);
 }

@@ -17,12 +17,18 @@
 #ifndef ALO_LEVEL_OF_DETAIL_SELECT_H
 #define ALO_LEVEL_OF_DETAIL_SELECT_H
 
-#include <iostream>
+#include <math/Vector3F.h>
 
 namespace alo {
 
+struct LevelOfDetailParam {
+	Vector3F _viewPoint;
+	float _tanhfov;
+	Vector3F _viewDirection;
+	float _screenWidth;
+};
+
 class Hexahedron;
-class PerspectiveCamera;
 class LevelOfDetailSelect {
 
 	enum StateTag {
@@ -48,7 +54,7 @@ public:
 	bool isStateChanged() const;
 	bool isIncreased() const;
 
-	void select(const Hexahedron &hexa, const PerspectiveCamera &camera);
+	void select(const Hexahedron &hexa, const LevelOfDetailParam &param);
 	void select(int x);
 
 	friend std::ostream& operator<<(std::ostream &output, const LevelOfDetailSelect & p);

@@ -13,17 +13,14 @@
 #include <math/SimpleBuffer.h>
 #include "VisibilityState.h"
 #include "LevelOfDetailSelect.h"
-#include <math/Vector3F.h>
 
 namespace alo {
-class BaseCamera;
+class PerspectiveCamera;
 class VisibleDetail {
 
 	SimpleBuffer<VisibilityState> m_visible;
 	SimpleBuffer<LevelOfDetailSelect> m_detail;
-	Vector3F m_viewPoint;
-	int m_screenWidth;
-	Vector3F m_viewDirection;
+	LevelOfDetailParam m_param;
 	float m_deltaD;
 
 public:
@@ -36,12 +33,13 @@ public:
 	void setDetail(int x, int i);
 	void setDeltaDistance(float x);
 
-	bool updateView(const BaseCamera &cam);
+	bool updateView(const PerspectiveCamera &cam);
 
 	VisibilityState *visibilities();
 	LevelOfDetailSelect *levelOfDetails();
 	const VisibilityState *c_visibilities() const;
 	const LevelOfDetailSelect *c_levelOfDetails() const;
+	const LevelOfDetailParam &param() const;
 
 };
 

@@ -38,17 +38,12 @@ void RootOps::update()
     getFloatAttribValue(m_profile._tws, "tws");
     
     computeMesh();
-
-    DrawableResource *rec = resource();
-    processResource(rec);
 }
 
 void RootOps::addDrawableTo(DrawableScene *scene)
 { 
-    computeMesh();
     setDrawableScene(scene);
-    DrawableResource *rec = resource();
-    initiateResource(rec);
+    computeMesh();
 }
 
 void RootOps::computeMesh()
@@ -140,6 +135,9 @@ void RootOps::computeMesh()
     DrawableResource *rec = resource();
     UpdateMeshResouce(rec, m_mesh);
     
+    lockScene();
+    processResourceNoLock(rec);
+    unlockScene();
 }
 
 }

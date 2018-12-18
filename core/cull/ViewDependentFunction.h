@@ -13,7 +13,7 @@ namespace alo {
 
 class ViewFrustumCull;
 class VisibleDetail;
-class BaseCamera;
+class PerspectiveCamera;
 class AFrustum;
 class VisibilityState;
 class BVHPrimitive;
@@ -32,7 +32,7 @@ public:
 protected:
 
 	void initializeDetails();
-	bool updateView(const BaseCamera &camera, const AFrustum &frustum);
+	bool updateView(const PerspectiveCamera &camera, const AFrustum &frustum);
 
 	void setFreezeView(bool x);
 	const bool &freezeView() const;

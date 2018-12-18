@@ -161,12 +161,13 @@ void LodMeshInOps::recvCameraChanged(const CameraEvent &x)
     if(m_cache.numMeshes() < 1) return;
     if(freezeView()) return;
     if(x.progressBegin() || x.progressEnd()) return;
-    if(!updateView(*x.camera(), *x.frustum())) return;
     
     const PerspectiveCamera *persp = static_cast<const PerspectiveCamera *>(x.camera());
-    lockScene();
-    viewDependentReform(persp);
+    if(!updateView(*persp, *x.frustum())) return;
+    
+    viewDependentReform();
 
+    lockScene();
     const int n = numResources();
     for(int i=0;i<n;++i) {
         DrawableResource *rec = resource(i);
@@ -176,7 +177,7 @@ void LodMeshInOps::recvCameraChanged(const CameraEvent &x)
     unlockScene();
 }
 
-void LodMeshInOps::viewDependentReform(const PerspectiveCamera *persp)
+void LodMeshInOps::viewDependentReform()
 {
     const int n = m_cache.numMeshes();
    
@@ -194,7 +195,7 @@ void LodMeshInOps::viewDependentReform(const PerspectiveCamera *persp)
             continue;
         }
 
-        lod.select(culler()->primitiveHexahedron(i), *persp);
+        lod.select(culler()->primitiveHexahedron(i), details()->param() );
 
         DrawableResource *rec = resource(i);
         if(rec->changedOnFrame() > beforeFrame) {

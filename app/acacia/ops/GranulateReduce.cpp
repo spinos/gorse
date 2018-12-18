@@ -13,7 +13,6 @@
 #include <bvh/BVHNodeIterator.h>
 #include <cull/ViewFrustumCull.h>
 #include <cull/VisibleDetail.h>
-#include <math/PerspectiveCamera.h>
 #include <boost/chrono/include.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
@@ -144,8 +143,7 @@ int GranulateReduce::reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMes
     return npart;
 }
 
-void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
-                              const ViewFrustumCull *culler, VisibleDetail *details)
+void GranulateReduce::viewDependentReform(const ViewFrustumCull *culler, VisibleDetail *details)
 {
     boost::thread tref[12];
     int ntref = 0;
@@ -160,7 +158,7 @@ void GranulateReduce::viewDependentReform(const PerspectiveCamera *persp,
             continue;
         }
         
-        lod.select(culler->primitiveHexahedron(i), *persp);
+        lod.select(culler->primitiveHexahedron(i), details->param() );
         
         DrawableResource *rec = resource(i);
 

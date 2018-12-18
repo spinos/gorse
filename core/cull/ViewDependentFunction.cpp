@@ -7,7 +7,7 @@
 #include "ViewDependentFunction.h"
 #include "ViewFrustumCull.h"
 #include "VisibleDetail.h"
-#include <math/BaseCamera.h>
+#include <math/PerspectiveCamera.h>
 #include <math/AFrustum.h>
 
 namespace alo {
@@ -50,7 +50,7 @@ void ViewDependentFunction::initializeDetails()
     m_details->setDeltaDistance(m_culler->getMeanSize() / 32.f);
 }
 
-bool ViewDependentFunction::updateView(const BaseCamera &camera, const AFrustum &frustum)
+bool ViewDependentFunction::updateView(const PerspectiveCamera &camera, const AFrustum &frustum)
 {
 	if(!m_details->updateView(camera)) return false;
 	m_culler->compare(m_details->visibilities(), frustum);

@@ -6,15 +6,16 @@
  */
 
 #include "VisibleDetail.h"
-#include <math/BaseCamera.h>
+#include <math/PerspectiveCamera.h>
 namespace alo {
 
 VisibleDetail::VisibleDetail() :
-m_viewPoint(Vector3F(-1e9f,-1e9f,-1e9f)),
-m_screenWidth(0),
-m_viewDirection(Vector3F(0.f,0.f,0.f)),
 m_deltaD(1.f)
-{}
+{
+	m_param._viewPoint.set(-1e9f,-1e9f,-1e9f);
+	m_param._screenWidth = 0.f;
+	m_param._viewDirection.setZero();
+}
 
 VisibleDetail::~VisibleDetail()
 {}
@@ -57,20 +58,24 @@ const VisibilityState *VisibleDetail::c_visibilities() const
 const LevelOfDetailSelect *VisibleDetail::c_levelOfDetails() const
 { return m_detail.c_data(); }
 
-bool VisibleDetail::updateView(const BaseCamera &cam)
+bool VisibleDetail::updateView(const PerspectiveCamera &cam)
 {
 	const Vector3F p = cam.eyePosition();
 	const Vector3F d = cam.eyeDirection();
-	int s = cam.portWidth() - m_screenWidth;
+	int s = cam.portWidth() - m_param._screenWidth;
 
-	bool pChanged = p.distanceTo(m_viewPoint) > m_deltaD;
-	bool dChanged = d.dot(m_viewDirection) < .991f;
+	bool pChanged = p.distanceTo(m_param._viewPoint) > m_deltaD;
+	bool dChanged = d.dot(m_param._viewDirection) < .991f;
 	bool sChanged = (s < -10 || s > 10);
 
-	if(pChanged) m_viewPoint = p;
-	if(dChanged) m_viewDirection = d;
-	if(sChanged) m_screenWidth = cam.portWidth();
+	if(pChanged) m_param._viewPoint = p;
+	if(dChanged) m_param._viewDirection = d;
+	if(sChanged) m_param._screenWidth = cam.portWidth();
+	m_param._tanhfov = cam.tanhfov();
 	return pChanged || dChanged || sChanged;
 }
+
+const LevelOfDetailParam &VisibleDetail::param() const
+{ return m_param; }
 
 }

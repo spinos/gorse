@@ -87,7 +87,8 @@ float ViewFrustumCull::getMeanSize() const
 
 void ViewFrustumCull::compare(VisibilityState *visibilities, const AFrustum &fru) const
 {
-	ViewFrustumEvent *e = new ViewFrustumEvent(m_nodes[0], m_nodeHexa[0], fru);
+	const AFrustum af = fru;
+	ViewFrustumEvent *e = new ViewFrustumEvent(m_nodes[0], m_nodeHexa[0], af);
 	std::deque<ViewFrustumEvent *> visitQueue;
 	visitQueue.push_back(e);
 
@@ -101,10 +102,10 @@ void ViewFrustumCull::compare(VisibilityState *visibilities, const AFrustum &fru
 			const BVHNode &lft = m_nodes[iLeft];
 			const BVHNode &rgt = m_nodes[iLeft+1];
 
-			ViewFrustumEvent *lftVisit = ViewFrustumEvent::Create(lft, m_nodeHexa[iLeft], fru, res);
+			ViewFrustumEvent *lftVisit = ViewFrustumEvent::Create(lft, m_nodeHexa[iLeft], af, res);
 			visitQueue.push_back(lftVisit);
 
-			ViewFrustumEvent *rgtVisit = ViewFrustumEvent::Create(rgt, m_nodeHexa[iLeft+1], fru, res);
+			ViewFrustumEvent *rgtVisit = ViewFrustumEvent::Create(rgt, m_nodeHexa[iLeft+1], af, res);
 			visitQueue.push_back(rgtVisit);
 
 		} else {

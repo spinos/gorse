@@ -25,13 +25,8 @@ void PVSTest::update()
 
 void PVSTest::addDrawableTo(DrawableScene *scene)
 { 
-    computeMesh();
     setDrawableScene(scene);
-    const int n = numResources();
-    for(int i=0;i<n;++i) {
-        DrawableResource *rec = resource(i);
-        initiateResource(rec);
-    }
+    computeMesh();
 }
 
 void PVSTest::computeMesh()
@@ -90,6 +85,14 @@ void PVSTest::computeMesh()
     int npart = reduce(culler(), &srcMesh);
 
     initializeDetails();
+
+    lockScene();
+    const int n = numResources();
+    for(int i=0;i<n;++i) {
+        DrawableResource *rec = resource(i);
+        processResourceNoLock(rec);
+    }
+    unlockScene();
 }
 
 void PVSTest::recvCameraChanged(const CameraEvent &x)
@@ -97,12 +100,12 @@ void PVSTest::recvCameraChanged(const CameraEvent &x)
     if(!drawableVisible()) return;
     if(freezeView()) return;
     if(x.progressBegin() || x.progressEnd()) return;
-    if(!updateView(*x.camera(), *x.frustum())) return;
-    
     const PerspectiveCamera *persp = static_cast<const PerspectiveCamera *>(x.camera());
-    lockScene();
-    viewDependentReform(persp, culler(), details());
+    if(!updateView(*persp, *x.frustum())) return;
+    
+    viewDependentReform(culler(), details());
 
+    lockScene();
     const int n = numResources();
     for(int i=0;i<n;++i) {
         DrawableResource *rec = resource(i);

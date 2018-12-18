@@ -52,9 +52,7 @@ protected:
 	const bool &drawableVisible() const;
 
 	static void UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangleMesh *mesh, bool showUV=false);
-	void initiateResource(DrawableResource *rec);
-/// relocate or edit associated drawable object
-	void processResource(DrawableResource *rec, bool forcedToRelocate=false);
+
 	void processResourceNoLock(DrawableResource *rec);
 	void processResource(DrawableResource *rec, const VisibilityState &vis);
 /// n resouce remove redundant ones

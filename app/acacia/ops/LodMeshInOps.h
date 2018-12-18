@@ -15,7 +15,6 @@
 
 namespace alo {
 class LodMeshCache;
-class PerspectiveCamera;
 class LodMeshInOps : public DrawableOps, public ViewDependentFunction {
     
     LodMeshGroup m_cache;
@@ -42,7 +41,7 @@ private:
     void reformMesh(LodMeshCache *c, DrawableResource *rec);
     void reformMesh1(LodMeshCache *c, int nv, bool forcedUpdate, DrawableResource *rec);
     bool loadCache(const std::string &fileName);
-    void viewDependentReform(const PerspectiveCamera *persp);
+    void viewDependentReform();
 
 };
 

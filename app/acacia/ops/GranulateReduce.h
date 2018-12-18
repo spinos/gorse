@@ -18,7 +18,6 @@ class ViewFrustumCull;
 class VisibleDetail;
 class LevelOfDetailSelect;
 class Hexahedron;
-class PerspectiveCamera;
 class GranulateReduce : public DrawableOps {
 
     static AFileDlgProfile SWriteProfile;
@@ -35,8 +34,7 @@ public:
     
 protected:
     int reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMesh);
-    void viewDependentReform(const PerspectiveCamera *persp,
-                const ViewFrustumCull *culler, VisibleDetail *details);
+    void viewDependentReform(const ViewFrustumCull *culler, VisibleDetail *details);
     void simpleReform(const float &lod, bool shoAsUV);
     
     struct MeshReformTrio {
