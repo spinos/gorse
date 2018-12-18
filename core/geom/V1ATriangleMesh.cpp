@@ -95,12 +95,12 @@ void ATriangleMesh::copyIndicesFrom(const unsigned *x)
 Float2 *ATriangleMesh::addUVSet(const std::string &name)
 {
     int n = numUVSets();
-    if(n < 8) {
+    if(n < 16) {
         m_uvSets.resize(n+1, m_numIndices);
         m_uvSets.setName(name, n);
     } else {
-        std::cout << " WARNING max 8 uv set ";
-        n = 7;
+        std::cout << " WARNING max 16 uv set ";
+        n = 15;
     }
     SimpleBuffer<Float2> *d = m_uvSets.buffer(n);
     return d->data();

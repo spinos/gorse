@@ -1,3 +1,9 @@
+/*
+ *  SphereOps.h
+ *  acacia
+ *
+ */
+
 #ifndef ACA_SPHERE_OPS_H
 #define ACA_SPHERE_OPS_H
 

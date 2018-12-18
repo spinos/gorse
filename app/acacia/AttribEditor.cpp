@@ -149,6 +149,7 @@ void AttribEditor::lsIntAttr(alo::QAttrib *attr)
 	sld->setLimit(val0, val1);
 	sld->setValue(val);
 	sld->setName(attr->attrName());
+	sld->setUseIntSteps(true);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 	connect(sld, &FieldSlider::valueChanged,

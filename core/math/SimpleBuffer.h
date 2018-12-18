@@ -215,6 +215,7 @@ void SimpleBuffer<T>::copyFrom(const SimpleBuffer &b)
 template<typename T>
 void SimpleBuffer<T>::purgeBuffer()
 {
+    if(m_count<1) return;
     delete[] m_data;
 	m_data = 0;
     m_count = m_cap = 0;  

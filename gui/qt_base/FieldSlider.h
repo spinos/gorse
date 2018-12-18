@@ -21,6 +21,7 @@ public:
     void setValue(float x);
     void setLimit(float mn, float mx);
     void setName(const std::string &name);
+    void setUseIntSteps(bool x);
     
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
@@ -47,6 +48,7 @@ private:
    int m_startPos;
    int m_stepInd;
    bool m_isContinuous;
+   bool m_useIntSteps;
    static const char *SMenuLabels[];
    static const float SFSteps[];
 };

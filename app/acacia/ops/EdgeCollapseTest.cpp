@@ -123,24 +123,15 @@ EdgeCollapseTest::~EdgeCollapseTest()
     
 void EdgeCollapseTest::update()
 {
-    QAttrib * al = findAttrib("lod");
-    FloatAttrib *fl = static_cast<FloatAttrib *>(al);
-    fl->getValue(m_lod);
+    getFloatAttribValue(m_lod, "lod");
     
     computeMesh();
-
-    DrawableScene *scene = drawableScene();
-
-    DrawableResource *rec = resource();
-    processResource(rec);
 }
 
 void EdgeCollapseTest::addDrawableTo(DrawableScene *scene)
 { 
-    computeMesh();
     setDrawableScene(scene);
-    DrawableResource *rec = resource();
-    initiateResource(rec);
+    computeMesh();
 }
 
 void EdgeCollapseTest::computeMesh()
@@ -150,7 +141,19 @@ void EdgeCollapseTest::computeMesh()
     reformer.reformSrc(&transient, m_stageMesh, m_lod, m_sourceMesh);
 
     DrawableResource *rec = resource();
+
+    lockScene();
+    const int beforeFrame = frameNumber() - 2;
+    if(rec->changedOnFrame() > beforeFrame) {
+/// prevent editing unsynchronized resource
+        unlockScene();
+        return;
+    }
+    
     UpdateMeshResouce(rec, &transient);
+    
+    processResourceNoLock(rec);
+    unlockScene();
 }
 
 bool EdgeCollapseTest::hasMenu() const

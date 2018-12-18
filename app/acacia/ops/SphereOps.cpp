@@ -1,3 +1,9 @@
+/*
+ *  SphereOps.cpp
+ *  acacia
+ *
+ */
+
 #include "SphereOps.h"
 #include <qt_ogl/DrawableScene.h>
 #include <qt_ogl/DrawableObject.h>
@@ -24,22 +30,12 @@ void SphereOps::update()
     getFloatAttribValue(m_radius, "r");
     getBoolAttribValue(m_shoUV, "sho_uv");
     computeMesh();
-
-    lockScene();
-    DrawableResource *rec = resource();
-    processResourceNoLock(rec);
-    unlockScene();
 }
 
 void SphereOps::addDrawableTo(DrawableScene *scene)
 {
-    computeMesh();
     setDrawableScene(scene);
-
-    lockScene();
-    DrawableResource *rec = resource();
-    processResourceNoLock(rec);
-    unlockScene();
+    computeMesh();  
 }
 
 void SphereOps::computeMesh()
@@ -47,7 +43,19 @@ void SphereOps::computeMesh()
     GeodesicSphere transient(m_level);
     transient.scaleBy(m_radius);
     DrawableResource *rec = resource();
+
+    lockScene();
+    const int beforeFrame = frameNumber() - 2;
+    if(rec->changedOnFrame() > beforeFrame) {
+/// prevent editing unsynchronized resource
+        unlockScene();
+        return;
+    }
+
     UpdateMeshResouce(rec, &transient, m_shoUV);
+
+    processResourceNoLock(rec);
+    unlockScene();
 }
 
 }

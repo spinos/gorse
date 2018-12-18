@@ -26,7 +26,7 @@ class ATriangleMesh {
     SimpleBuffer<Vector3F> m_normals;
     SimpleBuffer<Int3> m_indices;
 /// name and face-varying texture coordinate
-    NamedBufferArray<Float2, 8> m_uvSets;
+    NamedBufferArray<Float2, 16> m_uvSets;
     int m_numVertices;
     int m_numTriangles;
     int m_numIndices;

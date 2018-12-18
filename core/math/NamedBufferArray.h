@@ -19,7 +19,7 @@ template<typename T, int N>
 class NamedBufferArray {
 
 	std::string m_names[N];
-	SimpleBuffer<T> *m_buf[N];
+	SimpleBuffer<T> m_buf[N];
 	int m_count;
 
 public:
@@ -39,7 +39,6 @@ public:
 	int findName(const std::string &name) const;
 
 private:
-	void expandTo(int n);
 	void shrinkTo(int n);
 
 };
@@ -47,18 +46,11 @@ private:
 template<typename T, int N>
 NamedBufferArray<T, N>::NamedBufferArray() :
 m_count(0)
-{
-	for(int i=0;i<N;++i)
-		m_buf[i] = 0;
-}
+{}
 
 template<typename T, int N>
 NamedBufferArray<T, N>::~NamedBufferArray()
-{
-	for(int i=0;i<N;++i) {
-		if(m_buf[i]) delete m_buf[i];
-	}
-}
+{}
 
 template<typename T, int N>
 void NamedBufferArray<T, N>::resize(int n, int d)
@@ -72,22 +64,19 @@ void NamedBufferArray<T, N>::resize(int n, int d)
 	if(rn > N) rn = N;
 
 	if(m_count > rn) shrinkTo(rn);
-	if(m_count < rn) expandTo(rn);
+	if(m_count < rn) m_count = rn;
 	
 	for(int i=0;i<m_count;++i)
-		m_buf[i]->resetBuffer(d);
+		m_buf[i].resetBuffer(d);
 
 }
 
 template<typename T, int N>
 void NamedBufferArray<T, N>::clear()
 {
-	for(int i=0;i<m_count;++i) {
-		if(m_buf[i]) {
-			delete m_buf[i];
-			m_buf[i] = 0;
-		}
-	}
+	for(int i=0;i<m_count;++i)
+		m_buf[i].purgeBuffer();
+
 	m_count = 0;
 }
 
@@ -101,7 +90,7 @@ const int &NamedBufferArray<T, N>::count() const
 
 template<typename T, int N>
 SimpleBuffer<T> *NamedBufferArray<T, N>::buffer(int i)
-{ return m_buf[i]; }
+{ return &m_buf[i]; }
 
 template<typename T, int N>
 const std::string &NamedBufferArray<T, N>::c_name(int i) const
@@ -109,7 +98,7 @@ const std::string &NamedBufferArray<T, N>::c_name(int i) const
 
 template<typename T, int N>
 const SimpleBuffer<T> *NamedBufferArray<T, N>::c_buffer(int i) const
-{ return m_buf[i]; }
+{ return &m_buf[i]; }
 
 template<typename T, int N>
 int NamedBufferArray<T, N>::findName(const std::string &name) const
@@ -122,25 +111,11 @@ int NamedBufferArray<T, N>::findName(const std::string &name) const
 }
 
 template<typename T, int N>
-void NamedBufferArray<T, N>::expandTo(int n)
-{
-	for(int i=m_count;i<n;++i) {
-		m_names[i] = "unknown";
-		if(!m_buf[i])
-			m_buf[i] = new SimpleBuffer<T>();
-	}
-	m_count = n;
-}
-
-template<typename T, int N>
 void NamedBufferArray<T, N>::shrinkTo(int n)
 {
 	for(int i=m_count-1;i>n-1;--i) {
 		m_names[i] = "unknown";
-		if(m_buf[i]) {
-			delete m_buf[i];
-			m_buf[i] = 0;
-		}
+		m_buf[i].purgeBuffer();
 	}
 	m_count = n;
 }

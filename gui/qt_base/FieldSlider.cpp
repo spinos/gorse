@@ -35,6 +35,7 @@ FieldSlider::FieldSlider(QWidget *parent)
     m_startPos = -1;
     m_stepInd = 1;
     m_isContinuous = false;
+    m_useIntSteps = false;
     setContextMenuPolicy(Qt::CustomContextMenu);
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     connect(this, &FieldSlider::customContextMenuRequested,
@@ -57,6 +58,13 @@ void FieldSlider::setLimit(float mn, float mx)
 
 void FieldSlider::setName(const std::string &name)
 { m_name = name; }
+
+void FieldSlider::setUseIntSteps(bool x)
+{ 
+    m_useIntSteps = x; 
+    if(x) m_stepInd = 3;
+    else m_stepInd = 1;
+}
 
 QSize FieldSlider::minimumSizeHint() const
 {
@@ -95,7 +103,10 @@ void FieldSlider::paintEvent(QPaintEvent *e)
   
     painter.drawPixmap(QRect(width() - 13, 0, 13, 24), tailpix);
     
-    painter.drawText(QPoint(10, 16), QString("%1").arg(m_var, 0, 'f', 3));
+    if(m_useIntSteps) 
+        painter.drawText(QPoint(10, 16), QString("%1").arg(m_var, 0, 'f', 0));
+    else 
+        painter.drawText(QPoint(10, 16), QString("%1").arg(m_var, 0, 'f', 3));
 }
 
 void FieldSlider::mousePressEvent(QMouseEvent *e)
@@ -145,9 +156,10 @@ void FieldSlider::showContextMenu(const QPoint& pos)
     QPoint globalPos = mapToGlobal(pos);
     // for QAbstractScrollArea and derived classes you would use:
     // QPoint globalPos = myWidget->viewport()->mapToGlobal(pos);
+    int menuBegin = m_useIntSteps ? 3 : 0;
 
     QMenu myMenu;
-    for(int i=0;i<7;++i) {
+    for(int i=menuBegin;i<7;++i) {
         QAction * a = myMenu.addAction(tr(SMenuLabels[i]));
         a->setCheckable(true);
         a->setData(QVariant(i));
