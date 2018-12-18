@@ -138,7 +138,7 @@ void EdgeCollapseTest::computeMesh()
 {
     AdaptableMesh transient;
     HistoryReformSrc reformer;
-    reformer.reformSrc(&transient, m_stageMesh, m_lod, m_sourceMesh);
+    reformer.reformF(&transient, m_stageMesh, m_lod, m_sourceMesh);
 
     DrawableResource *rec = resource();
 

@@ -38,6 +38,9 @@ protected:
 
 private:
 	void clear();
+	void resize(int n);
+	void expandTo(int n);
+	void shrinkTo(int n);
 	
 };
 

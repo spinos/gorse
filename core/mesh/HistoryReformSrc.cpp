@@ -6,42 +6,41 @@ namespace alo {
 HistoryReformSrc::HistoryReformSrc()
 {}
 
-bool HistoryReformSrc::reformSrc(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
+bool HistoryReformSrc::reformF(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
 					const float &lod, const HistoryMesh *sourceMesh)
 {
 	int istage;
 	int selV;
 	sourceMesh->selectStage(istage, selV, lod);
-    if(selV == stageMesh->cachedNv()) return false;
-	
-	const CoarseFineHistory &stage = stageMesh->stage(0);
-	
-	if(istage != stageMesh->cachedStageId() ) {
-		sourceMesh->copyStageTo(stageMesh, istage);
-		sortCoarseFaces(stageMesh, 0, stage.coarseMax(), stage.c_value() );
-	}
+    if(selV == outMesh->numVertices()) return false;
 
-	reform(outMesh, stageMesh, selV, istage, stage);
+	reformC(outMesh, stageMesh, istage, selV, sourceMesh);
     return true;
 }
 
-bool HistoryReformSrc::reformSrc1(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
+bool HistoryReformSrc::reformI(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
 					const int &lodNv, const HistoryMesh *sourceMesh)
 {
 	int istage;
 	int selV;
 	sourceMesh->selectStageByVertexCount(istage, selV, lodNv);
-	if(selV == stageMesh->cachedNv()) return false;
+	if(selV == outMesh->numVertices()) return false;
     
+	reformC(outMesh, stageMesh, istage, selV, sourceMesh);
+    return true;
+}
+
+void HistoryReformSrc::reformC(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
+					const int &selStage, const int &selV, const HistoryMesh *sourceMesh)
+{
 	const CoarseFineHistory &stage = stageMesh->stage(0);
 	
-	if(istage != stageMesh->cachedStageId() ) {
-		sourceMesh->copyStageTo(stageMesh, istage);
+	if(selStage != stageMesh->cachedStageId() ) {
+		sourceMesh->copyStageTo(stageMesh, selStage);
 		sortCoarseFaces(stageMesh, 0, stage.coarseMax(), stage.c_value() );
 	}
 
-	reform(outMesh, stageMesh, selV, istage, stage);
-    return true;
+	reform(outMesh, stageMesh, selV, selStage, stage);
 }
 
 }

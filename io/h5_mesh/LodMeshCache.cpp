@@ -25,6 +25,15 @@ LodMeshCache::~LodMeshCache()
         delete m_historyInCore[i]; 
 }
 
+void LodMeshCache::clear()
+{ 
+    m_currentCacheId = -1; 
+    for(int i=0;i<3;++i) {
+        m_historyInCore[i]->setCachedStageId(-1);
+        m_historyInCore[i]->purgeMesh();
+    }
+}
+
 bool LodMeshCache::isValid() const
 {
     if(m_meshName=="unknown") return false;
@@ -85,9 +94,6 @@ int LodMeshCache::findStage(const int &nv) const
 	return low;
 }
 
-bool LodMeshCache::nvChanged(int x) const
-{ return c_currentCache()->cachedNv() != x; }
-
 const int &LodMeshCache::minNumTriangles() const
 { return m_minNt; }
 
@@ -112,7 +118,6 @@ bool LodMeshCache::loadStage(int x)
     hrec.close();
 
     meshInCore->setCachedStageId(x);
-    meshInCore->setCachedNv(-1);
 
     return true;
 }
@@ -124,10 +129,10 @@ void LodMeshCache::sortCurrentStage()
     sortCoarseFaces(meshInCore, 0, stg.coarseMax(), stg.c_value() );
 }
 
-void LodMeshCache::reformInCore(const int &nv, const int &istage)
+void LodMeshCache::reformInCore(const int &nv)
 {
     HistoryMesh *meshInCore = currentCache();
-    reform(m_outMesh, meshInCore, nv, istage, meshInCore->stage(0) );
+    reform(m_outMesh, meshInCore, nv, meshInCore->cachedStageId(), meshInCore->stage(0) );
 }
 
 void LodMeshCache::printStages() const
@@ -172,7 +177,7 @@ bool LodMeshCache::switchToStage(int x)
     for(int i=0;i<3;++i) {
         if(m_historyInCore[i]->cachedStageId() == x) {
             m_currentCacheId = i;
-            sortCurrentStage();
+            //sortCurrentStage();
             return true;
         }
     }
@@ -181,22 +186,27 @@ bool LodMeshCache::switchToStage(int x)
 
 HistoryMesh *LodMeshCache::selectCurrentCache(int x)
 {
-    m_currentCacheId = 0; 
+    int selC = 0; 
     int md = 0;
     for(int i=0;i<3;++i) {
-        int ci = m_historyInCore[i]->cachedStageId();
+        const int ci = m_historyInCore[i]->cachedStageId();
         if(ci < 0) {
-            m_currentCacheId = i;
+            selC = i;
             break;
         }
         int d = ci - x;
         if(d < 0) d = -d;
         if(md < d) {
             md = d;
-            m_currentCacheId = i;
+            selC = i;
         }
     }
+    
+    m_currentCacheId = selC;
     return m_historyInCore[m_currentCacheId];
 }
+
+bool LodMeshCache::isMeshCached(const int &x) const
+{ return m_outMesh->numVertices() == x; }
 
 }

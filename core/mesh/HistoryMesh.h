@@ -2,7 +2,7 @@
  *  HistoryMesh.h
  *
  *  build coarse/fine history in stages
- *  or single stage as cache to reform
+ *  or use stage as cache to reform
  *
  */
 
@@ -23,7 +23,6 @@ class HistoryMesh : public AdaptableMesh {
 /// face-varying uv indices
     SimpleBuffer<Int3> m_uvIndices;
     int m_cachedStageId;
-    int m_cachedNv;
 
 public:
 	HistoryMesh();
@@ -72,9 +71,6 @@ public:
 
     const int &cachedStageId() const;
     void setCachedStageId(int x);
-    
-    const int &cachedNv() const;
-    void setCachedNv(int x);
 
 protected:
     

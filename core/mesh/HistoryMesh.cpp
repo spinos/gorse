@@ -10,8 +10,7 @@
 namespace alo {
 	
 HistoryMesh::HistoryMesh() :
-m_cachedStageId(-1),
-m_cachedNv(-1)
+m_cachedStageId(-1)
 {}
 
 HistoryMesh::~HistoryMesh()
@@ -233,12 +232,6 @@ const int &HistoryMesh::cachedStageId() const
 
 void HistoryMesh::setCachedStageId(int x)
 { m_cachedStageId = x; }
-
-const int &HistoryMesh::cachedNv() const
-{ return m_cachedNv; }
-
-void HistoryMesh::setCachedNv(int x)
-{ m_cachedNv = x; }
 
 void HistoryMesh::printHistoryStage(int i) const
 { 

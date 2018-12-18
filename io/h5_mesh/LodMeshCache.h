@@ -36,6 +36,8 @@ public:
     LodMeshCache();
     virtual ~LodMeshCache();
 
+    void clear();
+
     bool isValid() const;
     const std::string &meshName() const;
     const int &minNumTriangles() const;
@@ -46,12 +48,13 @@ public:
 
 /// false if stage x is not cached
     bool switchToStage(int x);
-    bool nvChanged(int x) const;
-
+/// num vertices equals x
+    bool isMeshCached(const int &x) const;
+    
 /// hdf5 read cannot parallel
     bool loadStage(int x);
     void sortCurrentStage();
-    void reformInCore(const int &nv, const int &istage);
+    void reformInCore(const int &nv);
     
     void printStages() const;
     
@@ -62,7 +65,7 @@ public:
     void getAabb(BoundingBox &box) const;
 
     const AdaptableMesh *c_outMesh() const;
-    
+
 protected:
 
 private:

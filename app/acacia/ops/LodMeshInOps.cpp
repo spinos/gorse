@@ -118,7 +118,7 @@ void LodMeshInOps::reformMesh(LodMeshCache *c, DrawableResource *rec)
         m_mtx.unlock();
         c->sortCurrentStage();
     }
-    c->reformInCore(nv, istage);
+    c->reformInCore(nv);
 
     UpdateMeshResouce(rec, c->c_outMesh(), m_shoUV);
 }
@@ -227,14 +227,14 @@ void LodMeshInOps::reformMesh1(LodMeshCache *c, int lodNv, bool forcedUpdate, Dr
     
     int nv = lodNv;
     int istage = c->selectStageByNv(nv);
-    if(!c->nvChanged(nv) && !forcedUpdate) return;
+    if(c->isMeshCached(nv) ) return;
     if(!c->switchToStage(istage)) {
         m_mtx.lock();
         c->loadStage(istage);
         m_mtx.unlock();
         c->sortCurrentStage();
     }
-    c->reformInCore(nv, istage);
+    c->reformInCore(nv);
     UpdateMeshResouce(rec, c->c_outMesh() );
 }
 

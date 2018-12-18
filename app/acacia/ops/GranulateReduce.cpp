@@ -229,7 +229,7 @@ void GranulateReduce::Reform(MeshReformTrio &p, int nv, bool forcedUpdate, Drawa
     if(rec->drawArrayLength() == p._srcMesh->minNumTriangles() * 3 && !forcedUpdate) return;
 
     HistoryReformSrc reformer;
-    bool stat = reformer.reformSrc1(p._outMesh, p._stageMesh, nv, p._srcMesh);
+    bool stat = reformer.reformI(p._outMesh, p._stageMesh, nv, p._srcMesh);
     if(stat || forcedUpdate) UpdateMeshResouce(rec, p._outMesh);
 }
 
@@ -237,7 +237,7 @@ void GranulateReduce::LodReform1(const float &lod, bool shoAsUV,
                 MeshReformTrio &p, DrawableResource *rec)
 {
     HistoryReformSrc reformer;
-    bool stat = reformer.reformSrc(p._outMesh, p._stageMesh, lod, p._srcMesh);
+    bool stat = reformer.reformF(p._outMesh, p._stageMesh, lod, p._srcMesh);
     if(stat) UpdateMeshResouce(rec, p._outMesh, shoAsUV);
 }
 

@@ -9,11 +9,10 @@ HistoryReform::HistoryReform()
 HistoryReform::~HistoryReform()
 {}
 
-void HistoryReform::reform(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
+void HistoryReform::reform(AdaptableMesh *outMesh, const HistoryMesh *stageMesh, 
 					const int &selV, const int &istage, const CoarseFineHistory &stage)
 {
 	stageMesh->copyMeshTo(outMesh, selV, stage.fbegin());
-    stageMesh->setCachedNv(selV);
 
 	if(selV > stage.vbegin() || istage > 0) {
 
@@ -50,7 +49,7 @@ void HistoryReform::sortCoarseFaces(HistoryMesh *stageMesh, int first, int last,
     low = first;
     high = last;
 
-    int list_separator = history[(first+last)/2];
+    int list_separator = history[(first+last)>>1];
     do
     {
         while(history[low] > list_separator) low++;

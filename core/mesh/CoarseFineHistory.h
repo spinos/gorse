@@ -40,7 +40,6 @@ public:
 	CoarseFineHistory();
 	~CoarseFineHistory();
 	
-	void purgeHistory();
 	void createHistory(int nf);
 	void setDesc(const CoarseFineHistoryDesc &x);
 	

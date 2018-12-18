@@ -8,9 +8,6 @@ CoarseFineHistory::CoarseFineHistory()
 CoarseFineHistory::~CoarseFineHistory()
 {}
 
-void CoarseFineHistory::purgeHistory()
-{ m_history.purgeBuffer(); }
-
 void CoarseFineHistory::createHistory(int nf)
 { m_history.resetBuffer(nf); }
 
@@ -105,7 +102,7 @@ const CoarseFineHistoryDesc &CoarseFineHistory::desc() const
 void CoarseFineHistory::operator=(const CoarseFineHistory &b)
 {
 	m_desc = b.desc();
-    m_history.createBuffer(m_desc._length);
+    m_history.resetBuffer(m_desc._length);
 	memcpy(m_history.data(), b.c_value(), m_desc._length<<2);
 }
 

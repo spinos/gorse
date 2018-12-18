@@ -20,10 +20,10 @@ public:
 	HistoryReform();
 	~HistoryReform();
 
-	void reform(AdaptableMesh *outMesh, HistoryMesh *stageMesh, 
+protected:
+	void reform(AdaptableMesh *outMesh, const HistoryMesh *stageMesh, 
 					const int &selV, const int &istage, const CoarseFineHistory &stage);
 
-protected:
 /// hight to low
 	void sortCoarseFaces(HistoryMesh *stageMesh, int first, int last, const int *history);
 
