@@ -7,7 +7,7 @@ namespace alo {
 
 LodMeshCache::LodMeshCache() :
 m_meshName("unknown"),
-m_currentCacheId(0)
+m_currentCacheId(-1)
 {
     m_outMesh = new AdaptableMesh;
     for(int i=0;i<3;++i) {
@@ -98,7 +98,7 @@ bool LodMeshCache::loadStage(int x)
 {
     HistoryMesh *meshInCore = selectCurrentCache(x);
     HHistoryMeshRecord hrec(m_meshName);
-/// load a stage?
+
     const CoarseFineHistoryDesc &d = m_stageDescs[x];
     const int nv = d._vend;
     const int nf = d._fend;
@@ -112,14 +112,16 @@ bool LodMeshCache::loadStage(int x)
     hrec.close();
 
     meshInCore->setCachedStageId(x);
+    meshInCore->setCachedNv(-1);
 
     return true;
 }
 
 void LodMeshCache::sortCurrentStage()
 {
-    CoarseFineHistory &stg = currentCache()->stage(0);
-    sortCoarseFaces(currentCache(), 0, stg.coarseMax(), stg.c_value() );
+    HistoryMesh *meshInCore = currentCache();
+    CoarseFineHistory &stg = meshInCore->stage(0);
+    sortCoarseFaces(meshInCore, 0, stg.coarseMax(), stg.c_value() );
 }
 
 void LodMeshCache::reformInCore(const int &nv, const int &istage)
@@ -154,7 +156,7 @@ std::deque<CoarseFineHistoryDesc> &LodMeshCache::stageDescs()
 void LodMeshCache::getAabb(BoundingBox &box) const
 { c_currentCache()->getAabb(box); }
 
-AdaptableMesh *LodMeshCache::c_outMesh() const
+const AdaptableMesh *LodMeshCache::c_outMesh() const
 { return m_outMesh; }
 
 HistoryMesh *LodMeshCache::currentCache()
@@ -165,9 +167,12 @@ const HistoryMesh *LodMeshCache::c_currentCache() const
 
 bool LodMeshCache::switchToStage(int x)
 {
+    if(m_currentCacheId < 0) return false;
+    if(currentCache()->cachedStageId() == x) return true;
     for(int i=0;i<3;++i) {
         if(m_historyInCore[i]->cachedStageId() == x) {
             m_currentCacheId = i;
+            sortCurrentStage();
             return true;
         }
     }
@@ -182,7 +187,7 @@ HistoryMesh *LodMeshCache::selectCurrentCache(int x)
         int ci = m_historyInCore[i]->cachedStageId();
         if(ci < 0) {
             m_currentCacheId = i;
-            return m_historyInCore[i];
+            break;
         }
         int d = ci - x;
         if(d < 0) d = -d;

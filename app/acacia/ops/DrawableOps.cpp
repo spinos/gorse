@@ -52,7 +52,7 @@ void DrawableOps::UpdateMeshResouce(DrawableResource *rec, const ver1::ATriangle
     else
     	mesh->createPositionNormalArray(rec->posnmlBuffer());
 
-    const bool relocated = (oldL < rec->size() || oldL > rec->size() + 2048);
+    const bool relocated = (oldL < rec->size() || oldL > rec->size() + 3072);
 
     rec->setToRelocate(relocated);
     if(relocated)

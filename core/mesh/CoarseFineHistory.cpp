@@ -12,7 +12,7 @@ void CoarseFineHistory::purgeHistory()
 { m_history.purgeBuffer(); }
 
 void CoarseFineHistory::createHistory(int nf)
-{ m_history.createBuffer(nf); }
+{ m_history.resetBuffer(nf); }
 
 void CoarseFineHistory::setDesc(const CoarseFineHistoryDesc &x)
 { m_desc = x; }

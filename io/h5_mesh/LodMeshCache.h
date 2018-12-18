@@ -61,7 +61,7 @@ public:
 
     void getAabb(BoundingBox &box) const;
 
-    AdaptableMesh *c_outMesh() const;
+    const AdaptableMesh *c_outMesh() const;
     
 protected:
 

@@ -63,7 +63,6 @@ bool HHistoryMeshRecord::load(HistoryMesh *msh, int nv, int nt)
 
 bool HHistoryMeshRecord::load(CoarseFineHistory *stg, int hl, int i)
 {
-    stg->purgeHistory();
     stg->createHistory(hl);
     const std::string stgName = boost::str(boost::format("stg%1%") % i);
     HCoarseFineHistory fhis(childPath(stgName));
