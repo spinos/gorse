@@ -113,6 +113,7 @@ void FieldSlider::mousePressEvent(QMouseEvent *e)
 {
     m_startPos = m_lastPos = e->pos().x();
     update();
+    emit beginEditing();
 }
 
 void FieldSlider::mouseMoveEvent(QMouseEvent *e)
@@ -140,6 +141,7 @@ void FieldSlider::mouseReleaseEvent(QMouseEvent *)
     m_startPos = m_lastPos = -1;
     update();
     notifyValueChange();
+    emit endEditing();
 }
 
 void FieldSlider::notifyValueChange()

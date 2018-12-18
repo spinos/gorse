@@ -154,6 +154,10 @@ void AttribEditor::lsIntAttr(alo::QAttrib *attr)
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 	connect(sld, &FieldSlider::valueChanged,
             this, &AttribEditor::recvIntValue);
+    connect(sld, &FieldSlider::beginEditing,
+            this, &AttribEditor::recvBeginEditing);
+    connect(sld, &FieldSlider::endEditing,
+            this, &AttribEditor::recvEndEditing);
 #else	
 	connect(sld, SIGNAL(valueChanged(QPair<std::string, float>)),
             this, SLOT(recvIntValue(QPair<std::string, float>)));
@@ -178,9 +182,17 @@ void AttribEditor::lsFloatAttr(alo::QAttrib *attr)
 	sld->setValue(val);
 	sld->setName(attr->attrName());
 	
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+	connect(sld, &FieldSlider::valueChanged,
+            this, &AttribEditor::recvFloatValue);
+    connect(sld, &FieldSlider::beginEditing,
+            this, &AttribEditor::recvBeginEditing);
+    connect(sld, &FieldSlider::endEditing,
+            this, &AttribEditor::recvEndEditing);
+#else	
 	connect(sld, SIGNAL(valueChanged(QPair<std::string, float>)),
             this, SLOT(recvFloatValue(QPair<std::string, float>)));
-			
+#endif			
 }
 
 void AttribEditor::lsFloat2Attr(alo::QAttrib *attr)
@@ -250,9 +262,17 @@ void AttribEditor::lsBoolAttr(alo::QAttrib *attr)
 	chk->setValue(val);
 	chk->setName(attr->attrName());
 	
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+	connect(chk, &CheckLabel::valueChanged,
+            this, &AttribEditor::recvBoolValue);
+    connect(chk, &CheckLabel::beginEditing,
+            this, &AttribEditor::recvBeginEditing);
+    connect(chk, &CheckLabel::endEditing,
+            this, &AttribEditor::recvEndEditing);
+#else	
 	connect(chk, SIGNAL(valueChanged(QPair<std::string, bool>)),
            this, SLOT(recvBoolValue(QPair<std::string, bool>)));
-    
+#endif  
 }
 
 void AttribEditor::lsStringAttr(alo::QAttrib *attr)
@@ -333,3 +353,10 @@ void AttribEditor::recvSplitMove(int pos, int index)
         if(lab) lab->setLableText(isShort);
     }
 }
+
+void AttribEditor::recvBeginEditing()
+{ emit sendAttribChanged(); }
+
+void AttribEditor::recvEndEditing()
+{ emit sendAttribChanged(); }
+

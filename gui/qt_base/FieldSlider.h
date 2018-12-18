@@ -25,12 +25,16 @@ public:
     
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
+    
+protected:
     void mousePressEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
     void mouseReleaseEvent(QMouseEvent *e) override;
     
 signals:
     void valueChanged(QPair<std::string, float>);
+    void beginEditing();
+    void endEditing();
 
 private slots:
     void showContextMenu(const QPoint& pos);

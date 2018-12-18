@@ -18,8 +18,14 @@ public:
 	QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
     
+protected:
+    virtual void mousePressEvent(QMouseEvent *e) override;
+    virtual void mouseReleaseEvent(QMouseEvent *e) override;
+    
 signals :
     void valueChanged(QPair<std::string, bool>);
+    void beginEditing();
+    void endEditing();
     
 private slots:
     void notifyValueChange();

@@ -38,4 +38,16 @@ void CheckLabel::notifyValueChange()
     }
 }
 
+void CheckLabel::mousePressEvent(QMouseEvent *e)
+{ 
+    QCheckBox::mousePressEvent(e);
+    emit beginEditing(); 
+}
+
+void CheckLabel::mouseReleaseEvent(QMouseEvent *e)
+{ 
+    QCheckBox::mouseReleaseEvent(e);
+    emit endEditing(); 
+}
+
 }

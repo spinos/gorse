@@ -24,6 +24,8 @@ class AttribEditor : public QWidget
 
 public:
 	AttribEditor(AcaciaScene *scene, QWidget *parent = 0);
+	
+protected:
 
 signals:
 	void sendAttribChanged();
@@ -38,6 +40,8 @@ private slots:
 	void recvBoolValue(QPair<std::string, bool> x);
 	void recvStringValue(QPair<std::string, std::string> x);
 	void recvSplitMove(int pos, int index);
+	void recvBeginEditing();
+    void recvEndEditing();
     
 private:
 	void clearAttribs();
