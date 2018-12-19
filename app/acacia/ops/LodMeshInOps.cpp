@@ -32,7 +32,10 @@ AFileDlgProfile LodMeshInOps::SReadProfile(AFileDlgProfile::FRead,
 LodMeshInOps::LodMeshInOps() :
 m_lod(.5f),
 m_shoUV(false)
-{}
+{
+    m_aabb.set(Vector3F::Zero, 1.f);
+    setBound(m_aabb);
+}
 
 LodMeshInOps::~LodMeshInOps()
 {
@@ -50,19 +53,19 @@ void LodMeshInOps::update()
     if(m_cache.cacheFilePath() != scachePath )
         loadCache(scachePath);
     
-    QAttrib * al = findAttrib("lod");
-    FloatAttrib *fl = static_cast<FloatAttrib *>(al);
-    fl->getValue(m_lod);
-    
-    QAttrib * ashouv = findAttrib("sho_uv");
-    BoolAttrib *fshouv = static_cast<BoolAttrib *>(ashouv);
-    fshouv->getValue(m_shoUV);
+    getFloatAttribValue(m_lod, "lod");
+    getBoolAttribValue(m_shoUV, "sho_uv");
     
     bool fz;
     getBoolAttribValue(fz, "freeze_view");
     setFreezeView(fz);
 
     if(fz) computeMesh();
+
+    if(m_shoUV)
+        setBound(BoundingBox(-.5f, -.5f, -.5f, 1.5f, 1.5f, 1.f));
+    else
+        setBound(m_aabb);
 }
 
 void LodMeshInOps::addDrawableTo(DrawableScene *scene)
@@ -151,6 +154,9 @@ bool LodMeshInOps::loadCache(const std::string &fileName)
     buildBvh();
 
     initializeDetails();
+
+    m_aabb = bvhAabb();
+    setBound(m_aabb);
 
     return true;
 }

@@ -66,4 +66,7 @@ void ViewDependentFunction::addBvhPrimitive(const BVHPrimitive &x)
 void ViewDependentFunction::buildBvh()
 { m_culler->buildBvh(); }
 
+const BoundingBox &ViewDependentFunction::bvhAabb() const
+{ return m_culler->bvhAabb(); }
+
 }

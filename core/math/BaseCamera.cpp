@@ -146,8 +146,8 @@ void BaseCamera::moveForward(int y)
 	const float fra = (float)y * .01f;
 	
 	eye += front * (dist * -fra);
-	if(y > 0 && dist < 20.f ) 
-		fCenterOfInterest += front * (20.f * -fra);
+	if(y > 0 && dist < 8.f ) 
+		fCenterOfInterest += front * (8.f * -fra);
 	fSpace.setTranslation(eye);
 	updateInverseSpace();
 }

@@ -79,3 +79,13 @@ void AcaciaScene::recvCameraChanged(const CameraEvent &x)
         block = nextGlyph(block);
     }
 }
+
+void AcaciaScene::recvRequestBound()
+{
+    GlyphOps *op = getActiveOps();
+    if(!op) return;
+    if(!op->hasDrawable() ) return;
+    Hexahedron b;
+    op->getDrawableBound(b);
+    emit sendBound(b);
+}

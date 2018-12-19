@@ -155,4 +155,7 @@ void Fissure::setMeshUVs(Float2 *outUVs,
 const BVH *Fissure::bvh() const
 { return m_bvh; }
 
+const BoundingBox &Fissure::aabb() const
+{ return m_bvh->aabb(); }
+
 }

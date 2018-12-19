@@ -12,6 +12,8 @@
 #include "CameraResponse.h"
 #include "CameraEvent.h"
 Q_DECLARE_METATYPE(alo::CameraEvent)
+#include <math/Hexahedron.h>
+Q_DECLARE_METATYPE(alo::Hexahedron)
 
 namespace alo {
     
@@ -28,9 +30,11 @@ public:
     QSize sizeHint() const override;
     
 signals:
-    void cameraChanged(const alo::CameraEvent &x);
+    void cameraChanged(const CameraEvent &x);
+    void requestBound();
 
 public slots:
+    void recvBound(const Hexahedron &x);
 	
 protected:
 
@@ -41,6 +45,7 @@ protected:
     void mousePressEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent* event);
 	void mouseReleaseEvent(QMouseEvent* event);
+    void keyPressEvent(QKeyEvent *event);
 	
 	virtual void processCamera(QMouseEvent *event);
 	virtual void clientInit();

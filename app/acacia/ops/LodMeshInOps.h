@@ -18,6 +18,7 @@ class LodMeshCache;
 class LodMeshInOps : public DrawableOps, public ViewDependentFunction {
     
     LodMeshGroup m_cache;
+    BoundingBox m_aabb;
     float m_lod;
     bool m_shoUV;
     boost::mutex m_mtx;

@@ -189,4 +189,7 @@ void ViewFrustumCull::buildBvh()
 	}
 }
 
+const BoundingBox &ViewFrustumCull::bvhAabb() const
+{ return m_bvh->aabb(); }
+
 }

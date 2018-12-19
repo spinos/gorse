@@ -17,6 +17,7 @@ class PerspectiveCamera;
 class AFrustum;
 class VisibilityState;
 class BVHPrimitive;
+class BoundingBox;
 
 class ViewDependentFunction {
 
@@ -45,6 +46,8 @@ protected:
 	void clearBvh();
 	void addBvhPrimitive(const BVHPrimitive &x);
 	void buildBvh();
+
+	const BoundingBox &bvhAabb() const;
 
 private:
 

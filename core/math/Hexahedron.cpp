@@ -10,7 +10,7 @@
 namespace alo {
 
 Hexahedron::Hexahedron()
-{}
+{ memset(m_p, 0, 96); }
 
 void Hexahedron::set(const BoundingBox &aabb)
 {

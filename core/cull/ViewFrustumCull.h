@@ -47,6 +47,8 @@ public:
 	void addBvhPrimitive(const BVHPrimitive &x);
 	void buildBvh();
 
+	const BoundingBox &bvhAabb() const;
+
 };
 	
 }

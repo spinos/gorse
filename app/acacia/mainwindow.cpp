@@ -55,6 +55,10 @@ MainWindow::MainWindow()
             m_scene, &AcaciaScene::recvCameraChanged );
     connect(m_graphView, &alo::SceneGraph::sendGraphChanged,
             m_glview, &GLWidget::recvAttribChanged );
+    connect(m_glview, &alo::View3DWidget::requestBound,
+            m_scene, &AcaciaScene::recvRequestBound );
+    connect(m_scene, &AcaciaScene::sendBound,
+            m_glview, &alo::View3DWidget::recvBound );
 #else
     connect(m_glview, SIGNAL(cameraChanged(alo::CameraEvent)),
             m_scene, SLOT(recvCameraChanged(alo::CameraEvent)));

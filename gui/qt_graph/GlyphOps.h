@@ -16,6 +16,7 @@ namespace alo {
 
 class CameraEvent;
 struct AFileDlgProfile;
+class Hexahedron;
 
 class GlyphOps
 {
@@ -42,6 +43,7 @@ public:
 	virtual void update();
 	virtual bool hasDrawable() const;
 	virtual void setDrawableVisible(bool x);
+	virtual void getDrawableBound(Hexahedron &b) const;
 	virtual void onSelection();
 	virtual void postUI();
 	virtual bool hasMenu() const;

@@ -27,6 +27,9 @@ void GlyphOps::update()
 bool GlyphOps::hasDrawable() const
 { return false; }
 
+void GlyphOps::getDrawableBound(Hexahedron &b) const 
+{}
+
 void GlyphOps::setDrawableVisible(bool x)
 {}
 

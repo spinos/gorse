@@ -18,7 +18,11 @@ CameraResponse::~CameraResponse()
 }
 
 void CameraResponse::resetCamera(const Matrix44F &mat)
-{ m_persp->setViewTransform(mat, 100.f); }
+{ 
+    m_persp->setViewTransform(mat, 100.f); 
+    calcCameraMatrix();
+    calcCameraFrustum();
+}
 
 void CameraResponse::resetCamera()
 {
@@ -95,5 +99,21 @@ const QMatrix4x4 &CameraResponse::cameraMatrix() const
 
 CameraEvent CameraResponse::getCameraEvent() const
 { return CameraEvent(m_persp, m_frustum); }
+
+void CameraResponse::frameAll(const Vector3F &center, const float &width)
+{
+    m_persp->fCenterOfInterest = center;
+    const float fl = width * .75f / m_persp->tanhfov();
+    m_persp->fSpace.setTranslation(center + m_persp->eyeDirection() * fl);
+    m_persp->updateInverseSpace();
+    if(fl + width *.5f > m_persp->farClipPlane()) {
+        m_persp->m_farClipPlane = fl + width * .5f;
+        m_persp->m_nearClipPlane = m_persp->m_farClipPlane * .4e-5f;
+        std::cout << " INFO extend camera far clipping plane to " << m_persp->farClipPlane();
+        calcProjectionMatrix();
+    }
+    calcCameraMatrix();
+    calcCameraFrustum();
+}
    
 }

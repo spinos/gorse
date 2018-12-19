@@ -9,7 +9,7 @@ class AFrustum;
 class PerspectiveCamera;
 class Matrix44F;
 class CameraEvent;
-
+class Vector3F;
 class CameraResponse {
 
 public:
@@ -33,6 +33,7 @@ protected:
     const QMatrix4x4 &calcCameraMatrix();
     void calcCameraFrustum();
     CameraEvent getCameraEvent() const;
+    void frameAll(const Vector3F &center, const float &width);
 	
 private:
 

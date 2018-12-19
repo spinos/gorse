@@ -16,6 +16,7 @@
 
 #include <qt_graph/GlyphOps.h>
 #include <qt_ogl/DrawableResourceArray.h>
+#include <math/Hexahedron.h>
 
 namespace alo {
 
@@ -26,9 +27,11 @@ class ATriangleMesh;
 class DrawableScene;
 class DrawableObject;
 class VisibilityState;
+class BoundingBox;
 
 class DrawableOps : public GlyphOps, public DrawableResourceArray
 {
+	Hexahedron m_bound;
 	DrawableScene *m_scene;
 	int m_drawCounter;
 	bool m_drawableVisible;
@@ -39,6 +42,7 @@ public:
 
 	virtual bool hasDrawable() const override;
 	virtual void setDrawableVisible(bool x) override;
+	virtual void getDrawableBound(Hexahedron &b) const override;
 
 	virtual void addDrawableTo(DrawableScene *scene) = 0;
 	virtual void removeDrawableFromScene();
@@ -55,10 +59,14 @@ protected:
 
 	void processResourceNoLock(DrawableResource *rec);
 	void processResource(DrawableResource *rec, const VisibilityState &vis);
-/// n resouce remove redundant ones
+
 	void setDrawableSize(int n);
 	void lockScene();
 	void unlockScene();
+
+	void setBound(const Hexahedron &x);
+	void setBound(const BoundingBox &x);
+	void setBound(const ver1::ATriangleMesh *mesh);
 
 private:
 	

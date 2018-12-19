@@ -24,6 +24,7 @@ class AdaptableMesh;
 struct BVHNodeIterator;
 class BVH;
 struct Float2;
+class BoundingBox;
 class Fissure {
 
 	BVH *m_bvh;
@@ -39,6 +40,7 @@ public:
 	void reformPart(AdaptableMesh *outMesh, BVHNodeIterator x, const AdaptableMesh *inMesh) const;
 
 	const BVH *bvh() const;
+	const BoundingBox &aabb() const;
 	
 private:
 /// from primitive[begin] to (excluding) primitive[end]

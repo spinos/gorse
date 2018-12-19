@@ -181,4 +181,20 @@ void DrawableOps::setDrawableVisible(bool x)
     m_drawableVisible = x;
 }
 
+void DrawableOps::setBound(const Hexahedron &x)
+{ m_bound = x; }
+
+void DrawableOps::setBound(const BoundingBox &x)
+{ m_bound.set(x); }
+
+void DrawableOps::setBound(const ver1::ATriangleMesh *mesh)
+{
+    BoundingBox b;
+    mesh->getAabb(b);
+    setBound(b);
+}
+
+void DrawableOps::getDrawableBound(Hexahedron &b) const
+{ b = m_bound; }
+
 }

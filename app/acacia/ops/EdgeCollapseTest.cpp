@@ -113,6 +113,8 @@ EdgeCollapseTest::EdgeCollapseTest()
 
     DrawableResource *rec = createResource();
     setResource(rec);
+
+    setBound(m_sourceMesh);
 }
 
 EdgeCollapseTest::~EdgeCollapseTest()

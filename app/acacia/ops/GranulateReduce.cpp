@@ -73,6 +73,7 @@ int GranulateReduce::reduce(ViewFrustumCull *culler, const AdaptableMesh *srcMes
     Fissure fis;
     const int npart = fis.granulate(srcMesh);
     std::cout << " granulate to " << npart << " parts ";
+    setBound(fis.aabb());
             
     if(culler) culler->create(fis.bvh());
 

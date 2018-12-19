@@ -118,5 +118,40 @@ void View3DWidget::clientDraw(const QMatrix4x4 &proj, const QMatrix4x4 &cam) {}
 
 void View3DWidget::clientResize(int width, int height) {}
 
+void View3DWidget::keyPressEvent(QKeyEvent *event)
+{
+    bool viewChanged = false;
+    switch (event->key()) {
+        case Qt::Key_H:
+        case Qt::Key_Home:
+            resetCamera();
+            viewChanged = true;
+            break;
+        case Qt::Key_F:
+            emit requestBound();
+            break;
+        default:
+            break;
+    }
+    if(viewChanged) {
+        update();
+        CameraEvent e = getCameraEvent();
+        e.setProgressMode(CameraEvent::MInProgress);
+        emit cameraChanged(e);
+    }
 }
-//:~
+
+void View3DWidget::recvBound(const Hexahedron &x)
+{
+    const float d = x.size();
+/// invalid bound
+    if(d < .9f) return;
+    const Vector3F c = x.center();
+    frameAll(c, d);
+    update();
+    CameraEvent e = getCameraEvent();
+    e.setProgressMode(CameraEvent::MInProgress);
+    emit cameraChanged(e);
+}
+
+}

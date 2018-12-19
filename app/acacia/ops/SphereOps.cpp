@@ -56,6 +56,11 @@ void SphereOps::computeMesh()
 
     processResourceNoLock(rec);
     unlockScene();
+
+    if(m_shoUV)
+        setBound(BoundingBox(-.5f, -.5f, -.5f, 1.5f, 1.5f, 1.f));
+    else
+        setBound(&transient);
 }
 
 }
