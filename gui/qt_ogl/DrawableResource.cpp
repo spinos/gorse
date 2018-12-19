@@ -21,7 +21,10 @@ m_changedOnFrame(-999999),
 m_isDirty(false),
 m_toRelocate(false),
 m_deferred(false)
-{}
+{
+    m_surfaceColor[0] = m_surfaceColor[1] = m_surfaceColor[2] = 1.f;
+    m_wireColor[0] = m_wireColor[1] = m_wireColor[2] = 0.f;
+}
 
 void DrawableResource::attachToDrawable(DrawableObject *object)
 {
@@ -101,5 +104,11 @@ void DrawableResource::createBarycentricCoordinates(int numIndices)
     	d += 3;
     }
 }
+
+void DrawableResource::setSurfaceColor(const float *c)
+{ memcpy(m_surfaceColor, c, 12); }
+
+void DrawableResource::setWireColor(const float *c)
+{ memcpy(m_wireColor, c, 12); }
 
 }

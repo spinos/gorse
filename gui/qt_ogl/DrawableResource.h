@@ -27,7 +27,9 @@ class DrawableResource {
     bool m_isDirty;
     bool m_toRelocate;
     bool m_deferred;
-
+    float m_surfaceColor[3];
+    float m_wireColor[3];
+    
 public:
 	DrawableResource();
 
@@ -54,6 +56,9 @@ public:
 	const SimpleBuffer<Vector3F> &c_posnmlBuffer() const;
 	const SimpleBuffer<Vector3F> &c_barycBuffer() const;
 
+	void setSurfaceColor(const float *c);
+	void setWireColor(const float *c);
+	
 private:
 	static const float FaceBarycentricCoordinate[12];
 

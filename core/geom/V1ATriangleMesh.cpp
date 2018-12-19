@@ -2,10 +2,10 @@
  *  ATriangleMesh.cpp
  *  aloe
  *
- *
  */
 
 #include "V1ATriangleMesh.h"
+#include <cmath>
 
 namespace alo {
     
