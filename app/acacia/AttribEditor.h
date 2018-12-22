@@ -50,6 +50,7 @@ private:
 	void lsIntAttr(alo::QAttrib *attr);
 	void lsFloatAttr(alo::QAttrib *attr);
 	void lsFloat2Attr(alo::QAttrib *attr);
+	void lsFloat3Attr(alo::QAttrib *attr);
 	void lsListAttr(alo::QAttrib *attr);
 	void lsBoolAttr(alo::QAttrib *attr);
 	void lsStringAttr(alo::QAttrib *attr);

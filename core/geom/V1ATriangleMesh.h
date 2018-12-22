@@ -82,6 +82,14 @@ public:
     void scaleBy(float x);
 /// nv vertices nf faces to b
     void copyMeshTo(ATriangleMesh *b, const int &nv, const int &nf) const;
+    
+    static float CalcArea(const Vector3F &a, const Vector3F &b, const Vector3F &c);
+///     a
+//      |
+///     |
+///  b --- c
+/// perpendicular to bc pointing to a
+    static Vector3F PerpendicularToOppositeEdge(const Vector3F &a, const Vector3F &b, const Vector3F &c);
 
 protected:
     void setNumVertices(int x);

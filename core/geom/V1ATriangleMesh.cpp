@@ -350,6 +350,27 @@ void ATriangleMesh::copyMeshTo(ATriangleMesh *b, const int &nv, const int &nf) c
     }
 }
 
+float ATriangleMesh::CalcArea(const Vector3F &a, const Vector3F &b, const Vector3F &c)
+{
+    float la = (b - a).length();
+	float lb = (c - b).length();
+	float lc = (a - c).length();
+    float s = 0.5f * (la + lb + lc);
+	
+    return sqrt(s * (s - la) * (s - lb) * (s - lc));
+}
+
+Vector3F ATriangleMesh::PerpendicularToOppositeEdge(const Vector3F &a, const Vector3F &b, const Vector3F &c)
+{
+    Vector3F bc = c - b;
+    bc.normalize();
+    Vector3F ab = a - b;
+    float lab = ab.length();
+    ab /= lab;
+    float d = ab.dot(bc) * lab;
+    return a - (b + bc * d);
+}
+
 }
 
 }

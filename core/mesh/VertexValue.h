@@ -30,6 +30,7 @@ public:
 	float &cost();
 	void lock();
 	void unlock();
+    void setCost(float x);
 	void setOnBorder(bool x);
 	void setRingConcave(bool x);
 	const bool &isOnBorder() const;

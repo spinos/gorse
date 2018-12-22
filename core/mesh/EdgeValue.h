@@ -19,6 +19,7 @@ class EdgeIndex;
 class EdgeValue
 {
 	FaceIndex m_face0, m_face1;
+    float m_len;
 	int m_ind;
 
 public:
@@ -29,7 +30,9 @@ public:
 	bool isOnBorder() const;
 
 	void setInd(int x);
+    void setLength(float x);
 	const int &ind() const;
+    const float &length() const;
 	const FaceIndex &face0() const;
 	const FaceIndex &face1() const;
 

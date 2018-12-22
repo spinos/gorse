@@ -25,6 +25,9 @@ float &VertexValue::cost()
 const float &VertexValue::cost() const
 { return m_cost; }
 
+void VertexValue::setCost(float x)
+{ m_cost = x; }
+
 void VertexValue::setOnBorder(bool x)
 { m_onborder = x; }
 

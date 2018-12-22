@@ -43,7 +43,7 @@ public:
 	MeshTopology();
 	~MeshTopology();
 
-	void buildTopology(const ver1::ATriangleMesh *mesh);
+	virtual void buildTopology(const ver1::ATriangleMesh *mesh);
 
 	const int &numVertices() const;
 	const int &numFaces() const;
@@ -95,10 +95,14 @@ protected:
     void getFaceInds(std::vector<int> &faceInds,
                 const std::deque<FaceValue> &faces) const;
     void indexEdges();
+    void indexFaces();
 
     typedef sdb::L3Node<EdgeIndex, EdgeValue, 1024> EdgeDataType;
 	EdgeDataType *firstEdge();
 	EdgeDataType *nextEdge(const EdgeDataType *x);
+    typedef sdb::L3Node<FaceIndex, FaceValue, 1024> FaceDataType;
+    FaceDataType *firstFace();
+	FaceDataType *nextFace(const FaceDataType *x);
     const std::deque<FaceIndex> &facesConnectedTo(int vi) const;
 
     void copyPastFacesTo(std::vector<FaceIndex> &faces, int v) const;

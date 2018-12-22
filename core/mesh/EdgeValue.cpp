@@ -46,8 +46,14 @@ bool EdgeValue::disconnectFace(const FaceIndex &x)
 bool EdgeValue::isOnBorder() const
 { return !m_face1.isValid(); }
 
+void EdgeValue::setLength(float x)
+{ m_len = x; }
+
 void EdgeValue::setInd(int x)
 { m_ind = x; }
+
+const float &EdgeValue::length() const
+{ return m_len; }
 
 const int &EdgeValue::ind() const
 { return m_ind; }

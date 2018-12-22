@@ -428,6 +428,12 @@ MeshTopology::EdgeDataType *MeshTopology::firstEdge()
 MeshTopology::EdgeDataType *MeshTopology::nextEdge(const EdgeDataType *x)
 { return m_edges.next(x); }
 
+MeshTopology::FaceDataType *MeshTopology::firstFace()
+{ return m_tris.begin(); }
+
+MeshTopology::FaceDataType *MeshTopology::nextFace(const FaceDataType *x)
+{ return m_tris.next(x); }
+
 void MeshTopology::indexPastFaces(const ver1::ATriangleMesh *mesh, int begin, int end)
 {
 	for(int i=begin;i<end;++i) {
@@ -476,6 +482,20 @@ void MeshTopology::indexEdges()
 			acc++;
 		}
 		block = nextEdge(block);
+	}
+}
+
+void MeshTopology::indexFaces()
+{
+	int acc = 0;
+	FaceDataType *block = firstFace();
+	while(block) {
+		for(int i=0;i<block->count();++i) {
+			FaceValue &f = block->value(i);
+			f.setInd(acc);
+			acc++;
+		}
+		block = nextFace(block);
 	}
 }
 

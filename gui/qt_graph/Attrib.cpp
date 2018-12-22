@@ -166,7 +166,10 @@ void Float2Attrib::getMax(float* y) const
 }
 
 Float3Attrib::Float3Attrib(const std::string &name) : QAttrib(name, AtFloat3)
-{ value()<<0.f<<0.f<<0.f; }
+{ value()<<0.f<<0.f<<0.f<<-999999.f<<-999999.f<<-999999.f<<999999.f<<999999.f<<999999.f; }
+
+void Float3Attrib::setValue(const float &x, int component)
+{ value()[component] = x; }
 
 void Float3Attrib::setValue(const float *x)
 { 
@@ -180,6 +183,34 @@ void Float3Attrib::getValue(float *y) const
 	y[0] = c_value()[0].toFloat(); 
 	y[1] = c_value()[1].toFloat(); 
 	y[2] = c_value()[2].toFloat(); 
+}
+
+void Float3Attrib::setMin(const float* x)
+{
+    value()[3] = x[0];
+	value()[4] = x[1];
+    value()[5] = x[2];
+}
+
+void Float3Attrib::setMax(const float* x)
+{
+    value()[6] = x[0];
+	value()[7] = x[1];
+    value()[8] = x[2];
+}
+	
+void Float3Attrib::getMin(float* y) const
+{
+    y[0] = c_value()[3].toFloat(); 
+	y[1] = c_value()[4].toFloat(); 
+    y[2] = c_value()[5].toFloat(); 
+}
+
+void Float3Attrib::getMax(float* y) const
+{
+    y[0] = c_value()[6].toFloat(); 
+	y[1] = c_value()[7].toFloat(); 
+    y[2] = c_value()[8].toFloat(); 
 }
 
 Float4Attrib::Float4Attrib(const std::string &name) : QAttrib(name, AtFloat4)

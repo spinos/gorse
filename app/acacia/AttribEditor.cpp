@@ -115,6 +115,9 @@ void AttribEditor::lsAttr(QAttrib *attr)
 		case QAttrib::AtFloat2 :
 			lsFloat2Attr(attr);
 		break;
+        case QAttrib::AtFloat3 :
+			lsFloat3Attr(attr);
+		break;
 		case QAttrib::AtList :
 			lsListAttr(attr);
 		break;
@@ -224,6 +227,45 @@ void AttribEditor::lsFloat2Attr(alo::QAttrib *attr)
 	connect(ysld, SIGNAL(valueChanged(QPair<std::string, float>)),
            this, SLOT(recvFloatValue(QPair<std::string, float>)));
 			
+}
+
+void AttribEditor::lsFloat3Attr(alo::QAttrib *attr)
+{
+	SimpleLabel *lab = new SimpleLabel(QString(attr->label().c_str()));
+    lab->setShortText(QString(attr->attrName().c_str()));
+	FieldSlider* xsld = new FieldSlider();
+	FieldSlider* ysld = new FieldSlider();
+    FieldSlider* zsld = new FieldSlider();
+	
+    m_leftCollWigs.enqueue(lab);
+    m_leftCollWigs.enqueue(new SimpleLabel(tr("")));
+    m_leftCollWigs.enqueue(new SimpleLabel(tr("")));
+    m_rightCollWigs.enqueue(xsld);
+    m_rightCollWigs.enqueue(ysld);
+    m_rightCollWigs.enqueue(zsld);
+
+	Float3Attrib *fattr = static_cast<Float3Attrib *>(attr);
+	float val[3], val0[3], val1[3];
+	fattr->getValue(val);
+	fattr->getMin(val0);
+	fattr->getMax(val1);
+	xsld->setLimit(val0[0], val1[0]);
+	xsld->setValue(val[0]);
+	xsld->setName(attr->attrName() + ".x");
+	ysld->setLimit(val0[1], val1[1]);
+	ysld->setValue(val[1]);
+	ysld->setName(attr->attrName() + ".y");
+    zsld->setLimit(val0[2], val1[2]);
+	zsld->setValue(val[2]);
+	zsld->setName(attr->attrName() + ".z");
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)   	
+	connect(xsld, &FieldSlider::valueChanged,
+           this, &AttribEditor::recvFloatValue);
+	connect(ysld, &FieldSlider::valueChanged,
+           this, &AttribEditor::recvFloatValue);
+    connect(zsld, &FieldSlider::valueChanged,
+           this, &AttribEditor::recvFloatValue);       
+#endif
 }
 
 void AttribEditor::lsListAttr(alo::QAttrib *attr)

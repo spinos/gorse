@@ -40,6 +40,8 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
         return new LodMeshInOps;
     case AcaciaOpsType::AoPVSTest :
         return new PVSTest;
+    case AcaciaOpsType::AoGeodesicDistanceTest :
+        return new GeodesicDistanceTest;
     default:
         break;
     }

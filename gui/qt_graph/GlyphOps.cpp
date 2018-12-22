@@ -59,6 +59,9 @@ void GlyphOps::addAttribute(const QJsonObject &content)
 		case QAttrib::AtFloat2 :
 			b = addFloat2Attribute(content);
 			break;
+        case QAttrib::AtFloat3 :
+			b = addFloat3Attribute(content);
+			break;
 		case QAttrib::AtMesh :
 			b = addMeshAttribute(content);
 			break;
@@ -132,6 +135,31 @@ QAttrib *GlyphOps::addFloat2Attribute(const QJsonObject &content)
 	QJsonArray &fx = content["max"].toArray();
 	tmp[0] = fx[0].toDouble();
 	tmp[1] = fx[1].toDouble();
+	b->setMax(tmp);
+	m_attribs[snm] = b;
+	return b;
+}
+
+QAttrib *GlyphOps::addFloat3Attribute(const QJsonObject &content)
+{
+	QString name = content["name"].toString();
+	std::string snm = name.toStdString();
+	Float3Attrib *b = new Float3Attrib(snm);
+	float tmp[3];
+	QJsonArray &fv = content["value"].toArray();
+	tmp[0] = fv[0].toDouble();
+	tmp[1] = fv[1].toDouble();
+    tmp[2] = fv[2].toDouble();
+	b->setValue(tmp);
+	QJsonArray &fm = content["min"].toArray();
+	tmp[0] = fm[0].toDouble();
+	tmp[1] = fm[1].toDouble();
+    tmp[2] = fm[2].toDouble();
+	b->setMin(tmp);
+	QJsonArray &fx = content["max"].toArray();
+	tmp[0] = fx[0].toDouble();
+	tmp[1] = fx[1].toDouble();
+    tmp[2] = fx[2].toDouble();
 	b->setMax(tmp);
 	m_attribs[snm] = b;
 	return b;
@@ -212,6 +240,10 @@ void GlyphOps::setFloatComponentAttrValue(QAttrib *attr, const int &component, c
 {
 	if(attr->attrType() == QAttrib::AtFloat2) {
 		Float2Attrib *fattr = static_cast<Float2Attrib *>(attr);
+		fattr->setValue(x, component);
+	}
+    if(attr->attrType() == QAttrib::AtFloat3) {
+		Float3Attrib *fattr = static_cast<Float3Attrib *>(attr);
 		fattr->setValue(x, component);
 	}
 }
@@ -317,6 +349,16 @@ bool GlyphOps::getFloat2AttribValue(float *val, const std::string &attrName)
 	if(!attr) return false;
 
     Float2Attrib *fattr = static_cast<Float2Attrib *>(attr);
+    fattr->getValue(val);
+    return true;
+}
+
+bool GlyphOps::getFloat3AttribValue(float *val, const std::string &attrName)
+{
+	QAttrib * attr = findAttrib(attrName);
+	if(!attr) return false;
+
+    Float3Attrib *fattr = static_cast<Float3Attrib *>(attr);
     fattr->getValue(val);
     return true;
 }

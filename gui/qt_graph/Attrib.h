@@ -151,9 +151,17 @@ class Float3Attrib : public QAttrib {
 
 public:
 	Float3Attrib(const std::string &name);
+    
+    void setValue(const float &x, int component);
 
 	void setValue(const float *x);
 	void getValue(float *y) const;
+    
+    void setMin(const float* x);
+	void setMax(const float* x);
+	
+	void getMin(float* y) const;
+	void getMax(float* y) const;
 	
 private:
 };

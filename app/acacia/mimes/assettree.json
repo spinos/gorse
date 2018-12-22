@@ -155,6 +155,23 @@
             "label": "Test",
             "children": [
                 {
+                    "id": 704004,
+                    "name": "geodesic_dist",
+                    "label": "Geodesic Distance",
+                    "icon": ":images/geodesic_distance.png",
+                    "is_element": true,
+                    "attribs" : [
+                        { 
+                            "name": "disp",
+                            "label": "Displacement",
+                            "typ": 5,
+                            "value": [0.0, 0.0, 0.0],
+                            "min": [-100.0, -100.0, -100.0],
+                            "max": [100.0, 100.0, 100.0]
+                        }
+                    ]
+                },
+                {
                     "id": 716941,
                     "name": "pvs_test",
                     "label": "PVS Test",
