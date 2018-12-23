@@ -28,6 +28,9 @@ m_deferred(false)
     m_wireColor[0] = m_wireColor[1] = m_wireColor[2] = 0.f;
 }
 
+DrawableResource::~DrawableResource()
+{}
+
 void DrawableResource::attachToDrawable(DrawableObject *object)
 {
 	m_object = object;

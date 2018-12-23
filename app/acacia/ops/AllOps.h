@@ -9,6 +9,7 @@
 #include "PVSTest.h"
 #include "SphereOps.h"
 #include "GeodesicDistanceTest.h"
+#include "InstancedTest.h"
 
 namespace alo {
 
@@ -20,6 +21,7 @@ enum AcaciaOpsType {
     AoRoot = 872960,
     AoEdgeCollapseTest = 828635,
     AoLodMeshIn,
+    AoInstancedTest = 704003,
     AoGeodesicDistanceTest = 704004,
     AoPVSTest = 716941
 };

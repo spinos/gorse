@@ -44,6 +44,7 @@ public:
     void setDrawArrayLength(int x);
     const int &drawArrayLength() const;
     void setEditDrawArrayLength(int x);
+    void setNumInstances(int x);
 
     const QMatrix4x4 &worldMatrix() const;
 
@@ -62,6 +63,7 @@ private:
     int m_count[4];
     int m_drawArraySize;
     int m_editArrayLength;
+    int m_numInstances;
     int m_drawId;
 
 };

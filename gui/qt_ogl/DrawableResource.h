@@ -3,7 +3,7 @@
  *  aloe
  * 
  *  data can be modified on cpu
- *  once expanded associated gl resouce must be destroyed and recreated
+ *  once relocated, associated gl resouce must be destroyed and recreated
  *
  */
 
@@ -27,14 +27,16 @@ class DrawableResource {
     bool m_isDirty;
     bool m_toRelocate;
     bool m_deferred;
+/// only instance
     float m_tm[16];
     float m_surfaceColor[3];
     float m_wireColor[3];
     
 public:
 	DrawableResource();
+    virtual ~DrawableResource();
 
-	void attachToDrawable(DrawableObject *object);
+	virtual void attachToDrawable(DrawableObject *object);
 	void dettachDrawable();
 	DrawableObject *drawable();
 
@@ -59,7 +61,9 @@ public:
 
 	void setSurfaceColor(const float *c);
 	void setWireColor(const float *c);
-	
+    
+protected:
+
 private:
 	static const float FaceBarycentricCoordinate[12];
 

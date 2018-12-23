@@ -7,6 +7,7 @@ DrawableObject::DrawableObject()
 {
 	m_drawArraySize = 0;
     m_editArrayLength = 0;
+    m_numInstances = 1;
     m_count[0] = 0;
     m_count[1] = 0;
     m_count[2] = 0;
@@ -123,12 +124,15 @@ const int &DrawableObject::drawArrayLength() const
 void DrawableObject::setEditDrawArrayLength(int x)
 { m_editArrayLength = x; }
 
+void DrawableObject::setNumInstances(int x)
+{ m_numInstances = x; }
+
 void DrawableObject::draw(QOpenGLContext *ctx)
 { 
     m_vao.bind();
     QOpenGLExtraFunctions *f = ctx->extraFunctions();
     //f->glDrawArrays(GL_TRIANGLES, 0, m_drawArraySize );
-    f->glDrawArraysInstanced(GL_TRIANGLES, 0, m_drawArraySize, m_count[2]>>6);
+    f->glDrawArraysInstanced(GL_TRIANGLES, 0, m_drawArraySize, m_numInstances);
 }
 
 const QMatrix4x4 &DrawableObject::worldMatrix() const

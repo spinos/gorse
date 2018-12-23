@@ -12,7 +12,7 @@
 namespace alo {
 
 class DrawableResource;
-
+class InstancedResource;
 class DrawableResourceArray {
 
 	std::vector<DrawableResource *> m_resources;
@@ -27,6 +27,7 @@ protected:
 	bool hasResource(int i=0) const;
 
 	DrawableResource *createResource();
+    InstancedResource *createInstancedResources();
 	void setResource(DrawableResource *x, int i=0);
 	DrawableResource *resource(int i=0);
 	DrawableResource *lastResource();

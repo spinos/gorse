@@ -5,7 +5,7 @@
  */
 
 #include "DrawableResourceArray.h"
-#include "DrawableResource.h"
+#include "InstancedResource.h"
 
 namespace alo {
 
@@ -31,6 +31,9 @@ bool DrawableResourceArray::hasResource(int i) const
 
 DrawableResource *DrawableResourceArray::createResource()
 { return new DrawableResource; }
+
+InstancedResource *DrawableResourceArray::createInstancedResources()
+{ return new InstancedResource; }
 
 void DrawableResourceArray::setResource(DrawableResource *x, int i)
 {
