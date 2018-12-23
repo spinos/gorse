@@ -2,10 +2,8 @@
  *  Matrix44F.cpp
  *  aloe
  *
- *  Created by jian zhang on 10/30/11.
- *  Copyright 2011 __MyCompanyName__. All rights reserved.
- *
  */
+ 
 #include "Matrix44F.h"
 #include "miscfuncs.h"
 

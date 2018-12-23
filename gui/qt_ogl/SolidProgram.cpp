@@ -21,20 +21,24 @@ static const char *solid_vertexShaderSource =
     "attribute vec4 vertex;\n"
     "attribute vec3 normal;\n"
     "attribute mediump vec3 bary;\n"
+    "attribute mat4 voffset;\n"
     "varying vec3 vert;\n"
     "varying vec3 vertNormal;\n"
+    "varying vec3 baryc;\n"
     "uniform mat4 projMatrix;\n"
     "uniform mat4 mvMatrix;\n"
     "uniform mat3 normalMatrix;\n"
     "void main() {\n"
     "   vert = vertex.xyz;\n"
     "   vertNormal = normalMatrix * normal;\n"
-    "   gl_Position = projMatrix * mvMatrix * vertex;\n"
+    "   baryc = bary;\n"
+    "   gl_Position = projMatrix * mvMatrix * voffset * vertex;\n"
     "}\n";
 
 static const char *solid_fragmentShaderSource =
     "varying highp vec3 vert;\n"
     "varying highp vec3 vertNormal;\n"
+    "varying mediump vec3 baryc;\n"
     "uniform highp vec3 lightPos;\n"
     "uniform highp vec3 surfaceCol;\n"
     "void main() {\n"
@@ -49,11 +53,7 @@ void SolidProgram::initializeProgram(QOpenGLContext *ctx)
     QOpenGLShaderProgram *program = new QOpenGLShaderProgram(ctx);
     program->addShaderFromSourceCode(QOpenGLShader::Vertex, solid_vertexShaderSource );
     program->addShaderFromSourceCode(QOpenGLShader::Fragment, solid_fragmentShaderSource);
-    program->bindAttributeLocation("vertex", 0);
-    program->bindAttributeLocation("normal", 1);
-    program->bindAttributeLocation("bary", 2);
     program->link();
-
     program->bind();
     
     m_lightPosLoc = program->uniformLocation("lightPos");

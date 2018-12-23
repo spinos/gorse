@@ -2,10 +2,10 @@
  *  Matrix44F.h
  *  aloe
  *
- *  Created by jian zhang on 10/30/11.
- *  Copyright 2011 __MyCompanyName__. All rights reserved.
+ *  4x4 float matrix in row-major layout
  *
  */
+ 
 #ifndef ALO_MATRIX_44_F_H
 #define ALO_MATRIX_44_F_H
 

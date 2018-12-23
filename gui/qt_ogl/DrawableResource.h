@@ -27,6 +27,7 @@ class DrawableResource {
     bool m_isDirty;
     bool m_toRelocate;
     bool m_deferred;
+    float m_tm[16];
     float m_surfaceColor[3];
     float m_wireColor[3];
     

@@ -32,6 +32,7 @@ public:
 /// entry to data
     void setPosnml(const float *posnml, int count);
     void setBarycentric(const float *barycoord, int count);
+    void setTransformMatrix(const float *tm, int count);
     void move(float x, float y, float z);
     
 /// must have context
@@ -55,9 +56,10 @@ private:
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_posnmlVbo;
     QOpenGLBuffer m_barVbo;
+    QOpenGLBuffer m_offsetVbo;
     QMatrix4x4 m_world;
-    const float *m_data[2];
-    int m_count[2];
+    const float *m_data[4];
+    int m_count[4];
     int m_drawArraySize;
     int m_editArrayLength;
     int m_drawId;

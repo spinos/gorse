@@ -9,6 +9,7 @@ DrawableObject::DrawableObject()
     m_editArrayLength = 0;
     m_count[0] = 0;
     m_count[1] = 0;
+    m_count[2] = 0;
     m_drawId = 0;
 }
 
@@ -21,6 +22,7 @@ void DrawableObject::cleanup()
 {
     m_posnmlVbo.destroy();
     m_barVbo.destroy();
+    m_offsetVbo.destroy();
 }
 
 void DrawableObject::setDrawId(int x)
@@ -39,6 +41,12 @@ void DrawableObject::setBarycentric(const float *barycoord, int count)
 {
     m_data[1] = barycoord;
     m_count[1] = count;
+}
+
+void DrawableObject::setTransformMatrix(const float *tm, int count)
+{
+    m_data[2] = tm;
+    m_count[2] = count;
 }
 
 void DrawableObject::create(QOpenGLContext *ctx)
@@ -64,6 +72,17 @@ void DrawableObject::create(QOpenGLContext *ctx)
     f->glEnableVertexAttribArray(2);
     f->glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
     m_barVbo.release();
+    
+    m_offsetVbo.create();
+    m_offsetVbo.bind();
+    m_offsetVbo.allocate((const GLfloat *)m_data[2], m_count[2]);
+
+    for(int i=0;i<4;++i) {
+        f->glEnableVertexAttribArray(3 + i);
+        f->glVertexAttribPointer(3 + i, 4, GL_FLOAT, GL_FALSE, 64, (void *)(i<<4));
+        f->glVertexAttribDivisor(3 + i, 1);
+    }
+    m_offsetVbo.release();
 }
 
 void DrawableObject::update(QOpenGLContext *ctx)
@@ -108,7 +127,8 @@ void DrawableObject::draw(QOpenGLContext *ctx)
 { 
     m_vao.bind();
     QOpenGLExtraFunctions *f = ctx->extraFunctions();
-    f->glDrawArrays(GL_TRIANGLES, 0, m_drawArraySize );
+    //f->glDrawArrays(GL_TRIANGLES, 0, m_drawArraySize );
+    f->glDrawArraysInstanced(GL_TRIANGLES, 0, m_drawArraySize, m_count[2]>>6);
 }
 
 const QMatrix4x4 &DrawableObject::worldMatrix() const

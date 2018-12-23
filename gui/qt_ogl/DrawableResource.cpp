@@ -22,6 +22,8 @@ m_isDirty(false),
 m_toRelocate(false),
 m_deferred(false)
 {
+    memset(m_tm, 0, 64);
+    m_tm[0] = m_tm[5] = m_tm[10] = m_tm[15] = 1.f;
     m_surfaceColor[0] = m_surfaceColor[1] = m_surfaceColor[2] = 1.f;
     m_wireColor[0] = m_wireColor[1] = m_wireColor[2] = 0.f;
 }
@@ -32,6 +34,7 @@ void DrawableResource::attachToDrawable(DrawableObject *object)
 	object->setPosnml((const float *)m_posnml.c_data(), m_posnml.capacityByteSize());
     object->setBarycentric((const float *)m_baryc.c_data(), m_baryc.capacityByteSize());
     object->setDrawArrayLength(m_drawArrayLength);
+    object->setTransformMatrix(m_tm, 64);
     m_isDirty = false;
     m_toRelocate = false;
     m_deferred = false;
@@ -39,7 +42,6 @@ void DrawableResource::attachToDrawable(DrawableObject *object)
 
 void DrawableResource::dettachDrawable()
 {
-	//m_object->setDrawArrayLength(0);
 	m_object = 0;
 	m_isDirty = false;
 	m_toRelocate = false;

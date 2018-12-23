@@ -22,6 +22,7 @@ static const char *wfrm_vertexShaderSource =
     "attribute vec4 vertex;\n"
     "attribute vec3 normal;\n"
     "attribute mediump vec3 bary;\n"
+    "attribute mat4 voffset;\n"
     "varying vec3 vert;\n"
     "varying vec3 vertNormal;\n"
     "varying vec3 baryc;\n"
@@ -31,8 +32,8 @@ static const char *wfrm_vertexShaderSource =
     "void main() {\n"
     "   vert = vertex.xyz;\n"
     "   vertNormal = normalMatrix * normal;\n"
-    "   baryc = bary;"
-    "   gl_Position = projMatrix * mvMatrix * vertex;\n"
+    "   baryc = bary;\n"
+    "   gl_Position = projMatrix * mvMatrix * voffset * vertex;\n"
     "}\n";
 
 static const char *wfrm_fragmentShaderSource =
@@ -56,11 +57,7 @@ void WireframeProgram::initializeProgram(QOpenGLContext *ctx)
     QOpenGLShaderProgram *program = new QOpenGLShaderProgram(ctx);
     program->addShaderFromSourceCode(QOpenGLShader::Vertex, wfrm_vertexShaderSource );
     program->addShaderFromSourceCode(QOpenGLShader::Fragment, wfrm_fragmentShaderSource);
-    program->bindAttributeLocation("vertex", 0);
-    program->bindAttributeLocation("normal", 1);
-    program->bindAttributeLocation("bary", 2);
     program->link();
-
     program->bind();
     
     m_wireColorLoc = program->uniformLocation("wireCol");
