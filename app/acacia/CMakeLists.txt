@@ -41,6 +41,8 @@ target_link_libraries (acacia ${Boost_DATE_TIME_LIBRARY})
 target_link_libraries (acacia ${Boost_THREAD_LIBRARY})
 target_link_libraries (acacia ${Boost_CHRONO_LIBRARY})
 target_link_libraries (acacia ${HDF5_LIBRARIES})
+target_link_libraries (acacia ${SZIP_LIBRARY})
+target_link_libraries (acacia ${ZLIB_LIBRARY})
 
 IF(WIN32)
 ## set_target_properties(acacia PROPERTIES LINK_FLAGS "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")

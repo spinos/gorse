@@ -1,7 +1,13 @@
 MESSAGE (" find hdf5 ")
 SET (INSTALLED_HDF5 OFF)
 if (WIN32)
-	IF (EXISTS "C:/Program Files/HDF5/cmake/hdf5")
+    IF (EXISTS "D:/usr/hdf5-1.8.21-s")
+        SET (HDF5_INCLUDE_DIRS D:/usr/hdf5-1.8.21-s/include)
+        SET (HDF5_LIBRARIES "D:/usr/hdf5-1.8.21-s/lib/libhdf5.lib")
+    ELSEIF (EXISTS "D:/usr/hdf5-1.8.20-s")
+        SET (HDF5_INCLUDE_DIRS D:/usr/hdf5-1.8.20-s/include)
+        SET (HDF5_LIBRARIES "D:/usr/hdf5-1.8.20-s/lib/libhdf5.lib")
+	ELSEIF (EXISTS "C:/Program Files/HDF5/cmake/hdf5")
 # location of configure file FindHDF5.cmake
 		SET (HDF5_DIR "C:/Program Files/HDF5/cmake/hdf5")
         SET (INSTALLED_HDF5 ON)
@@ -31,4 +37,5 @@ MESSAGE (" hdf5 library is " ${HDF5_LIBRARIES} )
 
 include_directories (${HDF5_INCLUDE_DIRS})
 
-ADD_DEFINITIONS (-DH5_BUILT_AS_DYNAMIC_LIB)
+MESSAGE ("Use Static HDF5")
+##ADD_DEFINITIONS (-DH5_BUILT_AS_DYNAMIC_LIB)
