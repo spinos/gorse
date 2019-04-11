@@ -12,12 +12,19 @@
 
 namespace alo {
 
-IntersectResult::IntersectResult()
+IntersectResult::IntersectResult() : m_dist(1e7f)
 {
 	m_radianceState = new SampleState;
 	m_radianceState->setAccess(SampleState::Wrap, SampleState::Clamp);
 	m_radianceState->setFilter(SampleState::Box);
 	m_radianceState->setChannel(SampleState::RGB);
+}
+
+bool IntersectResult::updateRayDistance(float x)
+{
+	if(m_dist < x) return false;
+	m_dist = x;
+	return true;
 }
 
 float& IntersectResult::rayDistance()

@@ -21,7 +21,7 @@ class DeepBuffer;
 class BufferBlock;
 class Renderer;
 class RenderContext;
-class Scene;
+class RenderableScene;
 
 class RenderInterface {
 
@@ -36,7 +36,7 @@ public:
 
 	RenderInterface();
 	
-    void setScene(Scene* x);
+    void setScene(RenderableScene* x);
 	void setRenderer(Renderer* x);
 	void setCamera(BaseCamera* x);
 	void setChangedCamera();

@@ -16,13 +16,13 @@ namespace alo {
 
 class PixelSampler;
 class PixelProjector; 
-class Scene;
+class RenderableScene;
 
 class RenderContext {
 
 	PixelSampler* m_sampler;
 	PixelProjector* m_projector;
-    Scene* m_scene;
+    RenderableScene* m_scene;
 	
 public:
 
@@ -30,11 +30,11 @@ public:
 	
 	void createSampler();
 	void createProjector();
-    void setScene(Scene* x);
+    void setScene(RenderableScene* x);
 	
 	const PixelSampler* sampler() const;
 	PixelProjector* projector();
-    Scene* scene();
+    RenderableScene* scene();
 	
 protected:
 

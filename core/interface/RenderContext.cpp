@@ -10,7 +10,7 @@
 #include "RenderContext.h"
 #include "PixelSampler.h"
 #include "PixelProjector.h"
-#include "Scene.h"
+#include "RenderableScene.h"
 
 namespace alo {
 
@@ -29,10 +29,10 @@ const PixelSampler* RenderContext::sampler() const
 PixelProjector* RenderContext::projector()
 { return m_projector; }
 
-void RenderContext::setScene(Scene* x)
+void RenderContext::setScene(RenderableScene* x)
 { m_scene = x; }
 
-Scene* RenderContext::scene()
+RenderableScene* RenderContext::scene()
 { return m_scene; }
 
 }

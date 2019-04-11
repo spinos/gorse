@@ -10,7 +10,7 @@
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include "CameraResponse.h"
-#include "CameraEvent.h"
+#include <math/CameraEvent.h>
 Q_DECLARE_METATYPE(alo::CameraEvent)
 #include <math/Hexahedron.h>
 Q_DECLARE_METATYPE(alo::Hexahedron)

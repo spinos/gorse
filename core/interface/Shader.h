@@ -17,7 +17,7 @@
 namespace alo {
 
 class IntersectResult; 
-class Scene;
+class RenderableScene;
 class SpaceTransform;
 class Lambert;
 class CookTorrance;
@@ -40,7 +40,7 @@ public:
 /// cosTheta wi.n
 /// pdf probablity density function
 	void evaluate(float* col, Ray& aray, IntersectResult& isect,
-				PrngTyp* rng, const Scene* ascene);
+				PrngTyp* rng, const RenderableScene* ascene);
 	
 private:
 

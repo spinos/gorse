@@ -6,7 +6,6 @@
 
 #include "View3DWidget.h"
 #include <QMouseEvent>
-#include "CameraEvent.h"
 
 namespace alo {
 

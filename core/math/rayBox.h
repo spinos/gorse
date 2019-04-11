@@ -130,6 +130,43 @@ inline bool rayExitingBox(const float* p,
     return false;
 }
 
+inline void getNormalOnBox(float* nml, const float* pnt, const float* box)
+{
+    if(pnt[0] < box[0] - box[3] + 1e-4f) {
+        nml[0] = -1.f;
+        nml[1] = nml[2] = 0.f;
+        return;
+    }
+
+    if(pnt[0] > box[0] + box[3] - 1e-4f) {
+        nml[0] = 1.f;
+        nml[1] = nml[2] = 0.f;
+        return;
+    }
+
+    if(pnt[1] < box[1] - box[3] + 1e-4f) {
+        nml[1] = -1.f;
+        nml[0] = nml[2] = 0.f;
+        return;
+    }
+
+    if(pnt[1] > box[1] + box[3] - 1e-4f) {
+        nml[1] = 1.f;
+        nml[0] = nml[2] = 0.f;
+        return;
+    }
+
+    if(pnt[2] < box[2] - box[3] + 1e-4f) {
+        nml[2] = -1.f;
+        nml[0] = nml[1] = 0.f;
+        return;
+    }
+
+    nml[2] = 1.f;
+    nml[0] = nml[1] = 0.f;
+
+}
+
 }
 
 #endif

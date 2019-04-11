@@ -1,0 +1,39 @@
+{
+    "id": 0,
+    "name": "world",
+    "label": "All Assets",
+    "children": [
+        {
+            "id": 135109,
+            "name": "mesher",
+            "label": "Mesher",
+            "icon": ":images/mesh_small.png",
+            "children": [
+                {
+                    "id": 694285,
+                    "name": "static_mesher",
+                    "label": "Static Mesher",
+                    "icon": ":images/mesh_small.png",
+                    "children": [
+                    ]
+                },
+                {
+                    "id": 703426,
+                    "name": "adaptive_mesher",
+                    "label": "Adaptive Mesher",
+                    "icon": ":images/mesh_adaptable_small.png",
+                    "children": [
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 513556,
+            "name": "cache",
+            "label": "Cache",
+            "icon": ":images/cache_small.png",
+            "children": [
+            ]
+        }
+    ]
+}

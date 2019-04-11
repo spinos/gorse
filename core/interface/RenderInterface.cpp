@@ -34,7 +34,7 @@ RenderInterface::RenderInterface()
 #endif 
 }
 
-void RenderInterface::setScene(Scene* x)
+void RenderInterface::setScene(RenderableScene* x)
 { m_context->setScene(x); }
 
 void RenderInterface::setRenderer(Renderer* x)

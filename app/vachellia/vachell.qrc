@@ -1,0 +1,33 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>images/new.png</file>
+    <file>images/test.png</file>
+    <file>images/print.png</file>
+    <file>images/save.png</file>
+    <file>images/undo.png</file>
+    <file>images/save_big.png</file>
+    <file>images/open_big.png</file>
+    <file>images/unknown.png</file>
+    <file>images/field_body.png</file>
+    <file>images/field_head.png</file>
+    <file>images/field_tail.png</file>
+    <file>images/field_groove.png</file>
+    <file>images/open_file_small.png</file>
+    <file>images/edgeCollapseTest.png</file>
+    <file>images/listener.png</file>
+    <file>images/mesh_decimation.png</file>
+    <file>images/cache.png</file>
+    <file>images/cache_small.png</file>
+    <file>images/mesh_small.png</file>
+    <file>images/mesh_adaptable_small.png</file>
+    <file>images/cube.png</file>
+    <file>images/solid_ball.png</file>
+    <file>images/wire_ball.png</file>
+    <file>images/eyeOpen.png</file>
+    <file>images/eyeHalf.png</file>
+    <file>images/eyeClose.png</file>
+    <file>images/sphere.png</file>
+    <file>images/geodesic_distance.png</file>
+    <file>mimes/assettree.json</file>
+</qresource>
+</RCC>

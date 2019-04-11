@@ -27,6 +27,9 @@ class IntersectResult {
 public:
 	
 	IntersectResult();
+
+/// when x < dist
+	bool updateRayDistance(float x);
 	
 	float& rayDistance();
 	Vector3F& hitNormal();

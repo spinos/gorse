@@ -11,13 +11,14 @@
 #include "BufferBlock.h"
 #include "RenderContext.h"
 #include "PixelSampler.h"
-#include "Scene.h"
+#include "RenderableScene.h"
 #include <math/Ray.h>
 #include <math/Matrix44F.h>
 #include <math/BoundingBox.h>
 #include "ImageFragment.h"
 #include <math/miscfuncs.h>
 #include <img/SampleState.h>
+#include "IntersectResult.h"
 
 namespace alo {
 
@@ -39,7 +40,7 @@ void BoxRenderer::renderFragment(RenderContext& context, BufferBlock& blk)
 	const PixelSampler* pxsamp = context.sampler();
 	pxsamp->generateViewRays(blk, prng() );
     
-    const Scene* scn = context.scene();
+    RenderableScene* scn = context.scene();
 	IntersectResult result;
 /// from context?
     SampleState colorState;

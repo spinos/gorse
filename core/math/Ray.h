@@ -20,6 +20,8 @@ public:
 	Ray(const Vector3F& pfrom, const Vector3F& pto);
 /// v[8] as (origin, direction, t0, t1)
 	void set(const float* v);
+	void get(float* v) const;
+
 	void operator=(const Ray& b);
 	Vector3F travel(const float & t) const;
 	

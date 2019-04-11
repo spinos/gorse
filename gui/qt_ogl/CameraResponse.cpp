@@ -1,7 +1,7 @@
 #include "CameraResponse.h"
 #include <math/PerspectiveCamera.h>
 #include <math/AFrustum.h>
-#include "CameraEvent.h"
+#include <math/CameraEvent.h>
 
 namespace alo {
 

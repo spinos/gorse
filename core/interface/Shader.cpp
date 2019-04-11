@@ -8,7 +8,7 @@
  */
 
 #include "Shader.h"
-#include <interface/Scene.h>
+#include <interface/RenderableScene.h>
 #include <math/SpaceTransform.h>
 #include <brdf/Lambert.h>
 #include <brdf/CookTorrance.h>
@@ -16,6 +16,7 @@
 #include "light.h"
 #include "EnvironmentLight.h"
 #include <img/ExrImage.h>
+#include "IntersectResult.h"
 
 namespace alo {
 	
@@ -27,7 +28,7 @@ Shader::Shader()
 }
 
 void Shader::evaluate(float* col, Ray& aray, IntersectResult& isect,
-				PrngTyp* rng, const Scene* ascene)
+				PrngTyp* rng, const RenderableScene* ascene)
 {
 	col[0] = col[1] = col[2] = 0.f;
 	col[3] = 1.f;

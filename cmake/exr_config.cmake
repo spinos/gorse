@@ -1,11 +1,21 @@
 MESSAGE (" find openEXR")
 if (WIN32)
+IF (EXISTS "D:/usr/openexr23-s")
+    set (OpenEXR_INCLUDE_DIR "D:/usr/openexr23-s/include")
+    set (OpenEXR_Library "D:/usr/openexr23-s/lib/Half_s.lib"
+"D:/usr/openexr23-s/lib/Iex_s.lib"
+"D:/usr/openexr23-s/lib/Imath_s.lib"
+"D:/usr/openexr23-s/lib/IlmImf_s.lib"
+"D:/usr/openexr23-s/lib/IlmThread_s.lib"
+)
+ELSE ()
 add_definitions (-DOPENEXR_DLL)
 set (OpenEXR_INCLUDE_DIR D:/usr/openexr21/include)
 set (OpenEXR_Library "D:/usr/openexr21/lib/Half.lib"
 "D:/usr/openexr21/lib/Iex-2_1.lib"
 "D:/usr/openexr21/lib/IlmImf-2_1.lib"
 "D:/usr/openexr21/lib/IlmThread-2_1.lib")
+ENDIF()
 
 ELSEIF (APPLE)
 set (OpenEXR_INCLUDE_DIR /Users/jianzhang/Library/openexr21/include)

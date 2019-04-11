@@ -47,6 +47,14 @@ void Ray::set(const float* v)
 	m_tmax = v[7];
 }
 
+void Ray::get(float* v) const
+{
+	memcpy(v, &m_origin, 12);
+	memcpy(&v[3], &m_dir, 12);
+	v[6] = m_tmin;
+	v[7] = m_tmax;
+}
+
 void Ray::operator=(const Ray& b)
 { 
 	m_origin = b.m_origin;
