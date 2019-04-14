@@ -37,6 +37,14 @@ inline Vector3F projectPointOnPlane(const Vector3F & p0,
 	return p0 - n1 * t;
 }
 
+inline void projectPointOnPlane1(Vector3F &q, float &t, const Vector3F & p0,
+                        const Vector3F & p1, const Vector3F &n1)
+{
+	const float d = -p1.dot(n1);
+	t = p0.dot(n1) + d;
+	q = p0 - n1 * t;
+}
+
 }
 
 #endif

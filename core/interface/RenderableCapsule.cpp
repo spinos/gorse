@@ -22,13 +22,14 @@ m_dir(1.f, 0.f, 0.f)
 bool RenderableCapsule::intersectRay(const Ray& aray, IntersectResult& result)
 {
 	float tt = result.rayDistance();
-	if(!rayCapsuleIntersect(tt, result.hitNormal(),
+	Vector3F tn;
+	if(!rayCapsuleIntersect(tt, tn,
 		aray, 
 		m_p0, m_p1, m_r, m_l, m_dir) ) {
 		return false;
 	}
 
-	return result.updateRayDistance(tt);
+	return result.updateRayDistance(tt, tn);
 }
 
 }

@@ -2,9 +2,31 @@
 #define RAY_CAPSULE_H
 
 #include "line_math.h"
+#include "rayPlane.h"
 #include "Ray.h"
 
 namespace alo {
+    
+inline float distanceToCapsule(Vector3F &normal,
+    const Vector3F &q, 
+	const Vector3F &p0, const Vector3F &p1, const float &rc, const float &lc, const Vector3F &vp0p1)
+{
+    float h = (q - p0).dot(vp0p1);
+    if(h < 0) {
+        normal = q - p0;    
+    } else if(h > lc) {
+        normal = q - p1;
+    } else {
+        normal = projectPointOnPlane(q, p1, vp0p1) - p1;
+        normal.normalize();
+        
+        return q.distanceTo(p0 + vp0p1 * h + normal * rc);
+    }
+    
+    h = normal.length();
+    normal /= h;
+    return h - rc;
+}    
 
 /// r ray 
 /// p0 capsule end0 position
@@ -20,51 +42,35 @@ inline bool rayCapsuleIntersect(float& t, Vector3F &hitNormal,
 /// ignore ray t0
 	const Vector3F &rayBegin = r.origin();
 	const Vector3F rayEnd = r.travel(t);
-	
-/// line to ray
-	if(distanceBetweenLines(rayBegin, rayEnd, p0, p1) >= rc) return false;
+    
+    if(clipRayCapsule(rayBegin, rayEnd, r.direction(), p0, p1, rc, vp0p1)) 
+        return false;
 
 	const float tLimit = t;
 
 /// ends to ray
 	Vector3F q;
 	float tq;
-	float lp2r = distancePointLine(p0, rayBegin, rayEnd);
-	projectPointLineSegment(q, tq, lp2r, p0, rayBegin, rayEnd, r.direction());
-
-	if((q - p0).dot(vp0p1) < 0 ) {
-		if(lp2r > rc) return false;
-	}
-
-	lp2r = distancePointLine(p1, rayBegin, rayEnd);
-	projectPointLineSegment(q, tq, lp2r, p1, rayBegin, rayEnd, r.direction());
-
-	if((q - p1).dot(vp0p1) > 0 ) {
-		if(lp2r > rc) return false;
-	}
+    float preStep = 1e10f;
 
 	t = 0.f;
 	q = rayBegin;
 	for(int i=0;i<19;++i) {
-		distancePointLineSegment(tq, q, p0, p1);
-		if(tq - rc < 4e-5f) break;
-		t += tq - rc;
+		tq = distanceToCapsule(hitNormal, q, p0, p1, rc, lc, vp0p1);
+		if(tq < 5e-5f) return true;
+        if(preStep < tq) return false;
+        preStep = tq;
+        
+        float ang = (r.direction()).dot(hitNormal);
+        if(ang <0) ang = -ang;
+        ang = 1.f / (1e-3f + ang);
+            
+		t += tq*ang;
 		if(t > tLimit) return false;
 		q = r.travel(t);
 	}
 
-	Vector3F pol;
-	projectPointLine(pol, tq, q, p0, p1, vp0p1);
-	if(tq <= 0)
-		hitNormal = q - p0;
-	else if(tq >= lc)
-		hitNormal = q - p1;
-	else
-		hitNormal = q - pol;
-
-	hitNormal.normalize();
-
-	return true;
+    return false;
 }
 
 }

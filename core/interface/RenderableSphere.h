@@ -20,6 +20,9 @@ class RenderableSphere : public RenderableObject {
 public:
 	RenderableSphere();
 
+	void setRadius(float x);
+	void setPoint(const Vector3F &p);
+
 	virtual bool intersectRay(const Ray& aray, IntersectResult& result) override;
 
 };

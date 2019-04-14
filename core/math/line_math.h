@@ -116,6 +116,29 @@ inline float distanceBetweenLines(const Vector3F & P1, const Vector3F & P2,
     return distanceBetweenSkewLines(P1, P2, P3, P4);
 }
 
+/// determine if ray intersects the capsule defined by p0 p1, r, vp0p1
+inline bool clipRayCapsule(const Vector3F &rayBegin, const Vector3F &rayEnd, const Vector3F &rayDir,
+                const Vector3F &p0, const Vector3F &p1, const float &r, const Vector3F &vp0p1)
+{
+    if(distanceBetweenLines(rayBegin, rayEnd, p0, p1) >= r) return true;
+
+	Vector3F q;
+	float t;
+
+	float d = distancePointLine(p0, rayBegin, rayEnd);
+	projectPointLineSegment(q, t, d, p0, rayBegin, rayEnd, rayDir);
+
+	if((q - p0).dot(vp0p1) < 0 && (q - p0).length() > r) return true;
+
+	d = distancePointLine(p1, rayBegin, rayEnd);
+	projectPointLineSegment(q, t, d, p1, rayBegin, rayEnd, rayDir);
+
+	if((q - p1).dot(vp0p1) > 0 && (q - p1).length() > r) return true;
+    
+    return false;
+}
+
+
 }
 #endif        //  #ifndef LINE_MATH_H
 

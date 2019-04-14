@@ -5,8 +5,8 @@
     "children": [
         {
             "id": 135109,
-            "name": "mesher",
-            "label": "Mesher",
+            "name": "sdf",
+            "label": "Singed Distance Field",
             "icon": ":images/mesh_small.png",
             "children": [
                 {

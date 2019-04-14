@@ -16,12 +16,13 @@
 #include "RenderableCapsule.h"
 #include "RenderableCylinder.h"
 #include "RenderableCone.h"
+#include "RenderableCoordinateSystem.h"
 
 namespace alo {
 
 RenderableScene::RenderableScene()
 {
-	RenderableCone *b = new RenderableCone;
+	RenderableCoordinateSystem *b = new RenderableCoordinateSystem;
 	b->setDrawId(1);
 	enqueueCreateDrawable(b, 0);
 }
@@ -31,7 +32,6 @@ bool RenderableScene::intersectRay(const Ray& aray, IntersectResult& result)
 	result.rayDistance() = 1e9f;
 	bool hasIntersection = false;
 	bool isFinished = false;
-	lock();
 
 	ObjectDataType *block = m_drawQueue.begin();
     while(block) {
@@ -54,7 +54,6 @@ bool RenderableScene::intersectRay(const Ray& aray, IntersectResult& result)
         block = m_drawQueue.next(block);
     }
 
-	unlock();
 	return hasIntersection;
 }
 
@@ -63,12 +62,6 @@ void RenderableScene::getBackgroundColor(float* col, const Vector3F& dir, Sample
 
 const EnvLightTyp* RenderableScene::environmentLight() const
 { return 0; }
-
-void RenderableScene::lock()
-{ m_mutex.lock(); }
-
-void RenderableScene::unlock()
-{ m_mutex.unlock(); }
 
 void RenderableScene::enqueueCreateDrawable(RenderableObject* d, int groupId)
 {

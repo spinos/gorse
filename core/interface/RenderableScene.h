@@ -24,7 +24,7 @@ class IntersectResult;
 
 class RenderableScene {
 
-	QMutex m_mutex;
+	//QMutex m_mutex;
 
 	enum ObjectState {
         stUnknown = 0,
@@ -52,9 +52,6 @@ public:
 	virtual void getBackgroundColor(float* col, const Vector3F& dir, SampleState* state) const;
 	
 	virtual const EnvLightTyp* environmentLight() const;
-
-	void lock();
-    void unlock();
 
     void enqueueCreateDrawable(RenderableObject* d, int groupId);
     

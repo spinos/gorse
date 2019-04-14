@@ -11,8 +11,14 @@
 namespace alo {
 
 RenderableSphere::RenderableSphere() : m_center(Vector3F::Zero),
-m_radius(10.f)
+m_radius(1.f)
 {}
+
+void RenderableSphere::setRadius(float x)
+{ m_radius = x; }
+
+void RenderableSphere::setPoint(const Vector3F &p)
+{ m_center = p; }
 
 bool RenderableSphere::intersectRay(const Ray& aray, IntersectResult& result)
 {

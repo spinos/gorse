@@ -20,10 +20,11 @@ IntersectResult::IntersectResult() : m_dist(1e7f)
 	m_radianceState->setChannel(SampleState::RGB);
 }
 
-bool IntersectResult::updateRayDistance(float x)
+bool IntersectResult::updateRayDistance(float x, const Vector3F &nml)
 {
 	if(m_dist < x) return false;
 	m_dist = x;
+	m_normal = nml;
 	return true;
 }
 

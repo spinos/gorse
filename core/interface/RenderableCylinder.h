@@ -17,10 +17,14 @@ class RenderableCylinder : public RenderableObject {
 	Vector3F m_p0;
 	float m_r;
 	Vector3F m_p1;
+	float m_l;
 	Vector3F m_dir;
 	
 public:
 	RenderableCylinder();
+
+	void setPoints(const Vector3F &p0, const Vector3F &p1);
+	void setRadius(float x);
 
 	virtual bool intersectRay(const Ray& aray, IntersectResult& result) override;
 

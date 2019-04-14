@@ -28,8 +28,8 @@ public:
 	
 	IntersectResult();
 
-/// when x < dist
-	bool updateRayDistance(float x);
+/// dist <- x, normal <- nml when x < dist
+	bool updateRayDistance(float x, const Vector3F &nml);
 	
 	float& rayDistance();
 	Vector3F& hitNormal();

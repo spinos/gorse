@@ -6,97 +6,116 @@
 #include "Ray.h"
 
 namespace alo {
+    
+inline float distanceToCylinder(Vector3F &normal, bool &isOnBody,
+	const Vector3F &q, 
+	const Vector3F &p0, const Vector3F &p1, const float &rc, const float &lc, const Vector3F &vp0p1)
+{
+    Vector3F p, v;
+	float h = (q - p0).dot(vp0p1);
+	if(h < 0) {
+        normal = vp0p1 * -1.f;
+        p = projectPointOnPlane(q, p0, vp0p1);
+        if(p.distanceTo(p0) > rc) {
+            isOnBody = false;
+            v = p - p0;
+            v.normalize();
+            return q.distanceTo(p0 + v * rc);
+        } 
+        isOnBody = true;
+        return -h;
+	}
+	
+    if(h > lc) {
+        normal = vp0p1;
+        p = projectPointOnPlane(q, p1, vp0p1);
+        if(p.distanceTo(p1) > rc) {
+            isOnBody = false;
+            v = p - p1;
+            v.normalize();
+            return q.distanceTo(p1 + v * rc);
+        }
+        isOnBody = true;
+        return h - lc;
+	} 
+    
+    isOnBody = true;
+    p = projectPointOnPlane(q, p1, vp0p1);
+
+    normal = p - p1;
+	normal.normalize();
+
+	return q.distanceTo(p0 + vp0p1 * h + normal * rc);
+
+}
 
 inline bool rayCylinderIntersect(float& t, Vector3F &hitNormal,
 		const Ray& r, 
-		const Vector3F& p0, const Vector3F& p1, const float& rc, const Vector3F &vp0p1)
+		const Vector3F& p0, const Vector3F& p1, const float& rc, const float &lc, const Vector3F &vp0p1)
 {
 /// ignore ray t0
 	const Vector3F &rayBegin = r.origin();
 	const Vector3F rayEnd = r.travel(t);
+	
+    if(clipRayCapsule(rayBegin, rayEnd, r.direction(), p0, p1, rc, vp0p1)) 
+        return false;
+
 	const float tLimit = t;
-
-/// line to ray
-	if(distanceBetweenLines(rayBegin, rayEnd, p0, p1) >= rc) return false;
-
-	const Vector3F vp1p0 = vp0p1 * -1.f;
-
-	Vector3F q, c;
-	float tq, lp2r;
-
-	lp2r = distancePointLine(p0, rayBegin, rayEnd);
-	projectPointLineSegment(q, tq, lp2r, p0, rayBegin, rayEnd, r.direction());
-
-	if((q - p0).dot(vp1p0) > 0 && (q - p0).length() > rc) return false;
-
-	lp2r = distancePointLine(p1, rayBegin, rayEnd);
-	projectPointLineSegment(q, tq, lp2r, p1, rayBegin, rayEnd, r.direction());
-
-	if((q - p1).dot(vp0p1) > 0 && (q - p1).length() > rc) return false;
-
+    
+	Vector3F q;
+	float tq;
+/*
 /// caps
 	if(rayPlaneIntersect(tq, rayBegin, r.direction(), p0, vp1p0)) {
 		
 		q = r.travel(tq);
 		if(q.distanceTo(p0) <= rc) {
-			if(tq > t) return false;
+			if(tq > tLimit) return false;
 			t = tq;
 
 			hitNormal = vp1p0;
 			return true;
 		}
-
-		if((q - p0).dot(r.direction()) > 0) return false;
 	}	
-
-	if(rayPlaneIntersect(tq, rayBegin, r.direction(), p0, vp0p1)) {
-		q = r.travel(tq);
-		if(q.distanceTo(p0) > rc && (q - p0).dot(r.direction()) < 0) 
-			return false;
-	}
 
 	if(rayPlaneIntersect(tq, rayBegin, r.direction(), p1, vp0p1)) {
 		
 		q = r.travel(tq);
 		if(q.distanceTo(p1) <= rc) {
-			if(tq > t) return false;
+			if(tq > tLimit) return false;
 
 			t = tq;
 			hitNormal = vp0p1;
 			return true;
 		}
-
-		if((q - p1).dot(r.direction()) > 0) return false;
 	}
-
-	if(rayPlaneIntersect(tq, rayBegin, r.direction(), p1, vp1p0)) {
-		q = r.travel(tq);
-		if(q.distanceTo(p1) > rc && (q - p1).dot(r.direction()) < 0) 
-			return false;
-	}
-	
-/// body
+*/
+	bool isOnBody;
+	float preStep = 1e10f;
 	t = 0.f;
 	q = rayBegin;
 	for(int i=0;i<19;++i) {
-		distancePointLineSegment(tq, q, p0, p1);
-		if(tq - rc < 4e-5f) break;
-		t += tq - rc;
-		if(t > tLimit) return false;
-		q = r.travel(t);
+		tq = distanceToCylinder(hitNormal, isOnBody, q, p0, p1, rc, lc, vp0p1);
 
-		if(r.direction().dot(vp0p1) > 0 && (q - p1).dot(vp0p1) > 0) return false;
-		if(r.direction().dot(vp1p0) > 0 && (q - p0).dot(vp1p0) > 0) return false;
+		if(tq < 5e-3f) return true;
+        if(preStep < tq) return false;
+		preStep = tq;
+
+        if(isOnBody) {
+            float ang = (r.direction()).dot(hitNormal);
+            if(ang <0) ang = -ang;
+            ang = 1.f / (1e-3f + ang);
+            tq *= ang;
+        }
+        
+        t += tq;
+
+		if(t > tLimit) return false;
+
+		q = r.travel(t);
 	}
 
-
-	Vector3F pol;
-	projectPointLine(pol, tq, q, p0, p1, vp0p1);
-
-	hitNormal = q - pol;
-	hitNormal.normalize();
-
-	return true;
+	return false;
 }
 
 }
