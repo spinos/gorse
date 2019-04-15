@@ -20,11 +20,11 @@
 
 namespace alo {
 
-RenderableScene::RenderableScene()
+RenderableScene::RenderableScene() : m_objectCount(0)
 {
-	RenderableCylinder *b = new RenderableCylinder;
-	b->setDrawId(1);
-	enqueueCreateDrawable(b, 0);
+	RenderableCoordinateSystem *b = new RenderableCoordinateSystem;
+	enqueueCreateRenderable(b, 0);
+    processCreateRenderableQueue();
 }
 
 bool RenderableScene::intersectRay(const Ray& aray, IntersectResult& result)
@@ -63,12 +63,18 @@ void RenderableScene::getBackgroundColor(float* col, const Vector3F& dir, Sample
 const EnvLightTyp* RenderableScene::environmentLight() const
 { return 0; }
 
-void RenderableScene::enqueueCreateDrawable(RenderableObject* d, int groupId)
+void RenderableScene::enqueueCreateRenderable(RenderableObject* d, int groupId)
 {
-	RenderableObjectState a;
+	CreateRenderableObjectState a;
     a._state = stNormal;
+    a._group= groupId;
     a._object = d;
-    m_drawQueue.insert(sdb::Coord2(d->drawId(), groupId), a);
+    m_createQueue.push_back(a);
+}
+
+void RenderableScene::enqueueRemoveRenderable(int objectId, int groupId)
+{
+    m_removeQueue.push_back(sdb::Coord2(objectId, groupId));
 }
 
 void RenderableScene::enqueueHideDrawable(int objectId, int groupId)
@@ -81,22 +87,6 @@ void RenderableScene::enqueueShowDrawable(int objectId, int groupId)
 {
 	RenderableObjectState *a = m_drawQueue.find(sdb::Coord2(objectId, groupId) );
     if(a) a->_state = stNormal;
-}
-
-void RenderableScene::enqueueRemoveDrawable(int objectId, int groupId)
-{
-	RenderableObjectState *a = m_drawQueue.find(sdb::Coord2(objectId, groupId) );
-    if(a) a->_state = stWaitDestroy;
-}
-
-void RenderableScene::enqueueRemoveDrawable(int groupId)
-{
-	ObjectIteratorType it = m_drawQueue.begin(sdb::Coord2(-1,groupId));
-    for(;!it.done();it.next()) {
-        if(it.first.y > groupId) break;
-        if(it.first.y < groupId) continue;
-        if(it.second->_state > stWaitDestroy) it.second->_state = stWaitDestroy;
-    }
 }
 
 void RenderableScene::enqueueShowDrawable(int groupId)
@@ -117,6 +107,87 @@ void RenderableScene::enqueueHideDrawable(int groupId)
         if(it.first.y < groupId) continue;
         if(it.second->_state > stWaitDestroy) it.second->_state = stHidden;
     }
+}
+
+void RenderableScene::setToRemoveGroup(int groupId)
+{
+    ObjectIteratorType it = m_drawQueue.begin(sdb::Coord2(-1,groupId));
+    for(;!it.done();it.next()) {
+        if(it.first.y > groupId) break;
+        if(it.first.y < groupId) continue;
+        if(it.second->_state > stWaitDestroy) it.second->_state = stWaitDestroy;
+    }
+}
+
+void RenderableScene::processCreateRenderableQueue()
+{
+    while(m_createQueue.size() > 0) {
+
+        CreateRenderableObjectState &a = m_createQueue.front();
+
+        RenderableObjectState b;
+        b._state = a._state;
+        b._object = a._object;
+
+        const int i = m_objectCount;
+        m_objectCount++;
+
+        b._object->setObjectId(i);
+
+        m_drawQueue.insert(sdb::Coord2(i, a._group), b);
+
+        m_createQueue.erase(m_createQueue.begin());
+    }
+}
+
+void RenderableScene::processRemoveRenderableQueue()
+{
+    while(m_removeQueue.size() > 0) {
+
+        sdb::Coord2 &a = m_removeQueue.front();
+
+        if(a.x > -1) {
+            RenderableObjectState *b = m_drawQueue.find(a);
+            if(b) b->_state = stWaitDestroy;
+        }
+        else {
+            setToRemoveGroup(a.y);
+        }
+
+        m_removeQueue.erase(m_removeQueue.begin());
+    }
+
+    compressQueue();
+}
+
+void RenderableScene::compressQueue()
+{
+    ObjectDataType *block = m_drawQueue.begin();
+    while(block) {
+        for (int i=0;i<block->count();++i) { 
+            if(block->isSingular()) break;
+
+            RenderableObjectState &it = block->value(i);
+
+            if(it._state <= stWaitDestroy) {
+                block->remove(block->key(i));
+                i--;
+            }
+        }
+        block = m_drawQueue.next(block);
+    } 
+}
+
+bool RenderableScene::sceneChanged() const
+{
+    if(m_createQueue.size() > 0) return true;
+    return m_removeQueue.size() > 0;
+}
+
+void RenderableScene::updateRenderQueue()
+{
+    processCreateRenderableQueue();
+    processRemoveRenderableQueue();
 }
 
 }

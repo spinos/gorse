@@ -55,6 +55,9 @@ bool RenderInterface::imageSizeChanged() const
 	|| yres() != m_resizedImageDim[1] );
 }
 
+bool RenderInterface::sceneChanged() const
+{ return m_context->sceneChanged(); }
+
 void RenderInterface::createImage(int w, int h)
 { 
 	m_buffer->create(w, h);
@@ -113,5 +116,8 @@ RenderContext* RenderInterface::getContext()
 
 bool RenderInterface::isResidualLowEnough() const
 { return m_buffer->maxResidual() < 1e-9f; }
+
+void RenderInterface::updateScene()
+{ m_context->updateScene(); }
 
 }

@@ -35,4 +35,10 @@ void RenderContext::setScene(RenderableScene* x)
 RenderableScene* RenderContext::scene()
 { return m_scene; }
 
+bool RenderContext::sceneChanged() const
+{ return m_scene->sceneChanged(); }
+
+void RenderContext::updateScene()
+{ m_scene->updateRenderQueue(); }
+
 }

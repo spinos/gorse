@@ -62,7 +62,7 @@ void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
 	GlyphOps *ops = createOps(content);
 	ops->addAttributes(content);
 	g->setOps(ops);
-	if(ops->hasDrawable()) g->addVisibilityControl();
+	if(ops->hasDrawable() || ops->hasRenderable()) g->addVisibilityControl();
 	postCreation(g);
 }
 

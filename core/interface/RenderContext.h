@@ -35,6 +35,9 @@ public:
 	const PixelSampler* sampler() const;
 	PixelProjector* projector();
     RenderableScene* scene();
+
+    bool sceneChanged() const;
+    void updateScene();
 	
 protected:
 

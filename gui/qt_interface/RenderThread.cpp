@@ -12,6 +12,7 @@
 #include <interface/RenderInterface.h>
 #include <interface/BufferBlock.h>
 #include <interface/Renderer.h>
+//#include <QDebug>
 
 namespace alo {
 
@@ -39,26 +40,19 @@ void RenderThread::interruptRender()
 	}
 }
 
-void RenderThread::interruptAndResize()
+void RenderThread::interruptAndRestart(bool toResizeImage, bool toChangeScene)
 {
-//	qDebug()<<"interruptAndResize";	
+//	qDebug()<<"interruptAndRestart";	
 	interruptRender();
 	
-	m_interface->createImage(m_interface->resizedImageWidth(),
+	if(toResizeImage)
+		m_interface->createImage(m_interface->resizedImageWidth(),
 							m_interface->resizedImageHeight() );
 	
 	m_interface->updateDisplayView();
-	
-	this->m_abort = false;
-	start(LowPriority);
-}
 
-void RenderThread::interruptAndReview()
-{
-//	qDebug()<<"interruptAndReview";
-	interruptRender();
-	
-	m_interface->updateDisplayView();
+	if(toChangeScene) 
+		m_interface->updateScene();
 	
 	this->m_abort = false;
 	start(LowPriority);
@@ -66,13 +60,14 @@ void RenderThread::interruptAndReview()
 
 void RenderThread::render()
 {
-	if(m_interface->imageSizeChanged() ) {
-		interruptAndResize();
-		return;
-	}
-	
-	if(m_interface->cameraChanged() ) {
-		interruptAndReview();
+	bool imageResized = m_interface->imageSizeChanged();
+	bool viewChanged = m_interface->cameraChanged();
+	bool sceneChanged = m_interface->sceneChanged();
+    
+    //if(sceneChanged) qDebug() << " RenderThread::render scene changed ";
+
+	if(imageResized || viewChanged || sceneChanged) {
+		interruptAndRestart(imageResized, sceneChanged);
 		return;
 	}
 

@@ -41,9 +41,8 @@ protected:
     void run();
 
 private:
-	void interruptAndResize();
-	void interruptAndReview();
 	void interruptRender();
+	void interruptAndRestart(bool toResizeImage, bool toChangeScene);
 	
 private:
     QMutex mutex;

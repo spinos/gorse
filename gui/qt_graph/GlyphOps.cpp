@@ -24,6 +24,9 @@ const int &GlyphOps::opsId() const
 void GlyphOps::update()
 { qDebug()<<"GlyphOps::update"; }
 
+bool GlyphOps::hasRenderable() const
+{ return false; }
+
 bool GlyphOps::hasDrawable() const
 { return false; }
 

@@ -15,12 +15,10 @@ RenderWidget::RenderWidget(RenderableScene *scene, QWidget *parent)
 	m_scene = scene;
 
     m_perspCamera = new PerspectiveCamera;
-    static const float mm[16] = {1.f, 0.f, 0.f, 0.f,
-                    0.f, 1.f, 0.f, 0.f,
-                    0.f, 0.f, 1.f, 0.f,
-                    0.f, 0.f, 100.f, 1.f};
-    Matrix44F mat(mm);
-    m_perspCamera->setViewTransform(mat, 100.f);
+    Matrix44F mat;
+    mat.rotateX(-0.5f);
+    mat.translate(0.f, 120.f * sin(.5f), 120.f * cos(.5f));
+    m_perspCamera->setViewTransform(mat, 120.f);
 
     m_interface = new QImgRenderInterface;
     m_interface->setScene(m_scene);
@@ -49,7 +47,9 @@ QSize RenderWidget::sizeHint() const
 }
 
 void RenderWidget::recvAttribChanged()
-{ update(); }
+{ 
+    m_thread->render();
+}
 
 void RenderWidget::paintEvent(QPaintEvent * /* event */)
 {

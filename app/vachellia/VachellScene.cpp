@@ -1,8 +1,8 @@
 /*
  *  VachellScene.cpp
- *  acacia
+ *  vachellia
  *
- *  Created by jian zhang on 3/30/17.
+ *  Created by jian zhang on 4/16/19.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
  *
  */
@@ -25,39 +25,23 @@ VachellScene::~VachellScene()
 {}
 
 GlyphOps *VachellScene::createOps(const QJsonObject &content)
-{/*
+{
     int k = content["id"].toInt();
     switch(k) {
-    case AcaciaOpsType::AoSphere :
-        return new SphereOps;
-    case AcaciaOpsType::AoRoot :
-        return new RootOps;
-    case AcaciaOpsType::AoLodMesh :
-        return new LodMeshOps;
-    case AcaciaOpsType::AoStaticMesh :
-        return new SimpleMeshOps;
-    case AcaciaOpsType::AoEdgeCollapseTest :
-        return new EdgeCollapseTest;
-    case AcaciaOpsType::AoLodMeshIn :
-        return new LodMeshInOps;
-    case AcaciaOpsType::AoPVSTest :
-        return new PVSTest;
-    case AcaciaOpsType::AoInstancedTest :
-        return new InstancedTest;
-    case AcaciaOpsType::AoGeodesicDistanceTest :
-        return new GeodesicDistanceTest;
-    default:
-        break;
-    }*/
+        case HorizonOps::Type :
+            return new HorizonOps;
+        default:
+            break;
+    }
     return new GlyphOps; 
 }
 
 void VachellScene::postCreation(GlyphItem *item)
 {
 	GlyphOps *op = item->ops();
-	if(op->hasDrawable()) { 
-		//DrawableOps *dop = static_cast<DrawableOps *>(op);
-		//dop->addDrawableTo(this);
+	if(op->hasRenderable()) { 
+		RenderableOps *dop = static_cast<RenderableOps *>(op);
+		dop->addRenderableTo(this);
 	}
     emit sendUpdateDrawable();
 }
@@ -65,9 +49,9 @@ void VachellScene::postCreation(GlyphItem *item)
 void VachellScene::preDestruction(GlyphItem *item)
 {
     GlyphOps *op = item->ops();
-    if(op->hasDrawable()) { 
-        //DrawableOps *dop = static_cast<DrawableOps *>(op);
-        //dop->removeDrawableFromScene();
+    if(op->hasRenderable()) { 
+        RenderableOps *dop = static_cast<RenderableOps *>(op);
+        dop->removeRenderableFromScene();
     }
     delete op;
     emit sendUpdateDrawable();

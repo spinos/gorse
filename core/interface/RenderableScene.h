@@ -10,7 +10,7 @@
 #ifndef ALO_RENDERABLE_SCENE_H
 #define ALO_RENDERABLE_SCENE_H
 
-#include <QMutex>
+#include <vector>
 #include "light.h"
 #include <sdb/Types.h>
 #include <sdb/L3Tree.h>
@@ -24,7 +24,7 @@ class IntersectResult;
 
 class RenderableScene {
 
-	//QMutex m_mutex;
+	int m_objectCount;
 
 	enum ObjectState {
         stUnknown = 0,
@@ -38,6 +38,15 @@ class RenderableScene {
         int _state;
         RenderableObject* _object;
     };
+
+    struct CreateRenderableObjectState {
+        int _state;
+        int _group;
+        RenderableObject* _object;
+    };
+
+    std::vector<CreateRenderableObjectState> m_createQueue;
+    std::vector<sdb::Coord2> m_removeQueue;
 
     sdb::L3Tree<sdb::Coord2, RenderableObjectState, 2048, 512, 1024 > m_drawQueue;
     typedef sdb::L3Node<sdb::Coord2, RenderableObjectState, 1024> ObjectDataType;
@@ -53,20 +62,28 @@ public:
 	
 	virtual const EnvLightTyp* environmentLight() const;
 
-    void enqueueCreateDrawable(RenderableObject* d, int groupId);
+    void enqueueCreateRenderable(RenderableObject* d, int groupId);
+    
+/// remove entire group when objectId = -1
+    void enqueueRemoveRenderable(int objectId, int groupId);
     
     void enqueueHideDrawable(int objectId, int groupId);
     void enqueueShowDrawable(int objectId, int groupId);
-    void enqueueRemoveDrawable(int objectId, int groupId);
-/// remove entire group
-    void enqueueRemoveDrawable(int groupId);
+    
     void enqueueShowDrawable(int groupId);
     void enqueueHideDrawable(int groupId);
+/// has create remove queue
+    bool sceneChanged() const;
+    void updateRenderQueue();
 	
 protected:
 
 private:
-
+    void setToRemoveGroup(int groupId);
+    void compressQueue();
+    void processCreateRenderableQueue();
+    void processRemoveRenderableQueue();
+    
 };
 
 }

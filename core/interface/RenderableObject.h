@@ -14,17 +14,32 @@ class IntersectResult;
 
 class RenderableObject {
 
-	int m_drawId;
+	int m_objectId;
 
 public:
+
+	enum RenderableState {
+        stUnknown = 0,
+        stWaitDestroy,
+        stHidden,
+        stNormal,
+        stOverlay
+    };
+
 	RenderableObject();
 	virtual ~RenderableObject();
 
-	void setDrawId(int x);
-    const int& drawId() const;
+	void setObjectId(int x);
+    const int& objectId() const;
 
 	virtual bool intersectRay(const Ray& aray, IntersectResult& result);
 
+protected:
+
+private:
+
+	RenderableState m_state;
+	
 };
 
 }

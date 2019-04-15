@@ -41,6 +41,7 @@ public:
 	const int &opsId() const;
 	
 	virtual void update();
+    virtual bool hasRenderable() const;
 	virtual bool hasDrawable() const;
 	virtual void setDrawableVisible(bool x);
 	virtual void getDrawableBound(Hexahedron &b) const;

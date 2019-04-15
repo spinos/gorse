@@ -41,14 +41,16 @@ public:
 	void setCamera(BaseCamera* x);
 	void setChangedCamera();
 	bool cameraChanged() const;
+	bool sceneChanged() const;
 	
 	bool imageSizeChanged() const;
 	void createImage(int w, int h);
 	void setResizedImage(int w, int h);
 	int resizedImageWidth() const;
 	int resizedImageHeight() const;
-/// set frame in each block	
+/// set frame in each block	and restart
 	void updateDisplayView();
+	void updateScene();
 /// by high residual
 	BufferBlock* selectBlock();
 	DisplayImage* image();
