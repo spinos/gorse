@@ -11,27 +11,73 @@
             "children": [
                 {
                     "id": 694285,
-                    "name": "static_mesher",
-                    "label": "Static Mesher",
-                    "icon": ":images/mesh_small.png",
+                    "name": "primitive_sdf",
+                    "label": "Primitive",
+                    "icon": ":images/primitive_small.png",
                     "children": [
+                        {
+                            "id": 299105,
+                            "name": "horizon_sdf",
+                            "label": "Horizon",
+                            "icon": ":images/horizon_small.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "r",
+                                    "label": "Planet Radius",
+                                    "typ": 3,
+                                    "value": 6378100.0,
+                                    "min": 1000.0,
+                                    "max": 10000000.0
+                                }
+                            ]
+                        }
                     ]
                 },
                 {
                     "id": 703426,
-                    "name": "adaptive_mesher",
-                    "label": "Adaptive Mesher",
-                    "icon": ":images/mesh_adaptable_small.png",
+                    "name": "cache_sdf",
+                    "label": "Cache",
+                    "icon": ":images/cache_small.png",
                     "children": [
+                        {
+                            "id": 828636,
+                            "name": "svf",
+                            "label": "Sparse Voxel Field",
+                            "icon": ":images/cache.png",
+                            "is_element": true,
+                            "attribs" : [
+                            {
+                                "name": "cache_path",
+                                "label": "Cache File Path",
+                                "typ": 9,
+                                "strtyp": 513
+                            },
+                            {
+                                "name": "freeze_view",
+                                "label": "Freeze View",
+                                "typ": 1,
+                                "value": true
+                            },
+                            {
+                                "name": "lod",
+                                "label": "Level Of Detail",
+                                "typ": 3,
+                                "value": 0.5,
+                                "min": 0.0,
+                                "max": 1.0
+                            }
+                        ]
+                    }
                     ]
                 }
             ]
         },
         {
             "id": 513556,
-            "name": "cache",
-            "label": "Cache",
-            "icon": ":images/cache_small.png",
+            "name": "controller",
+            "label": "Controller",
+            "icon": ":images/controller_small.png",
             "children": [
             ]
         }

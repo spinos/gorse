@@ -7,6 +7,7 @@ widgets/*.h
 widgets/*.cpp)
 
 set (VCHL_SOURCE_FILES main.cpp 
+${VCHL_OPS_SRC}
 ${VCHL_WIDGETS_SRC}
 VachellScene.cpp 
 MainWindow.cpp

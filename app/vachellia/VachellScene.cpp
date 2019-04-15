@@ -8,7 +8,7 @@
  */
 
 #include "VachellScene.h"
-//#include "ops/AllOps.h"
+#include "ops/allOps.h"
 #include <qt_graph/GlyphOps.h>
 #include <qt_graph/GlyphItem.h>
 #include <math/CameraEvent.h>
