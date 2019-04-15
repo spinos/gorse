@@ -7,7 +7,7 @@
             "id": 135109,
             "name": "sdf",
             "label": "Singed Distance Field",
-            "icon": ":images/mesh_small.png",
+            "icon": ":images/sdf_small.png",
             "children": [
                 {
                     "id": 694285,

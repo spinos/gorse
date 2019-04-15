@@ -28,6 +28,9 @@
     <file>images/eyeClose.png</file>
     <file>images/sphere.png</file>
     <file>images/geodesic_distance.png</file>
+    <file>images/sdf_small.png</file>
+    <file>images/primitive_small.png</file>
+    <file>images/horizon_small.png</file>
     <file>mimes/assettree.json</file>
 </qresource>
 </RCC>

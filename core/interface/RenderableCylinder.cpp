@@ -12,7 +12,7 @@ namespace alo {
 
 RenderableCylinder::RenderableCylinder() :
 m_p0(0.f, -2.f, 0.f),
-m_r(1.5f),
+m_r(4.5f),
 m_p1(0.f, 2.f, 0.f),
 m_l(4.f),
 m_dir(0.f, 1.f, 0.f)

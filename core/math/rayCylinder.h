@@ -11,6 +11,8 @@ inline float distanceToCylinder(Vector3F &normal, bool &isOnBody,
 	const Vector3F &q, 
 	const Vector3F &p0, const Vector3F &p1, const float &rc, const float &lc, const Vector3F &vp0p1)
 {
+    isOnBody = true;
+        
     Vector3F p, v;
 	float h = (q - p0).dot(vp0p1);
 	if(h < 0) {
@@ -22,30 +24,26 @@ inline float distanceToCylinder(Vector3F &normal, bool &isOnBody,
             v.normalize();
             return q.distanceTo(p0 + v * rc);
         } 
-        isOnBody = true;
         return -h;
 	}
+    
+    p = projectPointOnPlane(q, p1, vp0p1);
 	
     if(h > lc) {
         normal = vp0p1;
-        p = projectPointOnPlane(q, p1, vp0p1);
         if(p.distanceTo(p1) > rc) {
             isOnBody = false;
             v = p - p1;
             v.normalize();
             return q.distanceTo(p1 + v * rc);
         }
-        isOnBody = true;
         return h - lc;
 	} 
     
-    isOnBody = true;
-    p = projectPointOnPlane(q, p1, vp0p1);
-
     normal = p - p1;
 	normal.normalize();
 
-	return q.distanceTo(p0 + vp0p1 * h + normal * rc);
+	return q.distanceTo(p0 + vp0p1 * h) - rc;
 
 }
 
@@ -94,13 +92,14 @@ inline bool rayCylinderIntersect(float& t, Vector3F &hitNormal,
 	float preStep = 1e10f;
 	t = 0.f;
 	q = rayBegin;
-	for(int i=0;i<19;++i) {
+	for(int i=0;i<29;++i) {
 		tq = distanceToCylinder(hitNormal, isOnBody, q, p0, p1, rc, lc, vp0p1);
+        if(hitNormal.dot(r.direction()) > 0) return false;
 
 		if(tq < 5e-3f) return true;
         if(preStep < tq) return false;
 		preStep = tq;
-
+        
         if(isOnBody) {
             float ang = (r.direction()).dot(hitNormal);
             if(ang <0) ang = -ang;

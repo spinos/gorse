@@ -96,15 +96,12 @@ inline bool rayConeIntersect(float& t, Vector3F &hitNormal,
 	bool isOnBody;
 	Vector3F hitTangent;
 
-	for(int i=0;i<19;++i) {
+	for(int i=0;i<29;++i) {
 
 		float d2c = distanceToCone(hitNormal, hitTangent, isOnBody, 
 			q, p0, p1, rc, lc, lcrc, vp0p1, vp1p0);
-
-		if(d2c < 5e-3f) {
-			hitNormal.normalize();
-			return true;
-		}
+            
+		if(d2c < 5e-3f) return true;
 
 		if(preStep < d2c) return false;
 		preStep = d2c;

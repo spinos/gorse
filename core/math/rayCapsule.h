@@ -57,6 +57,7 @@ inline bool rayCapsuleIntersect(float& t, Vector3F &hitNormal,
 	q = rayBegin;
 	for(int i=0;i<19;++i) {
 		tq = distanceToCapsule(hitNormal, q, p0, p1, rc, lc, vp0p1);
+        
 		if(tq < 5e-5f) return true;
         if(preStep < tq) return false;
         preStep = tq;

@@ -22,7 +22,7 @@ namespace alo {
 
 RenderableScene::RenderableScene()
 {
-	RenderableCoordinateSystem *b = new RenderableCoordinateSystem;
+	RenderableCylinder *b = new RenderableCylinder;
 	b->setDrawId(1);
 	enqueueCreateDrawable(b, 0);
 }
@@ -58,7 +58,7 @@ bool RenderableScene::intersectRay(const Ray& aray, IntersectResult& result)
 }
 
 void RenderableScene::getBackgroundColor(float* col, const Vector3F& dir, SampleState* state) const
-{ memset(col, 0, 16); }
+{ col[0] = .57f; col[1] = .57f; col[2] = .57f; col[3] = 0.f; }
 
 const EnvLightTyp* RenderableScene::environmentLight() const
 { return 0; }
