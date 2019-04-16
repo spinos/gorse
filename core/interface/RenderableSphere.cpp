@@ -10,8 +10,8 @@
 
 namespace alo {
 
-RenderableSphere::RenderableSphere() : m_center(Vector3F::Zero),
-m_radius(1.f)
+RenderableSphere::RenderableSphere() : m_center(0.f, 0.f, 0.f),
+m_radius(5.f)
 {}
 
 void RenderableSphere::setRadius(float x)

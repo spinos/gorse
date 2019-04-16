@@ -35,8 +35,9 @@ void DisplayCamera::updateViewFrame()
 { 
 #if 0
 	std::cout<<"\n update camera tm"<<m_camera->fSpace
-			<<"\n fov"<<m_camera->fieldOfView()
-			<<"\n frm "<<m_camera->frameWidth()<<"x"<<m_camera->frameHeight()
+			<<"\n fov "<<m_camera->fieldOfView()
+            <<"\n focus distance "<<m_camera->focusDistance()
+			<<"\n frame "<<m_camera->frameWidth()<<"x"<<m_camera->frameHeight()
 			<<"\n port "<<m_camera->portWidth()<<"x"<<m_camera->portHeight();
 #endif
 	static const float cornerOffset[4][2] = {
@@ -48,8 +49,8 @@ void DisplayCamera::updateViewFrame()
 	for(int i=0;i<4;++i) {
 		Vector3F corner(cornerOffset[i][0] * m_camera->frameWidth(), 
 						cornerOffset[i][1] * m_camera->frameHeight(), 
-						-m_camera->nearClipPlane() );	
-		corner = m_camera->fSpace.transform(corner);
+						-m_camera->focusDistance() );	
+		corner = m_camera->transformToWorld(corner);
 		memcpy(m_framePoints[i], &corner, 12);
 #if 0		
 		std::cout<<"\n corner"<<i<<"("<<m_framePoints[i][0]
@@ -61,7 +62,7 @@ void DisplayCamera::updateViewFrame()
 	m_deltaX = 1.f / (float)m_camera->portWidth();
 	m_deltaY = 1.f / (float)m_camera->portHeight();
 	
-	m_lastViewFrame->copy(m_camera->fSpace); 
+	m_lastViewFrame->copy(m_camera->space()); 
 	m_isChanged = false;
 }
 
@@ -78,26 +79,26 @@ void DisplayCamera::setBlockView(BufferBlock* blk) const
 	getPointOnFrame((float* )&ori, tx0, ty0);
 	dir = ori - peye;
 	dir.normalize();
-	
-	blk->setFrame(0, (const float*)&ori, (const float*)&dir);
+/// ignore near clip
+	blk->setFrame(0, (const float*)&peye, (const float*)&dir);
 	
 	getPointOnFrame((float* )&ori, tx1, ty0);
 	dir = ori - peye;
 	dir.normalize();
-	
-	blk->setFrame(1, (const float*)&ori, (const float*)&dir);
+    
+	blk->setFrame(1, (const float*)&peye, (const float*)&dir);
 	
 	getPointOnFrame((float* )&ori, tx0, ty1);
 	dir = ori - peye;
 	dir.normalize();
-
-	blk->setFrame(2, (const float*)&ori, (const float*)&dir);
+    
+	blk->setFrame(2, (const float*)&peye, (const float*)&dir);
 	
 	getPointOnFrame((float* )&ori, tx1, ty1);
 	dir = ori - peye;
 	dir.normalize();
-	
-	blk->setFrame(3, (const float*)&ori, (const float*)&dir);
+    
+	blk->setFrame(3, (const float*)&peye, (const float*)&dir);
 
 }
 

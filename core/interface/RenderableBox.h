@@ -15,7 +15,6 @@ namespace alo {
 class RenderableBox : public RenderableObject {
 
 	float m_centerHalfSpan[4];
-	float m_rayData[8];
 	
 public:
 	RenderableBox();

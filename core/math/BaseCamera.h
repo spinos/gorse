@@ -14,6 +14,13 @@ namespace alo {
 
 class BaseCamera {
 
+/// eye to center of interest
+    float m_focusDistance;
+    float m_nearClipPlane, m_farClipPlane;
+    float fHorizontalAperture;
+    unsigned fPortWidth, fPortHeight;
+	Matrix44F fSpace, fInverseSpace;
+    
 public:
 
 	BaseCamera();
@@ -52,6 +59,7 @@ public:
 	int portWidth() const;
 	int portHeight() const;
 	float heightWidthRatio() const;
+    const float &focusDistance() const;
 	
 	virtual float fieldOfView() const;
 	virtual float frameWidth() const;
@@ -72,13 +80,11 @@ public:
 	
 	void traverse(const Vector3F & v);
 	void setViewTransform(const Matrix44F & mat,
-				const float & focalLength);
+				const float & focusDistance);
 	
-	Matrix44F fSpace, fInverseSpace;
-	Vector3F fCenterOfInterest;
-	unsigned fPortWidth, fPortHeight;
-	float fHorizontalAperture;
-	float m_nearClipPlane, m_farClipPlane;
+    Vector3F transformToWorld(const Vector3F &x) const;
+    Vector3F transformNormalToWorld(const Vector3F &x) const;
+    const Matrix44F &space() const;
     
 };
 

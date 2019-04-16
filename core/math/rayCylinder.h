@@ -96,7 +96,7 @@ inline bool rayCylinderIntersect(float& t, Vector3F &hitNormal,
 		tq = distanceToCylinder(hitNormal, isOnBody, q, p0, p1, rc, lc, vp0p1);
         if(hitNormal.dot(r.direction()) > 0) return false;
 
-		if(tq < 5e-3f) return true;
+		if(tq < t * 1.4e-5f) return true;
         if(preStep < tq) return false;
 		preStep = tq;
         

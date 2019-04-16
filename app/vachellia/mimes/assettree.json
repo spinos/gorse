@@ -19,7 +19,7 @@
                             "id": 299105,
                             "name": "horizon_sdf",
                             "label": "Horizon",
-                            "icon": ":images/horizon_small.png",
+                            "icon": ":images/horizon.png",
                             "is_element": true,
                             "attribs" : [
                                 {

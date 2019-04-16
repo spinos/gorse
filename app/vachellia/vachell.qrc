@@ -31,7 +31,7 @@
     <file>images/sdf_small.png</file>
     <file>images/primitive_small.png</file>
     <file>images/controller_small.png</file>
-    <file>images/horizon_small.png</file>
+    <file>images/horizon.png</file>
     <file>mimes/assettree.json</file>
 </qresource>
 </RCC>

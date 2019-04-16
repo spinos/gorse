@@ -10,8 +10,9 @@ namespace alo {
 
 BaseCamera::BaseCamera() 
 {
-    m_nearClipPlane = 0.9f;
+    m_nearClipPlane = .9f;
     m_farClipPlane = 19999.9f;
+    m_focusDistance = 19.9f;
 	fPortWidth = 400;
 	fPortHeight = 300;
 	reset(Vector3F(0.f, 0.f, 0.f));
@@ -27,10 +28,9 @@ bool BaseCamera::isOrthographic() const
 void BaseCamera::reset(const Vector3F & pos)
 {
 	fHorizontalAperture = 100.f;
-	
+	m_focusDistance = 19.9f;
 	fSpace.setIdentity();
-	fSpace.setTranslation(pos + Vector3F(0.f, 0.f, 100.f));
-	fCenterOfInterest = pos;
+	fSpace.setTranslation(pos + Vector3F(0.f, 0.f, 19.f));
 	updateInverseSpace();
 }
 
@@ -38,7 +38,7 @@ void BaseCamera::lookFromTo(Vector3F & from, Vector3F & to)
 {
 	fSpace.setIdentity();
 	fSpace.setTranslation(from.x, from.y, from.z);
-	fCenterOfInterest = to;
+	m_focusDistance = from.distanceTo(to);
 	updateInverseSpace();
 }
 
@@ -80,16 +80,16 @@ void BaseCamera::tumble(int x, int y)
 	Vector3F up    = fSpace.getUp();
 	Vector3F front = fSpace.getFront();
 	Vector3F eye = fSpace.getTranslation();	
-	Vector3F view = eye - fCenterOfInterest;
-	float dist = view.length();
-	const float scaleing = dist / fPortWidth * 2.f;
+	Vector3F coi = eye - front * m_focusDistance;
+
+	const float scaleing = m_focusDistance / fPortWidth * 2.f;
 	eye -= side * (float)x * scaleing;
 	eye += up * (float)y * scaleing;
 	
-	view = eye - fCenterOfInterest;
+	Vector3F view = eye - coi;
 	view.normalize();
 	
-	eye = fCenterOfInterest + view * dist;
+	eye = coi + view * m_focusDistance;
 	fSpace.setTranslation(eye);
 	
 	front = view;
@@ -114,9 +114,6 @@ void BaseCamera::track(int x, int y)
 	eye -= side * (float)x * scaleing;
 	eye += up * (float)y * scaleing;	
 	
-	fCenterOfInterest -= side * (float)x * scaleing;
-	fCenterOfInterest += up * (float)y * scaleing;
-	
 	fSpace.setTranslation(eye);
 	updateInverseSpace();
 }
@@ -125,7 +122,6 @@ void BaseCamera::traverse(const Vector3F & v)
 {
 	Vector3F eye = fSpace.getTranslation();
 	eye += v;
-	fCenterOfInterest += v;
 	fSpace.setTranslation(eye);
 	updateInverseSpace();
 }
@@ -140,14 +136,15 @@ void BaseCamera::moveForward(int y)
 {
 	Vector3F front = fSpace.getFront();
 	Vector3F eye = fSpace.getTranslation();
-	Vector3F view = eye - fCenterOfInterest;
-	const float dist = view.length();
 	
 	const float fra = (float)y * .01f;
-	
-	eye += front * (dist * -fra);
-	if(y > 0 && dist < 8.f ) 
-		fCenterOfInterest += front * (8.f * -fra);
+	float dist = m_focusDistance * - fra;
+	eye += front * dist;
+    m_focusDistance += dist;
+    
+	if(y > 0 && m_focusDistance < 1.f ) 
+		m_focusDistance = 1.f;
+    
 	fSpace.setTranslation(eye);
 	updateInverseSpace();
 }
@@ -272,7 +269,7 @@ void BaseCamera::copyTransformFrom(BaseCamera * another)
 {
 	fSpace = another->fSpace;
 	fInverseSpace = another->fInverseSpace;
-	fCenterOfInterest = another->fCenterOfInterest;
+	m_focusDistance = another->focusDistance();
 }
 
 void BaseCamera::setNearClipPlane(float x)
@@ -288,10 +285,10 @@ void BaseCamera::setFarClipPlane(float x)
 void BaseCamera::setFieldOfView(float) {}
 
 void BaseCamera::setViewTransform(const Matrix44F & mat,
-					const float & focalLength)
+					const float & focusDistance)
 {
 	fSpace = mat;
-	fCenterOfInterest = mat.transform(Vector3F(0.f, 0.f, -focalLength) );
+    m_focusDistance = focusDistance;
 	updateInverseSpace();
 }
 
@@ -301,5 +298,17 @@ void BaseCamera::getScreenCoord(float& cx, float& cy,
 	cx = (float)px/(float)fPortWidth - .5f;
 	cy = -((float)py/(float)fPortHeight - .5f);
 }
+
+const float &BaseCamera::focusDistance() const
+{ return m_focusDistance; }
+
+Vector3F BaseCamera::transformToWorld(const Vector3F &x) const
+{ return fSpace.transform(x); }
+
+Vector3F BaseCamera::transformNormalToWorld(const Vector3F &x) const
+{ return fSpace.transformAsNormal(x); }
+
+const Matrix44F &BaseCamera::space() const
+{ return fSpace; }
  
 }

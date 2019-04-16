@@ -19,20 +19,21 @@ RenderableBox::RenderableBox()
 
 bool RenderableBox::intersectRay(const Ray& aray, IntersectResult& result)
 {
-	aray.get(m_rayData);
+    float rayData[8];
+	
+	aray.get(rayData);
 
-	if(!rayBoxIntersect(m_rayData, m_centerHalfSpan) ) {
+	if(!rayBoxIntersect(rayData, m_centerHalfSpan) )
 		return false;
-	}
+    
+    const float &tt = rayData[6];
 
-/// t0
-	result.rayDistance() = m_rayData[6];
-	
-	const Vector3F pnt = aray.travel(result.rayDistance() );
+	const Vector3F pnt = aray.travel(tt);
+    Vector3F tn;
 /// side on box
-	getNormalOnBox((float *)&result.hitNormal(), (const float *)&pnt, m_centerHalfSpan);
+	getNormalOnBox((float *)&tn, (const float *)&pnt, m_centerHalfSpan, tt * 1e-5f);
 	
-	return true;
+	return result.updateRayDistance(tt, tn);
 }
 
 }

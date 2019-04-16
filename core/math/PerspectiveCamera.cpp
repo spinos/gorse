@@ -34,14 +34,12 @@ float PerspectiveCamera::fieldOfView() const
 /// width of near clipping plane
 float PerspectiveCamera::frameWidth() const
 {
-	return m_2tanfov * m_nearClipPlane;
+	return m_2tanfov * focusDistance();
 }
 
 float PerspectiveCamera::frameWidthRel() const
 {
-	Vector3F eye = fSpace.getTranslation();	
-	Vector3F view = eye - fCenterOfInterest;
-	return frameWidth() * ( view.length() / fPortWidth );
+	return frameWidth() / portWidth();
 }
 
 void PerspectiveCamera::zoom(int y)
@@ -55,11 +53,11 @@ void PerspectiveCamera::incidentRay(int x, int y, Vector3F & origin, Vector3F & 
 	getScreenCoord(cx, cy, x, y);
 	worldVec.x = cx * frameWidth();
 	worldVec.y = cy * frameHeight();
-	worldVec.z = -m_nearClipPlane;
+	worldVec.z = -nearClipPlane();
 	
-	origin = fSpace.transform(worldVec);
+	origin = transformToWorld(worldVec);
 	worldVec.normalize();
-	worldVec = fSpace.transformAsNormal(worldVec);
+	worldVec = transformNormalToWorld(worldVec);
 }
 
 void PerspectiveCamera::setFieldOfView(float x)
@@ -75,8 +73,8 @@ void PerspectiveCamera::screenToWorldVectorAt(int x, int y, float depth, Vector3
 {
 	Vector3F vecNear;
 	screenToWorldVector(x, y, vecNear);
-	const Vector3F vecFar = vecNear * m_farClipPlane / m_nearClipPlane;
-	float alpha = (depth - m_nearClipPlane) / (m_farClipPlane - m_nearClipPlane);
+	const Vector3F vecFar = vecNear * farClipPlane() / nearClipPlane();
+	float alpha = (depth - nearClipPlane()) / (farClipPlane() - nearClipPlane());
 	if(alpha < 0.f) alpha = 0.f;
 	else if(alpha > 1.f) alpha = 1.f;
 	worldVec = vecFar * alpha + vecNear * (1.f - alpha);
