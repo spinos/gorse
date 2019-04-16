@@ -18,16 +18,31 @@ void RenderableObject::setObjectId(int x)
 const int& RenderableObject::objectId() const
 { return m_objectId; }
 
+void RenderableObject::setToDestroy()
+{ m_state = stWaitDestroy; }
+
+void RenderableObject::setVisibility(bool x)
+{ m_state = m_state ^ stHiddenMask; }
+
+bool RenderableObject::isToDestroy() const
+{ return m_state == stWaitDestroy; }
+
+bool RenderableObject::isHidden() const
+{ return m_state > stHiddenMask; }
+
+bool RenderableObject::isOverlay() const
+{ return m_state == stOverlay; }
+
 bool RenderableObject::intersectRay(const Ray& aray, IntersectResult& result)
 { 
-	if(!raySphereIntersect(result.rayDistance(), aray, Vector3F::Zero, 4.f) ) {
+    float tt = result.rayDistance();
+	if(!raySphereIntersect(tt, aray, Vector3F::Zero, 5.f) ) {
 		return false;
 	}
 	
-	Vector3F& nml = result.hitNormal();
-	nml = aray.travel(result.rayDistance() );
-	nml.normalize();
-	return true;
+	Vector3F tn = aray.travel(tt );
+	tn.normalize();
+	return result.updateRayDistance(tt, tn);
 }
 
 }

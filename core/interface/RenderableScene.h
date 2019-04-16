@@ -25,22 +25,13 @@ class IntersectResult;
 class RenderableScene {
 
 	int m_objectCount;
-
-	enum ObjectState {
-        stUnknown = 0,
-        stWaitDestroy,
-        stHidden,
-        stNormal,
-        stOverlay
-    };
+	bool m_changed;
 
 	struct RenderableObjectState {
-        int _state;
         RenderableObject* _object;
     };
 
     struct CreateRenderableObjectState {
-        int _state;
         int _group;
         RenderableObject* _object;
     };
@@ -67,16 +58,12 @@ public:
 /// remove entire group when objectId = -1
     void enqueueRemoveRenderable(int objectId, int groupId);
     
-    void enqueueHideDrawable(int objectId, int groupId);
-    void enqueueShowDrawable(int objectId, int groupId);
-    
-    void enqueueShowDrawable(int groupId);
-    void enqueueHideDrawable(int groupId);
 /// has create remove queue
     bool sceneChanged() const;
     void updateRenderQueue();
 	
 protected:
+    void setSceneChanged();
 
 private:
     void setToRemoveGroup(int groupId);

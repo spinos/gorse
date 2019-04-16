@@ -294,7 +294,8 @@ void SceneGraph::endProcessItem(QGraphicsItem *item)
 		
 	if (item->type() == StateControlItem::Type) {
 		selectedItem->endEditState(item);
-		emit sendGraphChanged();
+		//emit sendGraphChanged();
+		asGlyphScene()->onItemVisibilityChanged();
 	}
 
 }

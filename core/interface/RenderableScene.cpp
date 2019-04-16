@@ -20,7 +20,8 @@
 
 namespace alo {
 
-RenderableScene::RenderableScene() : m_objectCount(0)
+RenderableScene::RenderableScene() : m_objectCount(0),
+m_changed(false)
 {
 	RenderableCoordinateSystem *b = new RenderableCoordinateSystem;
 	enqueueCreateRenderable(b, 0);
@@ -38,13 +39,14 @@ bool RenderableScene::intersectRay(const Ray& aray, IntersectResult& result)
     	for (int i=0;i<block->count();++i) { 
             RenderableObjectState &it = block->value(i);
 
-            if(it._state <= stHidden)
+            //if(it._state <= stHidden)
+            if(it._object->isHidden())
                 continue;
 
             if(it._object->intersectRay(aray, result))
             	hasIntersection = true;
 
-            if(it._state == stOverlay) {
+            if(it._object->isOverlay()) {
             	isFinished = true;
             	break;
             }
@@ -66,7 +68,6 @@ const EnvLightTyp* RenderableScene::environmentLight() const
 void RenderableScene::enqueueCreateRenderable(RenderableObject* d, int groupId)
 {
 	CreateRenderableObjectState a;
-    a._state = stNormal;
     a._group= groupId;
     a._object = d;
     m_createQueue.push_back(a);
@@ -77,45 +78,14 @@ void RenderableScene::enqueueRemoveRenderable(int objectId, int groupId)
     m_removeQueue.push_back(sdb::Coord2(objectId, groupId));
 }
 
-void RenderableScene::enqueueHideDrawable(int objectId, int groupId)
-{
-	RenderableObjectState *a = m_drawQueue.find(sdb::Coord2(objectId, groupId) );
-    if(a) a->_state = stHidden;
-}
-
-void RenderableScene::enqueueShowDrawable(int objectId, int groupId)
-{
-	RenderableObjectState *a = m_drawQueue.find(sdb::Coord2(objectId, groupId) );
-    if(a) a->_state = stNormal;
-}
-
-void RenderableScene::enqueueShowDrawable(int groupId)
-{
-	ObjectIteratorType it = m_drawQueue.begin(sdb::Coord2(-1,groupId));
-    for(;!it.done();it.next()) {
-        if(it.first.y > groupId) break;
-        if(it.first.y < groupId) continue;
-        if(it.second->_state > stWaitDestroy) it.second->_state = stNormal;
-    }
-}
-
-void RenderableScene::enqueueHideDrawable(int groupId)
-{
-	ObjectIteratorType it = m_drawQueue.begin(sdb::Coord2(-1,groupId));
-    for(;!it.done();it.next()) {
-        if(it.first.y > groupId) break;
-        if(it.first.y < groupId) continue;
-        if(it.second->_state > stWaitDestroy) it.second->_state = stHidden;
-    }
-}
-
 void RenderableScene::setToRemoveGroup(int groupId)
 {
     ObjectIteratorType it = m_drawQueue.begin(sdb::Coord2(-1,groupId));
     for(;!it.done();it.next()) {
         if(it.first.y > groupId) break;
         if(it.first.y < groupId) continue;
-        if(it.second->_state > stWaitDestroy) it.second->_state = stWaitDestroy;
+        RenderableObject *obj = it.second->_object;
+        if(obj) obj->setToDestroy();
     }
 }
 
@@ -126,7 +96,6 @@ void RenderableScene::processCreateRenderableQueue()
         CreateRenderableObjectState &a = m_createQueue.front();
 
         RenderableObjectState b;
-        b._state = a._state;
         b._object = a._object;
 
         const int i = m_objectCount;
@@ -148,7 +117,7 @@ void RenderableScene::processRemoveRenderableQueue()
 
         if(a.x > -1) {
             RenderableObjectState *b = m_drawQueue.find(a);
-            if(b) b->_state = stWaitDestroy;
+            if(b) b->_object->setToDestroy();
         }
         else {
             setToRemoveGroup(a.y);
@@ -169,7 +138,7 @@ void RenderableScene::compressQueue()
 
             RenderableObjectState &it = block->value(i);
 
-            if(it._state <= stWaitDestroy) {
+            if(it._object->isToDestroy()) {
                 block->remove(block->key(i));
                 i--;
             }
@@ -181,13 +150,18 @@ void RenderableScene::compressQueue()
 bool RenderableScene::sceneChanged() const
 {
     if(m_createQueue.size() > 0) return true;
-    return m_removeQueue.size() > 0;
+    if(m_removeQueue.size() > 0) return true;
+    return m_changed;
 }
 
 void RenderableScene::updateRenderQueue()
 {
     processCreateRenderableQueue();
     processRemoveRenderableQueue();
+    m_changed = false;
 }
+
+void RenderableScene::setSceneChanged()
+{ m_changed = true; }
 
 }

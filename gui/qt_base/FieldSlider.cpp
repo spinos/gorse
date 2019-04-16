@@ -121,7 +121,7 @@ void FieldSlider::mouseMoveEvent(QMouseEvent *e)
     int px = e->pos().x();
     int dx = px - m_lastPos;
     m_var += SFSteps[m_stepInd] * dx;
-
+	
     if(m_stepInd > 0) {
         const float &r = SFSteps[m_stepInd];
         int ir = m_var / r;

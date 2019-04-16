@@ -22,14 +22,14 @@ void RenderableSphere::setPoint(const Vector3F &p)
 
 bool RenderableSphere::intersectRay(const Ray& aray, IntersectResult& result)
 {
-	if(!raySphereIntersect(result.rayDistance(), aray, m_center, m_radius) ) {
+    float tt = result.rayDistance();
+	if(!raySphereIntersect(tt, aray, m_center, m_radius) ) {
 		return false;
 	}
 	
-	Vector3F& nml = result.hitNormal();
-	nml = aray.travel(result.rayDistance() ) - m_center;
-	nml.normalize();
-	return true;
+	Vector3F tn = aray.travel(tt ) - m_center;
+	tn.normalize();
+	return result.updateRayDistance(tt, tn);
 }
 
 }

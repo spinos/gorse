@@ -12,7 +12,7 @@
 #include <interface/RenderInterface.h>
 #include <interface/BufferBlock.h>
 #include <interface/Renderer.h>
-//#include <QDebug>
+#include <QDebug>
 
 namespace alo {
 
@@ -42,7 +42,7 @@ void RenderThread::interruptRender()
 
 void RenderThread::interruptAndRestart(bool toResizeImage, bool toChangeScene)
 {
-//	qDebug()<<"interruptAndRestart";	
+//qDebug()<<"interruptAndRestart";	
 	interruptRender();
 	
 	if(toResizeImage)

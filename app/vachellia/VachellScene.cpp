@@ -79,3 +79,16 @@ void VachellScene::recvRequestBound()
     op->getDrawableBound(b);
     emit sendBound(b);
 }
+
+void VachellScene::onItemVisibilityChanged()
+{
+	RenderableScene::setSceneChanged();
+	emit sendUpdateDrawable();
+}
+
+void VachellScene::recvAttribChanged()
+{
+    RenderableScene::setSceneChanged();
+	emit sendUpdateDrawable();
+}
+

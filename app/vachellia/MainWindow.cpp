@@ -39,31 +39,28 @@ MainWindow::MainWindow()
     //grDock->setFloating(true);
     viewMenu->addAction(grDock->toggleViewAction());
 
-    connect(m_scene, SIGNAL(sendSelectGlyph(bool)), 
-    m_editor, SLOT(recvSelectGlyph(bool)));
-
-    connect(m_editor, SIGNAL(sendAttribChanged()), 
-    m_renderView, SLOT(recvAttribChanged()));
-
-    connect(m_scene, SIGNAL(sendUpdateDrawable()),
-    m_renderView, SLOT(recvAttribChanged()));
-
     qRegisterMetaType<alo::CameraEvent>();
     
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+	connect(m_editor, &AttribEditor::sendAttribChanged, 
+			m_scene, &VachellScene::recvAttribChanged );
+
+	connect(m_scene, &VachellScene::sendSelectGlyph, 
+			m_editor, &AttribEditor::recvSelectGlyph );
+	
+    connect(m_scene, &VachellScene::sendUpdateDrawable,
+			m_renderView, &RenderWidget::recvRerender );
+	
     connect(m_renderView, &RenderWidget::cameraChanged,
             m_scene, &VachellScene::recvCameraChanged );
-    connect(m_graphView, &alo::SceneGraph::sendGraphChanged,
-            m_renderView, &RenderWidget::recvAttribChanged );
+					
     connect(m_renderView, &RenderWidget::requestBound,
             m_scene, &VachellScene::recvRequestBound );
+			
     connect(m_scene, &VachellScene::sendBound,
             m_renderView, &RenderWidget::recvBound );
 #else
-    connect(m_renderView, SIGNAL(cameraChanged(alo::CameraEvent)),
-            m_scene, SLOT(recvCameraChanged(alo::CameraEvent)));
-    connect(m_graphView, SIGNAL(sendGraphChanged()),
-            m_renderView, SLOT(recvAttribChanged()));
+    
 #endif
 
     setWindowTitle(tr("Vachellia"));

@@ -33,7 +33,7 @@ public:
 
 public slots:
     //void cleanup();
-    void recvAttribChanged();
+    void recvRerender();
     void recvBound(const alo::Hexahedron &x);
 
 signals:

@@ -48,6 +48,8 @@ public:
 
 	GlyphItem *getActiveGlyph() const;
 	GlyphOps *getActiveOps() const;
+	
+	virtual void onItemVisibilityChanged() = 0;
 
 signals:
 	void sendSelectGlyph(bool x);

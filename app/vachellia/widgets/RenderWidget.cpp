@@ -6,6 +6,7 @@
 #include <qt_interface/QImgRenderInterface.h>
 #include <interface/RenderableScene.h>
 #include <interface/BoxRenderer.h>
+#include <qDebug>
 
 using namespace alo;
 
@@ -46,8 +47,9 @@ QSize RenderWidget::sizeHint() const
     return QSize(500, 500);
 }
 
-void RenderWidget::recvAttribChanged()
+void RenderWidget::recvRerender()
 { 
+//qDebug() << "RenderWidget::recvRerender";	
     m_thread->render();
 }
 

@@ -13,11 +13,7 @@ bool RenderableOps::hasRenderable() const
 { return true; }
 
 void RenderableOps::setDrawableVisible(bool x)
-{
-   // if(x) m_scene->enqueueShowDrawable(opsId() ); 
-   // else m_scene->enqueueHideDrawable(opsId() ); 
-   // m_drawableVisible = x;
-}
+{ RenderableObject::setVisibility(x); }
 
 void RenderableOps::setRenderableScene(RenderableScene *x)
 { m_scene = x; }

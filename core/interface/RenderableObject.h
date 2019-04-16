@@ -17,28 +17,31 @@ class RenderableObject {
 	int m_objectId;
 
 public:
-
-	enum RenderableState {
-        stUnknown = 0,
-        stWaitDestroy,
-        stHidden,
-        stNormal,
-        stOverlay
-    };
-
 	RenderableObject();
 	virtual ~RenderableObject();
 
 	void setObjectId(int x);
+	void setToDestroy();
+	void setVisibility(bool x);
+    
     const int& objectId() const;
-
+    bool isToDestroy() const;
+    bool isHidden() const;
+    bool isOverlay() const;
+    
 	virtual bool intersectRay(const Ray& aray, IntersectResult& result);
 
 protected:
 
 private:
-
-	RenderableState m_state;
+    enum RenderableState {
+        stUnknown = 0,
+        stWaitDestroy,
+        stNormal = 3,
+        stOverlay = 7,
+        stHiddenMask = 256
+    };
+	int m_state;
 	
 };
 

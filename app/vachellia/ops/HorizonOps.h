@@ -13,6 +13,7 @@ namespace alo {
 
 class HorizonOps : public RenderableOps {
     
+    Vector3F m_center;
     float m_planetRadius;
 
 public:
@@ -24,6 +25,8 @@ public:
     virtual void addRenderableTo(RenderableScene *scene) override;
 
     virtual void update() override;
+    
+    virtual bool intersectRay(const Ray& aray, IntersectResult& result) override;
 
 protected:
     

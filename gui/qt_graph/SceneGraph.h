@@ -45,7 +45,7 @@ protected:
 	GlyphScene * asGlyphScene();
 	
 signals:
-	void sendGraphChanged();
+	//void sendGraphChanged();
 	
 private:
     void processSelect(const QPoint& pos);

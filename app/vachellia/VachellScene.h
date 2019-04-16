@@ -26,12 +26,15 @@ class VachellScene : public alo::GlyphScene, public alo::RenderableScene
 public:
 	VachellScene(alo::GroupCollection<QJsonObject> *collector, QObject *parent = 0);
 	virtual ~VachellScene();
+	
+	virtual void onItemVisibilityChanged() override;
 
 signals:
 	void sendUpdateDrawable();
 	void sendBound(const alo::Hexahedron &x);
 
 public slots:
+    void recvAttribChanged();
 	void recvCameraChanged(const alo::CameraEvent &x);
 	void recvRequestBound();
 		
