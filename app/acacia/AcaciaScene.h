@@ -26,6 +26,8 @@ class AcaciaScene : public alo::GlyphScene, public alo::DrawableScene
 public:
 	AcaciaScene(alo::GroupCollection<QJsonObject> *collector, QObject *parent = 0);
 	virtual ~AcaciaScene();
+	
+	virtual void onItemVisibilityChanged() override;
 
 signals:
 	void sendUpdateDrawable();

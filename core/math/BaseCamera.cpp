@@ -20,10 +20,14 @@ BaseCamera::BaseCamera()
 
 BaseCamera::~BaseCamera() {}
 
-bool BaseCamera::isOrthographic() const
+void BaseCamera::lookAt(const Vector3F &p)
 {
-	return true;
+    fSpace.setTranslation(p + eyeDirection() * m_focusDistance);
+    updateInverseSpace();
 }
+
+bool BaseCamera::isOrthographic() const
+{ return true; }
 
 void BaseCamera::reset(const Vector3F & pos)
 {
@@ -41,6 +45,9 @@ void BaseCamera::lookFromTo(Vector3F & from, Vector3F & to)
 	m_focusDistance = from.distanceTo(to);
 	updateInverseSpace();
 }
+
+void BaseCamera::setFocusDistance(const float &x)
+{ m_focusDistance = x; }
 
 void BaseCamera::setPortWidth(unsigned w)
 {
@@ -142,8 +149,8 @@ void BaseCamera::moveForward(int y)
 	eye += front * dist;
     m_focusDistance += dist;
     
-	if(y > 0 && m_focusDistance < 1.f ) 
-		m_focusDistance = 1.f;
+	if(y > 0 && m_focusDistance < m_nearClipPlane + 2.f ) 
+		m_focusDistance = m_nearClipPlane + 2.f;
     
 	fSpace.setTranslation(eye);
 	updateInverseSpace();
@@ -280,6 +287,8 @@ void BaseCamera::setNearClipPlane(float x)
 void BaseCamera::setFarClipPlane(float x)
 {	
 	m_farClipPlane = x;
+	if(m_nearClipPlane < x * 1e-6f)
+	    m_nearClipPlane = x * 1e-6f;
 }
 
 void BaseCamera::setFieldOfView(float) {}
@@ -310,5 +319,8 @@ Vector3F BaseCamera::transformNormalToWorld(const Vector3F &x) const
 
 const Matrix44F &BaseCamera::space() const
 { return fSpace; }
+
+const Matrix44F &BaseCamera::inverseSpace() const
+{ return fInverseSpace; }
  
 }

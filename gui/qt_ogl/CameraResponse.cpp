@@ -63,10 +63,12 @@ const QMatrix4x4 &CameraResponse::calcProjectionMatrix()
     m_proj.setToIdentity();
 
 	float left,right,bottom,top;
+	
+	const float d = .5f * m_persp->nearClipPlane() / m_persp->focusDistance();
 		
-	right = m_persp->frameWidth() * 0.5f;
+	right = m_persp->frameWidth() * d;
 	left = -right;
-	top = m_persp->frameHeight() * 0.5f;
+	top = m_persp->frameHeight() * d;
 	bottom = -top;
 
     m_proj.frustum(left, right, bottom, top, m_persp->nearClipPlane(), m_persp->farClipPlane());
@@ -76,7 +78,7 @@ const QMatrix4x4 &CameraResponse::calcProjectionMatrix()
 
 const QMatrix4x4 &CameraResponse::calcCameraMatrix()
 { 
-    const Matrix44F &invmat = m_persp->fInverseSpace;
+    const Matrix44F &invmat = m_persp->inverseSpace();
     m_camera = QMatrix4x4(invmat.v);
     m_camera = m_camera.transposed();
     return m_camera;
@@ -88,7 +90,7 @@ void CameraResponse::calcCameraFrustum()
            m_persp->heightWidthRatio(),
            -m_persp->nearClipPlane(),
            -m_persp->farClipPlane(),
-           m_persp->fSpace);
+           m_persp->space() );
 }
 
 const QMatrix4x4 &CameraResponse::projectionMatrix() const
@@ -102,13 +104,12 @@ CameraEvent CameraResponse::getCameraEvent() const
 
 void CameraResponse::frameAll(const Vector3F &center, const float &width)
 {
-    m_persp->fCenterOfInterest = center;
-    const float fl = width * .75f / m_persp->tanhfov();
-    m_persp->fSpace.setTranslation(center + m_persp->eyeDirection() * fl);
-    m_persp->updateInverseSpace();
-    if(fl + width *.5f > m_persp->farClipPlane()) {
-        m_persp->m_farClipPlane = fl + width * .5f;
-        m_persp->m_nearClipPlane = m_persp->m_farClipPlane * .4e-5f;
+    const float fd = width * .75f / m_persp->tanhfov();
+    m_persp->setFocusDistance(fd);
+    m_persp->lookAt(center);
+    
+    if(fd + width *.5f > m_persp->farClipPlane()) {
+        m_persp->setFarClipPlane(fd + width * .5f);
         std::cout << " INFO extend camera far clipping plane to " << m_persp->farClipPlane();
         calcProjectionMatrix();
     }

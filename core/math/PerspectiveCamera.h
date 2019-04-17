@@ -24,6 +24,7 @@ public:
 	
 	virtual bool isOrthographic() const;
 	virtual float fieldOfView() const;
+/// at focus distance
 	virtual float frameWidth() const;
 	virtual float frameWidthRel() const;
 	virtual void zoom(int y);

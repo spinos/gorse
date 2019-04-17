@@ -53,7 +53,7 @@ void PerspectiveCamera::incidentRay(int x, int y, Vector3F & origin, Vector3F & 
 	getScreenCoord(cx, cy, x, y);
 	worldVec.x = cx * frameWidth();
 	worldVec.y = cy * frameHeight();
-	worldVec.z = -nearClipPlane();
+	worldVec.z = -focusDistance();
 	
 	origin = transformToWorld(worldVec);
 	worldVec.normalize();

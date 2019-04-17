@@ -10,7 +10,7 @@
 #include <qt_ogl/DrawableResource.h>
 #include <qt_base/AFileDlg.h>
 #include <h5_mesh/LodMeshCache.h>
-#include <qt_ogl/CameraEvent.h>
+#include <math/CameraEvent.h>
 #include <math/PerspectiveCamera.h>
 #include <cull/ViewFrustumCull.h>
 #include <cull/VisibleDetail.h>

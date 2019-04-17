@@ -25,10 +25,13 @@ public:
 
 	BaseCamera();
 	virtual ~BaseCamera();
+
+	void lookAt(const Vector3F &p);
 	
 	virtual bool isOrthographic() const;
 	void reset(const Vector3F & pos);
 	void lookFromTo(Vector3F & from, Vector3F & to);
+	void setFocusDistance(const float &x);
 	void setPortWidth(unsigned w);
 	void setPortHeight(unsigned h);
 	void setHorizontalAperture(float w);
@@ -85,7 +88,7 @@ public:
     Vector3F transformToWorld(const Vector3F &x) const;
     Vector3F transformNormalToWorld(const Vector3F &x) const;
     const Matrix44F &space() const;
-    
+    const Matrix44F &inverseSpace() const;
 };
 
 }

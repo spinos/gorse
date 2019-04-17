@@ -5,7 +5,7 @@
 #include <geom/AdaptableMesh.h>
 #include <mesh/FrontMesher.h>
 #include <math/miscfuncs.h>
-#include <qt_ogl/CameraEvent.h>
+#include <math/CameraEvent.h>
 #include <math/PerspectiveCamera.h>
 
 namespace alo {

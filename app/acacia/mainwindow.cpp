@@ -53,8 +53,8 @@ MainWindow::MainWindow()
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     connect(m_glview, &alo::View3DWidget::cameraChanged,
             m_scene, &AcaciaScene::recvCameraChanged );
-    connect(m_graphView, &alo::SceneGraph::sendGraphChanged,
-            m_glview, &GLWidget::recvAttribChanged );
+    //connect(m_graphView, &alo::SceneGraph::sendGraphChanged,
+    //        m_glview, &GLWidget::recvAttribChanged );
     connect(m_glview, &alo::View3DWidget::requestBound,
             m_scene, &AcaciaScene::recvRequestBound );
     connect(m_scene, &AcaciaScene::sendBound,

@@ -10,7 +10,7 @@
 #include "AcaciaScene.h"
 #include "ops/AllOps.h"
 #include <qt_graph/GlyphItem.h>
-#include <qt_ogl/CameraEvent.h>
+#include <math/CameraEvent.h>
 #include <math/AFrustum.h>
 
 using namespace alo;
@@ -93,3 +93,7 @@ void AcaciaScene::recvRequestBound()
     op->getDrawableBound(b);
     emit sendBound(b);
 }
+
+void AcaciaScene::onItemVisibilityChanged()
+{ emit sendUpdateDrawable(); }
+
