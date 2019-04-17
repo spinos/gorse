@@ -230,7 +230,7 @@ bool SsdfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int* range,
 	cellFld->setOriginCellSize(corih);
 	cellFld->setResolution(1);
 	
-	sdb::Sequence<int> visited;
+	sdb::L3Tree<int, int, 2048, 512, 1024> visited;
 /// to Q-1
 	for(int l=P;l<Q;++l) {
 		
@@ -240,7 +240,7 @@ bool SsdfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int* range,
 		
 		for(int i=0;i<d3l;++i) {
 		
-			if(visited.findKey(ks[i]))
+			if(visited.find(ks[i]))
 				continue;
 				
 			int ind = m_hexa.findNode(ks[i]);
@@ -251,7 +251,7 @@ bool SsdfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int* range,
 				
 			cellFld->value()[i] = m_hexa.getNodeDistance(ind);
 			
-			visited.insert(ks[i]);
+			visited.insert(ks[i], 0);
 		}
 		
 		cellFld->upSample();

@@ -47,6 +47,15 @@ class AdaptiveHexagonDistance : public BaseDistanceField {
 				return false;
 			return _key < another._key;
 		}
+
+		const bool operator<=(const CellDesc & another) const
+		{ 
+			if(_span < another._span)
+				return true;
+			if(_span > another._span)
+				return false;
+			return _key <= another._key;
+		}
 		
 		const bool operator>(const CellDesc & another) const
 		{
@@ -133,7 +142,7 @@ void AdaptiveHexagonDistance::divideCell(int kcoord, Tr& rule, int level0, int l
 	rule. template getLevelCells<CellDesc>(tmp, kcoord, level0, level1);
 	
 	for(int i=0;i<nchild;++i) {
-		m_cellsToAdd.insert(tmp[i]);
+		m_cellsToAdd.insert(tmp[i], 0);
 	}
 	
 	delete[] tmp;
@@ -151,7 +160,7 @@ void AdaptiveHexagonDistance::divideCell(int kcoord, Tr& rule, int level0, int l
 	for(int j=0;j<12;++j) {
 		
 		sdb::Coord2 c = ke[j].ordered();
-		m_obslEdgeVs.insert(c);
+		m_obslEdgeVs.insert(c, 0);
 		
 	}
 	
@@ -162,7 +171,7 @@ void AdaptiveHexagonDistance::divideCell(int kcoord, Tr& rule, int level0, int l
 	CellDesc gcells[6];
 	int ng = rule. template getGuardCells<CellDesc>(gcells, kcoord, level0, level0);
 	for(int i=0;i<ng;++i) {
-		m_cellsToDivide.insert(gcells[i]);
+		m_cellsToDivide.insert(gcells[i], 0);
 	}
 }
 
@@ -174,20 +183,20 @@ void AdaptiveHexagonDistance::finishCells(Tr& rule)
 	m_nodeHash.create(n<<1);
 	
 	int kn[8];
-	m_cellsToAdd.begin();
-	while(!m_cellsToAdd.end() ) {
-	
-		const CellDesc& ci = m_cellsToAdd.key();
-		rule. template computeKeyToCellCorners<CellDesc>(kn, ci);
+	sdb::L3Node<CellDesc, int, 1024> *block = m_cellsToAdd.begin();
+	while(block) {
+		for (int i=0;i<block->count();++i) { 
+			const CellDesc& ci = block->key(i);
+			rule. template computeKeyToCellCorners<CellDesc>(kn, ci);
 		
-		for(int j=0;j<8;++j) {
-			int l = m_nodeHash.insertKey(kn[j]);
-			if(l<0) {
-				std::cout<<"\n WARNING cannot insert "<<kn[j];
+			for(int j=0;j<8;++j) {
+				int l = m_nodeHash.insertKey(kn[j]);
+				if(l<0) {
+					std::cout<<"\n WARNING cannot insert "<<kn[j];
+				}
 			}
 		}
-		
-		m_cellsToAdd.next();
+		block = m_cellsToAdd.next(block);
 	}
 	
 	int nv = m_nodeHash.finish();
@@ -201,19 +210,19 @@ template<typename Tr>
 void AdaptiveHexagonDistance::buildGraph(const int& nv,
 										Tr& rule)
 {
-	sdb::Sequence<sdb::Coord2> edgeMap;
+	sdb::L3Tree<sdb::Coord2, int, 2048, 512, 1024> edgeMap;
 	
 	sdb::Coord2 ke[12];
 	
-	m_cellsToAdd.begin();
-	while(!m_cellsToAdd.end() ) {
-	
-		const CellDesc& ci = m_cellsToAdd.key();
-		rule. template computeKeyToCellEdges<CellDesc, sdb::Coord2 >(ke, ci);
+	sdb::L3Node<CellDesc, int, 1024> *block = m_cellsToAdd.begin();
+	while(block) {
+		for (int i=0;i<block->count();++i) { 
+			const CellDesc& ci = block->key(i);
+			rule. template computeKeyToCellEdges<CellDesc, sdb::Coord2 >(ke, ci);
 		
 		for(int j=0;j<12;++j) {
 			
-			if(m_obslEdgeVs.findKey(ke[j].ordered() ) )
+			if(m_obslEdgeVs.find(ke[j].ordered() ) )
 				continue;
 				
 			int v1 = findNode(ke[j].x);
@@ -229,11 +238,11 @@ void AdaptiveHexagonDistance::buildGraph(const int& nv,
 			
 			sdb::Coord2 c = sdb::Coord2(v1, v2).ordered();
 				
-			edgeMap.insert(c);
+			edgeMap.insert(c, 0);
 			
 		}
-		
-		m_cellsToAdd.next();
+		}
+		block = m_cellsToAdd.next(block);
 	}
 	
 	m_obslEdgeVs.clear();
@@ -241,17 +250,19 @@ void AdaptiveHexagonDistance::buildGraph(const int& nv,
 	std::map<int, std::vector<int> > vvemap;
 	
 	int c = 0;
-	edgeMap.begin();
-	while(!edgeMap.end() ) {
-	
-		int v0 = edgeMap.key().x;
-		vvemap[v0].push_back(c);
+	sdb::L3Node<sdb::Coord2, int, 1024> *edgeBlock = edgeMap.begin();
+	while(edgeBlock) {
+		for (int i=0;i<edgeBlock->count();++i) { 
+			const sdb::Coord2 &edgeI = edgeBlock->key(i);
+			int v0 = edgeI.x;
+			vvemap[v0].push_back(c);
 		
-		int v1 = edgeMap.key().y;
-		vvemap[v1].push_back(c);
+			int v1 = edgeI.y;
+			vvemap[v1].push_back(c);
 		
-		c++;
-		edgeMap.next();
+			c++;
+		}
+		edgeBlock = edgeMap.next(edgeBlock);
 	}
 	
 	std::vector<int> edgeBegins;
@@ -383,13 +394,13 @@ void AdaptiveHexagonDistance::endGuardCells(Tr& rule, int levelBegin, int level1
 {		
 	std::deque<CellDesc> guardCellQueue;
 	
-	m_cellsToDivide.begin();
-	while(!m_cellsToDivide.end() ) {
-	
-		const CellDesc& ci = m_cellsToDivide.key();
+	sdb::L3Node<CellDesc, int, 1024> *block = m_cellsToDivide.begin();
+	while(block) {
+		for (int i=0;i<block->count();++i) { 
+		const CellDesc& ci = block->key(i);
 		guardCellQueue.push_back(ci);
-		
-		m_cellsToDivide.next();
+		}
+		block = m_cellsToDivide.next(block);
 	}
 	
 	while(guardCellQueue.size() > 0) {
@@ -413,7 +424,7 @@ void AdaptiveHexagonDistance::divideFirstCellInQueue(std::deque<CellDesc>& q,
 	rule. template getLevelCells<CellDesc>(tmp, ci._key, level0, level0+1);
 	
 	for(int i=0;i<8;++i) {
-		m_cellsToAdd.insert(tmp[i]);
+		m_cellsToAdd.insert(tmp[i], 0);
 	}
 	
 	sdb::Coord2 ke[12];
@@ -422,7 +433,7 @@ void AdaptiveHexagonDistance::divideFirstCellInQueue(std::deque<CellDesc>& q,
 	for(int j=0;j<12;++j) {
 
 		sdb::Coord2 c = ke[j].ordered();
-		m_obslEdgeVs.insert(c);
+		m_obslEdgeVs.insert(c, 0);
 		
 	}
 	

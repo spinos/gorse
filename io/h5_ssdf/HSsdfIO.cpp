@@ -17,7 +17,7 @@ HSsdfIO::HSsdfIO()
 bool HSsdfIO::findSsdf(std::vector<std::string> & names)
 {
 	const int oldSize = names.size();
-	HBase ga("/asset");
+	ver1::HBase ga("/asset");
 	ga.lsTypedChild<HSsdf>(names);
 	ga.close();
 	return names.size() > oldSize;

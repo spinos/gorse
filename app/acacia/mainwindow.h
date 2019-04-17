@@ -1,6 +1,6 @@
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef ACAC_MAIN_WINDOW_H
+#define ACAC_MAIN_WINDOW_H
 
 #include <QMainWindow>
 

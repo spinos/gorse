@@ -1,7 +1,7 @@
 
 #include <QtWidgets>
 
-#include "mainwindow.h"
+#include "MainWindow.h"
 #include "AssetPalette.h"
 #include "AcaciaScene.h"
 #include "AttribEditor.h"

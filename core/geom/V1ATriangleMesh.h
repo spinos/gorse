@@ -91,6 +91,9 @@ public:
 /// perpendicular to bc pointing to a
     static Vector3F PerpendicularToOppositeEdge(const Vector3F &a, const Vector3F &b, const Vector3F &c);
 
+    template<typename T, typename T1>
+    void getTriangle(T1 & sampler, const int & i) const;
+
 protected:
     void setNumVertices(int x);
     void setNumTriangles(int x);
@@ -103,6 +106,26 @@ protected:
 private:
     
 };
+
+template<typename T, typename T1>
+void ATriangleMesh::getTriangle(T1 & sampler, const int & i) const
+{
+	const Vector3F * p = c_positions();
+	const Int3 &t = c_indices()[i];
+    
+    T &v0 = sampler.vertex()[0];
+    v0._pos = p[t.x];
+    
+    T &v1 = sampler.vertex()[1];
+    v1._pos = p[t.y];
+    
+    T &v2 = sampler.vertex()[2];
+    v2._pos = p[t.z];
+			
+	/*
+	const Float2 * uvs = triangleTexcoord(i);
+	acomp.setUVs(uvs);*/
+}
 
 }
 

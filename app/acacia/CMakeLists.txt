@@ -3,7 +3,7 @@ ops/*.h
 ops/*.cpp)
 
 set (ACAC_SOURCE_FILES main.cpp 
-mainwindow.cpp
+MainWindow.cpp
 AssetPalette.cpp
 PiecesList.cpp
 AcaciaScene.cpp 
@@ -18,8 +18,8 @@ ${GORS_MATH_SRC}
 ${GORS_GEOM_SRC}
 ${GORS_MESH_SRC} 
 ${GORS_RNG_SRC}
-${GORS_GJK_SOURCE}
-${GORS_SDB_SOURCE}
+${GORS_GJK_SRC}
+${GORS_SDB_SRC}
 ${GORS_BVH_SRC}
 ${GORS_CULL_SRC}
 ${GORS_SDS_SRC}
@@ -27,9 +27,9 @@ ${GORS_GRAPH_SRC}
 ${GORS_SMP_SRC}
 ${GORS_SSDF_SRC}
 ${GORS_SVF_SRC}
-${GORS_H5_SOURCE}
-${GORS_H5_MESH_SOURCE}
-${GORS_H5_SSDF_SOURCE}
+${GORS_H5_SRC}
+${GORS_H5_MESH_SRC}
+${GORS_H5_SSDF_SRC}
 ${GORS_JSN_SOURCE}
 ${GORS_IPC_SOURCE})
 

@@ -10,6 +10,7 @@
 #include "SphereOps.h"
 #include "GeodesicDistanceTest.h"
 #include "InstancedTest.h"
+#include "SsdfTest.h"
 
 namespace alo {
 

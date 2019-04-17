@@ -13,7 +13,7 @@
 #include <math/BoundingBox.h>
 #include <math/miscfuncs.h>
 
-using namespace alo;
+namespace alo {
 
 struct PosSample {
 	
@@ -53,5 +53,6 @@ struct SampleInterp {
 	
 };
 
+}
 
 #endif

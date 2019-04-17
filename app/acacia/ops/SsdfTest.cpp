@@ -8,6 +8,8 @@
  */
 
 #include "SsdfTest.h"
+#include <qt_base/AFileDlg.h>
+#include <qt_ogl/DrawableResource.h>
 #include <ssdf/SparseSignedDistanceField.h>
 #include <sds/FZOrder.h>
 #include <math/BoundingBox.h>
@@ -21,7 +23,16 @@
 #include <rng/Uniform.h>
 #include <geom/GeodesicSphere.h>
 
-using namespace alo;
+namespace alo {
+
+AFileDlgProfile SsdfTest::SWriteProfile(AFileDlgProfile::FWrite,
+        "Choose File To Save",
+        ":images/save_big.png",
+        "Save sparse signed distance field",
+        "Save .hes",
+        ".hes",
+        "./",
+        "untitled");
 
 SsdfTest::SsdfTest()
 {
@@ -29,20 +40,61 @@ SsdfTest::SsdfTest()
 	m_buildRule = new BuildRuleTyp(m_sfc);
 	m_builder = new BuilderTyp;
 	m_field = new FieldTyp;
+	testIt();
+
+	DrawableResource *rec = createResource();
+    setResource(rec);
 }
 
-void SsdfTest::buildSsdf(alo::sds::SpaceFillingVector<PosSample >* samples,
-                const alo::BoundingBox& b)
+SsdfTest::~SsdfTest()
+{
+	delete m_sfc;
+	delete m_buildRule;
+	delete m_builder;
+	delete m_field;
+}
+
+void SsdfTest::update()
+{}
+
+void SsdfTest::addDrawableTo(DrawableScene *scene)
+{
+    setDrawableScene(scene);
+    computeMesh();  
+}
+
+void SsdfTest::computeMesh()
+{
+	GeodesicSphere transient(8);
+    transient.scaleBy(8.f);
+    DrawableResource *rec = resource();
+
+    lockScene();
+    const int beforeFrame = frameNumber() - 2;
+    if(rec->changedOnFrame() > beforeFrame) {
+/// prevent editing unsynchronized resource
+        unlockScene();
+        return;
+    }
+
+    UpdateMeshResouce(rec, &transient, false);
+
+    processResourceNoLock(rec);
+    unlockScene();
+}
+
+void SsdfTest::buildSsdf(sds::SpaceFillingVector<PosSample >* samples,
+                const BoundingBox& b)
 {
 	const Vector3F midP = b.center();
 	const float spanL = b.getLongestDistance();
 	m_sfc->setCoord(midP.x, midP.y, midP.z, spanL * .5f);
     m_builder->build(samples, *m_buildRule);
 	m_builder->save<FieldTyp>(*m_field, *m_buildRule);
-	saveToFile("../data/foo.aloe");
+	//saveToFile("../data/foo.aloe");
 }
 
-void SsdfTest::saveToFile(const char* filename)
+void SsdfTest::saveToFile(const std::string &filename)
 {
 	HSsdfIO hio;
 	bool stat = hio.begin(filename, HDocument::oCreate );
@@ -53,7 +105,63 @@ void SsdfTest::saveToFile(const char* filename)
 	hio.end();
 }
 
-void SsdfTest::drawGraph()
+void SsdfTest::testIt()
+{
+	typedef alo::sds::SpaceFillingVector<PosSample> PntArrTyp;
+	PntArrTyp pnts; 
+    
+    sds::FZOrderCurve zfc;
+    
+    GeodesicSphere transient(8);
+    transient.scaleBy(8.f);
+	
+    BoundingBox shapeBox;
+    transient.getAabb(shapeBox);
+    shapeBox.round();
+    std::cout<<"\n shape box"<<shapeBox;
+    
+    const float ssz = shapeBox.getLongestDistance() * .00141f;
+	
+	typedef smp::Triangle<PosSample > SamplerTyp;
+   
+	SamplerTyp sampler;
+	sampler.setSampleSize(ssz);
+    
+    PosSample asmp;
+    SampleInterp interp;
+	std::time_t secs = std::time(0);
+	Uniform<Lehmer> lmlcg(secs);
+    
+    const int nt = transient.numTriangles();
+    for(int i=0;i<nt;++i) {
+        transient.getTriangle<PosSample, SamplerTyp >(sampler, i);
+        sampler.addSamples <PntArrTyp, SampleInterp, Uniform<Lehmer> >(pnts, asmp, interp, &lmlcg);
+    }
+    
+    std::cout<<"\n n triangle samples "<<pnts.size();
+    buildSsdf(&pnts, shapeBox);
+}
+
+bool SsdfTest::hasMenu() const
+{ return true; }
+
+void SsdfTest::getMenuItems(std::vector<std::pair<std::string, int > > &ks) const
+{ ks.push_back(std::make_pair("Save", AFileDlgProfile::FWrite)); }
+
+void SsdfTest::recvAction(int x)
+{ if(x == AFileDlgProfile::FWrite) saveToFile(SWriteProfile.getFilePath()); }
+
+AFileDlgProfile *SsdfTest::writeFileProfileR () const
+{
+	SWriteProfile._notice = boost::str(boost::format("sparse signed distance field P %1% Q %2% \n storage size (%3%,%4%)") 
+        % m_field->P() % m_field->Q() 
+        % m_field->coarsDistanceStorageSize() % m_field->fineDistanceStorageSize() );
+    return &SWriteProfile; 
+}
+
+}
+
+/*void SsdfTest::drawGraph()
 {
 	drawGraph(m_builder->distanceField(), -1e20, 0.1, true, false, false);
 	
@@ -158,44 +266,4 @@ void SsdfTest::drawSamples()
 	}
 	ShapeDrawer::End();
 }
-/*
-void measureShape()
-{
-	typedef alo::sds::SpaceFillingVector<PosSample> PntArrTyp;
-	PntArrTyp* m_pnts = new PntArrTyp; 
-    
-    sds::FZOrderCurve* m_zfc = new sds::FZOrderCurve;
-    GeodesicSphere* m_shape = new GeodesicSphere;
-	
-    BoundingBox shapeBox;
-    m_shape->calculateGeomBBox(shapeBox);
-    shapeBox.round();
-    std::cout<<"\n shape box"<<shapeBox;
-    
-    m_pnts->clear();
-    
-    const float ssz = shapeBox.getLongestDistance() * .00141f;
-	
-	typedef smp::Triangle<PosSample > SamplerTyp;
-   
-	SamplerTyp sampler;
-	sampler.setSampleSize(ssz);
-    
-    PosSample asmp;
-    SampleInterp interp;
-	std::time_t secs = std::time(0);
-	Uniform<Lehmer> lmlcg(secs);
-    
-    const int nt = m_shape->numTriangles();
-    for(int i=0;i<nt;++i) {
-        m_shape->dumpTriangle<PosSample, SamplerTyp >(sampler, i);
-        sampler.addSamples <PntArrTyp, SampleInterp, Uniform<Lehmer> >(*m_pnts, asmp, interp, &lmlcg);
-    }
-    
-    std::cout<<"\n n triangle samples "<<m_pnts->size();
-    
-	m_ssd->buildSsdf(m_pnts, shapeBox);
-
-	std::cout.flush();
-    
-}*/
+*/

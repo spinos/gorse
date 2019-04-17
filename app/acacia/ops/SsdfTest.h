@@ -1,14 +1,16 @@
 /*
  *  SsdfTest.h
- *  aloe
+ *  acacia
  *
- *  Created by zhang on 18-2-21.
+ *  Created by zhang on 19-4-18.
  *  Copyright 2018 __MyCompanyName__. All rights reserved.
  *
  */
 
-#ifndef SSDF_TEST_H
-#define SSDF_TEST_H
+#ifndef ACAC_SSDF_TEST_H
+#define ACAC_SSDF_TEST_H
+
+#include "DrawableOps.h"
 
 namespace alo {
 
@@ -39,42 +41,52 @@ class SsdField;
 
 class BaseDistanceField;
 
-}
 
 struct PosSample;
 
-class SsdfTest {
+class SsdfTest : public DrawableOps {
 
-typedef alo::sds::FZOrderCurve SfcTyp;
+typedef sds::FZOrderCurve SfcTyp;
 	SfcTyp* m_sfc;
 
-typedef alo::sdf::SsdfBuildRule<alo::sds::FZOrderCurve> BuildRuleTyp;
+typedef sdf::SsdfBuildRule<sds::FZOrderCurve> BuildRuleTyp;
 	BuildRuleTyp* m_buildRule;
 	
-typedef alo::sdf::SsdfBuilder<PosSample, alo::Vector3F, 4, 7, BuildRuleTyp > BuilderTyp;
+typedef sdf::SsdfBuilder<PosSample, Vector3F, 4, 7, BuildRuleTyp > BuilderTyp;
 	BuilderTyp* m_builder;
 	
-typedef alo::sdf::SsdField FieldTyp;
+typedef sdf::SsdField FieldTyp;
 	FieldTyp* m_field;
+
+	static AFileDlgProfile SWriteProfile;
 
 public:
 
+	enum { Type = 704002 };
+
     SsdfTest();
+    virtual ~SsdfTest();
+
+    virtual void update() override;
+    virtual void addDrawableTo(DrawableScene *scene) override;
+	virtual bool hasMenu() const override;
+    virtual void getMenuItems(std::vector<std::pair<std::string, int > > &ks) const override;
+    virtual void recvAction(int x) override;
+    virtual AFileDlgProfile *writeFileProfileR () const override;
 	
-	void buildSsdf(alo::sds::SpaceFillingVector<PosSample >* samples,
-                const alo::BoundingBox& b);
-           
-	void drawGraph();
-	void drawSamples();
-    
 protected:
 	
 private:
-
-	void saveToFile(const char* filename);
-	void drawGraph(const alo::BaseDistanceField& fld, float zmin, float zmax, 
-					bool drawEdge, bool drawDist, bool drawNormal);
+	void testIt();
+	void buildSsdf(sds::SpaceFillingVector<PosSample >* samples,
+                const BoundingBox& b);
+	void computeMesh();
+	void saveToFile(const std::string &filename);
+	//void drawGraph(const alo::BaseDistanceField& fld, float zmin, float zmax, 
+	//				bool drawEdge, bool drawDist, bool drawNormal);
 	
 };
+
+}
 
 #endif

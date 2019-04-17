@@ -70,7 +70,7 @@ int UniformHexagonDistance::nodeInd(int i, int j, int k) const
 
 void UniformHexagonDistance::buildGraph()
 {
-	sdb::Sequence<sdb::Coord2> edgeMap;
+	sdb::L3Tree<sdb::Coord2, int, 2048, 512, 1024> edgeMap;
 	
 	for(int k=0;k<=dimension()[2];++k) {
 		for(int j=0;j<=dimension()[1];++j) {
@@ -78,8 +78,8 @@ void UniformHexagonDistance::buildGraph()
 				
 				sdb::Coord2 c = sdb::Coord2(nodeInd(i,j,k),
 										nodeInd(i+1,j,k) ).ordered();
-				if(!edgeMap.findKey(c) ) {
-					edgeMap.insert(c);
+				if(!edgeMap.find(c) ) {
+					edgeMap.insert(c, 0);
 				}
 			}
 		}
@@ -91,8 +91,8 @@ void UniformHexagonDistance::buildGraph()
 				
 				sdb::Coord2 c = sdb::Coord2(nodeInd(i,j,k),
 										nodeInd(i,j+1,k) ).ordered();
-				if(!edgeMap.findKey(c) ) {
-					edgeMap.insert(c);
+				if(!edgeMap.find(c) ) {
+					edgeMap.insert(c, 0);
 				}
 			}
 		}
@@ -104,8 +104,8 @@ void UniformHexagonDistance::buildGraph()
 				
 				sdb::Coord2 c = sdb::Coord2(nodeInd(i,j,k),
 										nodeInd(i,j,k+1) ).ordered();
-				if(!edgeMap.findKey(c) ) {
-					edgeMap.insert(c);
+				if(!edgeMap.find(c) ) {
+					edgeMap.insert(c, 0);
 				}
 			}
 		}
@@ -114,17 +114,19 @@ void UniformHexagonDistance::buildGraph()
 	std::map<int, std::vector<int> > vvemap;
 	
 	int c = 0;
-	edgeMap.begin();
-	while(!edgeMap.end() ) {
-	
-		int v0 = edgeMap.key().x;
+	sdb::L3Node<sdb::Coord2, int, 1024> *block = edgeMap.begin();
+	while(block) {
+		for (int i=0;i<block->count();++i) { 
+			const sdb::Coord2 &edgeI = block->key(i);
+			int v0 = edgeI.x;
 		vvemap[v0].push_back(c);
 		
-		int v1 = edgeMap.key().y;
+			int v1 = edgeI.y;
 		vvemap[v1].push_back(c);
 		
 		c++;
-		edgeMap.next();
+		}
+		block = edgeMap.next(block);
 	}
 	
 	std::vector<int> edgeBegins;
