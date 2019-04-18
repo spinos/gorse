@@ -20,8 +20,8 @@ bool HSsdf::verifyType()
 	if(!hasNamedAttr(".coord") ) return 0;
 	if(!hasNamedAttr(".pql") ) return 0;
 	if(!hasNamedData(".celli") ) return 0;
-	if(!hasNamedData(".coarsed") ) return 0;
-	if(!hasNamedData(".fined") ) return 0;
+	if(!hasNamedData(".coarse") ) return 0;
+	if(!hasNamedData(".fine") ) return 0;
 	return 1;
 }
 

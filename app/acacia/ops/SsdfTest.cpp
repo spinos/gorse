@@ -65,8 +65,8 @@ void SsdfTest::addDrawableTo(DrawableScene *scene)
 
 void SsdfTest::computeMesh()
 {
-	GeodesicSphere transient(8);
-    transient.scaleBy(8.f);
+	GeodesicSphere transient(7);
+    transient.scaleBy(9.f);
     DrawableResource *rec = resource();
 
     lockScene();
@@ -110,9 +110,7 @@ void SsdfTest::testIt()
 	typedef alo::sds::SpaceFillingVector<PosSample> PntArrTyp;
 	PntArrTyp pnts; 
     
-    sds::FZOrderCurve zfc;
-    
-    GeodesicSphere transient(8);
+    GeodesicSphere transient(10);
     transient.scaleBy(8.f);
 	
     BoundingBox shapeBox;
@@ -121,7 +119,7 @@ void SsdfTest::testIt()
     std::cout<<"\n shape box"<<shapeBox;
     
     const float ssz = shapeBox.getLongestDistance() * .00141f;
-	
+	std::cout << "\n sample size " << ssz;
 	typedef smp::Triangle<PosSample > SamplerTyp;
    
 	SamplerTyp sampler;

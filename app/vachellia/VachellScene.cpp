@@ -30,6 +30,8 @@ GlyphOps *VachellScene::createOps(const QJsonObject &content)
     switch(k) {
         case HorizonOps::Type :
             return new HorizonOps;
+        case VoxelOps::Type :
+            return new VoxelOps;
         default:
             break;
     }

@@ -3,6 +3,7 @@
  *  aloe
  *
  *  node at cell corners
+ *  edges are axis-aligned
  *
  *  Created by jian zhang on 3/2/18.
  *  Copyright 2018 __MyCompanyName__. All rights reserved.
@@ -12,7 +13,7 @@
 #ifndef ALO_ADAPTIVE_HEXAGON_DISTANCE_H
 #define ALO_ADAPTIVE_HEXAGON_DISTANCE_H
 
-#include <graph/BaseDistanceField.h>
+#include "BaseDistanceField.h"
 #include <sds/HashedIndex.h>
 #include <sds/SpaceFillingVector.h>
 #include <math/miscfuncs.h>
@@ -281,7 +282,7 @@ void AdaptiveHexagonDistance::buildGraph(const int& nv,
 	
 	int ne = edgeMap.size();
 	int ni = edgeInds.size();
-	std::cout<<"\n ne "<<ne;
+	std::cout<<"\n n edge "<<ne;
 	BaseDistanceField::create(nv, ne, ni);
 	
 	DistanceNode * dst = nodes();
@@ -357,9 +358,9 @@ void AdaptiveHexagonDistance::computeDistance(const sds::SpaceFillingVector<T>& 
 			setEdgeFront(ac._key[closestV], ac._key[touchE[2]]);
 		}
 	}
-	
+
 	const int iFar = firstEmptyCellInd(rule);
-	
+
 	fastMarchingMethod();
 	marchOutside(iFar);
 	setFarNodeInside();

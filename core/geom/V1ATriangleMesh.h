@@ -110,9 +110,11 @@ private:
 template<typename T, typename T1>
 void ATriangleMesh::getTriangle(T1 & sampler, const int & i) const
 {
-	const Vector3F * p = c_positions();
 	const Int3 &t = c_indices()[i];
+	memcpy(sampler.index(), (const int *)&t, 12);
     
+	const Vector3F * p = c_positions();
+	
     T &v0 = sampler.vertex()[0];
     v0._pos = p[t.x];
     

@@ -60,7 +60,7 @@ bool HSsdf::save(const T& field)
 	rect.count[0] = ncol;
 	rect.count[1] = 1024;
 	
-	H2dDataset<hdata::TChar, 1024, 32> coarsed(".coarsed");
+	H2dDataset<hdata::TChar, 1024, 32> coarsed(".coarse");
 	coarsed.create(fObjectId);
 	coarsed.write((char* )field.c_coarseDistanceValue(), &rect);
 	coarsed.close();
@@ -76,7 +76,7 @@ bool HSsdf::save(const T& field)
 	rect.count[0] = DivideUp(field.fineDistanceStorageSize(), 1024);
 	rect.count[1] = 1024;
 	
-	H2dDataset<hdata::TChar, 1024, 32> fined(".fined");
+	H2dDataset<hdata::TChar, 1024, 32> fined(".fine");
 	fined.create(fObjectId);
 	fined.write((char* )field.c_fineDistanceValue(), &rect);
 	fined.close();
@@ -107,7 +107,7 @@ bool HSsdf::load(T& field)
 	rect.count[0] = ncol;
 	rect.count[1] = 1024;
 	
-	H2dDataset<hdata::TChar, 1024, 32> coarsed(".coarsed");
+	H2dDataset<hdata::TChar, 1024, 32> coarsed(".coarse");
 	coarsed.open(fObjectId);
 	coarsed.read((char* )field.coarseDistanceValue(), &rect);
 	coarsed.close();
@@ -123,7 +123,7 @@ bool HSsdf::load(T& field)
 	rect.count[0] = DivideUp(field.fineDistanceStorageSize(), 1024);
 	rect.count[1] = 1024;
 	
-	H2dDataset<hdata::TChar, 1024, 32> fined(".fined");
+	H2dDataset<hdata::TChar, 1024, 32> fined(".fine");
 	fined.open(fObjectId);
 	fined.read((char* )field.fineDistanceValue(), &rect);
 	fined.close();

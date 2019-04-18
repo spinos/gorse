@@ -41,10 +41,10 @@
                     "icon": ":images/cache_small.png",
                     "children": [
                         {
-                            "id": 828636,
+                            "id": 703427,
                             "name": "svf",
-                            "label": "Sparse Voxel Field",
-                            "icon": ":images/cache.png",
+                            "label": "Voxel Field",
+                            "icon": ":images/voxel.png",
                             "is_element": true,
                             "attribs" : [
                             {
@@ -52,20 +52,6 @@
                                 "label": "Cache File Path",
                                 "typ": 9,
                                 "strtyp": 513
-                            },
-                            {
-                                "name": "freeze_view",
-                                "label": "Freeze View",
-                                "typ": 1,
-                                "value": true
-                            },
-                            {
-                                "name": "lod",
-                                "label": "Level Of Detail",
-                                "typ": 3,
-                                "value": 0.5,
-                                "min": 0.0,
-                                "max": 1.0
                             }
                         ]
                     }

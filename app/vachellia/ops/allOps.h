@@ -2,6 +2,7 @@
 #define VCHL_ALL_OPS_H
 
 #include "HorizonOps.h"
+#include "VoxelOps.h"
 
 #endif
 

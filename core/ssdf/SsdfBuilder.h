@@ -21,7 +21,7 @@
 #ifndef ALO_SSDF_BUILDER_H
 #define ALO_SSDF_BUILDER_H
 
-#include "AdaptiveHexagonDistance.h"
+#include <graph/AdaptiveHexagonDistance.h>
 #include <svf/SvfBuilder.h>
 
 namespace alo {
@@ -143,10 +143,10 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::build(sds::SpaceFillingVector<T>* samples,
 	}
 	
 	m_hexa.finishCells(rule);
-
+	
 	m_hexa. template computeDistance<T, Tr>(SvfBuilderTyp::levelSample(Q), 
 							Q-1, rule);
-		
+	
 	clearUniformDistances();
 	
 	buildPCells(rule);
@@ -317,12 +317,16 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::save(Tf& field, Tr& rule)
 	rule.getDomainOrigin(orih);
 	orih[3] = rule.deltaAtLevel(P);
 	field.setOriginCellSize(orih);
-	
+	std::cout << "\n field origin (" << orih[0] << "," << orih[1] << "," << orih[2] << ") "
+				<< "cell size " << orih[3];
+				
 	const DistanceFieldTyp* rootField = m_uniformDistances.back();
 	field.copyCoarseDistanceValue(rootField);
 	field.copyCellOffset(m_cellOffset);
-	
+				
 	const int n = SvfBuilderTyp::NumPCells();
+	std::cout << "\n n p-cell " << n;
+	int nq = 0;
 	for(int i=0;i<n;++i) {
 		int j = m_cellInd[i];
 		if(j<0)
@@ -332,8 +336,9 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::save(Tf& field, Tr& rule)
 		const int offset = m_cellOffset[i];
 		
 		field.copyFineDistanceValue(offset, cellField);
+		nq++;
 	}
-	
+	std::cout << "\n n q-cell " << nq;
 }
 
 }

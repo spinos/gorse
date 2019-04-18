@@ -65,7 +65,7 @@ public:
 	typedef Te EdgeType;
 	
 protected:
-	void extractEdges(sdb::L3Tree<sdb::Coord2, int, 2048, 512, 1024 > * a);
+	void extractEdges(sdb::L3Tree<sdb::Coord2, int, 2048, 512, 1024> *a);
 	void extractEdgeBegins(const std::vector<int> & a);
 	void extractEdgeIndices(const std::vector<int> & a);
 	void calculateEdgeLength();
@@ -161,18 +161,16 @@ const int * AGraph<Tn, Te>::edgeBegins() const
 { return m_vvEdgeBegins; }
 
 template<typename Tn, typename Te>
-void AGraph<Tn, Te>::extractEdges(sdb::L3Tree<sdb::Coord2, int, 2048, 512, 1024 > * a)
+void AGraph<Tn, Te>::extractEdges(sdb::L3Tree<sdb::Coord2, int, 2048, 512, 1024> * a)
 {
-	int i = 0;
+	int offset = 0;
 	sdb::L3Node<sdb::Coord2, int, 1024> *block = a->begin();
 	while(block) {
-	    for (int i=0;i<block->count();++i) { 
-	        const sdb::Coord2 &k = block->key(i);
-	        Te* e = &m_edges[i];
-	        e->vi = k;
+		for (int i=0;i<block->count();++i) { 
+		    Te* e = &m_edges[offset];
+		    e->vi = block->key(i);
 		
-	        i++;
-		
+		    offset++;
 		}
 		block = a->next(block);
 	}

@@ -245,12 +245,16 @@ void BaseDistanceField::setNodeDistance(const int & idx,
 
 void BaseDistanceField::setEdgeFront(int va, int vb)
 {
-	if(va < 0 || vb < 0)
+	if(va < 0 || vb < 0) {
+		std::cout << "\n invalid edge index (" << va << "," << vb << ")";
 		return;
+	}
 		
 	EdgeType* eg = edge(va, vb);
-	if(!eg)
+	if(!eg) {
+		std::cout << "\n cannot find edge (" << va << "," << vb << ")";
 		return;
+	}
 		
 	if(eg->lab < sdf::StFront)
 		eg->lab = sdf::StFront;
