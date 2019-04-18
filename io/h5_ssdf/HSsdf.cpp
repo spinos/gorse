@@ -22,6 +22,8 @@ bool HSsdf::verifyType()
 	if(!hasNamedData(".celli") ) return 0;
 	if(!hasNamedData(".coarse") ) return 0;
 	if(!hasNamedData(".fine") ) return 0;
+    if(!hasNamedData(".coarse_nml") ) return 0;
+	if(!hasNamedData(".fine_nml") ) return 0;
 	return 1;
 }
 

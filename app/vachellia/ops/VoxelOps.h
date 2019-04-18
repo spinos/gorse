@@ -11,10 +11,19 @@
 
 namespace alo {
 
+namespace sdf {
+class SsdField;
+template<typename T>
+class SsdfLookupRule;
+}
+
 class VoxelOps : public RenderableOps {
     
     static AFileDlgProfile SReadProfile;
-    
+    sdf::SsdField *m_field;
+    sdf::SsdfLookupRule<sdf::SsdField> *m_rule;
+    std::string m_cachePath;
+
 public:
 	enum { Type = 703427 };
 
@@ -31,7 +40,7 @@ public:
 protected:
     
 private:
-    
+    bool loadCache(const std::string &fileName);
 
 };
 

@@ -104,9 +104,9 @@ bool Triangle<T>::sampleTriangle(T& samp, Tf& finterp, Tr* prng)
 	m_coord[1] = r1 * (1.f - r2);
 	m_coord[2] = r1 * r2;
 	
-	samp._pos = m_v[0]._pos * m_coord[0] 
-				+ m_v[1]._pos * m_coord[1] 
-				+ m_v[2]._pos * m_coord[2];
+    samp = m_v[0] * m_coord[0] 
+				+ m_v[1] * m_coord[1] 
+				+ m_v[2] * m_coord[2];
 	
 	if(finterp.reject(samp) )
 		return false;

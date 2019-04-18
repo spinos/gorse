@@ -1,13 +1,17 @@
 #include "RenderableObject.h"
 #include <math/Ray.h>
 #include <math/raySphere.h>
+#include <math/rayBox.h>
 #include "IntersectResult.h"
 
 namespace alo {
 
 RenderableObject::RenderableObject() : m_objectId(0),
 m_state(stNormal)
-{}
+{
+	m_aabb[0] = m_aabb[1] = m_aabb[2] = -10.f;
+	m_aabb[3] = m_aabb[4] = m_aabb[5] = 10.f;
+}
 
 RenderableObject::~RenderableObject()
 {}
@@ -35,14 +39,21 @@ bool RenderableObject::isOverlay() const
 
 bool RenderableObject::intersectRay(const Ray& aray, IntersectResult& result)
 { 
-    float tt = result.rayDistance();
-	if(!raySphereIntersect(tt, aray, Vector3F::Zero, 5.f) ) {
-		return false;
-	}
-	
-	Vector3F tn = aray.travel(tt );
-	tn.normalize();
+	float rayData[8];
+	result.copyRayData(rayData);
+
+	if(!rayAabbIntersect(rayData, m_aabb)) return false;
+	const float &tt = rayData[6];
+
+	const Vector3F pnt = aray.travel(tt);
+    Vector3F tn;
+/// side on box
+	getNormalOnAabb((float *)&tn, (const float *)&pnt, m_aabb, tt * 1e-5f);
+
 	return result.updateRayDistance(tt, tn);
 }
+
+float *RenderableObject::aabb()
+{ return m_aabb; }
 
 }

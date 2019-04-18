@@ -12,24 +12,31 @@
 
 namespace alo {
 
-IntersectResult::IntersectResult() : m_dist(1e7f)
+IntersectResult::IntersectResult()
 {
+	m_rayData[7] = 1e7f;
 	m_radianceState = new SampleState;
 	m_radianceState->setAccess(SampleState::Wrap, SampleState::Clamp);
 	m_radianceState->setFilter(SampleState::Box);
 	m_radianceState->setChannel(SampleState::RGB);
 }
 
+float *IntersectResult::rayData()
+{ return m_rayData; }
+
+void IntersectResult::copyRayData(float *y) const
+{ memcpy(y, m_rayData, 32); }
+
 bool IntersectResult::updateRayDistance(float x, const Vector3F &nml)
 {
-	if(m_dist < x) return false;
-	m_dist = x;
+	if(m_rayData[7] < x) return false;
+	m_rayData[7] = x;
 	m_normal = nml;
 	return true;
 }
 
 float& IntersectResult::rayDistance()
-{ return m_dist; }
+{ return m_rayData[7]; }
 
 Vector3F& IntersectResult::hitNormal()
 { return m_normal; }

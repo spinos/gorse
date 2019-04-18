@@ -20,11 +20,10 @@ RenderableBox::RenderableBox()
 bool RenderableBox::intersectRay(const Ray& aray, IntersectResult& result)
 {
     float rayData[8];
-	
 	aray.get(rayData);
-
-	if(!rayBoxIntersect(rayData, m_centerHalfSpan) )
-		return false;
+    rayData[7] = result.rayDistance();
+    
+	if(!rayBoxIntersect(rayData, m_centerHalfSpan) ) return false;
     
     const float &tt = rayData[6];
 

@@ -14,9 +14,9 @@
 #include <sds/FZOrder.h>
 #include <math/BoundingBox.h>
 #include <ogl/ShapeDrawer.h>
-#include "PosSample.h"
 #include <h5_ssdf/HSsdfIO.h>
 #include <smp/Triangle.h>
+#include <smp/SurfaceSample.h>
 #include <sds/SpaceFillingVector.h>
 #include <sds/FZOrder.h>
 #include <rng/Lehmer.h>
@@ -65,8 +65,9 @@ void SsdfTest::addDrawableTo(DrawableScene *scene)
 
 void SsdfTest::computeMesh()
 {
-	GeodesicSphere transient(7);
+	GeodesicSphere transient(11);
     transient.scaleBy(9.f);
+    transient.translateBy(0.f, 9.f, 0.f);
     DrawableResource *rec = resource();
 
     lockScene();
@@ -83,7 +84,7 @@ void SsdfTest::computeMesh()
     unlockScene();
 }
 
-void SsdfTest::buildSsdf(sds::SpaceFillingVector<PosSample >* samples,
+void SsdfTest::buildSsdf(sds::SpaceFillingVector<SurfaceSample >* samples,
                 const BoundingBox& b)
 {
 	const Vector3F midP = b.center();
@@ -107,12 +108,13 @@ void SsdfTest::saveToFile(const std::string &filename)
 
 void SsdfTest::testIt()
 {
-	typedef alo::sds::SpaceFillingVector<PosSample> PntArrTyp;
+	typedef alo::sds::SpaceFillingVector<SurfaceSample> PntArrTyp;
 	PntArrTyp pnts; 
     
-    GeodesicSphere transient(10);
-    transient.scaleBy(8.f);
-	
+    GeodesicSphere transient(11);
+    transient.scaleBy(9.f);
+	transient.translateBy(0.f, 9.f, 0.f);
+    
     BoundingBox shapeBox;
     transient.getAabb(shapeBox);
     shapeBox.round();
@@ -120,19 +122,19 @@ void SsdfTest::testIt()
     
     const float ssz = shapeBox.getLongestDistance() * .00141f;
 	std::cout << "\n sample size " << ssz;
-	typedef smp::Triangle<PosSample > SamplerTyp;
+	typedef smp::Triangle<SurfaceSample > SamplerTyp;
    
 	SamplerTyp sampler;
 	sampler.setSampleSize(ssz);
     
-    PosSample asmp;
+    SurfaceSample asmp;
     SampleInterp interp;
 	std::time_t secs = std::time(0);
 	Uniform<Lehmer> lmlcg(secs);
     
     const int nt = transient.numTriangles();
     for(int i=0;i<nt;++i) {
-        transient.getTriangle<PosSample, SamplerTyp >(sampler, i);
+        transient.getTriangle<SurfaceSample, SamplerTyp >(sampler, i);
         sampler.addSamples <PntArrTyp, SampleInterp, Uniform<Lehmer> >(pnts, asmp, interp, &lmlcg);
     }
     
@@ -151,9 +153,12 @@ void SsdfTest::recvAction(int x)
 
 AFileDlgProfile *SsdfTest::writeFileProfileR () const
 {
-	SWriteProfile._notice = boost::str(boost::format("sparse signed distance field P %1% Q %2% \n storage size (%3%,%4%)") 
+	SWriteProfile._notice = boost::str(boost::format("sparse signed distance field P %1% Q %2% \n storage size (%3%,%4%,%5%,%6%)") 
         % m_field->P() % m_field->Q() 
-        % m_field->coarsDistanceStorageSize() % m_field->fineDistanceStorageSize() );
+        % m_field->coarseDistanceStorageSize() 
+        % m_field->fineDistanceStorageSize()
+        % m_field->coarseNormalStorageSize() 
+        % m_field->fineNormalStorageSize() );
     return &SWriteProfile; 
 }
 

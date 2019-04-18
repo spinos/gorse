@@ -51,7 +51,7 @@ bool HSsdf::save(const T& field)
 	    addIntAttr(".pql", 3);
 	writeIntAttr(".pql", pql );
 	
-	const int coarsedL = field.coarsDistanceStorageSize();
+	const int coarsedL = field.coarseDistanceStorageSize();
 	const int ncol = DivideUp(coarsedL, 1024);
 	
 	hdata::Select2DPart rect;
@@ -80,9 +80,25 @@ bool HSsdf::save(const T& field)
 	fined.create(fObjectId);
 	fined.write((char* )field.c_fineDistanceValue(), &rect);
 	fined.close();
+    
+    rect.count[0] = DivideUp(field.coarseNormalStorageSize(), 1024);
+	rect.count[1] = 1024;
+	
+	H2dDataset<hdata::TChar, 1024, 32> coarseNml(".coarse_nml");
+	coarseNml.create(fObjectId);
+	coarseNml.write((char* )field.c_coarseNormalValue(), &rect);
+	coarseNml.close();
+    
+    rect.count[0] = DivideUp(field.fineNormalStorageSize(), 1024);
+	rect.count[1] = 1024;
+	
+	H2dDataset<hdata::TChar, 1024, 32> fineNml(".fine_nml");
+	fineNml.create(fObjectId);
+	fineNml.write((char* )field.c_fineNormalValue(), &rect);
+	fineNml.close();
 	
 	std::cout<<"\n HSsdf "<<pathToObject()<<" saved "<<pql[0]<<" "<<pql[1]
-		<<" data "<<pql[2]<<" byte "<<std::endl;
+		<<" data "<< field.totalStorageSize() <<" byte "<<std::endl;
 	
 	return true;
 }
@@ -98,7 +114,7 @@ bool HSsdf::load(T& field)
 	readIntAttr(".pql", pql );
 	field.create(pql[0], pql[1], pql[2]);
 	
-	const int coarsedL = field.coarsDistanceStorageSize();
+	const int coarsedL = field.coarseDistanceStorageSize();
 	const int ncol = DivideUp(coarsedL, 1024);
 	
 	hdata::Select2DPart rect;
@@ -127,6 +143,22 @@ bool HSsdf::load(T& field)
 	fined.open(fObjectId);
 	fined.read((char* )field.fineDistanceValue(), &rect);
 	fined.close();
+    
+    rect.count[0] = DivideUp(field.coarseNormalStorageSize(), 1024);
+	rect.count[1] = 1024;
+	
+	H2dDataset<hdata::TChar, 1024, 32> coarseNml(".coarse_nml");
+	coarseNml.open(fObjectId);
+	coarseNml.read((char* )field.coarseNormalValue(), &rect);
+	coarseNml.close();
+    
+    rect.count[0] = DivideUp(field.fineNormalStorageSize(), 1024);
+	rect.count[1] = 1024;
+	
+	H2dDataset<hdata::TChar, 1024, 32> fineNml(".fine_nml");
+	fineNml.open(fObjectId);
+	fineNml.read((char* )field.fineNormalValue(), &rect);
+	fineNml.close();
 /*	
 	const int d = 1<<pql[0];
 	const int n = d*d*d;
@@ -141,7 +173,7 @@ bool HSsdf::load(T& field)
 	}
 */	
 	std::cout<<"\n HSsdf "<<pathToObject()<<" loaded "<<pql[0]<<" "<<pql[1]
-		<<" data "<<pql[2]<<" byte "<<std::endl;
+		<<" data "<< field.totalStorageSize() <<" byte "<<std::endl;
 
 	return true;
 }

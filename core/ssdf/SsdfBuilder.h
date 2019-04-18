@@ -5,15 +5,14 @@
  *  T sample
  *  Tv value
  *  P is begin level
- *  Q is end level
+ *  Q is end level Q > P
  *  Tr is rule
  *
- *  2 levels P and Q
  *  root node is a cubic field of resolution D = 1<<P
  *  each non-empty cell is a cubic field of resolution  
  *  D1 = 1<<(Q-P)
  *
- *  Created by jian zhang on 3/2/18.
+ *  Created by jian zhang on 4/19/19.
  *  Copyright 2018 __MyCompanyName__. All rights reserved.
  *
  */
@@ -23,6 +22,7 @@
 
 #include <graph/AdaptiveHexagonDistance.h>
 #include <svf/SvfBuilder.h>
+#include <sdb/L2Tree.h>
 
 namespace alo {
 
@@ -32,11 +32,15 @@ template<typename T, typename Tv, int P, int Q, typename Tr>
 class SsdfBuilder : public svf::SvfBuilder<T, Tv, P, Q, Tr> {
 
 typedef svf::SvfBuilder<T, Tv, P, Q, Tr> SvfBuilderTyp;
+typedef svf::SvfBuilder<T, Vector3F, P, Q, Tr> Vec3BuilderTyp;
 
-	AdaptiveHexagonDistance m_hexa;
-/// distance fields, first one is root, rest is sparse P cells
+	AdaptiveHexagonDistance<T> m_hexa;
+/// distance fields, last one is root, rest is Q cells
 typedef sds::CubicField<float> DistanceFieldTyp;
 	std::vector<DistanceFieldTyp* > m_uniformDistances;
+/// surface normal fields
+typedef sds::CubicField<Vector3F> NormalFieldTyp;
+	std::vector<NormalFieldTyp* > m_uniformNormals;
 /// ind to p cell, -1 if empty
 	int m_cellInd[(1<<P)*(1<<P)*(1<<P)];
 /// offset to p cell data, -1 if empty
@@ -54,13 +58,14 @@ public:
 	template<typename Tf>
 	void save(Tf& field, Tr& rule);
 	
-	const AdaptiveHexagonDistance& distanceField() const;
+	const AdaptiveHexagonDistance<T> &distanceField() const;
 	
 protected:
 
 private:
 					
 	void clearUniformDistances();
+    void clearNormals();
 	
 /// sample at lp cell corners
 	void buildRoot(Tr& rule);
@@ -101,6 +106,16 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::clearUniformDistances()
 		m_cellOffset[i] = -1;
 	}
 	m_currentCellOffset = 0;
+}
+
+template<typename T, typename Tv, int P, int Q, typename Tr>
+void SsdfBuilder<T, Tv, P, Q, Tr>::clearNormals()
+{
+    const int n = m_uniformNormals.size();
+	for(int i=0;i<n;++i) {
+		delete m_uniformNormals[i];
+	}
+	m_uniformNormals.clear();
 }
 
 template<typename T, typename Tv, int P, int Q, typename Tr>
@@ -148,13 +163,14 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::build(sds::SpaceFillingVector<T>* samples,
 							Q-1, rule);
 	
 	clearUniformDistances();
+    clearNormals();
 	
 	buildPCells(rule);
 	buildRoot(rule);
 }
 
 template<typename T, typename Tv, int P, int Q, typename Tr>
-const AdaptiveHexagonDistance& SsdfBuilder<T, Tv, P, Q, Tr>::distanceField() const
+const AdaptiveHexagonDistance<T> &SsdfBuilder<T, Tv, P, Q, Tr>::distanceField() const
 { return m_hexa; }
 
 template<typename T, typename Tv, int P, int Q, typename Tr>
@@ -167,6 +183,10 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::buildRoot(Tr& rule)
 	rule.getDomainOrigin(orih);
 	orih[3] = rule.deltaAtLevel(P);
 	rootField->setOriginCellSize(orih);
+    
+    NormalFieldTyp *rootNml = new NormalFieldTyp;
+    rootNml->setResolution(d);
+	rootNml->setOriginCellSize(orih);
 	
 	const int n = (d+1)*(d+1)*(d+1);
 	int* ks = new int[n];
@@ -176,6 +196,9 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::buildRoot(Tr& rule)
 		int j = m_hexa.findNode(ks[i]);
 		if(j>-1) {
 			rootField->value()[i] = m_hexa.nodes()[j].val;
+            
+            const T &nodeV = m_hexa.nodeValue(j);
+            rootNml->value()[i] = nodeV._nml;
 		} else {
 			std::cout<<"\n WARNING cannot find node ";
 			rule.printCoord(ks[i]);
@@ -185,6 +208,7 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::buildRoot(Tr& rule)
 	delete[] ks;
 	
 	m_uniformDistances.push_back(rootField);
+    m_uniformNormals.push_back(rootNml);
 }
 
 template<typename T, typename Tv, int P, int Q, typename Tr>
@@ -229,8 +253,12 @@ bool SsdfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int* range,
 	static const float corih[4] = {0.f,0.f,0.f,rule.deltaAtLevel(P)};
 	cellFld->setOriginCellSize(corih);
 	cellFld->setResolution(1);
+    
+    NormalFieldTyp *cellNml = new NormalFieldTyp;
+    cellNml->setOriginCellSize(corih);
+	cellNml->setResolution(1);
 	
-	sdb::L3Tree<int, int, 2048, 512, 1024> visited;
+	sdb::L2Tree<int, int, 512, 1024> visited;
 /// to Q-1
 	for(int l=P;l<Q;++l) {
 		
@@ -250,11 +278,15 @@ bool SsdfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int* range,
 			m_hexa. template resampleDistance<T>(ind, range, src);
 				
 			cellFld->value()[i] = m_hexa.getNodeDistance(ind);
+            
+            const T &nodeV = m_hexa.nodeValue(ind);
+            cellNml->value()[i] = nodeV._nml;
 			
 			visited.insert(ks[i], 0);
 		}
 		
 		cellFld->upSample();
+        cellNml->upSample();
 	}
 	
 	const int cellCount = m_uniformDistances.size();
@@ -264,6 +296,7 @@ bool SsdfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int* range,
 	m_currentCellOffset += cellFld->storageSize();
 	
 	m_uniformDistances.push_back(cellFld);
+    m_uniformNormals.push_back(cellNml);
 	
 	delete[] ks;
 	
@@ -322,13 +355,17 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::save(Tf& field, Tr& rule)
 				
 	const DistanceFieldTyp* rootField = m_uniformDistances.back();
 	field.copyCoarseDistanceValue(rootField);
+    
+    const NormalFieldTyp* rootNml = m_uniformNormals.back();
+	field.copyCoarseNormalValue(rootNml);
+    
 	field.copyCellOffset(m_cellOffset);
 				
 	const int n = SvfBuilderTyp::NumPCells();
 	std::cout << "\n n p-cell " << n;
 	int nq = 0;
 	for(int i=0;i<n;++i) {
-		int j = m_cellInd[i];
+		const int &j = m_cellInd[i];
 		if(j<0)
 			continue;
 			
@@ -336,9 +373,13 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::save(Tf& field, Tr& rule)
 		const int offset = m_cellOffset[i];
 		
 		field.copyFineDistanceValue(offset, cellField);
+        
+        const NormalFieldTyp* cellNml = m_uniformNormals[j];  
+        field.copyFineNormalValue(offset, cellNml);
+		
 		nq++;
 	}
-	std::cout << "\n n q-cell " << nq;
+	std::cout << "\n n q-field " << nq;
 }
 
 }

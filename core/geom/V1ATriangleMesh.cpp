@@ -329,6 +329,13 @@ void ATriangleMesh::scaleBy(float x)
         m_positions[i] *= x;
 }
 
+void ATriangleMesh::translateBy(float x, float y, float z)
+{
+    const Vector3F d(x, y, z);
+    for(int i=0;i<m_numVertices;++i)
+        m_positions[i] += d;
+}
+
 void ATriangleMesh::copyMeshTo(ATriangleMesh *b, const int &nv, const int &nf) const
 {
     b->createTriangleMesh(nv, nf);

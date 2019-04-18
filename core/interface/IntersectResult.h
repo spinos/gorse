@@ -20,13 +20,17 @@ class IntersectResult {
     
 	SampleState* m_radianceState;
     Vector3F m_normal;
-    float m_dist;
+/// (origin, direction, t0, t1)
+    float m_rayData[8];
     int m_materialId;
     int m_lightId;
     
 public:
 	
 	IntersectResult();
+
+	float *rayData();
+	void copyRayData(float *y) const;
 
 /// dist <- x, normal <- nml when x < dist
 	bool updateRayDistance(float x, const Vector3F &nml);

@@ -29,16 +29,20 @@ class SsdfLookupRule {
 	float m_invCellSize[2];
 	int m_dim[4];
 	const T* m_field;
+    float m_delta;
 	
 public:
 
 	SsdfLookupRule();
 	
 	void attach(const T& field);
-	
+    void dettach();
+/// ray is (origin, direction, t0, t1)	
 	bool intersectBox(float* ray) const;
 	
 	float lookup(const float* p) const;
+    
+    const float &delta() const;
 	
 protected:
 
@@ -54,7 +58,7 @@ private:
 };
 
 template<typename T>
-SsdfLookupRule<T>::SsdfLookupRule()
+SsdfLookupRule<T>::SsdfLookupRule() : m_field(nullptr)
 {}
 
 template<typename T>
@@ -70,7 +74,12 @@ void SsdfLookupRule<T>::attach(const T& field)
 	m_dim[2] = m_dim[0] - 1;
 	m_dim[3] = m_dim[1] - 1;
 	m_field = &field;
+    m_delta = field.delta();
 }
+
+template<typename T>
+void SsdfLookupRule<T>::dettach()
+{ m_field = nullptr; }
 
 template<typename T>
 bool SsdfLookupRule<T>::intersectBox(float* ray) const
@@ -79,6 +88,8 @@ bool SsdfLookupRule<T>::intersectBox(float* ray) const
 template<typename T>
 float SsdfLookupRule<T>::lookup(const float* p) const
 {
+    if(!m_field) return 1e10f;
+    if(m_field->isEmpty()) return 1e10f;
 	int u[3];
 	computeCellCoord(u, p);
 	const int c = computeCellInd(u);
@@ -155,6 +166,10 @@ float SsdfLookupRule<T>::lookupInCell(const float* p,
 	
 	return a * (1.f - wz) + c * wz;
 }
+
+template<typename T>
+const float &SsdfLookupRule<T>::delta() const
+{ return m_delta; }
 
 }
 

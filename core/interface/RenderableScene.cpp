@@ -30,7 +30,8 @@ m_changed(false)
 
 bool RenderableScene::intersectRay(const Ray& aray, IntersectResult& result)
 { 
-	result.rayDistance() = 1e9f;
+    aray.get(result.rayData());
+	//result.rayDistance() = 1e9f;
 	bool hasIntersection = false;
 	bool isFinished = false;
 

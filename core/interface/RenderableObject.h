@@ -14,6 +14,7 @@ class IntersectResult;
 
 class RenderableObject {
 
+    float m_aabb[6];
 	int m_objectId;
 
 public:
@@ -32,6 +33,7 @@ public:
 	virtual bool intersectRay(const Ray& aray, IntersectResult& result);
 
 protected:
+    float *aabb();
 
 private:
     enum RenderableState {

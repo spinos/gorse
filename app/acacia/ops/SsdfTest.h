@@ -39,10 +39,9 @@ class SsdField;
 
 }
 
-class BaseDistanceField;
+//class BaseDistanceField;
 
-
-struct PosSample;
+struct SurfaceSample;
 
 class SsdfTest : public DrawableOps {
 
@@ -52,7 +51,7 @@ typedef sds::FZOrderCurve SfcTyp;
 typedef sdf::SsdfBuildRule<sds::FZOrderCurve> BuildRuleTyp;
 	BuildRuleTyp* m_buildRule;
 	
-typedef sdf::SsdfBuilder<PosSample, Vector3F, 4, 7, BuildRuleTyp > BuilderTyp;
+typedef sdf::SsdfBuilder<SurfaceSample, float, 5, 7, BuildRuleTyp > BuilderTyp;
 	BuilderTyp* m_builder;
 	
 typedef sdf::SsdField FieldTyp;
@@ -78,7 +77,7 @@ protected:
 	
 private:
 	void testIt();
-	void buildSsdf(sds::SpaceFillingVector<PosSample >* samples,
+	void buildSsdf(sds::SpaceFillingVector<SurfaceSample >* samples,
                 const BoundingBox& b);
 	void computeMesh();
 	void saveToFile(const std::string &filename);

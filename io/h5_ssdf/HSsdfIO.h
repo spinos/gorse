@@ -22,14 +22,9 @@ public:
 	
 	HSsdfIO();
 	
-	bool findSsdf(std::vector<std::string> & names);
-	
 /// T is svt
 	template<typename T>
 	bool saveSsdf(const T& svt, const std::string& name );
-	
-	template<typename T>
-	bool loadSsdf(T& svt, const std::string& name );
 	
 protected:
 
@@ -48,21 +43,6 @@ bool HSsdfIO::saveSsdf(const T& svt, const std::string& name)
 	writer. template save<T>(svt);
 	
 	writer.close();
-	
-	ga.close();
-	
-	return true;
-}
-
-template<typename T>
-bool HSsdfIO::loadSsdf(T& svt, const std::string& name)
-{
-	HBase ga("/asset");
-	
-	HSsdf reader(name);
-	reader. template load<T>(svt);
-	
-	reader.close();
 	
 	ga.close();
 	

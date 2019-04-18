@@ -80,6 +80,7 @@ public:
     Vector3F* normals();
 
     void scaleBy(float x);
+    void translateBy(float x, float y, float z);
 /// nv vertices nf faces to b
     void copyMeshTo(ATriangleMesh *b, const int &nv, const int &nf) const;
     
@@ -113,20 +114,32 @@ void ATriangleMesh::getTriangle(T1 & sampler, const int & i) const
 	const Int3 &t = c_indices()[i];
 	memcpy(sampler.index(), (const int *)&t, 12);
     
-	const Vector3F * p = c_positions();
+	const Vector3F *p = c_positions();
+    const Vector3F *n = c_normals();
 	
     T &v0 = sampler.vertex()[0];
     v0._pos = p[t.x];
+    v0._nml = n[t.x];
     
     T &v1 = sampler.vertex()[1];
     v1._pos = p[t.y];
+    v1._nml = n[t.y];
     
     T &v2 = sampler.vertex()[2];
     v2._pos = p[t.z];
+    v2._nml = n[t.z];
 			
-	/*
-	const Float2 * uvs = triangleTexcoord(i);
-	acomp.setUVs(uvs);*/
+    if(numUVSets() < 1) {
+        v0._uv[0] = v0._uv[1] = 0.f;
+        v1._uv[0] = 1.f; v1._uv[1] = 0.f;
+        v2._uv[0] = v2._uv[1] = 1.f;
+    } else {
+        const Float2 *uvs = c_uvSet(0);
+        const Float2 *triUv = &uvs[i*3];
+        memcpy(v0._uv, triUv, 8);
+        memcpy(v1._uv, &triUv[1], 8);
+        memcpy(v2._uv, &triUv[2], 8);
+    }
 }
 
 }

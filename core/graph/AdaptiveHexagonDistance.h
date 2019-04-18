@@ -16,16 +16,15 @@
 #include "BaseDistanceField.h"
 #include <sds/HashedIndex.h>
 #include <sds/SpaceFillingVector.h>
-#include <math/miscfuncs.h>
 #include <vector>
 #include <deque>
-#include <iostream>
 
 namespace alo {
 
 namespace sdf {
 
-class AdaptiveHexagonDistance : public BaseDistanceField {
+template<typename T>
+class AdaptiveHexagonDistance : public BaseDistanceField<T> {
 
 	struct CellCorners {
 		int _key[8];
@@ -93,9 +92,9 @@ public:
 /// connecting all cells	
 	template<typename Tr>
 	void finishCells(Tr& rule);
-/// all level cells contain samples has distance	
-	template<typename T, typename Tr>
-	void computeDistance(const sds::SpaceFillingVector<T>& samples, 
+/// distance to nodes of all level cells contain samples	
+	template<typename T1, typename Tr>
+	void computeDistance(const sds::SpaceFillingVector<T1>& samples, 
 					const int level,
 					Tr& rule);
 /// same level across front
@@ -111,10 +110,10 @@ public:
 
 /// closest distance to sample for ind-th node	
 /// keep sign
-	template<typename T>
+	template<typename T1>
 	float resampleDistance(const int& ind, 
 				const int* range,
-				const sds::SpaceFillingVector<T>& src); 
+				const sds::SpaceFillingVector<T1>& src); 
 
 protected:
 	template<typename Tr>
@@ -129,13 +128,40 @@ private:
 	template<typename Tr>
 	void divideFirstCellInQueue(std::deque<CellDesc>& q,
 						Tr& rule, int levelBegin);
-	
-	void setNodeDistance2(const int& i, const Vector3F& ref);
-	
+		
 };
 
+template<typename T>
+AdaptiveHexagonDistance<T>::AdaptiveHexagonDistance() :
+m_enableGuard(false)
+{}
+
+template<typename T>
+AdaptiveHexagonDistance<T>::~AdaptiveHexagonDistance()
+{}
+
+template<typename T>
+void AdaptiveHexagonDistance<T>::beginGuardCells()
+{
+	m_enableGuard = true;
+	m_cellsToDivide.clear(); 
+}
+
+template<typename T>
+int AdaptiveHexagonDistance<T>::findNode(int k) const
+{ return m_nodeHash.lookupKey(k); }
+
+template<typename T>
+float AdaptiveHexagonDistance<T>::getNodeDistance(int i) const
+{ return nodes()[i].val; }
+
+template<typename T>
+Vector3F AdaptiveHexagonDistance<T>::getNodePosition(int i) const
+{ return nodes()[i].pos; }
+
+template<typename T>
 template<typename Tr>
-void AdaptiveHexagonDistance::divideCell(int kcoord, Tr& rule, int level0, int level1)
+void AdaptiveHexagonDistance<T>::divideCell(int kcoord, Tr& rule, int level0, int level1)
 {
 	const int nchild = 1<<((level1-level0)*3);
 	CellDesc* tmp = new CellDesc[nchild];
@@ -176,8 +202,9 @@ void AdaptiveHexagonDistance::divideCell(int kcoord, Tr& rule, int level0, int l
 	}
 }
 
+template<typename T>
 template<typename Tr>
-void AdaptiveHexagonDistance::finishCells(Tr& rule)
+void AdaptiveHexagonDistance<T>::finishCells(Tr& rule)
 {
 	const int n = m_cellsToAdd.size();
 	std::cout<<"\n finish cells n "<<n;
@@ -207,8 +234,9 @@ void AdaptiveHexagonDistance::finishCells(Tr& rule)
 	m_cellsToAdd.clear();
 }
 
+template<typename T>
 template<typename Tr>
-void AdaptiveHexagonDistance::buildGraph(const int& nv,
+void AdaptiveHexagonDistance<T>::buildGraph(const int& nv,
 										Tr& rule)
 {
 	sdb::L3Tree<sdb::Coord2, int, 2048, 512, 1024> edgeMap;
@@ -283,9 +311,9 @@ void AdaptiveHexagonDistance::buildGraph(const int& nv,
 	int ne = edgeMap.size();
 	int ni = edgeInds.size();
 	std::cout<<"\n n edge "<<ne;
-	BaseDistanceField::create(nv, ne, ni);
+	BaseDistanceField<T>::create(nv, ne, ni);
 	
-	DistanceNode * dst = nodes();
+	NodeType *dst = nodes();
 	
 	const int* tableKs = m_nodeHash.table();
 	const int* tableIs = m_nodeHash.index();
@@ -310,8 +338,9 @@ void AdaptiveHexagonDistance::buildGraph(const int& nv,
 	std::cout.flush();
 }
 
-template<typename T, typename Tr>
-void AdaptiveHexagonDistance::computeDistance(const sds::SpaceFillingVector<T>& samples, 
+template<typename T>
+template<typename T1, typename Tr>
+void AdaptiveHexagonDistance<T>::computeDistance(const sds::SpaceFillingVector<T1>& samples, 
 								const int level,
 								Tr& rule)
 {
@@ -324,9 +353,9 @@ void AdaptiveHexagonDistance::computeDistance(const sds::SpaceFillingVector<T>& 
 	const int n = samples.size();
 	for(int i=0;i<n;++i) {
 		
-		const Vector3F& sp = samples[i]._pos;
+		const T1 &sp = samples[i];
 		
-		rule.getLevelCellAt(ac, (const float*)&sp, level);
+		rule.getLevelCellAt(ac, (const float*)&sp._pos, level);
 		
 		minD = 1e20f;
 		closestV = -1;
@@ -342,7 +371,7 @@ void AdaptiveHexagonDistance::computeDistance(const sds::SpaceFillingVector<T>& 
 			} 
 			
 			ac._key[j] = v;
-			float d = getNodePosition(v).distance2To(sp);
+			float d = getNodePosition(v).distance2To(sp._pos);
 			if(minD > d) {
 				minD = d;
 				closestV = j;
@@ -351,7 +380,8 @@ void AdaptiveHexagonDistance::computeDistance(const sds::SpaceFillingVector<T>& 
 		}
 		
 		if(closestV > -1) {
-			setNodeDistance2(ac._key[closestV], sp);
+			setNodeDistance2(ac._key[closestV], sp._pos);
+			setNodeTValue(ac._key[closestV], sp);
 			rule.GetCellCornersConnectedToCorner(touchE, closestV);
 			setEdgeFront(ac._key[closestV], ac._key[touchE[0]]);
 			setEdgeFront(ac._key[closestV], ac._key[touchE[1]]);
@@ -368,8 +398,9 @@ void AdaptiveHexagonDistance::computeDistance(const sds::SpaceFillingVector<T>& 
 	
 }
 
+template<typename T>
 template<typename Tr>
-int AdaptiveHexagonDistance::firstEmptyCellInd(Tr& rule)
+int AdaptiveHexagonDistance<T>::firstEmptyCellInd(Tr& rule)
 {
 	int iter = 0;
 	int coord = rule.firstEmptySite(iter);
@@ -390,8 +421,9 @@ int AdaptiveHexagonDistance::firstEmptyCellInd(Tr& rule)
 	return 0;
 }
 	
+template<typename T>
 template<typename Tr>
-void AdaptiveHexagonDistance::endGuardCells(Tr& rule, int levelBegin, int level1)
+void AdaptiveHexagonDistance<T>::endGuardCells(Tr& rule, int levelBegin, int level1)
 {		
 	std::deque<CellDesc> guardCellQueue;
 	
@@ -412,8 +444,9 @@ void AdaptiveHexagonDistance::endGuardCells(Tr& rule, int levelBegin, int level1
 	m_enableGuard = false;
 }
 
+template<typename T>
 template<typename Tr>
-void AdaptiveHexagonDistance::divideFirstCellInQueue(std::deque<CellDesc>& q,
+void AdaptiveHexagonDistance<T>::divideFirstCellInQueue(std::deque<CellDesc>& q,
 						Tr& rule, int levelBegin)
 {
 	const CellDesc& ci = q.front();
@@ -451,9 +484,10 @@ void AdaptiveHexagonDistance::divideFirstCellInQueue(std::deque<CellDesc>& q,
 }
 
 template<typename T>
-float AdaptiveHexagonDistance::resampleDistance(const int& ind, 
+template<typename T1>
+float AdaptiveHexagonDistance<T>::resampleDistance(const int& ind, 
 				const int* range,
-				const sds::SpaceFillingVector<T>& src)
+				const sds::SpaceFillingVector<T1>& src)
 {
 	NodeType& nj = nodes()[ind];
 	for(int i=range[0];i<range[1];++i) {
@@ -472,7 +506,6 @@ float AdaptiveHexagonDistance::resampleDistance(const int& ind,
 }
 
 }
-
 
 }
 
