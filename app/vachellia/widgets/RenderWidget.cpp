@@ -31,6 +31,9 @@ RenderWidget::RenderWidget(RenderableScene *scene, QWidget *parent)
     
     connect(m_thread, SIGNAL(renderedImage()),
             this, SLOT(updatePixmap()));
+
+    connect(m_thread, SIGNAL(preRenderRestart()),
+            this, SLOT(recvPreRenderRestart()));
 }
 
 RenderWidget::~RenderWidget()
@@ -139,4 +142,9 @@ void RenderWidget::recvBound(const Hexahedron &x)
     //CameraEvent e = getCameraEvent();
     //e.setProgressMode(CameraEvent::MInProgress);
     //emit cameraChanged(e);
+}
+
+void RenderWidget::recvPreRenderRestart()
+{
+    emit preRenderRestart();
 }

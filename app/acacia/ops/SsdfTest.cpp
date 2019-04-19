@@ -67,7 +67,7 @@ void SsdfTest::computeMesh()
 {
 	GeodesicSphere transient(11);
     transient.scaleBy(9.f);
-    transient.translateBy(0.f, 9.7f, 0.f);
+    transient.translateBy(0.f, 11.7f, 0.f);
     DrawableResource *rec = resource();
 
     lockScene();
@@ -113,7 +113,7 @@ void SsdfTest::testIt()
     
     GeodesicSphere transient(11);
     transient.scaleBy(9.f);
-	transient.translateBy(0.f, 9.7f, 0.f);
+	transient.translateBy(0.f, 11.7f, 0.f);
     
     BoundingBox shapeBox;
     transient.getAabb(shapeBox);

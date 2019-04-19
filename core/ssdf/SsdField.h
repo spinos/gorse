@@ -13,7 +13,7 @@
 #define ALO_SSD_FIELD_H
 
 #include <sds/CubicField.h>
-#include <boost/scoped_array.hpp>
+#include <math/SimpleBuffer.h>
 #include <math/Vector3F.h>
 
 namespace alo {
@@ -23,17 +23,17 @@ namespace sdf {
 class SsdField {
 
 	sds::CubicField<float> m_coarseDistance;
-	boost::scoped_array<float> m_fineDistance;
+	SimpleBuffer<float> m_fineDistance;
     sds::CubicField<Vector3F> m_coarseNormal;
-    boost::scoped_array<Vector3F> m_fineNormal;
+    SimpleBuffer<Vector3F> m_fineNormal;
 /// to (1<<P)^3 level p cells
-	boost::scoped_array<int> m_cellIndices;
+	SimpleBuffer<int> m_cellIndices;
 	int m_P, m_Q, m_fltStorageSize;
 	
 public:
 
 	SsdField();
-	~SsdField();
+	virtual ~SsdField();
 	
 	void create(int p, int q, int fltStorageSize);
     void destroy();

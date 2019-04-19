@@ -3,8 +3,6 @@
 #include "RenderContext.h"
 #include "ImageFragment.h"
 #include "PixelProjector.h"
-#include <rng/Uniform.h>
-#include <rng/Lehmer.h>
 
 namespace alo {
 
@@ -29,7 +27,7 @@ void RenderBuffer::reproject(RenderContext& context, BufferBlock& blk) const
 {
     blk.progressAge();
 	PixelProjector* prjr = context.projector();
-	float res = prjr->reproject(blk, *m_fragment);
+	float res = prjr->reproject(blk.fragment(), blk.age(), blk.inverseAge(), *m_fragment);
 	blk.setResidual(res);
 }
 

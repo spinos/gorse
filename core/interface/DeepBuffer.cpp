@@ -97,7 +97,7 @@ void DeepBuffer::sortByResidual()
 {
     const int nblk = numBlocks();
 	for(int i=0;i<nblk;++i) {
-		QuickSortPair<float, int>& ind = m_priority[i];
+		QuickSortPair<float, int> &ind = m_priority[i];
 		ind.key = m_blocks[i]->residual();
 		ind.value = i;
 	}
@@ -113,7 +113,7 @@ void DeepBuffer::highResidualBlocks(BufferBlock **blocks, int n) const
 
 		offset +=  rand() % (nblk>>(n-i));
 
-		if(offset > nblk - 1) offset = offset - (nblk - 1);
+		if(offset > (nblk>>1)) offset = offset - (nblk>>1);
 
 		blocks[i] = m_blocks[m_priority[nblk - 1 - offset].value];
 	}

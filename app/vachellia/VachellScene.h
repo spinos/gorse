@@ -37,6 +37,7 @@ public slots:
     void recvAttribChanged();
 	void recvCameraChanged(const alo::CameraEvent &x);
 	void recvRequestBound();
+	void recvPreRenderRestart();
 		
 protected:
     virtual alo::GlyphOps *createOps(const QJsonObject &content) override;
@@ -44,7 +45,7 @@ protected:
     virtual void preDestruction(alo::GlyphItem *item) override;
 	
 private:
-
+	alo::GlyphOps *m_garbageOp;
 };
 
 #endif

@@ -21,6 +21,9 @@ IntersectResult::IntersectResult()
 	m_radianceState->setChannel(SampleState::RGB);
 }
 
+IntersectResult::~IntersectResult()
+{ delete m_radianceState; }
+
 float *IntersectResult::rayData()
 { return m_rayData; }
 

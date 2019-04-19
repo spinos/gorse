@@ -56,6 +56,9 @@ MainWindow::MainWindow()
 					
     connect(m_renderView, &RenderWidget::requestBound,
             m_scene, &VachellScene::recvRequestBound );
+
+    connect(m_renderView, &RenderWidget::preRenderRestart,
+            m_scene, &VachellScene::recvPreRenderRestart );
 			
     connect(m_scene, &VachellScene::sendBound,
             m_renderView, &RenderWidget::recvBound );

@@ -50,6 +50,7 @@ public:
 	};
 	
 	SampleState();
+	~SampleState();
 	
 	void setAccess(AccessMode u, AccessMode v);
 	void setFilter(FilterMode x);

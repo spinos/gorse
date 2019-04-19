@@ -79,8 +79,7 @@ bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
     }
 
     Vector3F tn = m_rule->lookupNormal((const float *)&q);
-    //getNormalOnAabb((float *)&tn, (const float *)&q, aabb(), tt * 1e-5f);
-    
+    tn.normalize();
     return result.updateRayDistance(tt, tn);
 }
 

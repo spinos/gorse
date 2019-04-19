@@ -40,7 +40,6 @@ bool RenderableScene::intersectRay(const Ray& aray, IntersectResult& result) con
     	for (int i=0;i<block->count();++i) { 
             RenderableObjectState &it = block->value(i);
 
-            //if(it._state <= stHidden)
             if(it._object->isHidden())
                 continue;
 

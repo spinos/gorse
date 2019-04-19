@@ -14,12 +14,13 @@
 #include <math/CameraEvent.h>
 #include <math/AFrustum.h>
 #include <math/Hexahedron.h>
+#include <QDebug>
 
 using namespace alo;
 
 VachellScene::VachellScene(GroupCollection<QJsonObject> *collector, QObject *parent)
     : GlyphScene(collector, parent)
-{}
+{ m_garbageOp = nullptr; }
 
 VachellScene::~VachellScene()
 {}
@@ -55,7 +56,7 @@ void VachellScene::preDestruction(GlyphItem *item)
         RenderableOps *dop = static_cast<RenderableOps *>(op);
         dop->removeRenderableFromScene();
     }
-    delete op;
+    m_garbageOp = op;
     emit sendUpdateDrawable();
 }
 
@@ -94,3 +95,10 @@ void VachellScene::recvAttribChanged()
 	emit sendUpdateDrawable();
 }
 
+void VachellScene::recvPreRenderRestart()
+{
+    if(m_garbageOp) {
+        delete m_garbageOp;
+        m_garbageOp = nullptr;
+    } 
+}

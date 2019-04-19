@@ -21,7 +21,9 @@ m_fltStorageSize(0)
 {}
 
 SsdField::~SsdField()
-{}
+{
+	destroy();
+}
 
 void SsdField::create(int p, int q, int fltStorageSize)
 {
@@ -31,13 +33,20 @@ void SsdField::create(int p, int q, int fltStorageSize)
 	const int d = 1<<p;
 	m_coarseDistance.setResolution(d);
     m_coarseNormal.setResolution(d);
-	m_cellIndices.reset(new int[cellIndLength()]);
-	m_fineDistance.reset(new float[fltStorageSize>>2]);
-	m_fineNormal.reset(new Vector3F[fltStorageSize>>2]);
+	m_cellIndices.resetBuffer(cellIndLength());
+	m_fineDistance.resetBuffer(fltStorageSize>>2);
+	m_fineNormal.resetBuffer(fltStorageSize>>2);
 }
 
 void SsdField::destroy()
-{ m_P = m_Q = 0; }
+{ 
+	m_P = m_Q = 0; 
+	m_coarseDistance.destroy();
+	m_coarseNormal.destroy();
+	m_cellIndices.purgeBuffer();
+	m_fineDistance.purgeBuffer();
+	m_fineNormal.purgeBuffer();
+}
 
 void SsdField::setOriginCellSize(const float* v)
 { 
@@ -46,20 +55,20 @@ void SsdField::setOriginCellSize(const float* v)
 }
 
 int* SsdField::cellIndValue()
-{ return m_cellIndices.get(); }
+{ return m_cellIndices.data(); }
 
 float* SsdField::coarseDistanceValue()
 { return m_coarseDistance.value(); }
 
 float* SsdField::fineDistanceValue()
-{ return m_fineDistance.get(); }
+{ return m_fineDistance.data(); }
 
 void SsdField::copyCoarseDistanceValue(const sds::CubicField<float>* b)
 { m_coarseDistance.copyValue(b); }
 
 void SsdField::copyFineDistanceValue(const int offset, const sds::CubicField<float>* b)
 {
-	char* dst = (char*)m_fineDistance.get();
+	char* dst = (char*)m_fineDistance.data();
 	memcpy(&dst[offset], b->c_value(), b->storageSize() );
 }
 
@@ -68,14 +77,14 @@ void SsdField::copyCoarseNormalValue(const sds::CubicField<Vector3F>* b)
 
 void SsdField::copyFineNormalValue(const int offset, const sds::CubicField<Vector3F>* b)
 {
-    char* dst = (char*)m_fineNormal.get();
+    char* dst = (char*)m_fineNormal.data();
 	memcpy(&dst[offset*3], b->c_value(), b->storageSize() );
 }
 
 void SsdField::copyCellOffset(const int* b)
 { 
 	const int d = 1<<m_P;
-	memcpy(m_cellIndices.get(), b, (d*d*d)<<2 ); 
+	memcpy(m_cellIndices.data(), b, (d*d*d)<<2 ); 
 }
 
 bool SsdField::isEmpty() const
@@ -100,7 +109,7 @@ const int& SsdField::fineDistanceStorageSize() const
 { return m_fltStorageSize; }
 
 const float* SsdField::c_fineDistanceValue() const
-{ return m_fineDistance.get(); }
+{ return m_fineDistance.c_data(); }
 
 int SsdField::coarseNormalStorageSize() const
 { return m_coarseNormal.storageSize(); }
@@ -112,7 +121,7 @@ int SsdField::fineNormalStorageSize() const
 { return m_fltStorageSize * 3; }
 	
 const Vector3F *SsdField::c_fineNormalValue() const
-{ return m_fineNormal.get(); }
+{ return m_fineNormal.c_data(); }
 
 int SsdField::cellIndLength() const
 { 
@@ -121,7 +130,7 @@ int SsdField::cellIndLength() const
 }
 
 const int* SsdField::c_cellIndValue() const
-{ return m_cellIndices.get(); }
+{ return m_cellIndices.c_data(); }
 
 void SsdField::getBox(float* b) const
 { m_coarseDistance.getBox(b); }
@@ -148,7 +157,7 @@ Vector3F *SsdField::coarseNormalValue()
 { return m_coarseNormal.value(); }
 
 Vector3F *SsdField::fineNormalValue()
-{ return m_fineNormal.get(); }
+{ return m_fineNormal.data(); }
 
 int SsdField::totalStorageSize() const
 { return  coarseDistanceStorageSize()

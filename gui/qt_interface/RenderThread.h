@@ -41,6 +41,7 @@ public:
 	
 signals:
     void renderedImage();
+    void preRenderRestart();
 	
 protected:
     void run();

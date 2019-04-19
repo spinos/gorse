@@ -8,7 +8,6 @@
  */
 
 #include "PixelProjector.h"
-#include "BufferBlock.h"
 #include "ImageFragment.h"
 #include <math/miscfuncs.h>
 #include <iostream>
@@ -20,14 +19,11 @@ PixelProjector::PixelProjector()
 PixelProjector::~PixelProjector()
 {}
 
-float PixelProjector::reproject(BufferBlock& blk, const ImageFragment& y_t) const
+float PixelProjector::reproject(ImageFragment* h_tm1, const int t, const float diva, const ImageFragment& y_t) const
 {
-	const int& t = blk.age();
-	//const float alpha = 1.f - 1.f / (1.f + t);
-	const float diva = blk.inverseAge();
+///const float alpha = 1.f - 1.f / (1.f + t);
 	float residual = 0.f, den = 0.f;
 	
-	ImageFragment* h_tm1 = blk.fragment();
 /// same size
 	const int n = h_tm1->fragmentSize();
 	

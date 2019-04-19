@@ -19,7 +19,6 @@
 namespace alo {
 
 class ImageFragment;
-class BufferBlock;
 
 class PixelProjector {
 
@@ -28,7 +27,7 @@ public:
 	PixelProjector();
 	virtual ~PixelProjector();
 	
-	virtual float reproject(BufferBlock& blk, const ImageFragment& y_t) const;
+	virtual float reproject(ImageFragment* h_tm1, const int t, const float diva, const ImageFragment& y_t) const;
 	
 protected:
 

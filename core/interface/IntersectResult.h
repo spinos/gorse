@@ -28,6 +28,7 @@ class IntersectResult {
 public:
 	
 	IntersectResult();
+	~IntersectResult();
 
 	float *rayData();
 	void copyRayData(float *y) const;

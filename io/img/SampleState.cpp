@@ -18,6 +18,9 @@ m_levelOfDetail(0.f),
 m_rank(3)
 {}
 
+SampleState::~SampleState()
+{}
+
 void SampleState::setAccess(AccessMode u, AccessMode v)
 { m_accessU = u; m_accessV = v; }
 

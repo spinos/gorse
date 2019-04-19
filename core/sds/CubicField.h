@@ -16,7 +16,7 @@
 #ifndef ALO_CUBIC_FIELD_H
 #define ALO_CUBIC_FIELD_H
 
-#include <boost/scoped_array.hpp>
+#include <math/SimpleBuffer.h>
 #include <math/miscfuncs.h>
 #include <iostream>
 #ifdef LINUX
@@ -34,11 +34,12 @@ class CubicField {
 	float m_originCellSize[5];
 /// (M,M+1,(M+1)^2,M-1)
 	int m_dim[4];
-	boost::scoped_array<T> m_value;
+	SimpleBuffer<T> m_value;
 	
 public:
 
 	CubicField();
+	~CubicField();
 	
 /// (origin, cell_size)
 	void setOriginCellSize(const float* v);
@@ -84,6 +85,8 @@ public:
 	T getCellValue(int i, int j, int k) const;
     
     void printValues() const;
+
+    void destroy();
 	
 protected:
 
@@ -95,6 +98,10 @@ private:
 template<typename T>
 CubicField<T>::CubicField()
 {}
+
+template<typename T>
+CubicField<T>::~CubicField()
+{ destroy(); }
 
 template<typename T>
 void CubicField<T>::setOriginCellSize(const float* v)
@@ -115,7 +122,7 @@ void CubicField<T>::setResolution(const int& x)
 	m_dim[2] = m_dim[1] * m_dim[1];
 	m_dim[3] = m_dim[0] - 1;
 	int dataL = storageSize() / sizeof(T);
-	m_value.reset(new T[dataL]);
+	m_value.resetBuffer(dataL);
 	
 }
 
@@ -151,11 +158,11 @@ void CubicField<T>::getOriginCellSize(float* b) const
 
 template<typename T>
 T* CubicField<T>::value()
-{ return m_value.get(); }
+{ return m_value.data(); }
 	
 template<typename T>
 const T* CubicField<T>::c_value() const
-{ return m_value.get(); }
+{ return m_value.c_data(); }
 
 template<typename T>
 int CubicField<T>::valueInd(int i, int j, int k) const
@@ -464,6 +471,10 @@ void CubicField<T>::printValues() const
         std::cout << m_value[i];
 	}
 }
+
+template<typename T>
+void CubicField<T>::destroy()
+{ m_value.purgeBuffer(); }
 
 }
 

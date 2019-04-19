@@ -57,6 +57,8 @@ void RenderThread::interruptAndRestart(bool toResizeImage, bool toChangeScene)
 
 	if(toChangeScene) 
 		m_interface->updateScene();
+
+	emit preRenderRestart();
 	
 	this->m_abort = false;
 	start(LowPriority);
@@ -89,6 +91,7 @@ void RenderThread::render()
 void RenderThread::renderWork(BufferBlock* packet, RenderBuffer *buf, Renderer* tracer, RenderContext* ctx)
 {
     tracer->renderFragment(buf, *ctx, *packet);
+    //buf->reproject(*ctx, *packet);
 }
 
 void RenderThread::imageWork(BufferBlock* packet, DisplayImage* dspImg)
@@ -120,8 +123,10 @@ void RenderThread::run()
         
 		Renderer* tracer = m_interface->getRenderer();
 		RenderContext* ctx = m_interface->getContext();
-        
+		DisplayImage* dspImg = m_interface->image();
+ 
         RenderBuffer *buf1 = m_interface->renderBuffer(0);
+#if 1 
         RenderBuffer *buf2 = m_interface->renderBuffer(1);
         RenderBuffer *buf3 = m_interface->renderBuffer(2);
         RenderBuffer *buf4 = m_interface->renderBuffer(3);
@@ -141,8 +146,6 @@ void RenderThread::run()
         buf3->reproject(*ctx, *packets[2]);
         buf4->reproject(*ctx, *packets[3]);
         
-        DisplayImage* dspImg = m_interface->image();
-        
         f1 = QtConcurrent::run(this, &RenderThread::imageWork, packets[0], dspImg);
         f2 = QtConcurrent::run(this, &RenderThread::imageWork, packets[1], dspImg);
         f3 = QtConcurrent::run(this, &RenderThread::imageWork, packets[2], dspImg);
@@ -152,6 +155,11 @@ void RenderThread::run()
         f2.waitForFinished();
         f3.waitForFinished();
         f4.waitForFinished();
+#else
+        tracer->renderFragment(buf1, *ctx, *packets[0]);
+        buf1->reproject(*ctx, *packets[0]);
+        packets[0]->projectImage(dspImg);   
+#endif
         
 		emit renderedImage();
 

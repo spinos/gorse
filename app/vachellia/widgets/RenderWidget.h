@@ -39,6 +39,7 @@ public slots:
 signals:
     void cameraChanged(const alo::CameraEvent &x);
     void requestBound();
+    void preRenderRestart();
 
 protected:
     //virtual void clientInit();
@@ -52,6 +53,7 @@ protected:
 
 private slots:
     void updatePixmap();
+    void recvPreRenderRestart();
     
 private:
     void processCamera(QMouseEvent *event);
