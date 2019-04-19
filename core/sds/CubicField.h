@@ -82,6 +82,8 @@ public:
 	T getFaceValue(int i, int j, int k,
 					int plane) const;
 	T getCellValue(int i, int j, int k) const;
+    
+    void printValues() const;
 	
 protected:
 
@@ -451,6 +453,15 @@ void CubicField<T>::divide(const float* weight)
 		if(weight[i] > 1.f) {
 			m_value[i] /= weight[i];
 		}
+	}
+}
+
+template<typename T>
+void CubicField<T>::printValues() const
+{
+    const int n = numValues();
+	for(int i=0;i<n;++i) {
+        std::cout << m_value[i];
 	}
 }
 

@@ -62,7 +62,7 @@ public:
 	void setNumSamples(int x);
 	void setResidual(const float& x);
 	
-	void projectImage(DisplayImage* img);
+	void projectImage(DisplayImage* img) const;
 	
 	ImageFragment* fragment();
 	

@@ -2,7 +2,7 @@
  *  RenderInterface.h
  *  aloe
  *  
- *  access to camera, image, buffer, renderer, context
+ *  access to camera, image, buffer, renderer, context, rng, etc
  *
  *  Created by jian zhang on 8/8/17.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
@@ -22,6 +22,7 @@ class BufferBlock;
 class Renderer;
 class RenderContext;
 class RenderableScene;
+class RenderBuffer;
 
 class RenderInterface {
 
@@ -30,11 +31,13 @@ class RenderInterface {
 	DisplayImage* m_image;
 	RenderContext* m_context;
 	Renderer* m_renderer;
+    RenderBuffer *m_renderBuffer[4];
 	int m_resizedImageDim[2];
 	
 public:
 
 	RenderInterface();
+    virtual ~RenderInterface();
 	
     void setScene(RenderableScene* x);
 	void setRenderer(Renderer* x);
@@ -51,10 +54,15 @@ public:
 /// set frame in each block	and restart
 	void updateDisplayView();
 	void updateScene();
-/// by high residual
+/// before select
+	void sortBlocks();
+/// select n blocks by high residual
+	void selectBlocks(BufferBlock **blocks, int n);
 	BufferBlock* selectBlock();
 	DisplayImage* image();
     const DisplayImage* c_image() const;
+/// i-th render buffer
+    RenderBuffer *renderBuffer(int i);
 
 typedef unsigned char uchar;
 	

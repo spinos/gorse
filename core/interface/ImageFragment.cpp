@@ -32,6 +32,9 @@ const int& ImageFragment::fragmentWidth() const
 const int& ImageFragment::fragmentHeight() const
 { return m_fragHeight; }
 
+int ImageFragment::fragmentSize() const
+{ return m_fragWidth * m_fragHeight; }
+
 float* ImageFragment::colorComponent(int i)
 { return m_color[i]; }
 

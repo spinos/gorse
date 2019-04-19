@@ -68,9 +68,6 @@ bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
     const float &tLimit = rayData[7];
     Vector3F q = aray.travel(tt);
 
-    Vector3F tn;
-    getNormalOnAabb((float *)&tn, (const float *)&q, aabb(), tt * 1e-5f);
-
     for(int i=0;i<29;++i) {
         
         float d = m_rule->lookup((const float *)&q);
@@ -81,6 +78,9 @@ bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
         q = aray.travel(tt);
     }
 
+    Vector3F tn = m_rule->lookupNormal((const float *)&q);
+    //getNormalOnAabb((float *)&tn, (const float *)&q, aabb(), tt * 1e-5f);
+    
     return result.updateRayDistance(tt, tn);
 }
 

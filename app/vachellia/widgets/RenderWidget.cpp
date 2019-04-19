@@ -35,6 +35,7 @@ RenderWidget::RenderWidget(RenderableScene *scene, QWidget *parent)
 
 RenderWidget::~RenderWidget()
 {
+    delete m_thread;
 }
 
 QSize RenderWidget::minimumSizeHint() const

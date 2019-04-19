@@ -41,6 +41,7 @@ public:
 	bool intersectBox(float* ray) const;
 	
 	float lookup(const float* p) const;
+	Vector3F lookupNormal(const float* p) const;
     
     const float &delta() const;
 	
@@ -51,9 +52,11 @@ private:
 	void computeCellCoord(int* u, const float* p) const;
 	int computeCellInd(const int* u) const;
 	int cellValueInd(int i, int j, int k) const;
-	float lookupInCell(const float* p,
-					const int* u,
-					const float* v) const;
+/// Tv is value type
+	template<typename Tv>
+	Tv lookupInCell(const float *p,
+					const int *u,
+					const Tv *v) const;
 	
 };
 
@@ -96,7 +99,7 @@ float SsdfLookupRule<T>::lookup(const float* p) const
 	const int offset = m_field->c_cellIndValue()[c];
 	if(offset >-1) {
 		const float* fv = &m_field->c_fineDistanceValue()[offset>>2];
-		return lookupInCell(p, u, fv);
+		return lookupInCell<float>(p, u, fv);
 	}
 	return m_field->lookup(p); 
 }
@@ -121,9 +124,10 @@ int SsdfLookupRule<T>::cellValueInd(int i, int j, int k) const
 { return k*(m_dim[1]+1)*(m_dim[1]+1) + j*(m_dim[1]+1) + i; }
 
 template<typename T>
-float SsdfLookupRule<T>::lookupInCell(const float* p,
+template<typename Tv>
+Tv SsdfLookupRule<T>::lookupInCell(const float* p,
 					const int* u,
-					const float* v) const
+					const Tv* v) const
 {
 	float wx = (p[0] - m_originCellSize[0] - u[0] * m_originCellSize[3]) * m_invCellSize[1];
 	if(wx<0) wx = 0;
@@ -152,13 +156,13 @@ float SsdfLookupRule<T>::lookupInCell(const float* p,
 		wz = 1.f;
 	}
 	
-	float a = v[cellValueInd(i  ,j  ,k)] * (1.f - wx)
+	Tv a = v[cellValueInd(i  ,j  ,k)] * (1.f - wx)
 			+ v[cellValueInd(i+1,j  ,k)] * wx;
-	float b = v[cellValueInd(i  ,j+1,k)] * (1.f - wx)
+	Tv b = v[cellValueInd(i  ,j+1,k)] * (1.f - wx)
 			+ v[cellValueInd(i+1,j+1,k)] * wx;
-	float c = v[cellValueInd(i  ,j  ,k+1)] * (1.f - wx)
+	Tv c = v[cellValueInd(i  ,j  ,k+1)] * (1.f - wx)
 			+ v[cellValueInd(i+1,j  ,k+1)] * wx;
-	float d = v[cellValueInd(i  ,j+1,k+1)] * (1.f - wx)
+	Tv d = v[cellValueInd(i  ,j+1,k+1)] * (1.f - wx)
 			+ v[cellValueInd(i+1,j+1,k+1)] * wx;
 	
 	a = a * (1.f - wy) + b * wy;
@@ -170,6 +174,22 @@ float SsdfLookupRule<T>::lookupInCell(const float* p,
 template<typename T>
 const float &SsdfLookupRule<T>::delta() const
 { return m_delta; }
+
+template<typename T>
+Vector3F SsdfLookupRule<T>::lookupNormal(const float* p) const
+{
+	if(!m_field) return Vector3F::One;
+    if(m_field->isEmpty()) Vector3F::One;
+	int u[3];
+	computeCellCoord(u, p);
+	const int c = computeCellInd(u);
+	const int offset = m_field->c_cellIndValue()[c];
+	if(offset >-1) {
+		const Vector3F *fv = &m_field->c_fineNormalValue()[offset>>2];
+		return lookupInCell<Vector3F>(p, u, fv);
+	}
+	return m_field->lookupNormal(p); 
+}
 
 }
 

@@ -46,7 +46,7 @@ void BufferBlock::setTile(const int& tx, const int& ty)
 	m_tileY = ty<<BUFFER_BLOCK_TILE_SIZE_P2;
 }
 
-void BufferBlock::projectImage(DisplayImage* img)
+void BufferBlock::projectImage(DisplayImage* img) const
 {
 	const float* rfrag = m_fragment->colorComponent(0);
 	const float* gfrag = m_fragment->colorComponent(1);

@@ -15,7 +15,9 @@
 #include "NoiseRenderer.h"
 #include "BoxRenderer.h"
 #include "RenderContext.h"
+#include "RenderBuffer.h"
 #include <math/BaseCamera.h>
+#include <ctime>
 
 namespace alo {
 
@@ -32,6 +34,17 @@ RenderInterface::RenderInterface()
 #else
 	m_renderer = new BoxRenderer;
 #endif 
+    std::time_t secs = std::time(0);
+    for(int i=0;i<4;++i) {
+        m_renderBuffer[i] = new RenderBuffer;
+        m_renderBuffer[i]->createRng(secs + i * 10);
+    }
+}
+
+RenderInterface::~RenderInterface()
+{
+    delete m_renderBuffer[0];
+    delete m_renderBuffer[1];
 }
 
 void RenderInterface::setScene(RenderableScene* x)
@@ -102,6 +115,12 @@ const int& RenderInterface::xres() const
 const int& RenderInterface::yres() const
 { return m_image->yres(); }
 
+void RenderInterface::sortBlocks()
+{ m_buffer->sortByResidual(); }
+
+void RenderInterface::selectBlocks(BufferBlock **blocks, int n)
+{ m_buffer->highResidualBlocks(blocks, n); }
+
 BufferBlock* RenderInterface::selectBlock()
 { return m_buffer->highResidualBlock(); }
 
@@ -119,5 +138,8 @@ bool RenderInterface::isResidualLowEnough() const
 
 void RenderInterface::updateScene()
 { m_context->updateScene(); }
+
+RenderBuffer *RenderInterface::renderBuffer(int i)
+{ return m_renderBuffer[i]; }
 
 }

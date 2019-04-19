@@ -23,6 +23,11 @@ QT_END_NAMESPACE
 namespace alo {
 
 class RenderInterface;
+class BufferBlock;
+class Renderer;
+class RenderContext;
+class RenderBuffer;
+class DisplayImage;
 
 class RenderThread : public QThread
 {
@@ -53,7 +58,10 @@ private:
     bool m_abort;
 	
 	RenderInterface* m_interface;
-	
+    
+    void renderWork(BufferBlock* packet, RenderBuffer *buf, Renderer* tracer, RenderContext* ctx);
+	void imageWork(BufferBlock* packet, DisplayImage* dspImg);
+    
 };
 
 }

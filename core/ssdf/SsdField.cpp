@@ -40,7 +40,10 @@ void SsdField::destroy()
 { m_P = m_Q = 0; }
 
 void SsdField::setOriginCellSize(const float* v)
-{ m_coarseDistance.setOriginCellSize(v); }
+{ 
+    m_coarseDistance.setOriginCellSize(v);
+    m_coarseNormal.setOriginCellSize(v);
+}
 
 int* SsdField::cellIndValue()
 { return m_cellIndices.get(); }
@@ -90,9 +93,6 @@ const int& SsdField::Q() const
 int SsdField::coarseDistanceStorageSize() const
 { return m_coarseDistance.storageSize(); }
 
-int SsdField::coarseNormalStorageSize() const
-{ return m_coarseNormal.storageSize(); }
-
 const float* SsdField::c_coarseDistanceValue() const
 { return m_coarseDistance.c_value(); }
 
@@ -101,6 +101,9 @@ const int& SsdField::fineDistanceStorageSize() const
 
 const float* SsdField::c_fineDistanceValue() const
 { return m_fineDistance.get(); }
+
+int SsdField::coarseNormalStorageSize() const
+{ return m_coarseNormal.storageSize(); }
 
 const Vector3F *SsdField::c_coarseNormalValue() const
 { return m_coarseNormal.c_value(); }
@@ -138,6 +141,9 @@ float SsdField::delta() const
 float SsdField::lookup(const float* u) const
 { return m_coarseDistance.lookup(u); }
 
+Vector3F SsdField::lookupNormal(const float* u) const
+{ return m_coarseNormal.lookup(u); }
+
 Vector3F *SsdField::coarseNormalValue()
 { return m_coarseNormal.value(); }
 
@@ -148,7 +154,8 @@ int SsdField::totalStorageSize() const
 { return  coarseDistanceStorageSize()
 			+ coarseNormalStorageSize()
 			+ fineDistanceStorageSize()
-			+ fineNormalStorageSize(); }
+			+ fineNormalStorageSize(); 
+}
 
 }
 

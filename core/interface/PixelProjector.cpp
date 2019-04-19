@@ -20,7 +20,7 @@ PixelProjector::PixelProjector()
 PixelProjector::~PixelProjector()
 {}
 
-void PixelProjector::reproject(BufferBlock& blk, const ImageFragment& y_t)
+float PixelProjector::reproject(BufferBlock& blk, const ImageFragment& y_t) const
 {
 	const int& t = blk.age();
 	//const float alpha = 1.f - 1.f / (1.f + t);
@@ -29,7 +29,7 @@ void PixelProjector::reproject(BufferBlock& blk, const ImageFragment& y_t)
 	
 	ImageFragment* h_tm1 = blk.fragment();
 /// same size
-	const int n = h_tm1->fragmentWidth() * h_tm1->fragmentHeight();
+	const int n = h_tm1->fragmentSize();
 	
 	float* redH = h_tm1->colorComponent(0); 
 	const float* redY = y_t.colorComponent(0); 
@@ -56,8 +56,8 @@ void PixelProjector::reproject(BufferBlock& blk, const ImageFragment& y_t)
 	}
 	
     residual /= 3.f + t;
-
-	blk.setResidual(residual);
+    
+    return residual;
 }
 
 void PixelProjector::Overwrite(float& h_t, const float& y_t, float& residual, float& den)

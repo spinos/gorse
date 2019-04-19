@@ -28,7 +28,7 @@ public:
 	PixelProjector();
 	virtual ~PixelProjector();
 	
-	virtual void reproject(BufferBlock& blk, const ImageFragment& y_t);
+	virtual float reproject(BufferBlock& blk, const ImageFragment& y_t) const;
 	
 protected:
 

@@ -20,7 +20,7 @@ public:
 	BoxRenderer();
 	virtual ~BoxRenderer();
 	
-	virtual void renderFragment(RenderContext& context, BufferBlock& blk);
+	virtual void renderFragment(RenderBuffer *buffer, RenderContext& context, BufferBlock& blk) const override;
 
 private:
 

@@ -30,6 +30,7 @@ public:
 	
 	const int& fragmentWidth() const;
 	const int& fragmentHeight() const;
+	int fragmentSize() const;
 	
 	float* colorComponent(int i);
 	const float* colorComponent(int i) const;

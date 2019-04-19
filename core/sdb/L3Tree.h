@@ -40,8 +40,8 @@ public:
 	int size() const;
 	void printDetail() const;
 
-	LeafNodeType *begin();
-	LeafNodeType *next(const LeafNodeType *x);
+	LeafNodeType *begin() const;
+	LeafNodeType *next(const LeafNodeType *x) const;
 /// at leaf and location of x
 /// if not found try last < x then first > x
 	L3DataIterator<KeyType, DataType, Dim2> begin(const KeyType &x) const;
@@ -215,7 +215,7 @@ int L3Tree<KeyType, DataType, Dim0, Dim1, Dim2>::size() const
 }
 
 template <typename KeyType, typename DataType, int Dim0, int Dim1, int Dim2>
-L3Node<KeyType, DataType, Dim2> *L3Tree<KeyType, DataType, Dim0, Dim1, Dim2>::begin()
+L3Node<KeyType, DataType, Dim2> *L3Tree<KeyType, DataType, Dim0, Dim1, Dim2>::begin() const
 {
 	if(m_root.isEmpty()) return NULL;
 	InnerNodeType *inner = m_root.value(0);
@@ -223,7 +223,7 @@ L3Node<KeyType, DataType, Dim2> *L3Tree<KeyType, DataType, Dim0, Dim1, Dim2>::be
 }
 
 template <typename KeyType, typename DataType, int Dim0, int Dim1, int Dim2>
-L3Node<KeyType, DataType, Dim2> *L3Tree<KeyType, DataType, Dim0, Dim1, Dim2>::next(const L3Node<KeyType, DataType, Dim2> *x)
+L3Node<KeyType, DataType, Dim2> *L3Tree<KeyType, DataType, Dim0, Dim1, Dim2>::next(const L3Node<KeyType, DataType, Dim2> *x) const
 { return x->rightSibling(); }
 
 template <typename KeyType, typename DataType, int Dim0, int Dim1, int Dim2>

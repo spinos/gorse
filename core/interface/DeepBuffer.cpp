@@ -12,6 +12,7 @@
 #include "DisplayCamera.h"
 #include <math/QuickSort.h>
 #include <math/miscfuncs.h>
+#include <iostream>
 
 namespace alo {
 
@@ -92,17 +93,36 @@ void DeepBuffer::setBegin(const DisplayCamera* camera)
 	}
 }
 
-BufferBlock* DeepBuffer::highResidualBlock()
+void DeepBuffer::sortByResidual()
 {
-	const int nblk = numBlocks();
+    const int nblk = numBlocks();
 	for(int i=0;i<nblk;++i) {
 		QuickSortPair<float, int>& ind = m_priority[i];
 		ind.key = m_blocks[i]->residual();
 		ind.value = i;
 	}
 	QuickSort1::Sort<float, int>(m_priority.get(), 0, nblk-1);
+}
+
+void DeepBuffer::highResidualBlocks(BufferBlock **blocks, int n) const
+{
+	const int nblk = numBlocks();
 	
-	int ib = rand() % (nblk>>2);
+	int offset = 0;
+	for(int i=0;i<n;++i) {
+
+		offset +=  rand() % (nblk>>(n-i));
+
+		if(offset > nblk - 1) offset = offset - (nblk - 1);
+
+		blocks[i] = m_blocks[m_priority[nblk - 1 - offset].value];
+	}
+}
+
+BufferBlock* DeepBuffer::highResidualBlock() const
+{
+    const int nblk = numBlocks();
+	int ib = rand() % (nblk>>3);
 
 	return m_blocks[m_priority[nblk - 1 - ib].value];
 }

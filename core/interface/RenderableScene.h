@@ -47,7 +47,7 @@ public:
 
     RenderableScene();
     
-    virtual bool intersectRay(const Ray& aray, IntersectResult& result);
+    virtual bool intersectRay(const Ray& aray, IntersectResult& result) const;
     
 	virtual void getBackgroundColor(float* col, const Vector3F& dir, SampleState* state) const;
 	

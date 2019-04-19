@@ -77,9 +77,10 @@ public:
 	float delta() const;
 /// at u
 	float lookup(const float* u) const;
+    Vector3F lookupNormal(const float* u) const;
 
 	int totalStorageSize() const;
-	
+    
 protected:
 
 private:

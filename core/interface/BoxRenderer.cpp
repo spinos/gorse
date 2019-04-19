@@ -16,6 +16,7 @@
 #include <math/Matrix44F.h>
 #include <math/BoundingBox.h>
 #include "ImageFragment.h"
+#include "RenderBuffer.h"
 #include <math/miscfuncs.h>
 #include <img/SampleState.h>
 #include "IntersectResult.h"
@@ -35,10 +36,10 @@ void BoxRenderer::NormalToBGR(float* bgr, const float* nml)
     bgr[2] = nml[2] * .5f + .5f;
 }
 
-void BoxRenderer::renderFragment(RenderContext& context, BufferBlock& blk)
+void BoxRenderer::renderFragment(RenderBuffer *buffer, RenderContext& context, BufferBlock& blk) const
 {
 	const PixelSampler* pxsamp = context.sampler();
-	pxsamp->generateViewRays(blk, prng() );
+	pxsamp->generateViewRays(blk, buffer->prng() );
     
     RenderableScene* scn = context.scene();
 	IntersectResult result;
@@ -61,9 +62,8 @@ void BoxRenderer::renderFragment(RenderContext& context, BufferBlock& blk)
 			scn->getBackgroundColor(col, rayi.m_dir, &colorState);
 		}
 		
-		setFragmentColor(col, i);
+		buffer->setFragmentColor(col, i);
 	}
-	reproject(context, blk);
 }
 
 }

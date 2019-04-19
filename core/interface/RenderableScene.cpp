@@ -28,7 +28,7 @@ m_changed(false)
     processCreateRenderableQueue();
 }
 
-bool RenderableScene::intersectRay(const Ray& aray, IntersectResult& result)
+bool RenderableScene::intersectRay(const Ray& aray, IntersectResult& result) const
 { 
     aray.get(result.rayData());
 	//result.rayDistance() = 1e9f;

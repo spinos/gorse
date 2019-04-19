@@ -48,7 +48,9 @@ public:
 	int numBlocks() const;
 /// i-th block
 	BufferBlock* block(int i);
-	BufferBlock* highResidualBlock();
+    void sortByResidual();
+    void highResidualBlocks(BufferBlock **blocks, int n) const;
+	BufferBlock* highResidualBlock() const;
 /// max residual of all blocks
 	float maxResidual() const;
 	

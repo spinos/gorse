@@ -12,7 +12,11 @@
 #include <interface/RenderInterface.h>
 #include <interface/BufferBlock.h>
 #include <interface/Renderer.h>
+#include <interface/RenderBuffer.h>
+#include <interface/DisplayImage.h>
+#include <QtConcurrent/QtConcurrent>
 #include <QDebug>
+#include <QFuture>
 
 namespace alo {
 
@@ -82,6 +86,16 @@ void RenderThread::render()
     }
 }
 
+void RenderThread::renderWork(BufferBlock* packet, RenderBuffer *buf, Renderer* tracer, RenderContext* ctx)
+{
+    tracer->renderFragment(buf, *ctx, *packet);
+}
+
+void RenderThread::imageWork(BufferBlock* packet, DisplayImage* dspImg)
+{
+    packet->projectImage(dspImg);   
+}
+
 void RenderThread::run()
 {
     forever {
@@ -98,15 +112,47 @@ void RenderThread::run()
 		if(m_interface->isResidualLowEnough() ) {
 			return;
 		}
-		
-		BufferBlock* packet = m_interface->selectBlock();
+
+        m_interface->sortBlocks();
+        
+        BufferBlock* packets[4];
+        m_interface->selectBlocks(packets, 4);
+        
 		Renderer* tracer = m_interface->getRenderer();
 		RenderContext* ctx = m_interface->getContext();
-		
-		tracer->renderFragment(*ctx, *packet);
-					
-		packet->projectImage(m_interface->image() );
-
+        
+        RenderBuffer *buf1 = m_interface->renderBuffer(0);
+        RenderBuffer *buf2 = m_interface->renderBuffer(1);
+        RenderBuffer *buf3 = m_interface->renderBuffer(2);
+        RenderBuffer *buf4 = m_interface->renderBuffer(3);
+        
+        QFuture<void> f1 = QtConcurrent::run(this, &RenderThread::renderWork, packets[0], buf1, tracer, ctx);
+        QFuture<void> f2 = QtConcurrent::run(this, &RenderThread::renderWork, packets[1], buf2, tracer, ctx);
+        QFuture<void> f3 = QtConcurrent::run(this, &RenderThread::renderWork, packets[2], buf3, tracer, ctx);
+        QFuture<void> f4 = QtConcurrent::run(this, &RenderThread::renderWork, packets[3], buf4, tracer, ctx);
+        
+        f1.waitForFinished();
+        f2.waitForFinished();
+        f3.waitForFinished();
+        f4.waitForFinished();
+/// not thread safe
+        buf1->reproject(*ctx, *packets[0]);
+        buf2->reproject(*ctx, *packets[1]);
+        buf3->reproject(*ctx, *packets[2]);
+        buf4->reproject(*ctx, *packets[3]);
+        
+        DisplayImage* dspImg = m_interface->image();
+        
+        f1 = QtConcurrent::run(this, &RenderThread::imageWork, packets[0], dspImg);
+        f2 = QtConcurrent::run(this, &RenderThread::imageWork, packets[1], dspImg);
+        f3 = QtConcurrent::run(this, &RenderThread::imageWork, packets[2], dspImg);
+        f4 = QtConcurrent::run(this, &RenderThread::imageWork, packets[3], dspImg);
+        
+        f1.waitForFinished();
+        f2.waitForFinished();
+        f3.waitForFinished();
+        f4.waitForFinished();
+        
 		emit renderedImage();
 
         mutex.lock();
