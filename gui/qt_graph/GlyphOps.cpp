@@ -1,8 +1,12 @@
 #include "GlyphOps.h"
 #include <QJsonArray>
+#include <QJsonDocument>
+#include <QFile>
 #include <QDebug>
 
 namespace alo {
+
+QJsonObject GlyphOps::attributePresetObj;
 
 GlyphOps::GlyphOps()
 {}
@@ -43,10 +47,6 @@ void GlyphOps::addAttributes(const QJsonObject &content)
     	QJsonObject attrObject = attrArray[i].toObject();
 		addAttribute(attrObject);
 	}
-
-	if(content.find("has_transform") != content.end()) {
-		addTransformAttributes();
-	}
 }
 
 void GlyphOps::addAttribute(const QJsonObject &content)
@@ -77,6 +77,9 @@ void GlyphOps::addAttribute(const QJsonObject &content)
 			break;
 		case QAttrib::AtString :
 			b = addStringAttribute(content);
+			break;
+		case QAttrib::AtTransformSet :
+			addTransformAttributes();
 			break;
 		default:
 			break;
@@ -392,7 +395,41 @@ bool GlyphOps::getListAttribValue(std::string &val, const std::string &attrName)
 
 void GlyphOps::addTransformAttributes()
 {
+	bool stat;
+	QJsonObject content = getTransformPresetObj(stat);
+	if(!stat) return;
+
+	addAttributes(content);
+}
+
+void GlyphOps::loadAttributePreset(const QString &fileName)
+{
+	QFile loadFile(fileName);
+	if (!loadFile.open(QIODevice::ReadOnly) ) {
+		qWarning("Couldn't open file for attribute preset");
+		return;
+	}
+
+	QByteArray loadData = loadFile.readAll();
+	QJsonDocument loadDoc(QJsonDocument::fromJson(loadData));
 	
+	attributePresetObj = loadDoc.object();
+}
+
+QJsonObject GlyphOps::getTransformPresetObj(bool &found)
+{
+	found = false;
+	QJsonArray attrArray = attributePresetObj["children"].toArray();
+	QJsonObject res;
+	for(int i=0;i<attrArray.size();++i) {
+		res = attrArray[i].toObject();
+		if(res["name"].toString() == "transform") {
+			found = true;
+			break;
+		}
+	}
+	
+	return res;
 }
 
 }

@@ -60,8 +60,7 @@ private:
 	
 	RenderInterface* m_interface;
     
-    void renderWork(BufferBlock* packet, RenderBuffer *buf, Renderer* tracer, RenderContext* ctx);
-	void imageWork(BufferBlock* packet, DisplayImage* dspImg);
+    void renderWork(BufferBlock* packet, RenderBuffer *buf);
     
 };
 

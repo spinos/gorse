@@ -34,10 +34,10 @@ class GlyphScene : public QGraphicsScene
     Q_OBJECT
 
 public:
-	GlyphScene(GroupCollection<QJsonObject> *collector, 
-				QObject *parent = 0);
+	GlyphScene(QObject *parent = 0);
 	virtual ~GlyphScene();
 
+	void setAssetCollection(GroupCollection<QJsonObject> *x);
 	void initializeGraphics();
 
 	void createGlyph(const QPixmap &pix, int typ, const QPointF & pos);
@@ -73,7 +73,7 @@ private:
 	GroupCollection<QJsonObject> *m_collector;
 	sdb::L2Tree<int, GlyphItem *, 128, 128> m_glyphMap;
 	Uniform<Lehmer> *m_rng;
-
+	
 };
 
 }

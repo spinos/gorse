@@ -22,6 +22,7 @@ class GlyphOps
 {
 	int m_opsId;
 	std::map<std::string, QAttrib * > m_attribs;
+	static QJsonObject attributePresetObj;
 
 public:
 	GlyphOps();
@@ -54,6 +55,8 @@ public:
 	virtual AFileDlgProfile *writeFileProfileR () const;
 	virtual AFileDlgProfile *readFileProfileR () const;
 
+	static void loadAttributePreset(const QString &fileName);
+
 protected:
 	void addAttribute(const QJsonObject &content);
 	QAttrib *addBoolAttribute(const QJsonObject &content);
@@ -76,7 +79,8 @@ private:
 	void addConnection(QAttrib *b, const QJsonObject &content);
 	void setFloatComponentAttrValue(QAttrib *attr, const int &component, const float &x);
 	void addTransformAttributes();
-	
+	QJsonObject getTransformPresetObj(bool &found);
+
 };
 
 }

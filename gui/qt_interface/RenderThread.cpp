@@ -88,14 +88,14 @@ void RenderThread::render()
     }
 }
 
-void RenderThread::renderWork(BufferBlock* packet, RenderBuffer *buf, Renderer* tracer, RenderContext* ctx)
+void RenderThread::renderWork(BufferBlock* packet, RenderBuffer *buf)
 {
-    tracer->renderFragment(buf, *ctx, *packet);
-    //buf->reproject(*ctx, *packet);
-}
+	Renderer* tracer = m_interface->getRenderer();
+	RenderContext* ctx = m_interface->getContext();
+	DisplayImage* dspImg = m_interface->image();
 
-void RenderThread::imageWork(BufferBlock* packet, DisplayImage* dspImg)
-{
+    tracer->renderFragment(buf, *ctx, *packet);
+    buf->reproject(*ctx, *packet);
     packet->projectImage(dspImg);   
 }
 
@@ -118,48 +118,25 @@ void RenderThread::run()
 
         m_interface->sortBlocks();
         
-        BufferBlock* packets[4];
-        m_interface->selectBlocks(packets, 4);
+        BufferBlock* packets[8];
+        m_interface->selectBlocks(packets, 8);
         
 		Renderer* tracer = m_interface->getRenderer();
 		RenderContext* ctx = m_interface->getContext();
 		DisplayImage* dspImg = m_interface->image();
- 
-        RenderBuffer *buf1 = m_interface->renderBuffer(0);
-#if 1 
-        RenderBuffer *buf2 = m_interface->renderBuffer(1);
-        RenderBuffer *buf3 = m_interface->renderBuffer(2);
-        RenderBuffer *buf4 = m_interface->renderBuffer(3);
-        
-        QFuture<void> f1 = QtConcurrent::run(this, &RenderThread::renderWork, packets[0], buf1, tracer, ctx);
-        QFuture<void> f2 = QtConcurrent::run(this, &RenderThread::renderWork, packets[1], buf2, tracer, ctx);
-        QFuture<void> f3 = QtConcurrent::run(this, &RenderThread::renderWork, packets[2], buf3, tracer, ctx);
-        QFuture<void> f4 = QtConcurrent::run(this, &RenderThread::renderWork, packets[3], buf4, tracer, ctx);
-        
-        f1.waitForFinished();
-        f2.waitForFinished();
-        f3.waitForFinished();
-        f4.waitForFinished();
-/// not thread safe
-        buf1->reproject(*ctx, *packets[0]);
-        buf2->reproject(*ctx, *packets[1]);
-        buf3->reproject(*ctx, *packets[2]);
-        buf4->reproject(*ctx, *packets[3]);
-        
-        f1 = QtConcurrent::run(this, &RenderThread::imageWork, packets[0], dspImg);
-        f2 = QtConcurrent::run(this, &RenderThread::imageWork, packets[1], dspImg);
-        f3 = QtConcurrent::run(this, &RenderThread::imageWork, packets[2], dspImg);
-        f4 = QtConcurrent::run(this, &RenderThread::imageWork, packets[3], dspImg);
-        
-        f1.waitForFinished();
-        f2.waitForFinished();
-        f3.waitForFinished();
-        f4.waitForFinished();
-#else
-        tracer->renderFragment(buf1, *ctx, *packets[0]);
-        buf1->reproject(*ctx, *packets[0]);
-        packets[0]->projectImage(dspImg);   
-#endif
+
+#define NUM_FUTURE 6
+		RenderBuffer *buf[NUM_FUTURE];
+		QFuture<void> ff[NUM_FUTURE];
+
+		for(int i=0;i<NUM_FUTURE;++i) {
+			buf[i] = m_interface->renderBuffer(i); 
+			ff[i] = QtConcurrent::run(this, &RenderThread::renderWork, packets[i], buf[i]);
+		}
+
+		for(int i=0;i<NUM_FUTURE;++i) {
+			ff[i].waitForFinished();
+		}
         
 		emit renderedImage();
 

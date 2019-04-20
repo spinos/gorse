@@ -106,6 +106,7 @@ void DeepBuffer::sortByResidual()
 
 void DeepBuffer::highResidualBlocks(BufferBlock **blocks, int n) const
 {
+	int *selected = new int[n];
 	const int nblk = numBlocks();
 	
 	int offset = 0;
@@ -114,8 +115,20 @@ void DeepBuffer::highResidualBlocks(BufferBlock **blocks, int n) const
 		offset += rand() % (nblk>>3);
 		if(offset > (nblk>>1)) offset = offset - (nblk>>1);
 
-		blocks[i] = m_blocks[m_priority[nblk - 1 - offset].value];
+		bool stat = true;
+		for(int j=0;j<i;++j) {
+			if(offset == selected[j]) {
+				stat = false;
+				i--;
+			}
+		}
+
+		if(stat) {
+			selected[i] = offset;
+			blocks[i] = m_blocks[m_priority[nblk - 1 - offset].value];
+		}
 	}
+	delete[] selected;
 }
 
 BufferBlock* DeepBuffer::highResidualBlock() const

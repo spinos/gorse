@@ -6,7 +6,7 @@
         {
             "id": 135109,
             "name": "sdf",
-            "label": "Singed Distance Field",
+            "label": "Renderable",
             "icon": ":images/sdf_small.png",
             "children": [
                 {
@@ -46,13 +46,16 @@
                             "label": "Voxel Field",
                             "icon": ":images/voxel.png",
                             "is_element": true,
-                            "has_transform": true,
                             "attribs" : [
                             {
                                 "name": "cache_path",
                                 "label": "Cache File Path",
                                 "typ": 9,
                                 "strtyp": 513
+                            },
+                            {
+                                "name": "transform",
+                                "typ": 16
                             }
                         ]
                     }

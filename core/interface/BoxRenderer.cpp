@@ -42,13 +42,9 @@ void BoxRenderer::renderFragment(RenderBuffer *buffer, RenderContext& context, B
 	pxsamp->generateViewRays(blk, buffer->prng() );
     
     RenderableScene* scn = context.scene();
-	IntersectResult result;
-/// from context?
-    SampleState colorState;
-	colorState.setAccess(SampleState::Wrap, SampleState::Clamp);
-	colorState.setFilter(SampleState::Box);
-	colorState.setChannel(SampleState::RGB);
-	
+	IntersectResult &result = *buffer->primaryIntersction();
+    SampleState &colorState = *buffer->evironmentLatlongSampleState();
+
 	float col[4];
     Ray rayi;
 	const int& ns = blk.numSamples();

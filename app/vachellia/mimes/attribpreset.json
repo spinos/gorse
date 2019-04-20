@@ -3,7 +3,7 @@
 	"children": [
 		{
 			"name": "transform",
-			"children": [
+			"attribs": [
 				{
 					"name": "tx",
                     "label": "Position X",
@@ -57,7 +57,7 @@
                     "label": "Scale X",
                     "typ": 3,
                     "value": 1.0,
-                    "min": 0.001,
+                    "min": 0.01,
                     "max": 1000.0
 				},
 				{
@@ -65,7 +65,7 @@
                     "label": "Scale Y",
                     "typ": 3,
                     "value": 1.0,
-                    "min": 0.001,
+                    "min": 0.01,
                     "max": 1000.0
 				},
 				{
@@ -73,7 +73,7 @@
                     "label": "Scale Z",
                     "typ": 3,
                     "value": 1.0,
-                    "min": 0.001,
+                    "min": 0.01,
                     "max": 1000.0
 				}
 			]

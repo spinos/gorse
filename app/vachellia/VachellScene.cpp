@@ -18,8 +18,8 @@
 
 using namespace alo;
 
-VachellScene::VachellScene(GroupCollection<QJsonObject> *collector, QObject *parent)
-    : GlyphScene(collector, parent)
+VachellScene::VachellScene(QObject *parent)
+    : GlyphScene(parent)
 { m_garbageOp = nullptr; }
 
 VachellScene::~VachellScene()
@@ -34,7 +34,7 @@ GlyphOps *VachellScene::createOps(const QJsonObject &content)
         case VoxelOps::Type :
             return new VoxelOps;
         default:
-            break;
+            ;
     }
     return new GlyphOps; 
 }

@@ -35,7 +35,7 @@ RenderInterface::RenderInterface()
 	m_renderer = new BoxRenderer;
 #endif 
     std::time_t secs = std::time(0);
-    for(int i=0;i<4;++i) {
+    for(int i=0;i<8;++i) {
         m_renderBuffer[i] = new RenderBuffer;
         m_renderBuffer[i]->createRng(secs + i * 10);
     }
@@ -43,8 +43,8 @@ RenderInterface::RenderInterface()
 
 RenderInterface::~RenderInterface()
 {
-    delete m_renderBuffer[0];
-    delete m_renderBuffer[1];
+	for(int i=0;i<8;++i)
+    	delete m_renderBuffer[i];
 }
 
 void RenderInterface::setScene(RenderableScene* x)

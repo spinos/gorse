@@ -19,6 +19,9 @@ public:
 	TransformOps();
 	virtual ~TransformOps();
 
+	virtual void update() override;
+	virtual bool intersectRay(const Ray& aray, IntersectResult& result) override;
+
 	virtual bool hasMenu() const override;
     virtual void getMenuItems(std::vector<std::pair<std::string, int > > &ks) const override;
     virtual void recvAction(int x) override;

@@ -54,7 +54,8 @@ public:
 		AtString,
 		AtAction,
 		AtMesh,
-		AtList
+		AtList,
+		AtTransformSet = 16
 	};
 
 	QAttrib(const std::string &anm, AttrType atyp);

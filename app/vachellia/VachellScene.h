@@ -24,7 +24,7 @@ class VachellScene : public alo::GlyphScene, public alo::RenderableScene
     Q_OBJECT
 
 public:
-	VachellScene(alo::GroupCollection<QJsonObject> *collector, QObject *parent = 0);
+	VachellScene(QObject *parent = 0);
 	virtual ~VachellScene();
 	
 	virtual void onItemVisibilityChanged() override;
@@ -46,6 +46,7 @@ protected:
 	
 private:
 	alo::GlyphOps *m_garbageOp;
+
 };
 
 #endif

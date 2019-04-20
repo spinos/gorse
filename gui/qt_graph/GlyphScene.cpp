@@ -7,7 +7,6 @@
  *
  */
 
-#include <QtGui>
 #include "GlyphScene.h"
 #include "GlyphPort.h"
 #include "GlyphHalo.h"
@@ -20,11 +19,10 @@
 
 namespace alo {
 
-GlyphScene::GlyphScene(GroupCollection<QJsonObject> *collector,
-					QObject *parent) :
+GlyphScene::GlyphScene(QObject *parent) :
 	QGraphicsScene(parent), 
-	m_collector(collector),
-	m_activeGlyph(0)
+	m_collector(nullptr),
+	m_activeGlyph(nullptr)
 {
 	time_t now;
 	time(&now);
@@ -35,6 +33,9 @@ GlyphScene::~GlyphScene()
 {
 	delete m_rng;
 }
+
+void GlyphScene::setAssetCollection(GroupCollection<QJsonObject> *x)
+{ m_collector = x; }
 
 void GlyphScene::initializeGraphics()
 {

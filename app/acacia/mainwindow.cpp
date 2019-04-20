@@ -19,7 +19,8 @@ MainWindow::MainWindow()
     addDockWidget(Qt::LeftDockWidgetArea, assetDock);
     viewMenu->addAction(assetDock->toggleViewAction());
 
-    m_scene = new AcaciaScene(m_palette->assetCollector());
+    m_scene = new AcaciaScene(this);
+    m_scene->setAssetCollection(m_palette->assetCollector());
     m_scene->initializeGraphics();
     m_glview = new GLWidget(m_scene, this);
     setCentralWidget(m_glview);

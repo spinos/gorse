@@ -7,6 +7,7 @@
 #include "widgets/AttribEditor.h"
 #include "widgets/RenderWidget.h"
 #include <qt_graph/SceneGraph.h>
+#include <qt_graph/GlyphOps.h>
 
 MainWindow::MainWindow()
 {
@@ -19,10 +20,13 @@ MainWindow::MainWindow()
     addDockWidget(Qt::LeftDockWidgetArea, assetDock);
     viewMenu->addAction(assetDock->toggleViewAction());
 
-    m_scene = new VachellScene(m_palette->assetCollector());
+    m_scene = new VachellScene(this);
+    m_scene->setAssetCollection(m_palette->assetCollector());
     m_scene->initializeGraphics();
     m_renderView = new RenderWidget(m_scene, this);
     setCentralWidget(m_renderView);
+
+    alo::GlyphOps::loadAttributePreset(":/mimes/attribpreset.json");
 
     QDockWidget *attrDock = new QDockWidget(tr("Attributes"), this);
     attrDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);

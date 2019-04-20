@@ -46,27 +46,31 @@ void VoxelOps::addRenderableTo(RenderableScene *scene)
   
 void VoxelOps::update()
 {
+    TransformOps::update();
     QAttrib * acp = findAttrib("cache_path");
     StringAttrib *fcp = static_cast<StringAttrib *>(acp);
     std::string scachePath;
     fcp->getValue(scachePath);
-    if(m_cachePath != scachePath )
+    if(m_cachePath != scachePath && scachePath.size() > 3)
         loadCache(scachePath);
 }
 
 bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
 {
     if(m_field->isEmpty()) 
-        return RenderableObject::intersectRay(aray, result);
+        return TransformOps::intersectRay(aray, result);
 
     float rayData[8];
     result.copyRayData(rayData);
 
+    rayToLocal(rayData);
+
     if(!rayAabbIntersect(rayData, aabb())) return false;
 
-    float tt = rayData[6];
+    float &tt = rayData[6];
     const float &tLimit = rayData[7];
-    Vector3F q = aray.travel(tt);
+    float q[3];
+    rayTravel(q, rayData);
 
     for(int i=0;i<29;++i) {
         
@@ -75,11 +79,14 @@ bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
 
         tt += d;
         if(tt > tLimit) return false;
-        q = aray.travel(tt);
+        rayTravel(q, rayData);
     }
 
-    Vector3F tn = m_rule->lookupNormal((const float *)&q);
-    tn.normalize();
+    Vector3F tn = m_rule->lookupNormal(q);
+
+    rayToWorld(rayData);
+    normalToWorld((float *)&tn);
+
     return result.updateRayDistance(tt, tn);
 }
 

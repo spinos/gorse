@@ -31,7 +31,7 @@ class RenderInterface {
 	DisplayImage* m_image;
 	RenderContext* m_context;
 	Renderer* m_renderer;
-    RenderBuffer *m_renderBuffer[4];
+    RenderBuffer *m_renderBuffer[8];
 	int m_resizedImageDim[2];
 	
 public:

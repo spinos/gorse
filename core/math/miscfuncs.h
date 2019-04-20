@@ -101,13 +101,13 @@ inline T Absolute(T const& a)
 template<typename T>
 inline T DegreeToAngle(T const & a)
 {
-	return a * PIF / 180.0;
+	return a * 0.0174532925;
 }
 
 template<typename T>
 inline T AngleToDegree(T const & a)
 {
-	return a * ONE_OVER_PIF * 180.0;
+	return a * 57.2957795;
 }
 
 template<typename T>
