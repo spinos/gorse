@@ -75,7 +75,8 @@ protected:
 private:
 	void addConnection(QAttrib *b, const QJsonObject &content);
 	void setFloatComponentAttrValue(QAttrib *attr, const int &component, const float &x);
-
+	void addTransformAttributes();
+	
 };
 
 }

@@ -34,5 +34,6 @@
     <file>images/horizon.png</file>
 	<file>images/voxel.png</file>
     <file>mimes/assettree.json</file>
+    <file>mimes/attribpreset.json</file>
 </qresource>
 </RCC>

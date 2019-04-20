@@ -26,9 +26,9 @@
                                     "name": "r",
                                     "label": "Planet Radius",
                                     "typ": 3,
-                                    "value": 6378100.0,
-                                    "min": 1000.0,
-                                    "max": 10000000.0
+                                    "value": 6378.0,
+                                    "min": 1.0,
+                                    "max": 10000.0
                                 }
                             ]
                         }
@@ -46,6 +46,7 @@
                             "label": "Voxel Field",
                             "icon": ":images/voxel.png",
                             "is_element": true,
+                            "has_transform": true,
                             "attribs" : [
                             {
                                 "name": "cache_path",

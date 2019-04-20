@@ -43,6 +43,10 @@ void GlyphOps::addAttributes(const QJsonObject &content)
     	QJsonObject attrObject = attrArray[i].toObject();
 		addAttribute(attrObject);
 	}
+
+	if(content.find("has_transform") != content.end()) {
+		addTransformAttributes();
+	}
 }
 
 void GlyphOps::addAttribute(const QJsonObject &content)
@@ -384,6 +388,11 @@ bool GlyphOps::getListAttribValue(std::string &val, const std::string &attrName)
     ListAttrib *fattr = static_cast<ListAttrib *>(attr);
     fattr->getValue(val);
     return true;
+}
+
+void GlyphOps::addTransformAttributes()
+{
+	
 }
 
 }

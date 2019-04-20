@@ -11,7 +11,7 @@
 #include "AssetPalette.h"
 #include "PiecesList.h"
 #include <qt_tree/TreeView.h>
-#include <qt_tree/treemodel.h>
+#include <qt_tree/TreeModel.h>
 
 using namespace alo;
 

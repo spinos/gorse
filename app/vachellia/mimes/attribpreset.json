@@ -1,0 +1,82 @@
+{
+	"name": "all_attrib_presets",
+	"children": [
+		{
+			"name": "transform",
+			"children": [
+				{
+					"name": "tx",
+                    "label": "Position X",
+                    "typ": 3,
+                    "value": 0.0,
+                    "min": -1000000.0,
+                    "max": 1000000.0
+				},
+				{
+					"name": "ty",
+                    "label": "Position Y",
+                    "typ": 3,
+                    "value": 0.0,
+                    "min": -1000000.0,
+                    "max": 1000000.0
+				},
+				{
+					"name": "tz",
+                    "label": "Position Z",
+                    "typ": 3,
+                    "value": 0.0,
+                    "min": -1000000.0,
+                    "max": 1000000.0
+				},
+				{
+					"name": "rx",
+                    "label": "Rotate X",
+                    "typ": 3,
+                    "value": 0.0,
+                    "min": -1000000.0,
+                    "max": 1000000.0
+				},
+				{
+					"name": "ry",
+                    "label": "Rotate Y",
+                    "typ": 3,
+                    "value": 0.0,
+                    "min": -1000000.0,
+                    "max": 1000000.0
+				},
+				{
+					"name": "rz",
+                    "label": "Rotate Z",
+                    "typ": 3,
+                    "value": 0.0,
+                    "min": -1000000.0,
+                    "max": 1000000.0
+				},
+				{
+					"name": "sx",
+                    "label": "Scale X",
+                    "typ": 3,
+                    "value": 1.0,
+                    "min": 0.001,
+                    "max": 1000.0
+				},
+				{
+					"name": "sy",
+                    "label": "Scale Y",
+                    "typ": 3,
+                    "value": 1.0,
+                    "min": 0.001,
+                    "max": 1000.0
+				},
+				{
+					"name": "sz",
+                    "label": "Scale Z",
+                    "typ": 3,
+                    "value": 1.0,
+                    "min": 0.001,
+                    "max": 1000.0
+				}
+			]
+		}
+	]
+}

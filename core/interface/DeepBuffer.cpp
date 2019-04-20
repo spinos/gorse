@@ -110,9 +110,8 @@ void DeepBuffer::highResidualBlocks(BufferBlock **blocks, int n) const
 	
 	int offset = 0;
 	for(int i=0;i<n;++i) {
-
-		offset +=  rand() % (nblk>>(n-i));
-
+		
+		offset += rand() % (nblk>>3);
 		if(offset > (nblk>>1)) offset = offset - (nblk>>1);
 
 		blocks[i] = m_blocks[m_priority[nblk - 1 - offset].value];

@@ -7,7 +7,7 @@
 #ifndef VCHL_VOXEL_OPS_H
 #define VCHL_VOXEL_OPS_H
 
-#include "RenderableOps.h"
+#include "TransformOps.h"
 
 namespace alo {
 
@@ -17,7 +17,7 @@ template<typename T>
 class SsdfLookupRule;
 }
 
-class VoxelOps : public RenderableOps {
+class VoxelOps : public TransformOps {
     
     static AFileDlgProfile SReadProfile;
     sdf::SsdField *m_field;
