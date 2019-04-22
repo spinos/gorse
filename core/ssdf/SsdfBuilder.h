@@ -159,7 +159,7 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::build(sds::SpaceFillingVector<T>* samples,
 	
 	m_hexa.finishCells(rule);
 	
-	m_hexa. template computeDistance<T, Tr>(SvfBuilderTyp::levelSample(Q), 
+	m_hexa. template computeDistance<T, Tr>(SvfBuilderTyp::levelSample(Q+1), 
 							Q-1, rule);
 	
 	clearUniformDistances();

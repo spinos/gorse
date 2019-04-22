@@ -70,16 +70,20 @@ bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
     float &tt = rayData[6];
     const float &tLimit = rayData[7];
     float q[3];
-    rayTravel(q, rayData);
 
-    for(int i=0;i<29;++i) {
+    for(int i=0;i<256;++i) {
         
-        float d = m_rule->lookup((const float *)&q);
-        if(d < tt * 1e-5f ) break;
-
-        tt += d;
-        if(tt > tLimit) return false;
         rayTravel(q, rayData);
+
+        float d = m_rule->lookup((const float *)&q);
+
+        if(d < 1e-4f) break;
+
+        if(d < tt * 1e-5f) break;
+
+        tt += d * .7f;
+     
+        if(tt > tLimit) return false;
     }
 
     Vector3F tn = m_rule->lookupNormal(q);

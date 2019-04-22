@@ -120,7 +120,7 @@ void SsdfTest::testIt()
     shapeBox.round();
     std::cout<<"\n shape box"<<shapeBox;
     
-    const float ssz = shapeBox.getLongestDistance() * .00141f;
+    const float ssz = shapeBox.getLongestDistance() * .00121f;
 	std::cout << "\n sample size " << ssz;
 	typedef smp::Triangle<SurfaceSample > SamplerTyp;
    
@@ -138,7 +138,7 @@ void SsdfTest::testIt()
         sampler.addSamples <PntArrTyp, SampleInterp, Uniform<Lehmer> >(pnts, asmp, interp, &lmlcg);
     }
     
-    std::cout<<"\n n triangle samples "<<pnts.size();
+    std::cout<<"\n n samples "<<pnts.size();
     buildSsdf(&pnts, shapeBox);
 }
 

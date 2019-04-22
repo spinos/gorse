@@ -73,16 +73,18 @@ protected:
     void setFarNodeInside();
 /// from marching origin
 	void computeAccurateDistance();
-	
-    void setNodeDistance(const int & idx,
-                        const float & v);
+/// lower node distance 
+    bool setNodeDistance(const int & idx,
+                        const float & v,
+                        bool toAccumulateFront = true);
 	void setEdgeFront(int va, int vb);
 	
 	void pushIndices(const std::vector<int> & a,
 							std::vector<int> & b) const;
 								
-/// set i-th node distance to point ref
-	void setNodeDistance2(const int& i, const Vector3F& ref);
+/// update i-th node by shorten distance to T._pos
+	void setNodeDistanceTValue(const int& i, const T &ref,
+						bool toAccumulateFront = true);
 
 	void setNodeTValue(const int& i, const T &x);
 			
@@ -214,13 +216,7 @@ void BaseDistanceField<T>::computeAccurateDistance()
 	const int& n = numNodes();
 	for(int i = 0;i<n;++i) {
 		NodeType &d = nodes()[i];
-			
-		const int& j = d._origin;
-		if(j == i)
-			continue;
-			
-		const NodeType &nj = nodes()[j];
-		d.val = GetSign(d.val) * d.pos.distanceTo(nj.pos) + nj.val;
+		d.val = GetSign(d.val) * d.pos.distanceTo(d._tval._pos);
 	}
 }
 
@@ -301,7 +297,7 @@ void BaseDistanceField<T>::propagateVisit(std::map<int, int > & heap, const int 
 			
 		NodeType &B = nodes()[vj];
 		
-		if(B.label > sdf::StFront1) {
+		if(B.label > sdf::StFront1+3) {
 /// stop
 			B.stat = sdf::StVisited;
 		} else {
@@ -315,29 +311,35 @@ void BaseDistanceField<T>::propagateVisit(std::map<int, int > & heap, const int 
 }
 
 template<typename T>
-void BaseDistanceField<T>::setNodeDistance(const int & idx,
-                        const float & v) 
+bool BaseDistanceField<T>::setNodeDistance(const int & idx,
+                        const float & v, 
+                        bool toAccumulateFront) 
 {
+	bool changed = false;
     NodeType &d = nodes()[idx];
     if(d.stat != sdf::StKnown) {
         d.val = v;
         d.stat = sdf::StKnown;
-		
+		changed = true;
     } else {
 /// closer to zero
         //if(Absolute<float>(d.val) > Absolute<float>(v) ) {
 /// inside first
 		if(d.val > v) {
             d.val = v;
+            changed = true;
         }
     }
+
+    if(!changed) return changed;
+    if(!toAccumulateFront) return changed;
 	
 	if(d.label < sdf::StFront) {
 		d.label = sdf::StFront;
 	} else {
 		d.label++;
 	}
-    
+    return changed;
 }
 
 template<typename T>
@@ -371,10 +373,11 @@ void BaseDistanceField<T>::pushIndices(const std::vector<int> & a,
 }
 
 template<typename T>
-void BaseDistanceField<T>::setNodeDistance2(const int& i, const Vector3F& ref)
+void BaseDistanceField<T>::setNodeDistanceTValue(const int& i, const T &ref,
+							bool toAccumulateFront)
 {
-	float d = nodes()[i].pos.distanceTo(ref);		
-	setNodeDistance(i, d);
+	float d = nodes()[i].pos.distanceTo(ref._pos);		
+	if(setNodeDistance(i, d, toAccumulateFront)) nodes()[i]._tval = ref;
 }
 
 template<typename T>

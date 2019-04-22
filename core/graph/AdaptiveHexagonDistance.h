@@ -364,9 +364,9 @@ void AdaptiveHexagonDistance<T>::computeDistance(const sds::SpaceFillingVector<T
 			const int v = findNode(ac._key[j]);
 			if(v<0) {
 				ac._key[j] = -1;
-				//std::cout<<"\n WARNING cannot find cell of "<<i
-				//		<<" at level "<<level;
-				//rule.printCoord(ac._key[j]);
+				std::cout<<"\n WARNING cannot find cell of "<<i
+						<<" at level "<<level;
+				rule.printCoord(ac._key[j]);
 				continue;
 			} 
 			
@@ -376,16 +376,21 @@ void AdaptiveHexagonDistance<T>::computeDistance(const sds::SpaceFillingVector<T
 				minD = d;
 				closestV = j;
 			}
-			
 		}
 		
 		if(closestV > -1) {
-			setNodeDistance2(ac._key[closestV], sp._pos);
-			setNodeTValue(ac._key[closestV], sp);
+			setNodeDistanceTValue(ac._key[closestV], sp);
+/// block 3 wdges connected to the closest node
 			rule.GetCellCornersConnectedToCorner(touchE, closestV);
 			setEdgeFront(ac._key[closestV], ac._key[touchE[0]]);
 			setEdgeFront(ac._key[closestV], ac._key[touchE[1]]);
 			setEdgeFront(ac._key[closestV], ac._key[touchE[2]]);
+		}
+
+		for(int j=0;j<8;++j) {
+			if(j == closestV) continue;
+
+			setNodeDistanceTValue(ac._key[j], sp, false);
 		}
 	}
 
