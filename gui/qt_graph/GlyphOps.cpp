@@ -432,4 +432,10 @@ QJsonObject GlyphOps::getTransformPresetObj(bool &found)
 	return res;
 }
 
+void GlyphOps::setGlyphScene(GlyphScene *x)
+{ m_gscene = x; }
+
+GlyphScene *GlyphOps::glyphScene()
+{ return m_gscene; }
+
 }

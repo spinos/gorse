@@ -20,9 +20,10 @@ BaseCamera::BaseCamera()
 
 BaseCamera::~BaseCamera() {}
 
-void BaseCamera::lookAt(const Vector3F &p)
+void BaseCamera::lookAt(const Float4 &p)
 {
-    fSpace.setTranslation(p + eyeDirection() * m_focusDistance);
+	calculateFocusDistanceAperture(p.w);
+    fSpace.setTranslation(Vector3F(p.x, p.y, p.z) + eyeDirection() * m_focusDistance);
     updateInverseSpace();
 }
 
@@ -322,5 +323,13 @@ const Matrix44F &BaseCamera::space() const
 
 const Matrix44F &BaseCamera::inverseSpace() const
 { return fInverseSpace; }
+
+void BaseCamera::calculateFocusDistanceAperture(const float &radius)
+{
+	fHorizontalAperture = radius * 2.f;
+	m_focusDistance = radius * 2.f;
+	if(farClipPlane() < m_focusDistance * 1.5f) 
+		setFarClipPlane(m_focusDistance * 1.5f);
+}
  
 }

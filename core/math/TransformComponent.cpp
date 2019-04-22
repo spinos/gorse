@@ -117,9 +117,10 @@ void TransformComponent::rayToWorld(float *rayData) const
 }
 
 void TransformComponent::normalToWorld(float *nml) const
-{
-	m_tm.transformNormal(nml);
-}
+{ m_tm.transformNormal(nml); }
+
+void TransformComponent::pointToWorld(float *p) const
+{ m_tm.transformPoint(p); }
 
 void TransformComponent::rayTravel(float *q, const float *rayData) const
 {

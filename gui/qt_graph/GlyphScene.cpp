@@ -61,6 +61,7 @@ void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
 
 	QJsonObject content = m_collector->element(typ);
 	GlyphOps *ops = createOps(content);
+	ops->setGlyphScene(this);
 	ops->addAttributes(content);
 	g->setOps(ops);
 	if(ops->hasDrawable() || ops->hasRenderable()) g->addVisibilityControl();
@@ -155,5 +156,8 @@ GlyphScene::GlyphDataType *GlyphScene::firstGlyph()
 
 GlyphScene::GlyphDataType *GlyphScene::nextGlyph(const GlyphDataType *x)
 { return m_glyphMap.next(x); }
+
+void GlyphScene::onFocusIn3D(const Float4 &centerRadius)
+{ emit sendFocusCameraOn(centerRadius); }
 
 }

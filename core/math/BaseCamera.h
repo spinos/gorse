@@ -9,6 +9,7 @@
 #define ALO_MATH_BASE_CAMERA_H
 
 #include "Matrix44F.h"
+#include "Float4.h"
 
 namespace alo {
 
@@ -23,10 +24,12 @@ class BaseCamera {
     
 public:
 
+	enum { ActFocusIn3D = 1178 };
+
 	BaseCamera();
 	virtual ~BaseCamera();
 
-	void lookAt(const Vector3F &p);
+	void lookAt(const Float4 &p);
 	
 	virtual bool isOrthographic() const;
 	void reset(const Vector3F & pos);
@@ -89,6 +92,11 @@ public:
     Vector3F transformNormalToWorld(const Vector3F &x) const;
     const Matrix44F &space() const;
     const Matrix44F &inverseSpace() const;
+
+protected:
+
+	virtual void calculateFocusDistanceAperture(const float &radius);
+
 };
 
 }

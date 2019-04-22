@@ -36,6 +36,7 @@ protected:
 	void rayToLocal(float *rayData) const;
 	void rayToWorld(float *rayData) const;
 	void normalToWorld(float *nml) const;
+	void pointToWorld(float *p) const;
 /// q <- origin + direction * t0
 	void rayTravel(float *q, const float *rayData) const;
 

@@ -104,12 +104,11 @@ CameraEvent CameraResponse::getCameraEvent() const
 
 void CameraResponse::frameAll(const Vector3F &center, const float &width)
 {
-    const float fd = width * .75f / m_persp->tanhfov();
-    m_persp->setFocusDistance(fd);
-    m_persp->lookAt(center);
+    const float preFarClip = m_persp->farClipPlane();
+
+    m_persp->lookAt(Float4(center.x, center.y, center.z, width * .5f ));
     
-    if(fd + width *.5f > m_persp->farClipPlane()) {
-        m_persp->setFarClipPlane(fd + width * .5f);
+    if(preFarClip < m_persp->farClipPlane()) {
         std::cout << " INFO extend camera far clipping plane to " << m_persp->farClipPlane();
         calcProjectionMatrix();
     }

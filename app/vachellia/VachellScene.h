@@ -28,7 +28,7 @@ public:
 	virtual ~VachellScene();
 	
 	virtual void onItemVisibilityChanged() override;
-
+	
 signals:
 	void sendUpdateDrawable();
 	void sendBound(const alo::Hexahedron &x);

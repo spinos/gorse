@@ -10,6 +10,7 @@
 #ifndef ALO_GLYPH_SCENE_H
 #define ALO_GLYPH_SCENE_H
 
+#include <math/Float4.h>
 #include <rng/Uniform.h>
 #include <rng/Lehmer.h>
 #include <sdb/L2Tree.h>
@@ -50,9 +51,11 @@ public:
 	GlyphOps *getActiveOps() const;
 	
 	virtual void onItemVisibilityChanged() = 0;
+	virtual void onFocusIn3D(const Float4 &centerRadius);
 
 signals:
 	void sendSelectGlyph(bool x);
+	void sendFocusCameraOn(const Float4 &centerRadius);
 	
 protected:
 	virtual GlyphOps *createOps(const QJsonObject &content);

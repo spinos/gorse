@@ -13,6 +13,7 @@
 #include "VisibilityControlItem.h"
 #include "Attrib.h"
 #include <qt_base/AFileDlg.h>
+#include <math/BaseCamera.h>
 
 namespace alo {
 
@@ -108,7 +109,6 @@ void GlyphItem::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
     QAction *selectedAction = menu.exec(event->screenPos());
     if(selectedAction)
     	processContextMenu(selectedAction->data().toInt() );
-
 }
 
 void GlyphItem::setHalo(GlyphHalo* hal)
@@ -181,10 +181,19 @@ void GlyphItem::movePort(GlyphPort *pt, const Connectable *c)
 
 void GlyphItem::processContextMenu(int k)
 {
+	if(k == AFileDlgProfile::FWrite
+		|| k == AFileDlgProfile::FWrite)
+		return processFileContextMenu(k);
+
+	m_ops->recvAction(k);
+}
+
+void GlyphItem::processFileContextMenu(int k)
+{
 	AFileDlgProfile *prof = 0;
 	if(k==AFileDlgProfile::FWrite)
 		prof = m_ops->writeFileProfileR();
-	else if (k==AFileDlgProfile::FWrite)
+	else
 		prof = m_ops->readFileProfileR();
 
 	if(!prof) return;
@@ -197,7 +206,6 @@ void GlyphItem::processContextMenu(int k)
     }
 
     m_ops->recvAction(k);
-    	
 }
 
 void GlyphItem::addVisibilityControl()

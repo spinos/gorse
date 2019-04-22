@@ -8,6 +8,8 @@
 #include <math/rayBox.h>
 #include <math/Ray.h>
 #include <interface/IntersectResult.h>
+#include <qt_graph/GlyphScene.h>
+#include <math/BaseCamera.h>
 
 namespace alo {
 
@@ -62,12 +64,24 @@ bool TransformOps::hasMenu() const
 
 void TransformOps::getMenuItems(std::vector<std::pair<std::string, int > > &ks) const 
 {
-    ks.push_back(std::make_pair("Focus", 0));
+    ks.push_back(std::make_pair("Focus", BaseCamera::ActFocusIn3D));
 }
 
 void TransformOps::recvAction(int x) 
 {
-    if(x == 0) {}
+    if(x == BaseCamera::ActFocusIn3D) {
+    	float b[6];
+    	extractAabb(b);
+    	pointToWorld(b);
+    	pointToWorld(&b[3]);
+    	Float4 centerR;
+    	centerR.x = (b[0] + b[3]) * .5f;
+    	centerR.y = (b[1] + b[4]) * .5f;
+    	centerR.z = (b[2] + b[5]) * .5f;
+    	centerR.w = Vector3F(b[0] - centerR.x, b[1] - centerR.y, b[2] - centerR.z).length();
+
+    	glyphScene()->onFocusIn3D(centerR);
+    }
 }
 
 }

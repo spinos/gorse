@@ -34,6 +34,7 @@ public:
 
 protected:
     float *aabb();
+    void extractAabb(float *y) const;
 
 private:
     enum RenderableState {

@@ -56,4 +56,7 @@ bool RenderableObject::intersectRay(const Ray& aray, IntersectResult& result)
 float *RenderableObject::aabb()
 { return m_aabb; }
 
+void RenderableObject::extractAabb(float *y) const
+{ memcpy(y, m_aabb, 24); }
+
 }

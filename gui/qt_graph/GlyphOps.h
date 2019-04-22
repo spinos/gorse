@@ -1,12 +1,13 @@
 /*
  *  GlyphOps.h
  *
- *  attribute and update
- *
+ *  attribute, update, scene
+ *  
+ *  2019/4/22
  */
 
-#ifndef GAR_GLYPH_OPS_H
-#define GAR_GLYPH_OPS_H
+#ifndef GORS_GLYPH_OPS_H
+#define GORS_GLYPH_OPS_H
 
 #include "Attrib.h"
 #include <map>
@@ -17,11 +18,13 @@ namespace alo {
 class CameraEvent;
 struct AFileDlgProfile;
 class Hexahedron;
+class GlyphScene;
 
 class GlyphOps
 {
 	int m_opsId;
 	std::map<std::string, QAttrib * > m_attribs;
+	GlyphScene *m_gscene;
 	static QJsonObject attributePresetObj;
 
 public:
@@ -54,6 +57,9 @@ public:
 	virtual void recvCameraChanged(const CameraEvent &x);
 	virtual AFileDlgProfile *writeFileProfileR () const;
 	virtual AFileDlgProfile *readFileProfileR () const;
+
+	void setGlyphScene(GlyphScene *x);
+	GlyphScene *glyphScene();
 
 	static void loadAttributePreset(const QString &fileName);
 

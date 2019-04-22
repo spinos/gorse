@@ -80,4 +80,13 @@ void PerspectiveCamera::screenToWorldVectorAt(int x, int y, float depth, Vector3
 	worldVec = vecFar * alpha + vecNear * (1.f - alpha);
 }
 
+void PerspectiveCamera::calculateFocusDistanceAperture(const float &radius)
+{
+	const float d = radius / tanhfov() * 1.4f;
+	
+	setFocusDistance(d);
+	if(farClipPlane() < d + radius) 
+		setFarClipPlane(d + radius);
+}
+
 }

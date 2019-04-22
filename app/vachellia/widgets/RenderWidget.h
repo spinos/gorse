@@ -8,6 +8,8 @@
 Q_DECLARE_METATYPE(alo::CameraEvent)
 #include <math/Hexahedron.h>
 Q_DECLARE_METATYPE(alo::Hexahedron)
+#include <math/Float4.h>
+Q_DECLARE_METATYPE(alo::Float4)
 
 namespace alo {
 class PerspectiveCamera;
@@ -35,6 +37,7 @@ public slots:
     //void cleanup();
     void recvRerender();
     void recvBound(const alo::Hexahedron &x);
+    void recvFocusCameraOn(const alo::Float4 &centerRadius);
 
 signals:
     void cameraChanged(const alo::CameraEvent &x);

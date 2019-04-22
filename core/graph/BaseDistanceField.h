@@ -27,7 +27,10 @@ enum NodeState {
 	StFar,
 	StBackGround,
 	StFront = 127,
-	StFront1
+	StFront1,
+	StFront2,
+	StFront3,
+	StFront4
 };
 
 }
@@ -288,7 +291,7 @@ void BaseDistanceField<T>::propagateVisit(std::map<int, int > & heap, const int 
 
 		const IDistanceEdge& eg = edges()[k];
 /// do not cross front edge
-		if(eg.lab > sdf::StFront1)
+		if(eg.lab > sdf::StFront3)
 			continue;
 		
 		vj = eg.vi.x;
@@ -297,7 +300,7 @@ void BaseDistanceField<T>::propagateVisit(std::map<int, int > & heap, const int 
 			
 		NodeType &B = nodes()[vj];
 		
-		if(B.label > sdf::StFront1+3) {
+		if(B.label > sdf::StFront3) {
 /// stop
 			B.stat = sdf::StVisited;
 		} else {

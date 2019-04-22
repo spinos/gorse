@@ -148,3 +148,10 @@ void RenderWidget::recvPreRenderRestart()
 {
     emit preRenderRestart();
 }
+
+void RenderWidget::recvFocusCameraOn(const alo::Float4 &centerRadius)
+{
+    m_perspCamera->lookAt(centerRadius);
+    m_interface->setChangedCamera();
+    m_thread->render();
+}

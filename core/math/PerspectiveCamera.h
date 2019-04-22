@@ -34,6 +34,10 @@ public:
 /// tan(fieldOfView / 2)
 	float tanhfov() const;
 
+protected:
+
+	virtual void calculateFocusDistanceAperture(const float &radius) override;
+
 private:
 	
 };

@@ -81,7 +81,8 @@ protected:
 private:
 	void movePort(GlyphPort *pt, const Connectable *c);
 	void processContextMenu(int k);
-	
+	void processFileContextMenu(int k);
+
 private:
 	QGraphicsPixmapItem *m_icon;
 	GlyphOps *m_ops;

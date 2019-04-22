@@ -66,6 +66,10 @@ MainWindow::MainWindow()
 			
     connect(m_scene, &VachellScene::sendBound,
             m_renderView, &RenderWidget::recvBound );
+
+    connect(m_scene, &VachellScene::sendFocusCameraOn,
+            m_renderView, &RenderWidget::recvFocusCameraOn );
+    
 #else
     
 #endif
