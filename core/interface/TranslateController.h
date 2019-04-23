@@ -1,11 +1,11 @@
 /*
- *  RenderableCoordinateSystem.h
+ *  TranslateController.h
  *  vachellia
  *
  */
 
-#ifndef VCHL_RENDERABLE_COORDINATE_SYSTEM_H
-#define VCHL_RENDERABLE_COORDINATE_SYSTEM_H
+#ifndef VCHL_TRANSLATE_CONTROLLER_H
+#define VCHL_TRANSLATE_CONTROLLER_H
 
 #include "RenderableObject.h"
 #include <math/TransformComponent.h>
@@ -16,15 +16,15 @@ class RenderableSphere;
 class RenderableCylinder;
 class RenderableCone;
 
-class RenderableCoordinateSystem : public RenderableObject, public TransformComponent {
+class TranslateController : public RenderableObject, public TransformComponent {
 
 	RenderableSphere *m_sphere;
 	RenderableCylinder *m_axis[3];
 	RenderableCone *m_arrow[3];
 	
 public:
-	RenderableCoordinateSystem();
-	virtual ~RenderableCoordinateSystem();
+	TranslateController();
+	virtual ~TranslateController();
 
 	virtual bool intersectRay(const Ray& aray, IntersectResult& result) override;
 

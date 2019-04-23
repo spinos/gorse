@@ -1,26 +1,23 @@
 /*
- *  HorizonOps.h
+ *  UnionOps.h
  *  vachellia
  *
  */
 
-#ifndef VCHL_HORIZON_OPS_H
-#define VCHL_HORIZON_OPS_H
+#ifndef VCHL_UNION_OPS_H
+#define VCHL_UNION_OPS_H
 
-#include "RenderableOps.h"
+#include "TransformOps.h"
 
 namespace alo {
 
-class HorizonOps : public RenderableOps {
-    
-    Vector3F m_center;
-    float m_planetRadius;
+class UnionOps : public TransformOps {
 
 public:
-	enum { Type = 299105 };
+	enum { Type = 800001 };
 
-    HorizonOps();
-    virtual ~HorizonOps();
+    UnionOps();
+    virtual ~UnionOps();
 
     virtual std::string opsName() const override;
 
@@ -34,7 +31,6 @@ protected:
     
 private:
     
-
 };
 
 }

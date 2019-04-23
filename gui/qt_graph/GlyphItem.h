@@ -10,6 +10,7 @@
 #define GAR_GLYPH_ITEM_H
 
 #include <QGraphicsPathItem>
+#include <vector>
 
 QT_BEGIN_NAMESPACE
 class QPixmap;
@@ -23,6 +24,7 @@ class GlyphHalo;
 class GlyphOps;
 struct Connectable;
 class VisibilityControlItem;
+class GlyphConnection;
 
 class GlyphItem : public QGraphicsPathItem
 {
@@ -55,9 +57,10 @@ public:
 	GlyphOps *ops();
 	
 	QPointF localCenter() const;
-	const std::string& glyphName() const;
+	std::string glyphName() const;
 
-/// before (dis)connect with another via port	
+    bool canConnectTo(GlyphItem* another, GlyphPort* viaPort);
+    void preConnection(GlyphItem* another, GlyphPort* viaPort);
 	void postConnection(GlyphItem* another, GlyphPort* viaPort);
 	void preDisconnection(GlyphItem* another, GlyphPort* viaPort);
 /// after connection via port is changed
@@ -68,6 +71,8 @@ public:
 
 	void beginEditState(QGraphicsItem *item);
 	void endEditState(QGraphicsItem *item);
+    
+    void getConnections(std::vector<GlyphConnection *> &conns);
 
 protected:
 	GlyphPort *addPort(const QString & name, 

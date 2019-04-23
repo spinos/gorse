@@ -26,13 +26,8 @@ public:
 	GlyphConnection(QGraphicsItem * parent = 0);
 	virtual ~GlyphConnection();
 	
-	void setPos0(const QPointF & p);
-	void setPos1(const QPointF & p);
-	void setPort0(GlyphPort * p);
-	void setPort1(GlyphPort * p);
-	void disconnectPort(GlyphPort * p);
-	
 	void updatePath();
+    void updatePathTo(const QPointF & pos);
 	void updatePathByPort(GlyphPort * p);
 	bool isComplete() const;
 	
@@ -41,14 +36,21 @@ public:
 	GlyphItem *node0() const;
 	GlyphItem *node1() const;
 	
-	virtual bool canConnectTo(GlyphPort* p1) const;
-	virtual void breakUp();
+    void originFrom(GlyphPort* p, const QPointF & pos);
+	bool canConnectTo(GlyphPort* p1) const;
+    void destinationTo(GlyphPort* p1);
+	void breakUp();
 	
 	int type() const { return Type; }
 	
 	static bool IsItemConnection(const QGraphicsItem *item);
 	
 protected:
+    void setPos0(const QPointF & p);
+	void setPos1(const QPointF & p);
+	void setPort0(GlyphPort * p);
+	void setPort1(GlyphPort * p);
+    
 	GlyphPort *port0();
 	GlyphPort *port1();
 	static GlyphItem *PortToNode(const GlyphPort *pt);

@@ -58,7 +58,6 @@ private:
 	void doMoveConnection(const QPoint& mousePos);
 	void doConnectItem(QGraphicsItem* item);
 	void doRemoveConnection(QGraphicsItem* item);
-	void removeActiveItem();
 	
 	enum Mode {
 		mNone = 0,

@@ -3,6 +3,7 @@
 
 #include "HorizonOps.h"
 #include "VoxelOps.h"
+#include "UnionOps.h"
 
 #endif
 

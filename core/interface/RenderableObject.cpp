@@ -25,8 +25,17 @@ const int& RenderableObject::objectId() const
 void RenderableObject::setToDestroy()
 { m_state = stWaitDestroy; }
 
-void RenderableObject::setVisibility(bool x)
-{ m_state = m_state ^ stHiddenMask; }
+void RenderableObject::setVisible(bool x)
+{ 
+    if(x == isHidden())
+        m_state = m_state ^ stHiddenMask; 
+}
+
+void RenderableObject::setOverlay(bool x)
+{ 
+    if(x != isOverlay())
+        m_state = m_state ^ stOverlay; 
+}
 
 bool RenderableObject::isToDestroy() const
 { return m_state == stWaitDestroy; }
@@ -35,7 +44,7 @@ bool RenderableObject::isHidden() const
 { return m_state > stHiddenMask; }
 
 bool RenderableObject::isOverlay() const
-{ return m_state == stOverlay; }
+{ return (m_state & stOverlayMask) > stOverlay; }
 
 bool RenderableObject::intersectRay(const Ray& aray, IntersectResult& result)
 { 

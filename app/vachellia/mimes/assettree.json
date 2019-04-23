@@ -56,7 +56,17 @@
                             {
                                 "name": "transform",
                                 "typ": 16
-                            }
+                            },
+                            {
+                                    "name": "outsdf",
+                                    "typ": 3,
+                                    "port": {
+                                        "outgoing": true,
+                                        "side": 2,
+                                        "px": 2,
+                                        "py": 20
+                                    }
+                                }
                         ]
                     }
                     ]
@@ -74,6 +84,16 @@
                             "icon": ":images/union.png",
                             "is_element": true,
                             "attribs" : [
+                                {
+                                    "name": "insdf",
+                                    "typ": 3,
+                                    "port": {
+                                        "outgoing": false,
+                                        "side": 1,
+                                        "px": -2,
+                                        "py": 20
+                                    }
+                                }
                             ]
                         }
                     ]

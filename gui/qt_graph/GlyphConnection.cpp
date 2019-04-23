@@ -12,6 +12,7 @@
 #include "GlyphConnection.h"
 #include "GlyphPort.h"
 #include "GlyphItem.h"
+#include <iostream>
 
 namespace alo {
 
@@ -26,12 +27,6 @@ m_port1(NULL)
 
 GlyphConnection::~GlyphConnection()
 {
-	if(m_port0) {
-		m_port0->removeConnection(this);
-	}
-	if(m_port1) {
-		m_port1->removeConnection(this);
-	}
 }
 
 void GlyphConnection::setPos0(const QPointF & p)
@@ -52,14 +47,10 @@ void GlyphConnection::setPort1(GlyphPort * p)
 	p->addConnection(this);
 }
 
-void GlyphConnection::disconnectPort(GlyphPort * p)
-{
-	if(m_port0 == p) {
-		m_port0 = 0;
-	}
-	if(m_port1 == p) {
-		m_port1 = 0;
-	}
+void GlyphConnection::updatePathTo(const QPointF & pos)
+{ 
+    setPos1(pos);
+    updatePath();
 }
 
 void GlyphConnection::updatePath()
@@ -108,7 +99,11 @@ GlyphPort * GlyphConnection::port1()
 { return m_port1; }
 
 bool GlyphConnection::canConnectTo(GlyphPort* p1) const
-{ return true; }
+{ 
+	GlyphItem * srcNode = node0();
+    GlyphItem * destNode = PortToNode(p1);
+    return destNode->canConnectTo(srcNode, p1); 
+}
 
 bool GlyphConnection::IsItemConnection(const QGraphicsItem *item)
 {
@@ -118,10 +113,43 @@ bool GlyphConnection::IsItemConnection(const QGraphicsItem *item)
 	return (item->type() == GlyphConnection::Type);
 }
 
+void GlyphConnection::originFrom(GlyphPort* p, const QPointF & pos)
+{
+    setPort0(p);
+    setPos0(pos);
+}
+
+void GlyphConnection::destinationTo(GlyphPort* p1)
+{
+    GlyphItem * srcNode = node0();
+    GlyphItem * destNode = PortToNode(p1);
+    
+	destNode->preConnection(srcNode, p1);
+    
+    setPort1(p1);
+	updatePath();
+			
+	destNode->postConnection(srcNode, p1);
+}
+
 void GlyphConnection::breakUp()
 {
-	m_port1->removeConnection(this);
-	m_port0->removeConnection(this);
+    GlyphItem * n1 = node1();
+    GlyphItem * n0 = node1();
+	if(m_port1) {
+        
+        n1->preDisconnection(n0, m_port1);
+        m_port1->removeConnection(this);
+        n1->postDisconnection(m_port1);
+        m_port1 = nullptr;
+	}
+    if(m_port0) {
+        
+        n0->preDisconnection(n1, m_port0);
+        m_port0->removeConnection(this);
+        n0->postDisconnection(m_port0);
+        m_port0 = nullptr;
+	}
 }
 
 GlyphItem *GlyphConnection::node0() const

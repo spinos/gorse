@@ -14,6 +14,7 @@
 #include "Attrib.h"
 #include <qt_base/AFileDlg.h>
 #include <math/BaseCamera.h>
+#include <boost/format.hpp>
 
 namespace alo {
 
@@ -54,7 +55,7 @@ GlyphPort * GlyphItem::addPort(const QString & name,
 {
 	GlyphPort * pt = new GlyphPort(this);
 	pt->setPortName(name);
-	pt->setIsOutgoing(isOutgoing);
+    pt->setIsOutgoing(isOutgoing);
 	return pt;
 }
 
@@ -168,14 +169,12 @@ void GlyphItem::movePort(GlyphPort *pt, const Connectable *c)
 			px = c->_px;
 			py = c->_py - 8;
 			break;
-		case ConnectBottom :
+		default:
 			px = c->_px;
 			py = m_blockHeight + 8;
 			break;
-		default :
-			break;
 	}
-
+    
 	pt->setPos(px, py);
 }
 
@@ -228,14 +227,24 @@ void GlyphItem::endEditState(QGraphicsItem *item)
 	}
 }
 
-const std::string& GlyphItem::glyphName() const
-{ return "";//m_ops->glyphName(); 
+std::string GlyphItem::glyphName() const
+{ 
+    return boost::str(boost::format("%1%_%2%") % m_ops->opsName() % m_glyphId );
 }
+
+bool GlyphItem::canConnectTo(GlyphItem* another, GlyphPort* viaPort)
+{
+    return m_ops->canConnectTo(another->ops(), 
+				viaPort->portName().toStdString() ); 
+}
+
+void GlyphItem::preConnection(GlyphItem* another, GlyphPort* viaPort)
+{}
 
 void GlyphItem::postConnection(GlyphItem* another, GlyphPort* viaPort)
 { 
-	//m_ops->connectTo(another->attrib(), 
-	//			viaPort->portName().toStdString() ); 
+	m_ops->connectTo(another->ops(), 
+				viaPort->portName().toStdString() ); 
 }
 
 void GlyphItem::postSelection()
@@ -246,13 +255,24 @@ void GlyphItem::postSelection()
 
 void GlyphItem::preDisconnection(GlyphItem* another, GlyphPort* viaPort)
 {
-	//m_ops->disconnectFrom(another->attrib(),
-	//				viaPort->portName().toStdString() );
+	m_ops->disconnectFrom(another->ops(),
+					viaPort->portName().toStdString() );
 }
 
 void GlyphItem::postDisconnection(GlyphPort* viaPort)
 {
-	//m_ops->postPortChange(viaPort->portName().toStdString() );
+	m_ops->postConnectionChange(viaPort->portName().toStdString() );
 }
 
+void GlyphItem::getConnections(std::vector<GlyphConnection *> &conns)
+{
+    foreach(QGraphicsItem *port_, childItems()) {
+		if (port_->type() != GlyphPort::Type) continue;
+
+		GlyphPort *port = (GlyphPort*) port_;
+		port->getConnections(conns);
+		
+	}
 }
+
+} /// end of namespace alo

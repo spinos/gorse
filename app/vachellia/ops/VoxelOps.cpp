@@ -1,5 +1,5 @@
 /*
- *  HorizonOps.cpp
+ *  VoxelOps.cpp
  *  vachellia
  *
  */
@@ -37,6 +37,9 @@ VoxelOps::~VoxelOps()
     delete m_rule;
     delete m_field;
 }
+
+std::string VoxelOps::opsName() const
+{ return "voxel"; }
 
 void VoxelOps::addRenderableTo(RenderableScene *scene)
 {

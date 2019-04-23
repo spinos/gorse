@@ -43,6 +43,8 @@ public:
 
 	void setOpsId(int x);
 	const int &opsId() const;
+
+	virtual std::string opsName() const;
 	
 	virtual void update();
     virtual bool hasRenderable() const;
@@ -55,8 +57,16 @@ public:
 	virtual void getMenuItems(std::vector<std::pair<std::string, int > > &ks) const;
 	virtual void recvAction(int x);
 	virtual void recvCameraChanged(const CameraEvent &x);
+
 	virtual AFileDlgProfile *writeFileProfileR () const;
 	virtual AFileDlgProfile *readFileProfileR () const;
+
+	virtual bool canConnectTo(GlyphOps *another, const std::string &portName) const;
+	virtual void connectTo(GlyphOps *another, const std::string &portName);
+	virtual void disconnectFrom(GlyphOps *another, const std::string &portName);
+	virtual void postConnectionChange(const std::string &portName);
+
+	virtual void preDestruction();
 
 	void setGlyphScene(GlyphScene *x);
 	GlyphScene *glyphScene();

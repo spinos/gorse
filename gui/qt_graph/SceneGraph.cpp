@@ -2,7 +2,7 @@
  *  SceneGraph.cpp
  *  
  *
- *  Created by jian zhang on 3/30/17.
+ *  Created by jian zhang on 2019/4/24.
  *  Copyright 2017 __MyCompanyName__. All rights reserved.
  *
  */
@@ -159,12 +159,12 @@ void SceneGraph::processSelect(const QPoint & pos)
 	if (item) {
          if(GlyphPort::IsItemOutgoingPort(item) ) {
 			m_mode = mConnectItems;
+
 /// todo different connections
 			m_selectedConnection = new GlyphConnection;
-			m_selectedConnection->setPos0(item->scenePos() );
-			
+
 			GlyphPort * pt = static_cast<GlyphPort *>(item);
-			m_selectedConnection->setPort0(pt);
+			m_selectedConnection->originFrom(pt, item->scenePos() );
 			
 			scene()->addItem(m_selectedConnection);
 
@@ -219,38 +219,21 @@ void SceneGraph::doMoveItem(const QPoint& mousePos)
 
 void SceneGraph::doMoveConnection(const QPoint& mousePos)
 {
-	if(!m_selectedConnection)
-		return;
+	if(!m_selectedConnection) return;
 		
 	QPointF pf(mousePos.x(), mousePos.y() );
 	pf.rx() -= m_sceneOrigin.x();
 	pf.ry() -= m_sceneOrigin.y();
-	m_selectedConnection->setPos1(pf );
-	m_selectedConnection->updatePath();
+	m_selectedConnection->updatePathTo(pf);
 }
 
 void SceneGraph::doConnectItem(QGraphicsItem* item)
 {
-	if(!m_selectedConnection)
-		return;
+	if(!m_selectedConnection) return;
 		
 	if(GlyphPort::IsItemIncomingPort(item)) {
-		QPointF pf = item->scenePos();
-		m_selectedConnection->setPos1(pf );
-		GlyphPort * p1 = (GlyphPort *)item;
-		if(m_selectedConnection->canConnectTo(p1) ) {
-			m_selectedConnection->setPort1(p1);
-			m_selectedConnection->updatePath();
-			
-			GlyphItem * srcNode = m_selectedConnection->node0();
-			GlyphItem * destNode = m_selectedConnection->node1();
-			destNode->postConnection(srcNode, p1);
-			//qDebug()<<" made connection "<<m_selectedConnection->port0()->portName()
-			//    <<" -> "<<pt->portName();				
-		} else {		
-			//qDebug()<<" rejects connection "<<m_selectedConnection->port0()->parentItem()
-			//<<" -> "<<pt->parentItem();
-		}
+		GlyphPort * p1 = static_cast<GlyphPort *>(item);
+		asGlyphScene()->createConnection(m_selectedConnection, p1);
 	}
 	
 	if(!m_selectedConnection->isComplete() ) {
@@ -263,7 +246,7 @@ void SceneGraph::doConnectItem(QGraphicsItem* item)
 void SceneGraph::doRemoveConnection(QGraphicsItem* item)
 {
 	GlyphConnection *conn = static_cast<GlyphConnection *>(item);
-	conn->breakUp();
+	asGlyphScene()->removeConnection(conn);
 	scene()->removeItem( item );
 	delete item;
 }
@@ -294,7 +277,6 @@ void SceneGraph::endProcessItem(QGraphicsItem *item)
 		
 	if (item->type() == StateControlItem::Type) {
 		selectedItem->endEditState(item);
-		//emit sendGraphChanged();
 		asGlyphScene()->onItemVisibilityChanged();
 	}
 
@@ -303,15 +285,7 @@ void SceneGraph::endProcessItem(QGraphicsItem *item)
 void SceneGraph::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Delete) 
-    	asGlyphScene()->removeActiveItem();
+    	asGlyphScene()->removeActiveGlyph();
 }
 
-void SceneGraph::removeActiveItem()
-{
-	GlyphItem *g = asGlyphScene()->getActiveGlyph();
-	if(!g) return;
-	scene()->removeItem(g);
-	delete g;
-}
-
-}
+} /// end of namespace alo

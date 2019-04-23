@@ -10,6 +10,7 @@
 #include "AcaciaScene.h"
 #include "ops/AllOps.h"
 #include <qt_graph/GlyphItem.h>
+#include <qt_graph/GlyphConnection.h>
 #include <math/CameraEvent.h>
 #include <math/AFrustum.h>
 
@@ -98,4 +99,18 @@ void AcaciaScene::recvRequestBound()
 
 void AcaciaScene::onItemVisibilityChanged()
 { emit sendUpdateDrawable(); }
+
+void AcaciaScene::createConnection(GlyphConnection *conn, GlyphPort *port)
+{
+    if(!conn->canConnectTo(port) ) return;
+	
+	conn->destinationTo(port);
+    emit sendUpdateDrawable();
+}
+
+void AcaciaScene::removeConnection(GlyphConnection *conn)
+{
+	conn->breakUp();
+    emit sendUpdateDrawable();
+}
 

@@ -28,7 +28,9 @@ public:
 	virtual ~AcaciaScene();
 	
 	virtual void onItemVisibilityChanged() override;
-
+    virtual void createConnection(alo::GlyphConnection *conn, alo::GlyphPort *port) override;
+    virtual void removeConnection(alo::GlyphConnection *conn) override;
+    
 signals:
 	void sendUpdateDrawable();
 	void sendBound(const alo::Hexahedron &x);

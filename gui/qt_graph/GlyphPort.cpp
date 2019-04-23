@@ -23,9 +23,9 @@ GlyphPort::GlyphPort(QGraphicsItem * parent) : QGraphicsEllipseItem(parent)
 
 GlyphPort::~GlyphPort()
 {
-	foreach(GlyphConnection *conn, m_connections) {
-		conn->disconnectPort(this);
-	}
+	//foreach(GlyphConnection *conn, m_connections) {
+	//	conn->disconnectPort(this);
+	//}
 }
 
 void GlyphPort::setPortName(const QString & name)
@@ -75,6 +75,13 @@ int GlyphPort::numConnections() const
 const GlyphConnection * GlyphPort::connection(const int & i) const
 { return m_connections[i]; }
 
+void GlyphPort::getConnections(std::vector<GlyphConnection *> &conns) const
+{
+    foreach(GlyphConnection *conn, m_connections) {
+		conns.push_back(conn);
+	}
+}
+
 bool GlyphPort::IsItemPort(const QGraphicsItem *item)
 {
 	if(!item)
@@ -85,9 +92,8 @@ bool GlyphPort::IsItemPort(const QGraphicsItem *item)
 
 bool GlyphPort::IsItemOutgoingPort(const QGraphicsItem *item)
 {
-	if(!IsItemPort(item) ) {
-		return false;
-	}
+	if(!IsItemPort(item) ) return false;
+
 	const GlyphPort * pt = (const GlyphPort *)item;
 	return pt->isOutgoing();
 }

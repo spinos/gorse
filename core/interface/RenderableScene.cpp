@@ -17,6 +17,7 @@
 #include "RenderableCylinder.h"
 #include "RenderableCone.h"
 #include "RenderableCoordinateSystem.h"
+#include "TranslateController.h"
 
 namespace alo {
 
@@ -24,14 +25,21 @@ RenderableScene::RenderableScene() : m_objectCount(0),
 m_changed(false)
 {
 	RenderableCoordinateSystem *b = new RenderableCoordinateSystem;
+    b->setOverlay(true);
 	enqueueCreateRenderable(b, 0);
+    
+    TranslateController *t = new TranslateController;
+    t->setOverlay(true);
+    t->setVisible(false);
+    enqueueCreateRenderable(t, 1);
+    
     processCreateRenderableQueue();
+    
 }
 
 bool RenderableScene::intersectRay(const Ray& aray, IntersectResult& result) const
 { 
     aray.get(result.rayData());
-	//result.rayDistance() = 1e9f;
 	bool hasIntersection = false;
 	bool isFinished = false;
 
@@ -46,7 +54,7 @@ bool RenderableScene::intersectRay(const Ray& aray, IntersectResult& result) con
             if(it._object->intersectRay(aray, result))
             	hasIntersection = true;
 
-            if(it._object->isOverlay()) {
+            if(hasIntersection && it._object->isOverlay()) {
             	isFinished = true;
             	break;
             }

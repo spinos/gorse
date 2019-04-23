@@ -23,7 +23,8 @@ public:
 
 	void setObjectId(int x);
 	void setToDestroy();
-	void setVisibility(bool x);
+	void setVisible(bool x);
+    void setOverlay(bool x);
     
     const int& objectId() const;
     bool isToDestroy() const;
@@ -41,7 +42,8 @@ private:
         stUnknown = 0,
         stWaitDestroy,
         stNormal = 3,
-        stOverlay = 7,
+        stOverlay = 128,
+        stOverlayMask = 255,
         stHiddenMask = 256
     };
 	int m_state;

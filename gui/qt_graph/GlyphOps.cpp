@@ -25,6 +25,9 @@ void GlyphOps::setOpsId(int x)
 const int &GlyphOps::opsId() const
 { return m_opsId; }
 
+std::string GlyphOps::opsName() const
+{ return "ops"; }
+
 void GlyphOps::update()
 { qDebug()<<"GlyphOps::update"; }
 
@@ -186,8 +189,7 @@ QAttrib *GlyphOps::addMeshAttribute(const QJsonObject &content)
 
 void GlyphOps::addConnection(QAttrib *b, const QJsonObject &content)
 {
-	if(!content.contains("port"))
-		return;
+	if(!content.contains("port")) return;
 
 	QJsonObject portObj = content["port"].toObject();
 	Connectable *c = new Connectable;
@@ -438,4 +440,27 @@ void GlyphOps::setGlyphScene(GlyphScene *x)
 GlyphScene *GlyphOps::glyphScene()
 { return m_gscene; }
 
+bool GlyphOps::canConnectTo(GlyphOps *another, const std::string &portName) const
+{ return true; }
+
+void GlyphOps::connectTo(GlyphOps *another, const std::string &portName)
+{
+	std::cout << "\n GlyphOps::connectTo " << another << " via " << portName;
 }
+
+void GlyphOps::disconnectFrom(GlyphOps *another, const std::string &portName)
+{
+	std::cout << "\n GlyphOps::disconnectFrom " << another << " via " << portName;
+}
+
+void GlyphOps::postConnectionChange(const std::string &portName)
+{
+	std::cout << "\n GlyphOps::postConnectionChange port " << portName; 
+}
+
+void GlyphOps::preDestruction()
+{
+	std::cout << "\n GlyphOps::preDestruction "; 
+}
+
+} /// end of namespace alo

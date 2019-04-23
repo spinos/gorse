@@ -30,6 +30,8 @@ public:
     VoxelOps();
     virtual ~VoxelOps();
 
+    virtual std::string opsName() const override;
+
     virtual void addRenderableTo(RenderableScene *scene) override;
 
     virtual void update() override;

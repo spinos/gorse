@@ -13,7 +13,7 @@ bool RenderableOps::hasRenderable() const
 { return true; }
 
 void RenderableOps::setDrawableVisible(bool x)
-{ RenderableObject::setVisibility(x); }
+{ RenderableObject::setVisible(x); }
 
 void RenderableOps::setRenderableScene(RenderableScene *x)
 { m_scene = x; }

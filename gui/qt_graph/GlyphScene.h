@@ -26,6 +26,8 @@ namespace alo {
 
 class GlyphItem;
 class GlyphOps;
+class GlyphConnection;
+class GlyphPort;
 
 template<typename T>
 class GroupCollection;
@@ -45,20 +47,23 @@ public:
 	void selectGlyph(GlyphItem *item);
 	void deselectGlyph(GlyphItem *item);
 	void deselectAllGlyph();
-	void removeActiveItem();
+	void removeActiveGlyph();
 
 	GlyphItem *getActiveGlyph() const;
 	GlyphOps *getActiveOps() const;
 	
 	virtual void onItemVisibilityChanged() = 0;
 	virtual void onFocusIn3D(const Float4 &centerRadius);
-
+	virtual void createConnection(GlyphConnection *conn, GlyphPort *port) = 0;
+	virtual void removeConnection(GlyphConnection *conn) = 0;
+	
 signals:
 	void sendSelectGlyph(bool x);
 	void sendFocusCameraOn(const Float4 &centerRadius);
 	
 protected:
 	virtual GlyphOps *createOps(const QJsonObject &content);
+	
 	virtual void postCreation(GlyphItem *item) = 0;
 	virtual void preDestruction(GlyphItem *item) = 0;
 

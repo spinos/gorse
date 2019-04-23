@@ -20,6 +20,9 @@ m_planetRadius(6378.f)
 HorizonOps::~HorizonOps()
 {}
 
+std::string HorizonOps::opsName() const 
+{ return "horizon"; }
+
 void HorizonOps::addRenderableTo(RenderableScene *scene)
 {
     setRenderableScene(scene);

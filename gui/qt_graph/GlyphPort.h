@@ -12,6 +12,7 @@
 #define ALO_GLYPH_PORT_H
 
 #include <QGraphicsEllipseItem>
+#include <vector>
 
 namespace alo {
 
@@ -38,6 +39,7 @@ public:
 	
 	int numConnections() const;
 	const GlyphConnection * connection(const int & i) const;
+    void getConnections(std::vector<GlyphConnection *> &conns) const;
 	
 	int type() const { return Type; }
 	

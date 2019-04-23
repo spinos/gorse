@@ -11,6 +11,7 @@
 #include "ops/allOps.h"
 #include <qt_graph/GlyphOps.h>
 #include <qt_graph/GlyphItem.h>
+#include <qt_graph/GlyphConnection.h>
 #include <math/CameraEvent.h>
 #include <math/AFrustum.h>
 #include <math/Hexahedron.h>
@@ -33,6 +34,8 @@ GlyphOps *VachellScene::createOps(const QJsonObject &content)
             return new HorizonOps;
         case VoxelOps::Type :
             return new VoxelOps;
+        case UnionOps::Type :
+            return new UnionOps;
         default:
             ;
     }
@@ -56,6 +59,7 @@ void VachellScene::preDestruction(GlyphItem *item)
         RenderableOps *dop = static_cast<RenderableOps *>(op);
         dop->removeRenderableFromScene();
     }
+    op->preDestruction();
     m_garbageOp = op;
     emit sendUpdateDrawable();
 }
@@ -101,4 +105,20 @@ void VachellScene::recvPreRenderRestart()
         delete m_garbageOp;
         m_garbageOp = nullptr;
     } 
+}
+
+void VachellScene::createConnection(GlyphConnection *conn, GlyphPort *port)
+{
+    if(!conn->canConnectTo(port) ) return;
+	
+	conn->destinationTo(port);
+    RenderableScene::setSceneChanged();
+	emit sendUpdateDrawable();
+}
+
+void VachellScene::removeConnection(GlyphConnection *conn)
+{
+	conn->breakUp();
+    RenderableScene::setSceneChanged();
+	emit sendUpdateDrawable();
 }

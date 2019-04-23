@@ -108,6 +108,8 @@ void AttribEditor::lsAttribs(GlyphOps *ops)
 
 void AttribEditor::lsAttr(QAttrib *attr)
 {
+    if(attr->connection()) return;
+    
 	switch(attr->attrType()) {
 		case QAttrib::AtFloat :
 			lsFloatAttr(attr);

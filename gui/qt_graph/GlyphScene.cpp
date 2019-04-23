@@ -120,7 +120,7 @@ void GlyphScene::deselectGlyph(GlyphItem *item)
 	}
 }
 
-void GlyphScene::removeActiveItem()
+void GlyphScene::removeActiveGlyph()
 {
 	if(!m_activeGlyph) return;
 
@@ -130,6 +130,14 @@ void GlyphScene::removeActiveItem()
 	GlyphHalo* h = m_activeGlyph->halo();
 	QGraphicsScene::removeItem(h);
 	delete h;
+
+	std::vector<GlyphConnection *> conns;
+	m_activeGlyph->getConnections(conns);
+	foreach(GlyphConnection *conn, conns) {
+		conn->breakUp();
+		QGraphicsScene::removeItem(conn);
+		delete conn;
+	}
 
 	preDestruction(m_activeGlyph);
 
