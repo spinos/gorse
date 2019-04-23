@@ -31,8 +31,10 @@
     <file>images/sdf_small.png</file>
     <file>images/primitive_small.png</file>
     <file>images/controller_small.png</file>
+    <file>images/complex_small.png</file>
     <file>images/horizon.png</file>
 	<file>images/voxel.png</file>
+    <file>images/union.png</file>
     <file>mimes/assettree.json</file>
     <file>mimes/attribpreset.json</file>
 </qresource>

@@ -60,6 +60,23 @@
                         ]
                     }
                     ]
+                },
+                {
+                    "id": 800000,
+                    "name": "complex_sdf",
+                    "label": "Complex",
+                    "icon": ":images/complex_small.png",
+                    "children": [
+                        {
+                            "id": 800001,
+                            "name": "union_sdf",
+                            "label": "Union",
+                            "icon": ":images/union.png",
+                            "is_element": true,
+                            "attribs" : [
+                            ]
+                        }
+                    ]
                 }
             ]
         },
