@@ -85,6 +85,10 @@
                             "is_element": true,
                             "attribs" : [
                                 {
+                                    "name": "transform",
+                                    "typ": 16
+                                },
+                                {
                                     "name": "insdf",
                                     "typ": 3,
                                     "port": {

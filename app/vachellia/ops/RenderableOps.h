@@ -1,3 +1,10 @@
+/*
+ *  RenderableOps.h
+ *  vachellia
+ *
+ *  2019/4/25
+ */
+
 #ifndef RENDERABLE_GLYPH_OPS_H
 #define RENDERABLE_GLYPH_OPS_H
 
@@ -21,6 +28,10 @@ public:
     
     virtual void addRenderableTo(RenderableScene *scene) = 0;
 	virtual void removeRenderableFromScene();
+    
+    virtual void expandAabb(float *box) const = 0;
+    virtual float mapDistance(const float *q) const = 0;
+    virtual Vector3F mapNormal(const float *q) const = 0;
     
 protected:
     void setRenderableScene(RenderableScene *x);

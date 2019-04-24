@@ -56,6 +56,7 @@ void VoxelOps::update()
     fcp->getValue(scachePath);
     if(m_cachePath != scachePath && scachePath.size() > 3)
         loadCache(scachePath);
+    m_outOps.update();
 }
 
 bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
@@ -78,21 +79,18 @@ bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
         
         rayTravel(q, rayData);
 
-        float d = m_rule->lookup((const float *)&q);
+        float d = m_rule->lookup(q);
 
-        if(d < 1e-4f) break;
+        if(d < 1e-3f) break;
 
         if(d < tt * 1e-5f) break;
 
-        tt += d * .7f;
+        tt += d * .8f;
      
         if(tt > tLimit) return false;
     }
 
-    Vector3F tn = m_rule->lookupNormal(q);
-
-    rayToWorld(rayData);
-    normalToWorld((float *)&tn);
+    Vector3F tn = mapNormal(q);
 
     return result.updateRayDistance(tt, tn);
 }
@@ -153,6 +151,42 @@ bool VoxelOps::loadCache(const std::string &fileName)
     progress.setValue(1);
     return stat;
 
+}
+
+void VoxelOps::connectTo(GlyphOps *another, const std::string &portName)
+{
+    RenderableOps *r = static_cast<RenderableOps *>(another);
+    std::cout << "\n VoxelOps " << this << " connectTo renderable " << r;
+    m_outOps.append(r);
+}
+
+void VoxelOps::disconnectFrom(GlyphOps *another, const std::string &portName)
+{
+    RenderableOps *r = static_cast<RenderableOps *>(another);
+    m_outOps.remove(r);
+    std::cout << "\n VoxelOps " << this << " disconnectFrom renderable " << r;
+}
+
+float VoxelOps::mapDistance(const float *q) const
+{
+    if(m_field->isEmpty()) 
+        return TransformOps::mapDistance(q);
+
+    float a[3];
+    memcpy(a, q, 12);
+    pointToLocal(a);
+
+    return m_rule->lookup(a);
+}
+
+Vector3F VoxelOps::mapNormal(const float *q) const
+{
+    if(m_field->isEmpty()) 
+        return TransformOps::mapNormal(q);
+    
+    Vector3F tn = m_rule->lookupNormal(q);
+    normalToWorld((float *)&tn);
+    return tn;
 }
 
 }

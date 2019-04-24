@@ -443,6 +443,11 @@ GlyphScene *GlyphOps::glyphScene()
 bool GlyphOps::canConnectTo(GlyphOps *another, const std::string &portName) const
 { return true; }
 
+void GlyphOps::preConnectTo(GlyphOps *another, const std::string &portName)
+{
+	std::cout << "\n GlyphOps::preConnectTo " << another << " via " << portName;
+}
+
 void GlyphOps::connectTo(GlyphOps *another, const std::string &portName)
 {
 	std::cout << "\n GlyphOps::connectTo " << another << " via " << portName;

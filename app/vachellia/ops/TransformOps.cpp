@@ -2,6 +2,7 @@
  *  TransformOps.cpp
  *  vachellia
  *
+ *  2019/4/25
  */
 
 #include "TransformOps.h"
@@ -10,6 +11,7 @@
 #include <interface/IntersectResult.h>
 #include <qt_graph/GlyphScene.h>
 #include <math/BaseCamera.h>
+#include <math/pointBox.h>
 
 namespace alo {
 
@@ -50,10 +52,7 @@ bool TransformOps::intersectRay(const Ray& aray, IntersectResult& result)
 	const Vector3F pnt(rayData[0] + rayData[3] * tt, 
 						rayData[1] + rayData[4] * tt, 
 						rayData[2] + rayData[5] * tt);
-    Vector3F tn;
-	getNormalOnAabb((float *)&tn, (const float *)&pnt, aabb(), tt * 1e-5f);
-
-	rayToWorld(rayData);
+    Vector3F tn = mapNormal((const float *)&pnt);
 	normalToWorld((float *)&tn);
 
 	return result.updateRayDistance(tt, tn);
@@ -82,6 +81,37 @@ void TransformOps::recvAction(int x)
 
     	glyphScene()->onFocusIn3D(centerR);
     }
+}
+
+void TransformOps::expandAabb(float *box) const
+{
+    float b[6];
+    extractAabb(b);
+    float a[3];
+    for(int i=0;i<8;++i) {
+        getAabbCorner(a, b, i);
+        pointToWorld(a);
+        expandAabbByPoint(box, a);
+    }
+}
+
+float TransformOps::mapDistance(const float *q) const
+{
+	const float *b = c_aabb();
+	float a[3];
+	memcpy(a, q, 12);
+	pointToLocal(a);
+	if(isPointOutsideBox(a, b))
+		return distanceOutsidePointToBox(a, b);
+
+	return -distanceInsidePointToBox(a, b);
+}
+
+Vector3F TransformOps::mapNormal(const float *q) const
+{
+	Vector3F tn;
+	normalOnBox((float *)&tn, q, c_aabb());
+	return tn;
 }
 
 }

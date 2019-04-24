@@ -35,7 +35,10 @@ public:
 
 protected:
     float *aabb();
+    const float *c_aabb() const;
     void extractAabb(float *y) const;
+    void resetAabb();
+    void setAabbNull();
 
 private:
     enum RenderableState {

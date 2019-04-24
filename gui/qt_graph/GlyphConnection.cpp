@@ -124,18 +124,20 @@ void GlyphConnection::destinationTo(GlyphPort* p1)
     GlyphItem * srcNode = node0();
     GlyphItem * destNode = PortToNode(p1);
     
+    srcNode->preConnection(destNode, port0());
 	destNode->preConnection(srcNode, p1);
     
     setPort1(p1);
 	updatePath();
 			
 	destNode->postConnection(srcNode, p1);
+    srcNode->postConnection(destNode, port0());
 }
 
 void GlyphConnection::breakUp()
 {
     GlyphItem * n1 = node1();
-    GlyphItem * n0 = node1();
+    GlyphItem * n0 = node0();
 	if(m_port1) {
         
         n1->preDisconnection(n0, m_port1);

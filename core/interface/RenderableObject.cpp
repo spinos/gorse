@@ -9,8 +9,7 @@ namespace alo {
 RenderableObject::RenderableObject() : m_objectId(0),
 m_state(stNormal)
 {
-	m_aabb[0] = m_aabb[1] = m_aabb[2] = -10.f;
-	m_aabb[3] = m_aabb[4] = m_aabb[5] = 10.f;
+	resetAabb();
 }
 
 RenderableObject::~RenderableObject()
@@ -65,7 +64,22 @@ bool RenderableObject::intersectRay(const Ray& aray, IntersectResult& result)
 float *RenderableObject::aabb()
 { return m_aabb; }
 
+const float *RenderableObject::c_aabb() const
+{ return m_aabb; }
+
 void RenderableObject::extractAabb(float *y) const
 { memcpy(y, m_aabb, 24); }
+
+void RenderableObject::resetAabb()
+{
+	m_aabb[0] = m_aabb[1] = m_aabb[2] = -10.f;
+	m_aabb[3] = m_aabb[4] = m_aabb[5] = 10.f;
+}
+
+void RenderableObject::setAabbNull()
+{
+    m_aabb[0] = m_aabb[1] = m_aabb[2] = 1e10f;
+	m_aabb[3] = m_aabb[4] = m_aabb[5] = -1e10f;
+}
 
 }

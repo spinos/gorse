@@ -8,6 +8,7 @@
 #define VCHL_VOXEL_OPS_H
 
 #include "TransformOps.h"
+#include <math/ElementVector.h>
 
 namespace alo {
 
@@ -23,6 +24,7 @@ class VoxelOps : public TransformOps {
     sdf::SsdField *m_field;
     sdf::SsdfLookupRule<sdf::SsdField> *m_rule;
     std::string m_cachePath;
+    ElementVector<RenderableOps> m_outOps;
 
 public:
 	enum { Type = 703427 };
@@ -38,6 +40,12 @@ public:
     virtual AFileDlgProfile *readFileProfileR () const override;
     
     virtual bool intersectRay(const Ray& aray, IntersectResult& result) override;
+
+    virtual void connectTo(GlyphOps *another, const std::string &portName) override;
+    virtual void disconnectFrom(GlyphOps *another, const std::string &portName) override;
+    
+    virtual float mapDistance(const float *q) const override;
+    virtual Vector3F mapNormal(const float *q) const override;
 
 protected:
     

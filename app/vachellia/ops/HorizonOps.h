@@ -29,11 +29,16 @@ public:
     virtual void update() override;
     
     virtual bool intersectRay(const Ray& aray, IntersectResult& result) override;
+    
+    virtual void expandAabb(float *box) const override;
+
+    virtual float mapDistance(const float *q) const override;
+    virtual Vector3F mapNormal(const float *q) const override;
 
 protected:
     
 private:
-    
+    float radiusInMeters() const;
 
 };
 

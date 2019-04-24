@@ -239,7 +239,10 @@ bool GlyphItem::canConnectTo(GlyphItem* another, GlyphPort* viaPort)
 }
 
 void GlyphItem::preConnection(GlyphItem* another, GlyphPort* viaPort)
-{}
+{
+    m_ops->preConnectTo(another->ops(), 
+				viaPort->portName().toStdString() ); 
+}
 
 void GlyphItem::postConnection(GlyphItem* another, GlyphPort* viaPort)
 { 
