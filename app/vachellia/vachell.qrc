@@ -35,6 +35,7 @@
     <file>images/horizon.png</file>
 	<file>images/voxel.png</file>
     <file>images/union.png</file>
+    <file>images/repeat.png</file>
     <file>mimes/assettree.json</file>
     <file>mimes/attribpreset.json</file>
 </qresource>

@@ -39,7 +39,7 @@ class CubicField {
 public:
 
 	CubicField();
-	~CubicField();
+	virtual ~CubicField();
 	
 /// (origin, cell_size)
 	void setOriginCellSize(const float* v);
@@ -87,6 +87,8 @@ public:
     void printValues() const;
 
     void destroy();
+
+    const int &resolution() const;
 	
 protected:
 
@@ -475,6 +477,10 @@ void CubicField<T>::printValues() const
 template<typename T>
 void CubicField<T>::destroy()
 { m_value.purgeBuffer(); }
+
+template<typename T>
+const int &CubicField<T>::resolution() const
+{ return m_dim[0]; }
 
 }
 

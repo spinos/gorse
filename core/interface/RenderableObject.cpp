@@ -72,14 +72,25 @@ void RenderableObject::extractAabb(float *y) const
 
 void RenderableObject::resetAabb()
 {
-	m_aabb[0] = m_aabb[1] = m_aabb[2] = -10.f;
-	m_aabb[3] = m_aabb[4] = m_aabb[5] = 10.f;
+	m_aabb[0] = m_aabb[1] = m_aabb[2] = -5.f;
+	m_aabb[3] = m_aabb[4] = m_aabb[5] = 5.f;
 }
 
 void RenderableObject::setAabbNull()
 {
     m_aabb[0] = m_aabb[1] = m_aabb[2] = 1e10f;
 	m_aabb[3] = m_aabb[4] = m_aabb[5] = -1e10f;
+}
+
+void RenderableObject::setAabb(float x0, float y0, float z0,
+                float x1, float y1, float z1)
+{
+    m_aabb[0] = x0;
+    m_aabb[1] = y0;
+    m_aabb[2] = z0;
+    m_aabb[3] = x1;
+    m_aabb[4] = y1;
+    m_aabb[5] = z1;
 }
 
 }

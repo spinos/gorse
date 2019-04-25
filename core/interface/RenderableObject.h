@@ -33,11 +33,14 @@ public:
     
 	virtual bool intersectRay(const Ray& aray, IntersectResult& result);
 
+    const float *c_aabb() const;
+    
 protected:
     float *aabb();
-    const float *c_aabb() const;
     void extractAabb(float *y) const;
     void resetAabb();
+    void setAabb(float x0, float y0, float z0,
+                float x1, float y1, float z1);
     void setAabbNull();
 
 private:

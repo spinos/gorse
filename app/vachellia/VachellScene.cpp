@@ -30,10 +30,14 @@ GlyphOps *VachellScene::createOps(const QJsonObject &content)
 {
     int k = content["id"].toInt();
     switch(k) {
+        case BoxOps::Type :
+            return new BoxOps;
         case HorizonOps::Type :
             return new HorizonOps;
         case VoxelOps::Type :
             return new VoxelOps;
+        case RepeatOps::Type :
+            return new RepeatOps;
         case UnionOps::Type :
             return new UnionOps;
         default:

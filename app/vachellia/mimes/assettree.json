@@ -16,6 +16,53 @@
                     "icon": ":images/primitive_small.png",
                     "children": [
                         {
+                            "id": 299100,
+                            "name": "box_sdf",
+                            "label": "Box",
+                            "icon": ":images/cube.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "bx",
+                                    "label": "X Dimension",
+                                    "typ": 3,
+                                    "value": 10.0,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "by",
+                                    "label": "Y Dimension",
+                                    "typ": 3,
+                                    "value": 10.0,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "bz",
+                                    "label": "Z Dimension",
+                                    "typ": 3,
+                                    "value": 10.0,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "transform",
+                                    "typ": 16
+                                },
+                                {
+                                    "name": "outsdf",
+                                    "typ": 3,
+                                    "port": {
+                                        "outgoing": true,
+                                        "side": 2,
+                                        "px": 2,
+                                        "py": 20
+                                    }
+                                }
+                            ]
+                        },
+                        {
                             "id": 299105,
                             "name": "horizon_sdf",
                             "label": "Horizon",
@@ -58,15 +105,15 @@
                                 "typ": 16
                             },
                             {
-                                    "name": "outsdf",
-                                    "typ": 3,
-                                    "port": {
-                                        "outgoing": true,
-                                        "side": 2,
-                                        "px": 2,
-                                        "py": 20
-                                    }
+                                "name": "outsdf",
+                                "typ": 3,
+                                "port": {
+                                    "outgoing": true,
+                                    "side": 2,
+                                    "px": 2,
+                                    "py": 20
                                 }
+                            }
                         ]
                     }
                     ]
@@ -77,6 +124,29 @@
                     "label": "Complex",
                     "icon": ":images/complex_small.png",
                     "children": [
+                        {
+                            "id": 800002,
+                            "name": "repeat_sdf",
+                            "label": "Repeat",
+                            "icon": ":images/repeat.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "transform",
+                                    "typ": 16
+                                },
+                                {
+                                    "name": "insdf",
+                                    "typ": 3,
+                                    "port": {
+                                        "outgoing": false,
+                                        "side": 1,
+                                        "px": -2,
+                                        "py": 20
+                                    }
+                                }
+                            ]
+                        },
                         {
                             "id": 800001,
                             "name": "union_sdf",
