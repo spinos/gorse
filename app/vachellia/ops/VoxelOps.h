@@ -19,12 +19,23 @@ class SsdfLookupRule;
 }
 
 class VoxelOps : public TransformOps {
-    
+
+    typedef sdf::SsdfLookupRule<sdf::SsdField> LookupRuleTyp;
+
+    struct FieldLookupRulePair {
+        sdf::SsdField *_field;
+        LookupRuleTyp *_rule;
+    };
+
+    FieldLookupRulePair *m_pairs;
+    int m_numPairs;
+
     static AFileDlgProfile SReadProfile;
-    sdf::SsdField *m_field;
-    sdf::SsdfLookupRule<sdf::SsdField> *m_rule;
+    //sdf::SsdField *m_field;
+    //sdf::SsdfLookupRule<sdf::SsdField> *m_rule;
     std::string m_cachePath;
     ElementVector<RenderableOps> m_outOps;
+    int m_maxNStep;
 
 public:
 	enum { Type = 703427 };
@@ -51,6 +62,10 @@ protected:
     
 private:
     bool loadCache(const std::string &fileName);
+    void clearAllPairs();
+    void updateAllPairsAabb();
+    void setAllRelativeBoundaryOffset(float x);
+    float mapLocalDistanceTo(const float *q, int &objI) const;
 
 };
 

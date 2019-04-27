@@ -145,7 +145,7 @@ void EdgeCollapseTest::computeMesh()
     DrawableResource *rec = resource();
 
     lockScene();
-    const int beforeFrame = frameNumber() - 2;
+    const int beforeFrame = frameNumber() - 3;
     if(rec->changedOnFrame() > beforeFrame) {
 /// prevent editing unsynchronized resource
         unlockScene();

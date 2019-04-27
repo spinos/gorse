@@ -14,6 +14,8 @@
 #include "IndexGrid.h"
 
 namespace alo {
+    
+namespace grd {
 
 template<int P>
 class IndexGridBuilder {
@@ -77,12 +79,15 @@ void IndexGridBuilder<P>::measure(const T &sample, Tr &rule)
         const float dist = sample.mapDistance(pos);
 /// shorten the distance
         if(distOnGrid[i] > dist) distOnGrid[i] = dist;
-/// store object in cell      
-        if(dist < 0) {           
-        }
+
     }
     
     delete[] ks;
+    
+/// store object in cell      
+
+}
+
 }
 
 }

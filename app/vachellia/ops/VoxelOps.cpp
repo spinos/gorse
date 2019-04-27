@@ -26,16 +26,16 @@ AFileDlgProfile VoxelOps::SReadProfile(AFileDlgProfile::FRead,
         "./",
         "");
    
-VoxelOps::VoxelOps() : m_cachePath("unknown")
+VoxelOps::VoxelOps() : m_cachePath("unknown"),
+m_maxNStep(128),
+m_pairs(nullptr),
+m_numPairs(0)
 {
-    m_field = new sdf::SsdField;
-    m_rule = new sdf::SsdfLookupRule<sdf::SsdField>();
 }
 
 VoxelOps::~VoxelOps()
 {
-    delete m_rule;
-    delete m_field;
+    clearAllPairs();
 }
 
 std::string VoxelOps::opsName() const
@@ -50,18 +50,25 @@ void VoxelOps::addRenderableTo(RenderableScene *scene)
 void VoxelOps::update()
 {
     TransformOps::update();
+
+    float boundary;
+    getFloatAttribValue(boundary, "bthickness");
+    getIntAttribValue(m_maxNStep, "amaxnstep");
+
     QAttrib * acp = findAttrib("cache_path");
     StringAttrib *fcp = static_cast<StringAttrib *>(acp);
     std::string scachePath;
     fcp->getValue(scachePath);
     if(m_cachePath != scachePath && scachePath.size() > 3)
         loadCache(scachePath);
+
+    setAllRelativeBoundaryOffset(boundary);
     m_outOps.update();
 }
 
 bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
 {
-    if(m_field->isEmpty()) 
+    if(m_numPairs < 1)
         return TransformOps::intersectRay(aray, result);
 
     float rayData[8];
@@ -74,12 +81,13 @@ bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
     float &tt = rayData[6];
     const float &tLimit = rayData[7];
     float q[3];
+    int objId;
 
-    for(int i=0;i<256;++i) {
+    for(int i=0;i<m_maxNStep;++i) {
         
         rayTravel(q, rayData);
 
-        float d = m_rule->lookup(q);
+        float d = mapLocalDistanceTo(q, objId);
 
         if(d < 1e-3f) break;
 
@@ -100,6 +108,8 @@ AFileDlgProfile *VoxelOps::readFileProfileR () const
 
 bool VoxelOps::loadCache(const std::string &fileName)
 {
+    clearAllPairs();
+
     QProgressDialog progress("Processing...", QString(), 0, 1, QApplication::activeWindow() );
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
@@ -109,7 +119,6 @@ bool VoxelOps::loadCache(const std::string &fileName)
     bool stat = hio.begin(fileName);
     if(!stat) {
         m_cachePath = "unknown";
-        m_field->destroy();
         progress.setValue(1);
 /// todo unlock here
         return stat;
@@ -128,11 +137,26 @@ bool VoxelOps::loadCache(const std::string &fileName)
         stat = fldNames.size() > 0;
 
         if(stat) {
-            HSsdf reader(fldNames[0]);
+            int n = fldNames.size();
 
-            stat = reader. template load<sdf::SsdField>(*m_field);
+            m_pairs = new FieldLookupRulePair[n];
+
+            for(int i=0;i<n;++i) {
+
+                FieldLookupRulePair &p = m_pairs[i];
+                p._field = new sdf::SsdField;
+                p._rule = new LookupRuleTyp;
+
+                HSsdf reader(fldNames[i]);
+
+                stat = reader. template load<sdf::SsdField>(*p._field);
     
-            reader.close();
+                reader.close();
+
+                p._rule->attach(*p._field);
+            }
+
+            m_numPairs = n;
         }
     }
 
@@ -140,13 +164,10 @@ bool VoxelOps::loadCache(const std::string &fileName)
 /// todo unlock here
     if(stat) {
         m_cachePath = fileName;
-        m_field->getBox(aabb());
-        m_rule->attach(*m_field);
+        updateAllPairsAabb();
     }
     else {
         m_cachePath = "unknown";
-        m_field->destroy();
-        m_rule->dettach();
     }
     progress.setValue(1);
     return stat;
@@ -169,24 +190,74 @@ void VoxelOps::disconnectFrom(GlyphOps *another, const std::string &portName)
 
 float VoxelOps::mapDistance(const float *q) const
 {
-    if(m_field->isEmpty()) 
+    if(m_numPairs < 1)
         return TransformOps::mapDistance(q);
 
     float a[3];
     memcpy(a, q, 12);
     pointToLocal(a);
 
-    return m_rule->lookup(a);
+    int i;
+    return mapLocalDistanceTo(a, i);
 }
 
 Vector3F VoxelOps::mapNormal(const float *q) const
 {
-    if(m_field->isEmpty()) 
+    if(m_numPairs < 1)
         return TransformOps::mapNormal(q);
     
-    Vector3F tn = m_rule->lookupNormal(q);
+    int i;
+    mapLocalDistanceTo(q, i);
+
+    const LookupRuleTyp *r = m_pairs[i]._rule;
+
+    Vector3F tn = r->lookupNormal(q);
     normalToWorld((float *)&tn);
     return tn;
+}
+
+void VoxelOps::clearAllPairs()
+{
+    if(m_numPairs<1) return;
+    const int n = m_numPairs;
+    m_numPairs = 0;
+    for(int i=0;i<n;++i) {
+        FieldLookupRulePair &p = m_pairs[i];
+        delete p._field;
+        delete p._rule;
+    }
+    delete[] m_pairs;
+}
+
+void VoxelOps::updateAllPairsAabb()
+{
+    setAabbNull();
+    for(int i=0;i<m_numPairs;++i) {
+        const sdf::SsdField *r = m_pairs[i]._field;
+        r->expandAabb(aabb());
+    }
+}
+
+void VoxelOps::setAllRelativeBoundaryOffset(float x)
+{
+    if(m_numPairs<1) return;
+    for(int i=0;i<m_numPairs;++i) {
+        LookupRuleTyp *r = m_pairs[i]._rule;
+        r->setRelativeBoundaryOffset(x);
+    }
+}
+
+float VoxelOps::mapLocalDistanceTo(const float *q, int &objI) const
+{
+    float md = 1e10f;
+    for(int i=0;i<m_numPairs;++i) {
+        float d = m_pairs[i]._rule->lookup(q);
+        if(md > d) {
+            md = d;
+            objI = i;
+        }
+    }
+    return md;
 }
 
 }

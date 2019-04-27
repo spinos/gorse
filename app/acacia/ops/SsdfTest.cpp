@@ -14,7 +14,7 @@
 #include <sds/FZOrder.h>
 #include <math/BoundingBox.h>
 #include <ogl/ShapeDrawer.h>
-#include <h5_ssdf/HSsdfIO.h>
+#include <h5/V1H5IO.h>
 #include <smp/Triangle.h>
 #include <smp/SurfaceSample.h>
 #include <sds/SpaceFillingVector.h>
@@ -22,6 +22,14 @@
 #include <rng/Lehmer.h>
 #include <rng/Uniform.h>
 #include <geom/GeodesicSphere.h>
+#include <mesh/randomRibbon.h>
+#include <boost/format.hpp>
+#include <h5_ssdf/HSsdf.h>
+#include <grd/IndexGrid.h>
+#include <grd/IndexGridBuilder.h>
+#include <grd/IndexGridBuildRule.h>
+#include <QProgressDialog>
+#include <QApplication>
 
 namespace alo {
 
@@ -39,11 +47,6 @@ SsdfTest::SsdfTest()
 	m_sfc = new SfcTyp;
 	m_buildRule = new BuildRuleTyp(m_sfc);
 	m_builder = new BuilderTyp;
-	m_field = new FieldTyp;
-	testIt();
-
-	DrawableResource *rec = createResource();
-    setResource(rec);
 }
 
 SsdfTest::~SsdfTest()
@@ -51,7 +54,6 @@ SsdfTest::~SsdfTest()
 	delete m_sfc;
 	delete m_buildRule;
 	delete m_builder;
-	delete m_field;
 }
 
 void SsdfTest::update()
@@ -65,62 +67,104 @@ void SsdfTest::addDrawableTo(DrawableScene *scene)
 
 void SsdfTest::computeMesh()
 {
-	GeodesicSphere transient(11);
-    transient.scaleBy(9.f);
-    transient.translateBy(0.f, 11.7f, 0.f);
-    DrawableResource *rec = resource();
+	for(int i=0;i<8;++i) {
+		AdaptableMesh *transient = new AdaptableMesh;
+		createRandomRibbon(*transient, 6, 97);
+		m_ribbon[i] = transient;
+	}
 
-    lockScene();
-    const int beforeFrame = frameNumber() - 2;
-    if(rec->changedOnFrame() > beforeFrame) {
-/// prevent editing unsynchronized resource
-        unlockScene();
-        return;
+	setDrawableSize(8);
+
+	lockScene();
+    const int n = numResources();
+    for(int i=0;i<n;++i) {
+        DrawableResource *rec = resource(i);
+        UpdateMeshResouce(rec, m_ribbon[i]);
+        processResourceNoLock(rec);
     }
-
-    UpdateMeshResouce(rec, &transient, false);
-
-    processResourceNoLock(rec);
     unlockScene();
+
 }
 
 void SsdfTest::buildSsdf(sds::SpaceFillingVector<SurfaceSample >* samples,
-                const BoundingBox& b)
+                FieldTyp *field, const BoundingBox& b)
 {
-	const Vector3F midP = b.center();
-	const float spanL = b.getLongestDistance();
-	m_sfc->setCoord(midP.x, midP.y, midP.z, spanL * .5f);
+	m_buildRule->setBBox(b);
     m_builder->build(samples, *m_buildRule);
-	m_builder->save<FieldTyp>(*m_field, *m_buildRule);
-	//saveToFile("../data/foo.aloe");
+	m_builder->save<FieldTyp>(*field, *m_buildRule);
 }
 
 void SsdfTest::saveToFile(const std::string &filename)
 {
-	HSsdfIO hio;
+	QProgressDialog progress("Processing...", QString(), 0, 9, QApplication::activeWindow() );
+    progress.setWindowModality(Qt::ApplicationModal);
+    progress.show();
+
+	ver1::H5IO hio;
 	bool stat = hio.begin(filename, HDocument::oCreate );
 	if(!stat) return;
+
+	ver1::HBase ga("/asset");
+
+	FieldTyp *fields[8];
+	float grdBox[6] = {1e10f, 1e10f, 1e10f, -1e10f, -1e10f, -1e10f};
 	
-	hio.saveSsdf<FieldTyp>(*m_field, "foo");
+	for(int i=0;i<8;++i) {
+		fields[i] = new FieldTyp;
+
+		buildField(fields[i], *m_ribbon[i]);
+		fields[i]->expandAabb(grdBox);
+
+		std::string fullName = boost::str(boost::format("/asset/foo_%1%") % i );
+
+		HSsdf writer(fullName);
+		writer.save<FieldTyp>(*fields[i]);
+		writer.close();
+		progress.setValue(i);
+	}
+
+	progress.setValue(8);
+
+	grd::IndexGrid indG;
+	indG.setResolution(1<<4);
+	indG.setAabb(grdBox);
+
+	grd::IndexGridBuilder<4> indBuilder;
+	indBuilder.attach(&indG);
+
+typedef grd::IndexGridBuildRule<sds::FZOrderCurve> IndBuildTyp;
+	IndBuildTyp indRule(m_sfc);
+	indRule.setBBox(grdBox);
+
+typedef sdf::SsdfLookupRule<FieldTyp> IndSampleTyp;
+	IndSampleTyp indSample;
+
+	for(int i=0;i<8;++i) {
+		indSample.attach(*fields[i]);
+		indBuilder.measure<IndSampleTyp, IndBuildTyp>(indSample, indRule);
+	}
+
+	for(int i=0;i<8;++i) {
+		delete fields[i];
+	}
+	
+	ga.close();
 	
 	hio.end();
+	progress.setValue(9);
 }
 
-void SsdfTest::testIt()
+void SsdfTest::buildField(FieldTyp *field, const AdaptableMesh &transient)
 {
 	typedef alo::sds::SpaceFillingVector<SurfaceSample> PntArrTyp;
-	PntArrTyp pnts; 
-    
-    GeodesicSphere transient(11);
-    transient.scaleBy(9.f);
-	transient.translateBy(0.f, 11.7f, 0.f);
+	PntArrTyp pnts;
     
     BoundingBox shapeBox;
     transient.getAabb(shapeBox);
     shapeBox.round();
     std::cout<<"\n shape box"<<shapeBox;
     
-    const float ssz = shapeBox.getLongestDistance() * .00121f;
+    const float ssz = shapeBox.getLongestDistance() * .001f;
 	std::cout << "\n sample size " << ssz;
 	typedef smp::Triangle<SurfaceSample > SamplerTyp;
    
@@ -139,7 +183,7 @@ void SsdfTest::testIt()
     }
     
     std::cout<<"\n n samples "<<pnts.size();
-    buildSsdf(&pnts, shapeBox);
+    buildSsdf(&pnts, field, shapeBox);
 }
 
 bool SsdfTest::hasMenu() const
@@ -153,120 +197,9 @@ void SsdfTest::recvAction(int x)
 
 AFileDlgProfile *SsdfTest::writeFileProfileR () const
 {
-	SWriteProfile._notice = boost::str(boost::format("sparse signed distance field P %1% Q %2% \n storage size (%3%,%4%,%5%,%6%)") 
-        % m_field->P() % m_field->Q() 
-        % m_field->coarseDistanceStorageSize() 
-        % m_field->fineDistanceStorageSize()
-        % m_field->coarseNormalStorageSize() 
-        % m_field->fineNormalStorageSize() );
+	SWriteProfile._notice = boost::str(boost::format("sparse signed distance field P %1% Q %2% \n n mesh %3%") 
+        % 5 % 7 % 8 );
     return &SWriteProfile; 
 }
 
-}
-
-/*void SsdfTest::drawGraph()
-{
-	drawGraph(m_builder->distanceField(), -1e20, 0.1, true, false, false);
-	
-}
-
-void SsdfTest::drawGraph(const BaseDistanceField& fld, float zmin, float zmax, 
-						bool drawEdge, bool drawDist, bool drawNormal)
-{
-	const int& nv = fld.numNodes();
-	if(nv<1) return;
-	const int& ne = fld.numEdges();
-	const BaseDistanceField::NodeType* dns = fld.nodes();
-	const BaseDistanceField::EdgeType* des = fld.edges();
-	float boxCoord[4];
-	boxCoord[3] = m_sfc->_h * 1.733f;
-	float distScal = m_sfc->_h * 1200;
-	
-	ShapeDrawer::BeginLines();
-	
-	for(int i=0;i<nv;++i) {
-		const BaseDistanceField::NodeType& ni = dns[i];
-		
-		if(ni.val > m_sfc->_h * 16)
-			continue;
-			
-		if(ni.pos.z > zmax || ni.pos.z < zmin)
-			continue;
-		
-		float r = ni.val / distScal;
-		if(r > 1.f) r = 1.f;
-		if(r > 0.f)
-			ShapeDrawer::SetColor(r* .1f, .1f + r, 0.f);
-			//continue;
-		else
-			ShapeDrawer::SetColor(.4f - .4f * r, .1f, 0.f);
-			
-		//if(ni.label == sdf::StFront)
-		//	ShapeDrawer::LightYellow();
-		
-		memcpy(boxCoord, &ni.pos, 12);
-		ShapeDrawer::BoundingBox(boxCoord);
-		
-		if(Absolute<float>(ni.val) < (m_sfc->_h * (1<<(10-5))) && drawDist) {
-			Vector3F le = dns[ni._origin].pos;
-			ShapeDrawer::Line((const float*)&ni.pos, (const float*)&le);
-		}
-		
-		if(!drawNormal)
-		    continue;
-		
-		Vector3F nml;
-		if(fld.estimateNodeNormal(nml, i)) {
-
-			ShapeDrawer::DarkGreen();
-			nml = ni.pos + nml * .1f;
-			ShapeDrawer::Line((const float*)&ni.pos, (const float*)&nml);
-			
-		}
-
-	}
-	ShapeDrawer::End();
-
-	if(!drawEdge)
-		return;
-		
-	ShapeDrawer::DarkRed();
-    ShapeDrawer::BeginLines();
-
-	for(int i=0;i<ne;++i) {
-		
-		const BaseDistanceField::EdgeType& ei = des[i];
-		
-		if(dns[ei.vi.x].pos.z > zmax
-			|| dns[ei.vi.x].pos.z < zmin)
-			continue;
-			
-		if(ei.lab > sdf::StFront)
-			ShapeDrawer::DarkRed();
-		else
-			ShapeDrawer::DarkGreen();
-		
-		ShapeDrawer::Line((const float* )&dns[ei.vi.x].pos, 
-						(const float* )&dns[ei.vi.y].pos);
-		
-	}	
-	ShapeDrawer::End();
-}
-
-void SsdfTest::drawSamples()
-{
-	const sds::SpaceFillingVector<PosSample>& samps = m_builder->finestSample();
-	const int n = samps.size();
-	if(n<0)
-		return;
-		
-	ShapeDrawer::DarkBlue();
-	ShapeDrawer::BeginPoints();
-	for(int i=0;i<n;++i) {
-		if(samps[i]._pos.z > 0.f)
-			continue;
-		ShapeDrawer::Vertex((const float*)&samps[i]._pos);
-	}
-	ShapeDrawer::End();
-}
-*/
+} /// end of namespace alo

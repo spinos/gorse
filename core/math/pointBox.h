@@ -67,6 +67,24 @@ inline float distanceOutsidePointToBox(const float *a, const float *b)
     return sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2]);
 }
 
+/// move a to box b
+/// return distance moved
+inline float movePointOntoBox(float *a, const float *b)
+{
+    float q[3];
+    memcpy(q, a, 12);
+    if(a[0] < b[0]) a[0] = b[0];
+    if(a[0] > b[3]) a[0] = b[3];
+    if(a[1] < b[1]) a[1] = b[1];
+    if(a[1] > b[4]) a[1] = b[4];
+    if(a[2] < b[2]) a[2] = b[2];
+    if(a[2] > b[5]) a[2] = b[5];
+    q[0] -= a[0];
+    q[1] -= a[1];
+    q[2] -= a[2];
+    return sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2]);
+}
+
 inline float distanceInsidePointToBox(const float *a, const float *b)
 {
     float d = a[0] - b[0];

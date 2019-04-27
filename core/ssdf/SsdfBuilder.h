@@ -77,6 +77,8 @@ private:
 				Tr& rule);
 /// search nodes on front 				
 	int findFarNode(const int coord, Tr& rule) const;
+/// all nodes in P cell is negative
+	bool isPCellInside(const int coord, Tr& rule) const;
 				
 };
 
@@ -240,9 +242,9 @@ bool SsdfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int* range,
 				const sds::SpaceFillingVector<T>& src,
 				Tr& rule)
 {
-	int iFar = findFarNode(coord, rule);
-	if(iFar < 0)
-		return false;
+	//int iFar = findFarNode(coord, rule);
+	//if(iFar < 0) return false;
+	if(isPCellInside(coord, rule)) return false;
 	
 /// key for Q-P grid
 	const int d = 1<<(Q - P);
@@ -304,6 +306,38 @@ bool SsdfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int* range,
 }
 
 template<typename T, typename Tv, int P, int Q, typename Tr>
+bool SsdfBuilder<T, Tv, P, Q, Tr>::isPCellInside(const int coord, Tr& rule) const
+{
+	const int d = 1<<(Q - P);
+	const int d3 = (d+1)*(d+1)*(d+1);
+	int* ks = new int[d3];
+
+	bool stat = true;
+
+	for(int l=P;l<Q;++l) {
+		rule.getLevelGrid(ks, coord, P, l-P);
+		const int dl = 1<<(l-P);
+		const int d3l = (dl+1)*(dl+1)*(dl+1);
+
+		for(int i=0;i<d3l;++i) {
+			int ind = m_hexa.findNode(ks[i]);
+			if(ind < 0)
+				continue;
+
+			if(m_hexa.nodes()[ind].val > 0) {
+				stat = false;
+				break;
+			}
+		}
+
+		if(!stat) break;
+	}
+
+	delete[] ks;
+	return stat;
+}
+
+template<typename T, typename Tv, int P, int Q, typename Tr>
 int SsdfBuilder<T, Tv, P, Q, Tr>::findFarNode(const int coord, Tr& rule) const
 {
 	const float e = rule.deltaAtLevel(Q);
@@ -350,8 +384,7 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::save(Tf& field, Tr& rule)
 	rule.getDomainOrigin(orih);
 	orih[3] = rule.deltaAtLevel(P);
 	field.setOriginCellSize(orih);
-	std::cout << "\n field origin (" << orih[0] << "," << orih[1] << "," << orih[2] << ") "
-				<< "cell size " << orih[3];
+	field.setBBox(rule.bbox());
 				
 	const DistanceFieldTyp* rootField = m_uniformDistances.back();
 	field.copyCoarseDistanceValue(rootField);

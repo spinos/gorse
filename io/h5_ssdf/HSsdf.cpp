@@ -18,6 +18,7 @@ HBase(name)
 bool HSsdf::verifyType()
 {
 	if(!hasNamedAttr(".coord") ) return 0;
+    if(!hasNamedAttr(".aabb") ) return 0;
 	if(!hasNamedAttr(".pql") ) return 0;
 	if(!hasNamedData(".celli") ) return 0;
 	if(!hasNamedData(".coarse") ) return 0;

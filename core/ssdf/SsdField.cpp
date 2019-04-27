@@ -166,6 +166,38 @@ int SsdField::totalStorageSize() const
 			+ fineNormalStorageSize(); 
 }
 
+void SsdField::setBBox(const BoundingBox &b)
+{ m_bbox = b; }
+
+void SsdField::getAabb(float *b) const
+{ memcpy(b, (const float *)&m_bbox, 24); }
+
+void SsdField::setAabb(const float *b)
+{ memcpy(&m_bbox, b, 24); }
+
+void SsdField::expandAabb(float *b) const
+{
+	const float *d = m_bbox.data();
+	if(b[0] > d[0]) b[0] = d[0];
+	if(b[1] > d[1]) b[1] = d[1];
+	if(b[2] > d[2]) b[2] = d[2];
+	if(b[3] < d[3]) b[3] = d[3];
+	if(b[4] < d[4]) b[4] = d[4];
+	if(b[5] < d[5]) b[5] = d[5];
+}
+
+const float *SsdField::aabb() const
+{ return m_bbox.data(); }
+
+void SsdField::verbose() const
+{
+	std::cout << " SsdField "<<m_P<<" "<<m_Q
+	<<" "<<totalStorageSize()<<" byte origin ("
+	<<originCellSize()[0]<<", "<<originCellSize()[1]<<", "<<originCellSize()[2]
+	<<") cell_size "<<originCellSize()[3] << " delta " << delta()
+	<<" aabb "<<m_bbox;
+}
+
 }
 
 }

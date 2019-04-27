@@ -12,7 +12,6 @@
 
 #include "SsdfBuilder.h"
 #include "SsdfBuildRule.h"
-#include "SsdfContext.h"
 #include "SsdfLookupRule.h"
 #include "SsdField.h"
 

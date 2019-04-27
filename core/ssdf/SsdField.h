@@ -14,7 +14,7 @@
 
 #include <sds/CubicField.h>
 #include <math/SimpleBuffer.h>
-#include <math/Vector3F.h>
+#include <math/BoundingBox.h>
 
 namespace alo {
 
@@ -29,6 +29,7 @@ class SsdField {
 /// to (1<<P)^3 level p cells
 	SimpleBuffer<int> m_cellIndices;
 	int m_P, m_Q, m_fltStorageSize;
+	BoundingBox m_bbox;
 	
 public:
 
@@ -39,6 +40,8 @@ public:
     void destroy();
 /// (origin, cell_size)
 	void setOriginCellSize(const float* v);
+	void setBBox(const BoundingBox &b);
+	void setAabb(const float *b);
 	
     bool isEmpty() const;
 	const int& P() const;
@@ -80,6 +83,11 @@ public:
     Vector3F lookupNormal(const float* u) const;
 
 	int totalStorageSize() const;
+/// b is float[6] in (low, high)
+	void getAabb(float *b) const;
+	void expandAabb(float *b) const;
+	const float *aabb() const;
+	void verbose() const;
     
 protected:
 

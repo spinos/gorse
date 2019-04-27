@@ -39,7 +39,7 @@ class SsdField;
 
 }
 
-//class BaseDistanceField;
+class AdaptableMesh;
 
 struct SurfaceSample;
 
@@ -55,9 +55,10 @@ typedef sdf::SsdfBuilder<SurfaceSample, float, 5, 7, BuildRuleTyp > BuilderTyp;
 	BuilderTyp* m_builder;
 	
 typedef sdf::SsdField FieldTyp;
-	FieldTyp* m_field;
 
 	static AFileDlgProfile SWriteProfile;
+
+	AdaptableMesh *m_ribbon[8];
 
 public:
 
@@ -76,13 +77,11 @@ public:
 protected:
 	
 private:
-	void testIt();
+	void buildField(FieldTyp *field, const AdaptableMesh &transient);
 	void buildSsdf(sds::SpaceFillingVector<SurfaceSample >* samples,
-                const BoundingBox& b);
+                	FieldTyp *field, const BoundingBox& b);
 	void computeMesh();
 	void saveToFile(const std::string &filename);
-	//void drawGraph(const alo::BaseDistanceField& fld, float zmin, float zmax, 
-	//				bool drawEdge, bool drawDist, bool drawNormal);
 	
 };
 

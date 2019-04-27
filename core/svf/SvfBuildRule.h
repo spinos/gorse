@@ -19,12 +19,16 @@ namespace svf {
 template<typename Tc>
 class SvfBuildRule {
 
+    BoundingBox m_bbox;
 /// space filling curve
 	Tc* m_sfc;
 
 public:
 
 	SvfBuildRule(Tc* sfc);
+    
+    void setBBox(const BoundingBox &b);
+    const BoundingBox &bbox() const;
 	
 	int computeKey(const float* p) const;
 	int computeKeyAtLevel(const float* p, int level) const;
@@ -346,6 +350,19 @@ int SvfBuildRule<Tc>::GetGridNumValues(int d)
 	int d1 = (1<<d)+1;
 	return d1*d1*d1;
 }
+
+template<typename Tc>
+void SvfBuildRule<Tc>::setBBox(const BoundingBox &b)
+{
+    m_bbox = b;
+    const Vector3F midP = b.center();
+	const float spanL = b.getLongestDistance();
+	m_sfc->setCoord(midP.x, midP.y, midP.z, spanL * .5f);
+}
+
+template<typename Tc>
+const BoundingBox &SvfBuildRule<Tc>::bbox() const
+{ return m_bbox; }
 
 }
 

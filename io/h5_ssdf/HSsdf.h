@@ -42,6 +42,12 @@ bool HSsdf::save(const T& field)
 	if(!hasNamedAttr(".coord") )
 	    addFloatAttr(".coord", 4);
 	writeFloatAttr(".coord", (float* )field.originCellSize() );
+    
+    if(!hasNamedAttr(".aabb") )
+	    addFloatAttr(".aabb", 6);
+    float b[6];
+    field.getAabb(b);
+	writeFloatAttr(".aabb", b );
 	
 	int pql[3];
 	pql[0] = field.P();
@@ -97,8 +103,8 @@ bool HSsdf::save(const T& field)
 	fineNml.write((char* )field.c_fineNormalValue(), &rect);
 	fineNml.close();
 	
-	std::cout<<"\n HSsdf "<<pathToObject()<<" saved "<<pql[0]<<" "<<pql[1]
-		<<" data "<< field.totalStorageSize() <<" byte "<<std::endl;
+	std::cout<<"\n HSsdf save "<<pathToObject();
+    field.verbose();
 	
 	return true;
 }
@@ -109,6 +115,10 @@ bool HSsdf::load(T& field)
 	float orih[4];
 	readFloatAttr(".coord", orih);
 	field.setOriginCellSize(orih);
+    
+    float b[6];
+    readFloatAttr(".aabb", b);
+    field.setAabb(b);
 	
 	int pql[3];
 	readIntAttr(".pql", pql );
@@ -159,21 +169,9 @@ bool HSsdf::load(T& field)
 	fineNml.open(fObjectId);
 	fineNml.read((char* )field.fineNormalValue(), &rect);
 	fineNml.close();
-/*	
-	const int d = 1<<pql[0];
-	const int n = d*d*d;
-	for(int i=0;i<n;++i) {
-		std::cout<<" "<<field.c_cellIndValue()[i];
-	}
 	
-	const int d1 = 1<<(pql[1]-pql[0]);
-	const int d3 = (d1+1)*(d1+1)*(d1+1);
-	for(int i=0;i<d3;++i) {
-		std::cout<<" "<<field.c_fineDistanceValue()[i];
-	}
-*/	
-	std::cout<<"\n HSsdf "<<pathToObject()<<" loaded "<<pql[0]<<" "<<pql[1]
-		<<" data "<< field.totalStorageSize() <<" byte "<<std::endl;
+	std::cout<<"\n HSsdf load "<<pathToObject();
+    field.verbose();
 
 	return true;
 }

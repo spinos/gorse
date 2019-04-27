@@ -14,6 +14,7 @@
 #define ALO_SSDF_LOOKUP_RULE_H
 
 #include <math/rayBox.h>
+#include <math/pointBox.h>
 #include <math/miscfuncs.h>
 
 namespace alo {
@@ -30,6 +31,7 @@ class SsdfLookupRule {
 	int m_dim[4];
 	const T* m_field;
     float m_delta;
+    float m_boundary;
 	
 public:
 
@@ -37,11 +39,14 @@ public:
 	
 	void attach(const T& field);
     void dettach();
+    
+    void setRelativeBoundaryOffset(float x);
 /// ray is (origin, direction, t0, t1)	
 	bool intersectBox(float* ray) const;
 	
 	float lookup(const float* p) const;
 	Vector3F lookupNormal(const float* p) const;
+    float mapDistance(const float* p) const;
     
     const float &delta() const;
 	
@@ -61,7 +66,8 @@ private:
 };
 
 template<typename T>
-SsdfLookupRule<T>::SsdfLookupRule() : m_field(nullptr)
+SsdfLookupRule<T>::SsdfLookupRule() : m_field(nullptr),
+m_boundary(0.f)
 {}
 
 template<typename T>
@@ -85,6 +91,10 @@ void SsdfLookupRule<T>::dettach()
 { m_field = nullptr; }
 
 template<typename T>
+void SsdfLookupRule<T>::setRelativeBoundaryOffset(float x)
+{ m_boundary = m_delta * x; }
+
+template<typename T>
 bool SsdfLookupRule<T>::intersectBox(float* ray) const
 { return rayBoxIntersect(ray, m_coord); }
 
@@ -93,15 +103,23 @@ float SsdfLookupRule<T>::lookup(const float* p) const
 {
     if(!m_field) return 1e10f;
     if(m_field->isEmpty()) return 1e10f;
+
+    float toBox = 0.f;
+    float q[3];
+    memcpy(q, p, 12);
+    if(isPointOutsideBox(q, m_field->aabb() ) ) {
+    	toBox = movePointOntoBox(q, m_field->aabb() );
+    }
+
 	int u[3];
-	computeCellCoord(u, p);
+	computeCellCoord(u, q);
 	const int c = computeCellInd(u);
 	const int offset = m_field->c_cellIndValue()[c];
 	if(offset >-1) {
 		const float* fv = &m_field->c_fineDistanceValue()[offset>>2];
-		return lookupInCell<float>(p, u, fv);
+		return lookupInCell<float>(q, u, fv) - m_boundary + toBox;
 	}
-	return m_field->lookup(p); 
+	return m_field->lookup(q) - m_boundary + toBox; 
 }
 
 template<typename T>
@@ -190,6 +208,10 @@ Vector3F SsdfLookupRule<T>::lookupNormal(const float* p) const
 	}
 	return m_field->lookupNormal(p); 
 }
+
+template<typename T>
+float SsdfLookupRule<T>::mapDistance(const float* p) const
+{ return lookup(p); }
 
 }
 
