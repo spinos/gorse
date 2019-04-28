@@ -2,9 +2,7 @@
  *  SvfBuildRule.h
  *  aloe
  *
- *  Created by jian zhang on 2/13/18.
- *  Copyright 2018 __MyCompanyName__. All rights reserved.
- *
+ *  2019/4/28
  */
 
 #ifndef ALO_SVF_BUILD_RULE_H
@@ -19,6 +17,7 @@ namespace svf {
 template<typename Tc>
 class SvfBuildRule {
 
+/// aabb
     BoundingBox m_bbox;
 /// space filling curve
 	Tc* m_sfc;
@@ -29,12 +28,14 @@ public:
     
     void setBBox(const BoundingBox &b);
     const BoundingBox &bbox() const;
-	
+/// encode position
 	int computeKey(const float* p) const;
 	int computeKeyAtLevel(const float* p, int level) const;
 	int computeLevelBySpan(const int& s) const;
+/// decode key
 	void computePosition(float* p, int coord) const;
 	int computeCellInd(int coord, int level) const;
+/// cell size
 	float deltaAtLevel(int level) const;
 	void getDomainOrigin(float* p) const;
 	
@@ -55,7 +56,10 @@ public:
 /// find level0-1 neighbors
 	template<typename Tcell>
 	int getGuardCells(Tcell* gcells, int coord, int level0, int level1) const;
-	
+/// b[6] (low, high) from (_key, _span)
+	template<typename Tcell>
+	void getCellBox(float *b, const Tcell &kh) const;
+
 	void getEightCellVsAt(int* vs, const float* p, int level) const;
 /// keys to uniform grid of order p
 /// by coord and level
@@ -65,6 +69,8 @@ public:
 	void printCoord(int coord) const;
 	
 	static void PrintOriginCellSize(const float* orih);
+/// divide box to grid of d resolution
+/// p is float[n] n is 3(1+d)^3
 	static void GetCellGrid(float* p, const float* cellBox, int d);
 	static int GetGridNumValues(int d);
 	
@@ -261,6 +267,17 @@ void SvfBuildRule<Tc>::getLevelCellByCoord(Tcell& cell, const int coord, int lev
 	cell._key[5] = m_sfc->computeKey(u[0]+h, u[1], u[2]+h);
 	cell._key[6] = m_sfc->computeKey(u[0], u[1]+h, u[2]+h);
 	cell._key[7] = m_sfc->computeKey(u[0]+h, u[1]+h, u[2]+h);
+}
+
+template<typename Tc>
+template<typename Tcell>
+void SvfBuildRule<Tc>::getCellBox(float *b, const Tcell &kh) const
+{
+	computePosition(b, kh._key);
+	const float l = m_sfc->delta() * kh._span;
+	b[3] = b[0] + l;
+	b[4] = b[1] + l;
+	b[5] = b[2] + l;
 }
 
 template<typename Tc>

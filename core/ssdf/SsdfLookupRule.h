@@ -15,6 +15,7 @@
 
 #include <math/rayBox.h>
 #include <math/pointBox.h>
+#include <math/boxBox.h>
 #include <math/miscfuncs.h>
 
 namespace alo {
@@ -38,17 +39,20 @@ public:
 	SsdfLookupRule();
 	
 	void attach(const T& field);
-    void dettach();
+    void detach();
     
     void setRelativeBoundaryOffset(float x);
-/// ray is (origin, direction, t0, t1)	
-	bool intersectBox(float* ray) const;
-	
+
 	float lookup(const float* p) const;
 	Vector3F lookupNormal(const float* p) const;
     float mapDistance(const float* p) const;
     
     const float &delta() const;
+/// any nonempty cell intersects box b
+/// b is (low, high)	
+	bool intersectBox(const float* b) const;
+
+	const float &boundary() const;
 	
 protected:
 
@@ -57,6 +61,7 @@ private:
 	void computeCellCoord(int* u, const float* p) const;
 	int computeCellInd(const int* u) const;
 	int cellValueInd(int i, int j, int k) const;
+	void getCellBox(float *b, int i, int j, int k) const;
 /// Tv is value type
 	template<typename Tv>
 	Tv lookupInCell(const float *p,
@@ -87,16 +92,12 @@ void SsdfLookupRule<T>::attach(const T& field)
 }
 
 template<typename T>
-void SsdfLookupRule<T>::dettach()
+void SsdfLookupRule<T>::detach()
 { m_field = nullptr; }
 
 template<typename T>
 void SsdfLookupRule<T>::setRelativeBoundaryOffset(float x)
 { m_boundary = m_delta * x; }
-
-template<typename T>
-bool SsdfLookupRule<T>::intersectBox(float* ray) const
-{ return rayBoxIntersect(ray, m_coord); }
 
 template<typename T>
 float SsdfLookupRule<T>::lookup(const float* p) const
@@ -212,6 +213,45 @@ Vector3F SsdfLookupRule<T>::lookupNormal(const float* p) const
 template<typename T>
 float SsdfLookupRule<T>::mapDistance(const float* p) const
 { return lookup(p); }
+
+template<typename T>
+void SsdfLookupRule<T>::getCellBox(float *b, int i, int j, int k) const
+{
+	const float &h = m_originCellSize[3];
+	b[0] = m_originCellSize[0] + h * i;
+	b[1] = m_originCellSize[1] + h * j;
+	b[2] = m_originCellSize[2] + h * k;
+	b[3] = b[0] + h;
+	b[4] = b[1] + h;
+	b[5] = b[2] + h;
+}
+
+template<typename T>
+bool SsdfLookupRule<T>::intersectBox(const float* b) const
+{ 
+	const int d = m_dim[0];
+	float cb[6];
+	int c = 0;
+	for(int k=0;k<d;++k) {
+		for(int j=0;j<d;++j) {
+			for(int i=0;i<d;++i) {
+				const int offset = m_field->c_cellIndValue()[c];
+				c++;
+				if(offset < 0) continue;
+
+				getCellBox(cb, i, j, k);
+
+				if(boxIntersectBox(cb, b)) return true;
+			}
+		}
+	}
+	
+	return false; 
+}
+
+template<typename T>
+const float &SsdfLookupRule<T>::boundary() const
+{ return m_boundary; }
 
 }
 

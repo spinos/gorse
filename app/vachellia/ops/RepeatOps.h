@@ -11,13 +11,15 @@
 #include <math/ElementVector.h>
 
 namespace alo {
-    
+
+namespace grd {
 class IndexGrid;
+}
 
 class RepeatOps : public TransformOps {
 
 	ElementVector<RenderableOps> m_inOps;
-    IndexGrid *m_grid;
+    grd::IndexGrid *m_grid;
 
 public:
 	enum { Type = 800002 };

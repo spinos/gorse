@@ -23,6 +23,8 @@ class IndexGrid : public sds::CubicGrid<float, Int2> {
 typedef sds::CubicGrid<float, Int2> PGridTyp;
 
 	SimpleBuffer<int> m_indices;
+	int m_numIndices;
+    float m_aabb[6];
 
 public:
 
@@ -34,7 +36,20 @@ public:
     
     void setAabb(const float *b);
 
+    int *createIndices(int n);
+
+    const int *c_indices() const;
+    
+    const float *aabb() const;
+
+    const int &numIndices() const;
+/// i-th cell range y > x
+    bool isCellEmpty(int i) const;
+
+    void verbose() const;
+    
 protected:
+	int *indices();
 
 private:
 

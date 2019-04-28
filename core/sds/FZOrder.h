@@ -166,6 +166,9 @@ struct FZOrderCurve {
         }
         return l;
     }
+
+    float delta() const
+    { return _h; }
     
 };
 

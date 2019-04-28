@@ -8,9 +8,7 @@
  *  value stored at cell corners
  *  data size (M+1)^3
  *
- *  Created by jian zhang on 3/2/18.
- *  Copyright 2018 __MyCompanyName__. All rights reserved.
- *
+ *  2019/4/28
  */
 
 #ifndef ALO_CUBIC_FIELD_H
@@ -45,11 +43,15 @@ public:
 	void setOriginCellSize(const float* v);
 /// M
 	void setResolution(const int& x);
+/// (M+1)^3
 	int numValues() const;
-/// minmax box as (x0,y0,z0,x1,y1,z1)
+/// M^3
+	int numCells() const;
+/// box as (low, high)
 	void getBox(float* b) const;
 /// (center, half_span)
 	void getCoord(float* c) const;
+/// (origin, cell_size)
 	void getOriginCellSize(float* b) const;
 /// at u
 	T lookup(const float* u) const;
@@ -78,6 +80,7 @@ public:
 	void getCellValues(T* box, int i, int j, int k) const;
 	
 	const T& getPointValue(int i, int j, int k) const;
+/// average of corner values
 	T getEdgeValue(int i, int j, int k,
 					int di, int dj, int dk) const;
 	T getFaceValue(int i, int j, int k,
@@ -93,6 +96,7 @@ public:
 protected:
 
 private:
+/// (i,j,k) is (x,y,z)
 	int valueInd(int i, int j, int k) const;
 	
 };
@@ -222,6 +226,10 @@ void CubicField<T>::copyValue(const CubicField<T>* b)
 template<typename T>
 int CubicField<T>::numValues() const
 { return m_dim[1] * m_dim[1] * m_dim[1]; }
+
+template<typename T>
+int CubicField<T>::numCells() const
+{ return m_dim[0] * m_dim[0] * m_dim[0]; }
 
 template<typename T>
 int CubicField<T>::dataSize() const

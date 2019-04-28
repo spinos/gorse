@@ -189,6 +189,9 @@ void SsdField::expandAabb(float *b) const
 const float *SsdField::aabb() const
 { return m_bbox.data(); }
 
+int SsdField::numCells() const
+{ return m_coarseDistance.numCells(); }
+
 void SsdField::verbose() const
 {
 	std::cout << " SsdField "<<m_P<<" "<<m_Q

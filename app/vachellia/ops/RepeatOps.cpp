@@ -9,6 +9,7 @@
 #include <interface/IntersectResult.h>
 #include <math/rayBox.h>
 #include <grd/IndexGridBuilder.h>
+#include <grd/IndexGridBuildRule.h>
 #include <grd/InstanceBound.h>
 #include <sds/FZOrder.h>
 #include <svf/SvfBuildRule.h>
@@ -22,7 +23,7 @@ RepeatOps::RepeatOps()
     BoxOps *abox = new BoxOps;
     m_inOps.append(abox);
     
-    m_grid = new IndexGrid;
+    m_grid = new grd::IndexGrid;
     m_grid->setResolution(16);
     float originH[4] = {0.f, 0.f, 0.f, 4.f};
     m_grid->setOriginCellSize(originH);
@@ -30,7 +31,7 @@ RepeatOps::RepeatOps()
     sds::FZOrderCurve sfc;
     sfc.setCoord(32.f, 32.f, 32.f, 16.f);
     
-    typedef svf::SvfBuildRule<sds::FZOrderCurve> BuildRuleTyp;
+    typedef grd::IndexGridBuildRule<sds::FZOrderCurve> BuildRuleTyp;
     BuildRuleTyp rule(&sfc);
     
     InstanceBound inst;
@@ -42,10 +43,10 @@ RepeatOps::RepeatOps()
     inst._tm = &space;
     inst._invTm = &invSpace;
     
-    IndexGridBuilder<4> builder;
+    grd::IndexGridBuilder<4> builder;
     builder.attach(m_grid);
-    builder.measure<InstanceBound, BuildRuleTyp >(inst, rule);
-    builder.dettach();
+    builder.measure<InstanceBound, BuildRuleTyp >(inst, 0, rule);
+    builder.detach();
 }
 
 RepeatOps::~RepeatOps()

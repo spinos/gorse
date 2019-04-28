@@ -18,6 +18,13 @@ template<typename T>
 class SsdfLookupRule;
 }
 
+namespace grd {
+class IndexGrid;
+struct IndexGridLookupResult;
+template<typename T>
+class IndexGridLookupRule;
+}
+
 class VoxelOps : public TransformOps {
 
     typedef sdf::SsdfLookupRule<sdf::SsdField> LookupRuleTyp;
@@ -30,12 +37,20 @@ class VoxelOps : public TransformOps {
     FieldLookupRulePair *m_pairs;
     int m_numPairs;
 
+    grd::IndexGrid *m_grid;
+
+    typedef grd::IndexGridLookupRule<grd::IndexGrid> GridLookupRuleTyp;
+
+    typedef grd::IndexGridLookupResult GridLookupResultTyp;
+
+    GridLookupRuleTyp *m_gridRule;
+
     static AFileDlgProfile SReadProfile;
-    //sdf::SsdField *m_field;
-    //sdf::SsdfLookupRule<sdf::SsdField> *m_rule;
+    
     std::string m_cachePath;
     ElementVector<RenderableOps> m_outOps;
     int m_maxNStep;
+    float m_boundary;
 
 public:
 	enum { Type = 703427 };
@@ -63,13 +78,16 @@ protected:
 private:
     bool loadCache(const std::string &fileName);
     void clearAllPairs();
-    void updateAllPairsAabb();
     void setAllRelativeBoundaryOffset(float x);
-    float mapLocalDistanceTo(const float *q, int &objI) const;
+    float mapLocalDistanceTo(const float *q, GridLookupResultTyp &result) const;
+    Vector3F mapLocalNormalAt(const float *q, GridLookupResultTyp &result) const;
+    void findObjectClosestTo(const float *q, GridLookupResultTyp &result) const;
+    void findObjectInRangeClosestTo(const float *q, GridLookupResultTyp &result) const;
+
 
 };
 
-}
+} /// end of namespace alo
 
 #endif
 

@@ -2,8 +2,7 @@
  *  V1HBase.h
  *  aloe
  *
- *  all data sets are ooc
- *
+ *  2019/4/29
  */
 
 #ifndef ALO_V1_H_BASE_H
@@ -187,10 +186,32 @@ public:
         }
         
 	}
+
+	template<typename T>
+	bool lsFirstTypedChild(std::string &name);
 	
 };
 
+template<typename T>
+bool HBase::lsFirstTypedChild(std::string &name) 
+{
+	bool found = false;
+	int nc = numChildren();
+	for(int i=0;i<nc;i++) {
+		if(isChildGroup(i)) {
+			T gc(childPath(i));
+			if(gc.verifyType()) {
+				name = childPath(i);
+				found = true;
+			}
+			gc.close();
+		}
+		if(found) break;
+	}
+	return found;
 }
 
-}
+} /// end of ver1
+
+} /// end of alo
 #endif       

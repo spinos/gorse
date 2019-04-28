@@ -30,6 +30,11 @@ struct InstanceBound {
 
         return -distanceInsidePointToBox(a, _aabb);
     }
+
+    bool intersectBox(const float *b) const
+    {
+        return false; 
+    }
     
 };
 

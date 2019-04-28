@@ -27,8 +27,6 @@ public:
     virtual ~CubicGrid();
 
     void setResolution(const int& x);
-/// M^3
-    int numCells() const;
 
     Tc *cell();
     const Tc *c_cell() const;
@@ -52,13 +50,6 @@ void CubicGrid<T, Tc>::setResolution(const int& x)
 {
 	CubicField<T>::setResolution(x);
 	m_cells.resetBuffer(x * x * x);
-}
-
-template<typename T, typename Tc>
-int CubicGrid<T, Tc>::numCells() const
-{ 
-	const int &x = resolution();
-	return x * x * x;
 }
 
 template<typename T, typename Tc>

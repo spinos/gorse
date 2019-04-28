@@ -28,6 +28,7 @@
 #include <grd/IndexGrid.h>
 #include <grd/IndexGridBuilder.h>
 #include <grd/IndexGridBuildRule.h>
+#include <h5_ssdf/HIndexGrid.h>
 #include <QProgressDialog>
 #include <QApplication>
 
@@ -96,7 +97,7 @@ void SsdfTest::buildSsdf(sds::SpaceFillingVector<SurfaceSample >* samples,
 
 void SsdfTest::saveToFile(const std::string &filename)
 {
-	QProgressDialog progress("Processing...", QString(), 0, 9, QApplication::activeWindow() );
+	QProgressDialog progress("Processing...", QString(), 0, 16, QApplication::activeWindow() );
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
 
@@ -123,8 +124,6 @@ void SsdfTest::saveToFile(const std::string &filename)
 		progress.setValue(i);
 	}
 
-	progress.setValue(8);
-
 	grd::IndexGrid indG;
 	indG.setResolution(1<<4);
 	indG.setAabb(grdBox);
@@ -135,23 +134,32 @@ void SsdfTest::saveToFile(const std::string &filename)
 typedef grd::IndexGridBuildRule<sds::FZOrderCurve> IndBuildTyp;
 	IndBuildTyp indRule(m_sfc);
 	indRule.setBBox(grdBox);
+	indRule.setBoxRelativeBoundary(1.f);
 
 typedef sdf::SsdfLookupRule<FieldTyp> IndSampleTyp;
 	IndSampleTyp indSample;
 
 	for(int i=0;i<8;++i) {
+		progress.setValue(8+i);
 		indSample.attach(*fields[i]);
-		indBuilder.measure<IndSampleTyp, IndBuildTyp>(indSample, indRule);
+		indBuilder.measure<IndSampleTyp, IndBuildTyp>(indSample, i, indRule);
+
 	}
 
 	for(int i=0;i<8;++i) {
 		delete fields[i];
 	}
+
+	indBuilder.detach();
+
+	HIndexGrid hindG("/asset/indexGrid");
+	hindG.save(indG);
+	hindG.close();
 	
 	ga.close();
 	
 	hio.end();
-	progress.setValue(9);
+	progress.setValue(16);
 }
 
 void SsdfTest::buildField(FieldTyp *field, const AdaptableMesh &transient)

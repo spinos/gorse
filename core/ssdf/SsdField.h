@@ -87,6 +87,7 @@ public:
 	void getAabb(float *b) const;
 	void expandAabb(float *b) const;
 	const float *aabb() const;
+	int numCells() const;
 	void verbose() const;
     
 protected:
