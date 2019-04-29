@@ -74,7 +74,7 @@ protected:
 /// march to front
 	void marchOutside(const int& originNodeInd);
     void setFarNodeInside();
-/// from marching origin
+/// from sample of marching origin
 	void computeAccurateDistance();
 /// lower node distance 
     bool setNodeDistance(const int & idx,
@@ -90,7 +90,9 @@ protected:
 						bool toAccumulateFront = true);
 
 	void setNodeTValue(const int& i, const T &x);
-			
+/// fix distance when to-sample direction deviates from sample normal
+	void fixThinSheet(const float &maxDistance);
+
 private:
 /// propagate distance value
     void propagate(std::deque<int > & heap, const int & i);
@@ -390,6 +392,20 @@ void BaseDistanceField<T>::setNodeTValue(const int& i, const T &x)
 template<typename T>
 const T &BaseDistanceField<T>::nodeValue(const int &i) const
 { return nodes()[i]._tval; }
+
+template<typename T>
+void BaseDistanceField<T>::fixThinSheet(const float &maxDistance)
+{
+	const int & n = numNodes();
+	for(int i = 0;i<n;++i) {
+		NodeType & d = nodes()[i];
+        if(d.val > maxDistance ||
+        	d.val < -maxDistance) continue;
+
+        Vector3F s2g = d.pos - d._tval._pos;
+        d.val = s2g.dot(d._tval._nml);
+	}
+}
 
 }
 

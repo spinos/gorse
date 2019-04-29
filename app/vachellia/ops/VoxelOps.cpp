@@ -32,7 +32,6 @@ AFileDlgProfile VoxelOps::SReadProfile(AFileDlgProfile::FRead,
    
 VoxelOps::VoxelOps() : m_cachePath("unknown"),
 m_maxNStep(128),
-m_boundary(0.f),
 m_pairs(nullptr),
 m_numPairs(0)
 {
@@ -88,7 +87,7 @@ bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
     if(!rayAabbIntersect(rayData, aabb())) return false;
 
     float &tt = rayData[6];
-    const float tLimit = rayData[7] + m_boundary;
+    const float &tLimit = rayData[7];
     float q[3];
     GridLookupResultTyp param;
 
@@ -102,7 +101,10 @@ bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
 
         if(d < tt * 1e-5f) break;
 
-        tt += d * .8f;
+        if(d < param._stepSize) d = param._stepSize;
+        if(d > param._stepSize * 32.5f) d = param._stepSize * 32.5f;
+
+        tt += d;
      
         if(tt > tLimit) return false;
     }
@@ -251,11 +253,10 @@ void VoxelOps::clearAllPairs()
 void VoxelOps::setAllRelativeBoundaryOffset(float x)
 {
     if(m_numPairs<1) return;
-    m_boundary = 0.f;
+
     for(int i=0;i<m_numPairs;++i) {
         LookupRuleTyp *r = m_pairs[i]._rule;
         r->setRelativeBoundaryOffset(x);
-        if(m_boundary < r->boundary()) m_boundary = r->boundary();
     }
 }
 
@@ -263,12 +264,14 @@ float VoxelOps::mapLocalDistanceTo(const float *q, GridLookupResultTyp &result) 
 {
     m_gridRule->lookup(result, q);
     if(result.isEmptySpace() 
-        && result._distance > m_grid->cellSize()) 
-        return result._distance;
-
+        && result._distance > m_grid->cellSize() ) {
+        result.calcStepSize(result._distance * .8f);
+        return result._distance * .8f;
+    }
+        
     findObjectClosestTo(q, result);
-    
-    return result._distance;
+    result.calcStepSize(m_pairs[result._instanceId]._rule->delta() * .5f );
+    return result._distance * .732f;
 }
 
 Vector3F VoxelOps::mapLocalNormalAt(const float *q, GridLookupResultTyp &result) const
@@ -285,7 +288,8 @@ void VoxelOps::findObjectClosestTo(const float *q, GridLookupResultTyp &result) 
 {
     if(result.hasInstanceRange()) return findObjectInRangeClosestTo(q, result);
     
-    float md = 1e10f;
+    float &md = result._distance;
+    md = 1e10f;
     for(int i=0;i<m_numPairs;++i) {
         float d = m_pairs[i]._rule->lookup(q);
         if(md > d) {
@@ -293,13 +297,14 @@ void VoxelOps::findObjectClosestTo(const float *q, GridLookupResultTyp &result) 
             result._instanceId = i;
         }
     }
-    result._distance = md;
+    
 }
 
 void VoxelOps::findObjectInRangeClosestTo(const float *q, GridLookupResultTyp &result) const 
 {
     const int *ind = m_grid->c_indices();
-    float md = 1e10f;
+    float &md = result._distance;
+    md = 1e10f;
     for(int i=result._instanceRange.x;i<result._instanceRange.y;++i) {
         const int &objI = ind[i];
 
@@ -309,7 +314,6 @@ void VoxelOps::findObjectInRangeClosestTo(const float *q, GridLookupResultTyp &r
             result._instanceId = objI;
         }
     }
-    result._distance = md;
 }
 
 } /// end of namespace alo

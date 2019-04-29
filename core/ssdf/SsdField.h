@@ -77,6 +77,7 @@ public:
 	void getCoord(float* c) const;
 	void getOriginCellSize(float* b) const;
 	const float& cellSize() const;
+/// Q cell size
 	float delta() const;
 /// at u
 	float lookup(const float* u) const;

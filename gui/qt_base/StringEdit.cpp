@@ -18,8 +18,8 @@ m_readFileProfile(0)
     QPixmap openpix = ImageCollector::CollectPixmap(":images/open_file_small.png");
     m_btn->setIcon(QIcon(openpix) );
     QHBoxLayout *layout = new QHBoxLayout;
-    layout->addWidget(m_edit);
     layout->addWidget(m_btn);
+    layout->addWidget(m_edit);
     layout->setContentsMargins(0,0,0,0);
     setLayout(layout);
 

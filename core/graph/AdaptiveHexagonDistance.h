@@ -400,6 +400,7 @@ void AdaptiveHexagonDistance<T>::computeDistance(const sds::SpaceFillingVector<T
 	marchOutside(iFar);
 	setFarNodeInside();
 	computeAccurateDistance();
+	fixThinSheet(rule.deltaAtLevel(level));
 	
 }
 

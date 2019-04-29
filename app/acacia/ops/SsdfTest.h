@@ -51,14 +51,15 @@ typedef sds::FZOrderCurve SfcTyp;
 typedef sdf::SsdfBuildRule<sds::FZOrderCurve> BuildRuleTyp;
 	BuildRuleTyp* m_buildRule;
 	
-typedef sdf::SsdfBuilder<SurfaceSample, float, 5, 7, BuildRuleTyp > BuilderTyp;
+typedef sdf::SsdfBuilder<SurfaceSample, float, 4, 7, BuildRuleTyp > BuilderTyp;
 	BuilderTyp* m_builder;
 	
 typedef sdf::SsdField FieldTyp;
 
 	static AFileDlgProfile SWriteProfile;
 
-	AdaptableMesh *m_ribbon[8];
+#define NUM_RIBBONS 9
+	AdaptableMesh *m_ribbon[NUM_RIBBONS];
 
 public:
 

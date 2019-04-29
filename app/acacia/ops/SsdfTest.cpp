@@ -2,9 +2,7 @@
  *  SsdfTest.cpp
  *  aloe
  *
- *  Created by zhang on 18-2-21.
- *  Copyright 2018 __MyCompanyName__. All rights reserved.
- *
+ *  2019/4/30
  */
 
 #include "SsdfTest.h"
@@ -68,13 +66,16 @@ void SsdfTest::addDrawableTo(DrawableScene *scene)
 
 void SsdfTest::computeMesh()
 {
-	for(int i=0;i<8;++i) {
+	std::time_t secs = std::time(0);
+	Uniform<Lehmer> lmlcg(secs);
+
+	for(int i=0;i<NUM_RIBBONS;++i) {
 		AdaptableMesh *transient = new AdaptableMesh;
-		createRandomRibbon(*transient, 6, 97);
+		createRandomRibbon<Uniform<Lehmer> >(*transient, 6, 93, &lmlcg);
 		m_ribbon[i] = transient;
 	}
 
-	setDrawableSize(8);
+	setDrawableSize(NUM_RIBBONS);
 
 	lockScene();
     const int n = numResources();
@@ -97,7 +98,7 @@ void SsdfTest::buildSsdf(sds::SpaceFillingVector<SurfaceSample >* samples,
 
 void SsdfTest::saveToFile(const std::string &filename)
 {
-	QProgressDialog progress("Processing...", QString(), 0, 16, QApplication::activeWindow() );
+	QProgressDialog progress("Processing...", QString(), 0, NUM_RIBBONS*2, QApplication::activeWindow() );
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
 
@@ -107,10 +108,10 @@ void SsdfTest::saveToFile(const std::string &filename)
 
 	ver1::HBase ga("/asset");
 
-	FieldTyp *fields[8];
+	FieldTyp *fields[NUM_RIBBONS];
 	float grdBox[6] = {1e10f, 1e10f, 1e10f, -1e10f, -1e10f, -1e10f};
 	
-	for(int i=0;i<8;++i) {
+	for(int i=0;i<NUM_RIBBONS;++i) {
 		fields[i] = new FieldTyp;
 
 		buildField(fields[i], *m_ribbon[i]);
@@ -134,19 +135,19 @@ void SsdfTest::saveToFile(const std::string &filename)
 typedef grd::IndexGridBuildRule<sds::FZOrderCurve> IndBuildTyp;
 	IndBuildTyp indRule(m_sfc);
 	indRule.setBBox(grdBox);
-	indRule.setBoxRelativeBoundary(1.f);
+	indRule.setBoxRelativeBoundary(15.f);
 
 typedef sdf::SsdfLookupRule<FieldTyp> IndSampleTyp;
 	IndSampleTyp indSample;
 
-	for(int i=0;i<8;++i) {
-		progress.setValue(8+i);
+	for(int i=0;i<NUM_RIBBONS;++i) {
+		progress.setValue(NUM_RIBBONS+i);
 		indSample.attach(*fields[i]);
 		indBuilder.measure<IndSampleTyp, IndBuildTyp>(indSample, i, indRule);
 
 	}
 
-	for(int i=0;i<8;++i) {
+	for(int i=0;i<NUM_RIBBONS;++i) {
 		delete fields[i];
 	}
 
@@ -159,7 +160,7 @@ typedef sdf::SsdfLookupRule<FieldTyp> IndSampleTyp;
 	ga.close();
 	
 	hio.end();
-	progress.setValue(16);
+	progress.setValue(NUM_RIBBONS*2);
 }
 
 void SsdfTest::buildField(FieldTyp *field, const AdaptableMesh &transient)
@@ -206,7 +207,7 @@ void SsdfTest::recvAction(int x)
 AFileDlgProfile *SsdfTest::writeFileProfileR () const
 {
 	SWriteProfile._notice = boost::str(boost::format("sparse signed distance field P %1% Q %2% \n n mesh %3%") 
-        % 5 % 7 % 8 );
+        % 5 % 7 % NUM_RIBBONS );
     return &SWriteProfile; 
 }
 

@@ -7,10 +7,12 @@
 
 namespace alo {
 	
-inline void createRandomRibbon(AdaptableMesh &msh, int nu, int nv)
+template<typename Trng>
+inline void createRandomRibbon(AdaptableMesh &msh, int nu, int nv, Trng *rng)
 {
 	for(int i=0;i<nu;++i)
-        msh.addVertex(Vector3F(RandomFn11() * .13f + .53f * i, RandomFn11() * .19f, .3f * i));
+        msh.addVertex(Vector3F(rng->randf(-1.f, 1.f, 2147483647) * .13f + .53f * i, 
+                                rng->randf(-1.f, 1.f, 2147483647) * .19f, .3f * i));
     
     FrontLine originLine;
     FrontLine::EnableMerging = false;
@@ -40,9 +42,9 @@ inline void createRandomRibbon(AdaptableMesh &msh, int nu, int nv)
 
         l[i].rotateLocalBy(lq);
         l[i].rotateLocalBy(tq);
-        l[i].setShrinking(cshrinking + RandomFn11() * .07f);
-        up.y += RandomFn11() * .29f;
-        up.z += RandomFn11() * .29f;
+        l[i].setShrinking(cshrinking + rng->randf(-1.f, 1.f, 2147483647) * .07f);
+        up.y += rng->randf(-1.f, 1.f, 4095) * .29f;
+        up.z += rng->randf(-1.f, 1.f, 4095) * .29f;
         l[i].setDirection(up);
         l[i].setMinEdgeLength(.2f);
 
