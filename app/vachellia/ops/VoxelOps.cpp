@@ -267,7 +267,7 @@ float VoxelOps::mapLocalDistanceTo(const float *q, GridLookupResultTyp &result) 
         
     findObjectClosestTo(q, result);
     
-    result._distance *= .732f;
+    result._distance *= .7f;
     m_pairs[result._instanceId]._rule->limitStepSize(result._distance);
 
     return result._distance;

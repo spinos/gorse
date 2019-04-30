@@ -93,7 +93,7 @@ void SsdfLookupRule<T>::attach(const T& field)
 	m_field = &field;
     m_delta = field.delta();
     m_low = m_delta * .5f;
-    m_high = m_delta * 16.f;
+    m_high = m_delta * 8.f;
 }
 
 template<typename T>
@@ -113,8 +113,8 @@ float SsdfLookupRule<T>::lookup(const float* p) const
     float toBox = 0.f;
     float q[3];
     memcpy(q, p, 12);
-    if(isPointOutsideBox(q, m_field->aabb() ) ) {
-    	toBox = movePointOntoBox(q, m_field->aabb() );
+    if(isPointOutsideBox(q, m_field->fieldAabb() ) ) {
+    	toBox = movePointOntoBox(q, m_field->fieldAabb() );
     }
 
 	int u[3];

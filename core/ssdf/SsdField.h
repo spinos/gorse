@@ -30,6 +30,7 @@ class SsdField {
 	SimpleBuffer<int> m_cellIndices;
 	int m_P, m_Q, m_fltStorageSize;
 	BoundingBox m_bbox;
+	BoundingBox m_fieldBox;
 	
 public:
 
@@ -88,6 +89,7 @@ public:
 	void getAabb(float *b) const;
 	void expandAabb(float *b) const;
 	const float *aabb() const;
+	const float *fieldAabb() const;
 	int numCells() const;
 	void verbose() const;
     

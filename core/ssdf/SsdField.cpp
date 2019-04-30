@@ -52,6 +52,9 @@ void SsdField::setOriginCellSize(const float* v)
 { 
     m_coarseDistance.setOriginCellSize(v);
     m_coarseNormal.setOriginCellSize(v);
+    m_fieldBox.setMin(v[0], v[1], v[2]);
+    const int d = m_coarseDistance.resolution();
+    m_fieldBox.setMax(v[0] + v[3] * d, v[1] + v[3] * d, v[2] + v[3] * d);
 }
 
 int* SsdField::cellIndValue()
@@ -189,16 +192,19 @@ void SsdField::expandAabb(float *b) const
 const float *SsdField::aabb() const
 { return m_bbox.data(); }
 
+const float *SsdField::fieldAabb() const
+{ return m_fieldBox.data(); }
+
 int SsdField::numCells() const
 { return m_coarseDistance.numCells(); }
 
 void SsdField::verbose() const
 {
 	std::cout << " SsdField "<<m_P<<" "<<m_Q
-	<<" "<<totalStorageSize()<<" byte origin ("
+	<<" "<<totalStorageSize()<<" byte\n origin ("
 	<<originCellSize()[0]<<", "<<originCellSize()[1]<<", "<<originCellSize()[2]
 	<<") cell_size "<<originCellSize()[3] << " delta " << delta()
-	<<" aabb "<<m_bbox;
+	<<"\n aabb "<<m_bbox;
 }
 
 }

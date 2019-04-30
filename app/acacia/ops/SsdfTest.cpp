@@ -136,7 +136,7 @@ void SsdfTest::saveToFile(const std::string &filename)
 typedef grd::IndexGridBuildRule<sds::FZOrderCurve> IndBuildTyp;
 	IndBuildTyp indRule(m_sfc);
 	indRule.setBBox(grdBox);
-	indRule.setBoxRelativeBoundary(15.f);
+	indRule.setBoxRelativeBoundary(8.f);
 
 typedef sdf::SsdfLookupRule<FieldTyp> IndSampleTyp;
 	IndSampleTyp indSample;

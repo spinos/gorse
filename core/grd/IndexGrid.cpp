@@ -73,11 +73,11 @@ bool IndexGrid::isCellEmpty(int i) const
 void IndexGrid::verbose() const
 {
     std::cout << " IndexGrid rez "<<resolution()
-    <<" origin ("<<originCellSize()[0]<<", "<<originCellSize()[1]<<", "<<originCellSize()[2]
+    <<"\n origin ("<<originCellSize()[0]<<", "<<originCellSize()[1]<<", "<<originCellSize()[2]
     <<") cell_size "<<originCellSize()[3]
-    <<" aabb (("<<m_aabb[0]<<", "<<m_aabb[1]<<", "<<m_aabb[2]
+    <<"\n aabb (("<<m_aabb[0]<<", "<<m_aabb[1]<<", "<<m_aabb[2]
     <<"), ("<<m_aabb[3]<<", "<<m_aabb[4]<<", "<<m_aabb[5]
-    <<") ) n index "<<numIndices();
+    <<") )\n n index "<<numIndices();
 
     //const int nv = numValues();
     //for(int i=0;i<nv;++i) std::cout << " " << c_value()[i];

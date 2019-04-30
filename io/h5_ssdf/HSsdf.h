@@ -112,6 +112,10 @@ bool HSsdf::save(const T& field)
 template<typename T>
 bool HSsdf::load(T& field)
 {
+	int pql[3];
+	readIntAttr(".pql", pql );
+	field.create(pql[0], pql[1], pql[2]);
+
 	float orih[4];
 	readFloatAttr(".coord", orih);
 	field.setOriginCellSize(orih);
@@ -119,10 +123,6 @@ bool HSsdf::load(T& field)
     float b[6];
     readFloatAttr(".aabb", b);
     field.setAabb(b);
-	
-	int pql[3];
-	readIntAttr(".pql", pql );
-	field.create(pql[0], pql[1], pql[2]);
 	
 	const int coarsedL = field.coarseDistanceStorageSize();
 	const int ncol = DivideUp(coarsedL, 1024);
