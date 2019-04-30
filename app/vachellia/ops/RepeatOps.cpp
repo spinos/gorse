@@ -24,7 +24,7 @@ RepeatOps::RepeatOps()
     m_inOps.append(abox);
     
     m_grid = new grd::IndexGrid;
-    m_grid->setResolution(16);
+    m_grid->create(16);
     float originH[4] = {0.f, 0.f, 0.f, 4.f};
     m_grid->setOriginCellSize(originH);
     

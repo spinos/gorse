@@ -15,8 +15,7 @@
 #ifndef ALO_UNIFORM_FIELD_H
 #define ALO_UNIFORM_FIELD_H
 
-#include <boost/scoped_array.hpp>
-#include <math/miscfuncs.h>
+#include <math/SimpleBuffer.h>
 
 namespace alo {
 
@@ -29,11 +28,12 @@ class UniformField {
 	float m_originCellSize[5];
 /// (M,N,P,M+1,N+1,P+1,(M+1)(N+1),M-1,N-1,P-1)
 	int m_dim[10];
-	boost::scoped_array<T> m_value;
+	SimpleBuffer<T> m_value;
 	
 public:
 
 	UniformField();
+	virtual ~UniformField();
 	
 /// (origin, cell_size)
 	void setOriginCellSize(const float* v);
@@ -47,6 +47,9 @@ public:
 	
 	T* value();
 	const T* c_value() const;
+
+	int numValues() const;
+	int numCells() const;
 	
 protected:
 
@@ -57,6 +60,10 @@ private:
 
 template<typename T>
 UniformField<T>::UniformField()
+{}
+
+template<typename T>
+UniformField<T>::~UniformField()
 {}
 
 template<typename T>
@@ -77,8 +84,7 @@ void UniformField<T>::setResolution(const int* v)
 	m_dim[7] = m_dim[0] - 1;
 	m_dim[8] = m_dim[1] - 1;
 	m_dim[9] = m_dim[2] - 1;
-	int dataL = DivideUp(m_dim[3] * m_dim[4] * m_dim[5], 512) * 512;
-	m_value.reset(new float[dataL]);
+	m_value.resetBuffer(m_dim[3] * m_dim[4] * m_dim[5]);
 	
 }
 
@@ -97,11 +103,11 @@ void UniformField<T>::getBox(float* b) const
 
 template<typename T>
 T* UniformField<T>::value()
-{ return m_value.get(); }
+{ return m_value.data(); }
 	
 template<typename T>
 const T* UniformField<T>::c_value() const
-{ return m_value.get(); }
+{ return m_value.c_data(); }
 
 template<typename T>
 int UniformField<T>::valueInd(int i, int j, int k) const
@@ -149,8 +155,16 @@ T UniformField<T>::lookup(const float* u) const
 	return (1.f - wz) * a + wz * c;
 }
 
-}
+template<typename T>
+int UniformField<T>::numValues() const
+{ return m_dim[3] * m_dim[4] * m_dim[5]; }
 
-}
+template<typename T>
+int UniformField<T>::numCells() const
+{ return m_dim[0] * m_dim[1] * m_dim[2]; }
+
+} /// end of namespace sds
+
+} /// end of namespace alo
 
 #endif

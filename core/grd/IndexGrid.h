@@ -32,7 +32,7 @@ public:
 	virtual ~IndexGrid();
 /// create grid, distance to very large
 /// indices range to [0,0]
-	void setResolution(const int& x);
+	void create(const int& x);
     
     void setAabb(const float *b);
 

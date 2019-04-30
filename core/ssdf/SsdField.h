@@ -13,7 +13,6 @@
 #define ALO_SSD_FIELD_H
 
 #include <sds/CubicGrid.h>
-#include <math/BoundingBox.h>
 
 namespace alo {
 
@@ -27,7 +26,6 @@ class SsdField : public sds::CubicGrid<float, int> {
     SimpleBuffer<Vector3F> m_fineNormal;
 	int m_P, m_Q, m_numFineValues;
 	BoundingBox m_bbox;
-	BoundingBox m_fieldBox;
 	
 public:
 
@@ -67,7 +65,6 @@ public:
 	void getAabb(float *b) const;
 	void expandAabb(float *b) const;
 	const float *aabb() const;
-	const float *fieldAabb() const;
 	
 	void verbose() const;
     

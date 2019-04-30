@@ -82,7 +82,7 @@ bool HIndexGrid::load(grd::IndexGrid &grid)
 { 
     int d;
     readIntAttr(".is_index_grid", &d );
-    grid.setResolution(d);
+    grid.create(d);
 
     int nind;
     readIntAttr(".n_ind", &nind );

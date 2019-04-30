@@ -26,7 +26,7 @@ public:
     CubicGrid();
     virtual ~CubicGrid();
 
-    void setResolution(const int& x);
+    void create(const int& x);
 
     void destroy();
     void copyCell(const Tc *b);
@@ -49,9 +49,9 @@ CubicGrid<T, Tc>::~CubicGrid()
 {}
 
 template<typename T, typename Tc>
-void CubicGrid<T, Tc>::setResolution(const int& x)
+void CubicGrid<T, Tc>::create(const int& x)
 {
-	CubicField<T>::setResolution(x);
+	CubicField<T>::create(x);
 	m_cells.resetBuffer(x * x * x);
 }
 

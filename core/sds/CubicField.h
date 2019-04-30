@@ -6,14 +6,16 @@
  *  begin at origin, all cell has same cellSize
  *  grid resolution M
  *  value stored at cell corners
- *  data size (M+1)^3
+ *  num values (M+1)^3
+ *  num cells M^3
  *
- *  2019/4/28
+ *  2019/5/1
  */
 
 #ifndef ALO_CUBIC_FIELD_H
 #define ALO_CUBIC_FIELD_H
 
+#include <math/BoundingBox.h>
 #include <math/SimpleBuffer.h>
 #include <math/miscfuncs.h>
 #include <iostream>
@@ -33,16 +35,24 @@ class CubicField {
 /// (M,M+1,(M+1)^2,M-1)
 	int m_dim[4];
 	SimpleBuffer<T> m_value;
-	
+/// cubic
+	BoundingBox m_fieldBox;
+
 public:
 
 	CubicField();
 	virtual ~CubicField();
-	
-/// (origin, cell_size)
-	void setOriginCellSize(const float* v);
+
 /// M
-	void setResolution(const int& x);
+	void create(const int& x);
+/// (origin, cell_size)
+/// after creation
+	void setOriginCellSize(const float* v);
+/// purge
+	void destroy();
+
+/// M
+    const int &resolution() const;
 /// (M+1)^3
 	int numValues() const;
 /// M^3
@@ -53,7 +63,7 @@ public:
 	void getCoord(float* c) const;
 /// (origin, cell_size)
 	void getOriginCellSize(float* b) const;
-/// at u
+/// tri-linear interpolation at u
 	T lookup(const float* u) const;
 	const float& cellSize() const;
 	
@@ -84,9 +94,8 @@ public:
     
     void printValues() const;
 
-    void destroy();
-
-    const int &resolution() const;
+    const float *fieldAabb() const;
+    const BoundingBox &fieldBox() const;
 	
 protected:
 
@@ -105,6 +114,16 @@ CubicField<T>::~CubicField()
 { destroy(); }
 
 template<typename T>
+void CubicField<T>::create(const int& x)
+{
+	m_dim[0] = x;
+	m_dim[1] = m_dim[0] + 1;
+	m_dim[2] = m_dim[1] * m_dim[1];
+	m_dim[3] = m_dim[0] - 1;
+	m_value.resetBuffer(m_dim[1] * m_dim[2]);
+}
+
+template<typename T>
 void CubicField<T>::setOriginCellSize(const float* v)
 {
 	m_originCellSize[0] = v[0];
@@ -113,17 +132,10 @@ void CubicField<T>::setOriginCellSize(const float* v)
 	m_originCellSize[3] = v[3];
 	
 	m_originCellSize[4] = 1.f / m_originCellSize[3];
-}
 
-template<typename T>
-void CubicField<T>::setResolution(const int& x)
-{
-	m_dim[0] = x;
-	m_dim[1] = m_dim[0] + 1;
-	m_dim[2] = m_dim[1] * m_dim[1];
-	m_dim[3] = m_dim[0] - 1;
-	m_value.resetBuffer(m_dim[1] * m_dim[2]);
-	
+	m_fieldBox.setMin(v[0], v[1], v[2]);
+    const int d = resolution();
+    m_fieldBox.setMax(v[0] + v[3] * d, v[1] + v[3] * d, v[2] + v[3] * d);
 }
 
 template<typename T>
@@ -238,17 +250,20 @@ void CubicField<T>::upSample()
 {
 	CubicField<T> old;	
 	
+	const int oldD = m_dim[0];
+	old.create(oldD);
+
 	float orih[4];
 	memcpy(orih, m_originCellSize, 16);
 	old.setOriginCellSize(orih);
-	const int oldD = m_dim[0];
-	old.setResolution(oldD);
 	old.copyValue(this);
+
+/// double resolution
+	create(oldD<<1);
 /// half cell size
 	orih[3] /= 2.f;
 	setOriginCellSize(orih);
-/// double resolution
-	setResolution(oldD<<1);
+
 /// point
     for(int k=0;k<=oldD;++k) {
 
@@ -475,6 +490,14 @@ void CubicField<T>::destroy()
 template<typename T>
 const int &CubicField<T>::resolution() const
 { return m_dim[0]; }
+
+template<typename T>
+const float *CubicField<T>::fieldAabb() const
+{ return m_fieldBox.data(); }
+
+template<typename T>
+const BoundingBox &CubicField<T>::fieldBox() const
+{ return m_fieldBox; }
 
 }
 

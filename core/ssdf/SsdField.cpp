@@ -6,6 +6,7 @@
  */
 
 #include "SsdField.h"
+#include <math/boxBox.h>
 
 namespace alo {
 
@@ -28,8 +29,8 @@ void SsdField::create(int p, int q, int l)
 	m_Q = q;
 	m_numFineValues = l;
 	const int d = 1<<p;
-	PGridTyp::setResolution(d);
-    m_coarseNormal.setResolution(d);
+	PGridTyp::create(d);
+    m_coarseNormal.create(d);
 	m_fineDistance.resetBuffer(l);
 	m_fineNormal.resetBuffer(l);
 }
@@ -47,9 +48,6 @@ void SsdField::setOriginCellSize(const float* v)
 { 
     PGridTyp::setOriginCellSize(v);
     m_coarseNormal.setOriginCellSize(v);
-    m_fieldBox.setMin(v[0], v[1], v[2]);
-    const int d = PGridTyp::resolution();
-    m_fieldBox.setMax(v[0] + v[3] * d, v[1] + v[3] * d, v[2] + v[3] * d);
 }
 
 float* SsdField::fineDistanceValue()
@@ -113,19 +111,11 @@ void SsdField::setAabb(const float *b)
 void SsdField::expandAabb(float *b) const
 {
 	const float *d = m_bbox.data();
-	if(b[0] > d[0]) b[0] = d[0];
-	if(b[1] > d[1]) b[1] = d[1];
-	if(b[2] > d[2]) b[2] = d[2];
-	if(b[3] < d[3]) b[3] = d[3];
-	if(b[4] < d[4]) b[4] = d[4];
-	if(b[5] < d[5]) b[5] = d[5];
+	expandAabbByAabb(b, d);
 }
 
 const float *SsdField::aabb() const
 { return m_bbox.data(); }
-
-const float *SsdField::fieldAabb() const
-{ return m_fieldBox.data(); }
 
 void SsdField::verbose() const
 {
@@ -135,7 +125,7 @@ void SsdField::verbose() const
 	float nec = ((float)numFineValues()) / d3 / numCells() * 100;
 	std::cout << " SsdField "<<m_P<<" "<<m_Q<<" "<<numFineValues()
 	<<" "<< nec << " percent "
-	<<"\n box "<<m_fieldBox
+	<<"\n box "<<fieldBox()
 	<<" cell_size "<<originCellSize()[3] << " delta " << delta()
 	<<"\n aabb "<<m_bbox;
 }

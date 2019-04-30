@@ -127,7 +127,7 @@ void SsdfTest::saveToFile(const std::string &filename)
 	}
 
 	grd::IndexGrid indG;
-	indG.setResolution(1<<4);
+	indG.create(1<<4);
 	indG.setAabb(grdBox);
 
 	grd::IndexGridBuilder<4> indBuilder;

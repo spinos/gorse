@@ -18,9 +18,9 @@ m_numIndices(0)
 IndexGrid::~IndexGrid()
 {}
 
-void IndexGrid::setResolution(const int& x)
+void IndexGrid::create(const int& x)
 {
-	PGridTyp::setResolution(x);
+	PGridTyp::create(x);
 	const int nv = numValues();
 	for(int i=0;i<nv;++i) value()[i] = 1e10f;
 

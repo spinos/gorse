@@ -180,14 +180,14 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::buildRoot(Tr& rule)
 {
 	DistanceFieldTyp* rootField = new DistanceFieldTyp;
 	const int d = 1<<P;
-	rootField->setResolution(d);
+	rootField->create(d);
 	float orih[4];
 	rule.getDomainOrigin(orih);
 	orih[3] = rule.deltaAtLevel(P);
 	rootField->setOriginCellSize(orih);
     
     NormalFieldTyp *rootNml = new NormalFieldTyp;
-    rootNml->setResolution(d);
+    rootNml->create(d);
 	rootNml->setOriginCellSize(orih);
 	
 	const int n = (d+1)*(d+1)*(d+1);
@@ -253,12 +253,13 @@ bool SsdfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int* range,
 	
 	DistanceFieldTyp* cellFld = new DistanceFieldTyp;
 	static const float corih[4] = {0.f,0.f,0.f,rule.deltaAtLevel(P)};
+	cellFld->create(1);
 	cellFld->setOriginCellSize(corih);
-	cellFld->setResolution(1);
+	
     
     NormalFieldTyp *cellNml = new NormalFieldTyp;
-    cellNml->setOriginCellSize(corih);
-	cellNml->setResolution(1);
+    cellNml->create(1);
+	cellNml->setOriginCellSize(corih);
 	
 	sdb::L2Tree<int, int, 512, 1024> visited;
 /// to Q-1
