@@ -11,8 +11,8 @@
 #define ALO_H_SSDF_H
 
 #include <h5/V1HBase.h>
-#include <h5/H2DDataset.h>
 #include <math/miscfuncs.h>
+#include <h5/HOocArray.h>
 
 namespace alo {
 
@@ -52,56 +52,68 @@ bool HSsdf::save(const T& field)
 	int pql[3];
 	pql[0] = field.P();
 	pql[1] = field.Q();
-	pql[2] = field.fineDistanceStorageSize();
+	pql[2] = field.numFineValues();
 	if(!hasNamedAttr(".pql") )
 	    addIntAttr(".pql", 3);
 	writeIntAttr(".pql", pql );
-	
-	const int coarsedL = field.coarseDistanceStorageSize();
-	const int ncol = DivideUp(coarsedL, 1024);
-	
-	hdata::Select2DPart rect;
-	rect.start[0] = 0;
-	rect.start[1] = 0;
-	rect.count[0] = ncol;
-	rect.count[1] = 1024;
-	
-	H2dDataset<hdata::TChar, 1024, 32> coarsed(".coarse");
-	coarsed.create(fObjectId);
-	coarsed.write((char* )field.c_coarseDistanceValue(), &rect);
-	coarsed.close();
-	
-	rect.count[0] = DivideUp(field.cellIndLength(), 256);
-	rect.count[1] = 256;
-	
-	H2dDataset<hdata::TInt, 256, 32> cellid(".celli");
-	cellid.create(fObjectId);
-	cellid.write((char* )field.c_cellIndValue(), &rect);
-	cellid.close();
-	
-	rect.count[0] = DivideUp(field.fineDistanceStorageSize(), 1024);
-	rect.count[1] = 1024;
-	
-	H2dDataset<hdata::TChar, 1024, 32> fined(".fine");
-	fined.create(fObjectId);
-	fined.write((char* )field.c_fineDistanceValue(), &rect);
-	fined.close();
+
+	typedef HOocArray<hdata::TFloat, 32, 32> FltData;
+	bool stat;
+    FltData *coarsd = createDataStorage<FltData>(".coarse", true, stat);
+    if(!stat) {
+    	std::cout << "\n ERROR HSsdf cannot create ooc storage coarse";
+    	return false;
+    }
+
+    int nc = Round32(field.numValues())>>5;
     
-    rect.count[0] = DivideUp(field.coarseNormalStorageSize(), 1024);
-	rect.count[1] = 1024;
-	
-	H2dDataset<hdata::TChar, 1024, 32> coarseNml(".coarse_nml");
-	coarseNml.create(fObjectId);
-	coarseNml.write((char* )field.c_coarseNormalValue(), &rect);
-	coarseNml.close();
+    coarsd->writeColumns((char *)field.c_coarseDistanceValue(), 0, nc);
+    delete coarsd;
+
+    typedef HOocArray<hdata::TInt, 32, 32> IntData;
+    IntData *celld = createDataStorage<IntData>(".celli", true, stat);
+    if(!stat) {
+    	std::cout << "\n ERROR HSsdf cannot create ooc storage celli";
+    	return false;
+    }
+
+    nc = Round32(field.numCells())>>5;
     
-    rect.count[0] = DivideUp(field.fineNormalStorageSize(), 1024);
-	rect.count[1] = 1024;
-	
-	H2dDataset<hdata::TChar, 1024, 32> fineNml(".fine_nml");
-	fineNml.create(fObjectId);
-	fineNml.write((char* )field.c_fineNormalValue(), &rect);
-	fineNml.close();
+    celld->writeColumns((char *)field.c_cellIndValue(), 0, nc);
+    delete celld;
+
+    FltData *fined = createDataStorage<FltData>(".fine", true, stat);
+    if(!stat) {
+    	std::cout << "\n ERROR HSsdf cannot create ooc storage fine";
+    	return false;
+    }
+
+    nc = Round32(field.numFineValues())>>5;
+    
+    fined->writeColumns((char *)field.c_fineDistanceValue(), 0, nc);
+    delete fined;
+
+    FltData *coarseNmld = createDataStorage<FltData>(".coarse_nml", true, stat);
+    if(!stat) {
+    	std::cout << "\n ERROR HSsdf cannot create ooc storage coarse_nml";
+    	return false;
+    }
+
+    nc = Round32(field.numValues()*3)>>5;
+    
+    coarseNmld->writeColumns((char *)field.c_coarseNormalValue(), 0, nc);
+    delete coarseNmld;
+
+    FltData *fineNmld = createDataStorage<FltData>(".fine_nml", true, stat);
+    if(!stat) {
+    	std::cout << "\n ERROR HSsdf cannot create ooc storage fine_nml";
+    	return false;
+    }
+
+    nc = Round32(field.numFineValues()*3)>>5;
+    
+    fineNmld->writeColumns((char *)field.c_fineNormalValue(), 0, nc);
+    delete fineNmld;
 	
 	std::cout<<"\n HSsdf save "<<pathToObject();
     field.verbose();
@@ -123,52 +135,64 @@ bool HSsdf::load(T& field)
     float b[6];
     readFloatAttr(".aabb", b);
     field.setAabb(b);
-	
-	const int coarsedL = field.coarseDistanceStorageSize();
-	const int ncol = DivideUp(coarsedL, 1024);
-	
-	hdata::Select2DPart rect;
-	rect.start[0] = 0;
-	rect.start[1] = 0;
-	rect.count[0] = ncol;
-	rect.count[1] = 1024;
-	
-	H2dDataset<hdata::TChar, 1024, 32> coarsed(".coarse");
-	coarsed.open(fObjectId);
-	coarsed.read((char* )field.coarseDistanceValue(), &rect);
-	coarsed.close();
-	
-	rect.count[0] = DivideUp(field.cellIndLength(), 256);
-	rect.count[1] = 256;
-	
-	H2dDataset<hdata::TInt, 256, 32> cellid(".celli");
-	cellid.open(fObjectId);
-	cellid.read((char* )field.cellIndValue(), &rect);
-	cellid.close();
-	
-	rect.count[0] = DivideUp(field.fineDistanceStorageSize(), 1024);
-	rect.count[1] = 1024;
-	
-	H2dDataset<hdata::TChar, 1024, 32> fined(".fine");
-	fined.open(fObjectId);
-	fined.read((char* )field.fineDistanceValue(), &rect);
-	fined.close();
+
+    typedef HOocArray<hdata::TFloat, 32, 32> FltData;
+    bool stat;
+    FltData *coarsed = openDataStorage<FltData>(".coarse", stat);
+    if(!stat) {
+        std::cout << "\n ERROR HSsdf cannot open ooc storage coarse";
+        return false;
+    }
+
+    int nc = Round32(field.numValues())>>5;
     
-    rect.count[0] = DivideUp(field.coarseNormalStorageSize(), 1024);
-	rect.count[1] = 1024;
-	
-	H2dDataset<hdata::TChar, 1024, 32> coarseNml(".coarse_nml");
-	coarseNml.open(fObjectId);
-	coarseNml.read((char* )field.coarseNormalValue(), &rect);
-	coarseNml.close();
+    coarsed->readColumns((char *)field.coarseDistanceValue(), 0, nc);
+    delete coarsed;
+
+    typedef HOocArray<hdata::TInt, 32, 32> IntData;
+    IntData *celld = openDataStorage<IntData>(".celli", stat);
+    if(!stat) {
+        std::cout << "\n ERROR HSsdf cannot open ooc storage celli";
+        return false;
+    }
+
+    nc = Round32(field.numCells())>>5;
     
-    rect.count[0] = DivideUp(field.fineNormalStorageSize(), 1024);
-	rect.count[1] = 1024;
-	
-	H2dDataset<hdata::TChar, 1024, 32> fineNml(".fine_nml");
-	fineNml.open(fObjectId);
-	fineNml.read((char* )field.fineNormalValue(), &rect);
-	fineNml.close();
+    celld->readColumns((char *)field.cellIndValue(), 0, nc);
+    delete celld;
+
+    FltData *fined = openDataStorage<FltData>(".fine", stat);
+    if(!stat) {
+        std::cout << "\n ERROR HSsdf cannot open ooc storage fine";
+        return false;
+    }
+
+    nc = Round32(field.numFineValues())>>5;
+    
+    fined->readColumns((char *)field.fineDistanceValue(), 0, nc);
+    delete fined;
+
+    FltData *coarseNmld = openDataStorage<FltData>(".coarse_nml", stat);
+    if(!stat) {
+        std::cout << "\n ERROR HSsdf cannot open ooc storage coarse_nml";
+        return false;
+    }
+
+    nc = Round32(field.numValues()*3)>>5;
+    
+    coarseNmld->readColumns((char *)field.coarseNormalValue(), 0, nc);
+    delete coarseNmld;
+
+    FltData *fineNmld = openDataStorage<FltData>(".fine_nml", stat);
+    if(!stat) {
+        std::cout << "\n ERROR HSsdf cannot open ooc storage fine_nml";
+        return false;
+    }
+
+    nc = Round32(field.numFineValues()*3)>>5;
+    
+    fineNmld->readColumns((char *)field.fineNormalValue(), 0, nc);
+    delete fineNmld;
 	
 	std::cout<<"\n HSsdf load "<<pathToObject();
     field.verbose();

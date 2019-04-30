@@ -28,7 +28,7 @@ class SsdField {
     SimpleBuffer<Vector3F> m_fineNormal;
 /// to (1<<P)^3 level p cells
 	SimpleBuffer<int> m_cellIndices;
-	int m_P, m_Q, m_fltStorageSize;
+	int m_P, m_Q, m_numFineValues;
 	BoundingBox m_bbox;
 	BoundingBox m_fieldBox;
 	
@@ -37,7 +37,7 @@ public:
 	SsdField();
 	virtual ~SsdField();
 	
-	void create(int p, int q, int fltStorageSize);
+	void create(int p, int q, int l);
     void destroy();
 /// (origin, cell_size)
 	void setOriginCellSize(const float* v);
@@ -47,16 +47,15 @@ public:
     bool isEmpty() const;
 	const int& P() const;
 	const int& Q() const;
+	int numValues() const;
+	int numCells() const;
+	const int &numFineValues() const;
 	const float* originCellSize() const;
-	int coarseDistanceStorageSize() const;
-	int coarseNormalStorageSize() const;
+	
 	const float* c_coarseDistanceValue() const;
-	const int& fineDistanceStorageSize() const;
 	const float* c_fineDistanceValue() const;
 	const Vector3F *c_coarseNormalValue() const;
-	int fineNormalStorageSize() const;
 	const Vector3F *c_fineNormalValue() const;
-	int cellIndLength() const;
 	const int* c_cellIndValue() const;
 	
 	int* cellIndValue();
@@ -84,13 +83,12 @@ public:
 	float lookup(const float* u) const;
     Vector3F lookupNormal(const float* u) const;
 
-	int totalStorageSize() const;
 /// b is float[6] in (low, high)
 	void getAabb(float *b) const;
 	void expandAabb(float *b) const;
 	const float *aabb() const;
 	const float *fieldAabb() const;
-	int numCells() const;
+	
 	void verbose() const;
     
 protected:

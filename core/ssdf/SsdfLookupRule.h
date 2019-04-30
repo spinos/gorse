@@ -122,7 +122,7 @@ float SsdfLookupRule<T>::lookup(const float* p) const
 	const int c = computeCellInd(u);
 	const int offset = m_field->c_cellIndValue()[c];
 	if(offset >-1) {
-		const float* fv = &m_field->c_fineDistanceValue()[offset>>2];
+		const float *fv = &m_field->c_fineDistanceValue()[offset];
 		return lookupInCell<float>(q, u, fv) - m_boundary + toBox;
 	}
 	return m_field->lookup(q) - m_boundary + toBox; 
@@ -209,7 +209,7 @@ Vector3F SsdfLookupRule<T>::lookupNormal(const float* p) const
 	const int c = computeCellInd(u);
 	const int offset = m_field->c_cellIndValue()[c];
 	if(offset >-1) {
-		const Vector3F *fv = &m_field->c_fineNormalValue()[offset>>2];
+		const Vector3F *fv = &m_field->c_fineNormalValue()[offset];
 		return lookupInCell<Vector3F>(p, u, fv);
 	}
 	return m_field->lookupNormal(p); 

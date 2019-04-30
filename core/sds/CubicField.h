@@ -70,11 +70,6 @@ public:
 	void divide(const float* weight);
 	void copyValue(const CubicField<T>* b);
 	
-/// useful
-	int dataSize() const;
-/// rounded
-	int storageSize() const;
-	
 	void upSample();
 /// 8 corners of cell(i,j,k)	
 	void getCellValues(T* box, int i, int j, int k) const;
@@ -127,8 +122,7 @@ void CubicField<T>::setResolution(const int& x)
 	m_dim[1] = m_dim[0] + 1;
 	m_dim[2] = m_dim[1] * m_dim[1];
 	m_dim[3] = m_dim[0] - 1;
-	int dataL = storageSize() / sizeof(T);
-	m_value.resetBuffer(dataL);
+	m_value.resetBuffer(m_dim[1] * m_dim[2]);
 	
 }
 
@@ -221,7 +215,7 @@ T CubicField<T>::lookup(const float* u) const
 
 template<typename T>
 void CubicField<T>::copyValue(const CubicField<T>* b)
-{ memcpy(value(), b->c_value(), b->dataSize() ); }
+{ memcpy(value(), b->c_value(), b->numValues() * sizeof(T) ); }
 
 template<typename T>
 int CubicField<T>::numValues() const
@@ -230,14 +224,6 @@ int CubicField<T>::numValues() const
 template<typename T>
 int CubicField<T>::numCells() const
 { return m_dim[0] * m_dim[0] * m_dim[0]; }
-
-template<typename T>
-int CubicField<T>::dataSize() const
-{ return sizeof(T) * numValues(); }
-
-template<typename T>
-int CubicField<T>::storageSize() const
-{ return DivideUp(dataSize(), 1024) * 1024; }
 
 template<typename T>
 const float* CubicField<T>::originCellSize() const

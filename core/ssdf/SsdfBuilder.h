@@ -295,7 +295,7 @@ bool SsdfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int* range,
 	const int iCell = rule.computeCellInd(coord, P);
 	m_cellInd[iCell] = cellCount;
 	m_cellOffset[iCell] = m_currentCellOffset;
-	m_currentCellOffset += cellFld->storageSize();
+	m_currentCellOffset += cellFld->numValues();
 	
 	m_uniformDistances.push_back(cellFld);
     m_uniformNormals.push_back(cellNml);

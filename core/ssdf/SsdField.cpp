@@ -17,7 +17,7 @@ namespace sdf {
 SsdField::SsdField() :
 m_P(0), 
 m_Q(0),
-m_fltStorageSize(0)
+m_numFineValues(0)
 {}
 
 SsdField::~SsdField()
@@ -25,22 +25,22 @@ SsdField::~SsdField()
 	destroy();
 }
 
-void SsdField::create(int p, int q, int fltStorageSize)
+void SsdField::create(int p, int q, int l)
 {
 	m_P = p;
 	m_Q = q;
-	m_fltStorageSize = fltStorageSize;
+	m_numFineValues = l;
 	const int d = 1<<p;
 	m_coarseDistance.setResolution(d);
     m_coarseNormal.setResolution(d);
-	m_cellIndices.resetBuffer(cellIndLength());
-	m_fineDistance.resetBuffer(fltStorageSize>>2);
-	m_fineNormal.resetBuffer(fltStorageSize>>2);
+	m_cellIndices.resetBuffer(d * d * d);
+	m_fineDistance.resetBuffer(l);
+	m_fineNormal.resetBuffer(l);
 }
 
 void SsdField::destroy()
 { 
-	m_P = m_Q = 0; 
+	m_P = m_Q = m_numFineValues = 0; 
 	m_coarseDistance.destroy();
 	m_coarseNormal.destroy();
 	m_cellIndices.purgeBuffer();
@@ -71,8 +71,7 @@ void SsdField::copyCoarseDistanceValue(const sds::CubicField<float>* b)
 
 void SsdField::copyFineDistanceValue(const int offset, const sds::CubicField<float>* b)
 {
-	char* dst = (char*)m_fineDistance.data();
-	memcpy(&dst[offset], b->c_value(), b->storageSize() );
+	memcpy(&m_fineDistance.data()[offset], b->c_value(), b->numValues() * sizeof(float) );
 }
 
 void SsdField::copyCoarseNormalValue(const sds::CubicField<Vector3F>* b)
@@ -80,8 +79,7 @@ void SsdField::copyCoarseNormalValue(const sds::CubicField<Vector3F>* b)
 
 void SsdField::copyFineNormalValue(const int offset, const sds::CubicField<Vector3F>* b)
 {
-    char* dst = (char*)m_fineNormal.data();
-	memcpy(&dst[offset*3], b->c_value(), b->storageSize() );
+    memcpy(&m_fineNormal.data()[offset], b->c_value(), b->numValues() * sizeof(Vector3F) );
 }
 
 void SsdField::copyCellOffset(const int* b)
@@ -93,44 +91,35 @@ void SsdField::copyCellOffset(const int* b)
 bool SsdField::isEmpty() const
 { return m_P < 1; }
 
-const float* SsdField::originCellSize() const
-{ return m_coarseDistance.originCellSize(); }
-
 const int& SsdField::P() const
 { return m_P; }
 
 const int& SsdField::Q() const
 { return m_Q; }
 
-int SsdField::coarseDistanceStorageSize() const
-{ return m_coarseDistance.storageSize(); }
+int SsdField::numValues() const
+{ return m_coarseDistance.numValues(); }
+
+int SsdField::numCells() const
+{ return m_coarseDistance.numCells(); }
+
+const int &SsdField::numFineValues() const
+{ return m_numFineValues; }
+
+const float* SsdField::originCellSize() const
+{ return m_coarseDistance.originCellSize(); }
 
 const float* SsdField::c_coarseDistanceValue() const
 { return m_coarseDistance.c_value(); }
 
-const int& SsdField::fineDistanceStorageSize() const
-{ return m_fltStorageSize; }
-
 const float* SsdField::c_fineDistanceValue() const
 { return m_fineDistance.c_data(); }
-
-int SsdField::coarseNormalStorageSize() const
-{ return m_coarseNormal.storageSize(); }
 
 const Vector3F *SsdField::c_coarseNormalValue() const
 { return m_coarseNormal.c_value(); }
 	
-int SsdField::fineNormalStorageSize() const
-{ return m_fltStorageSize * 3; }
-	
 const Vector3F *SsdField::c_fineNormalValue() const
 { return m_fineNormal.c_data(); }
-
-int SsdField::cellIndLength() const
-{ 
-	const int d = 1<<m_P;
-	return DivideUp(d*d*d, 256)<<8; 
-}
 
 const int* SsdField::c_cellIndValue() const
 { return m_cellIndices.c_data(); }
@@ -162,13 +151,6 @@ Vector3F *SsdField::coarseNormalValue()
 Vector3F *SsdField::fineNormalValue()
 { return m_fineNormal.data(); }
 
-int SsdField::totalStorageSize() const
-{ return  coarseDistanceStorageSize()
-			+ coarseNormalStorageSize()
-			+ fineDistanceStorageSize()
-			+ fineNormalStorageSize(); 
-}
-
 void SsdField::setBBox(const BoundingBox &b)
 { m_bbox = b; }
 
@@ -195,14 +177,10 @@ const float *SsdField::aabb() const
 const float *SsdField::fieldAabb() const
 { return m_fieldBox.data(); }
 
-int SsdField::numCells() const
-{ return m_coarseDistance.numCells(); }
-
 void SsdField::verbose() const
 {
-	std::cout << " SsdField "<<m_P<<" "<<m_Q
-	<<" "<<totalStorageSize()<<" byte\n origin ("
-	<<originCellSize()[0]<<", "<<originCellSize()[1]<<", "<<originCellSize()[2]
+	std::cout << " SsdField "<<m_P<<" "<<m_Q<<" "<<numFineValues()
+	<<"\n origin ("<<originCellSize()[0]<<", "<<originCellSize()[1]<<", "<<originCellSize()[2]
 	<<") cell_size "<<originCellSize()[3] << " delta " << delta()
 	<<"\n aabb "<<m_bbox;
 }
