@@ -58,7 +58,7 @@ typedef sdf::SsdField FieldTyp;
 
 	static AFileDlgProfile SWriteProfile;
 
-#define NUM_RIBBONS 9
+#define NUM_RIBBONS 13
 	AdaptableMesh *m_ribbon[NUM_RIBBONS];
 
 public:

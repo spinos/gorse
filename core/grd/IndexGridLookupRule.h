@@ -19,13 +19,11 @@ struct IndexGridLookupResult {
     Int2 _instanceRange;
     int _instanceId;
     float _distance;
-    float _stepSize;
 
     IndexGridLookupResult() 
     {
     	_instanceRange.set(0,0);
     	_instanceId = -1;
-    	_stepSize = 1.f;
     }
 
     bool isEmptySpace() const 
@@ -33,13 +31,6 @@ struct IndexGridLookupResult {
 
     bool hasInstanceRange() const
     { return _instanceRange.x < _instanceRange.y; }
-
-    void calcStepSize(const float &delta)
-    {
-    	//float x = .01f * (_distance / delta);
-    	//Clamp01(x);
-    	_stepSize = delta;
-    }
 
 };
 

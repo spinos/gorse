@@ -33,6 +33,7 @@ class SsdfLookupRule {
 	const T* m_field;
     float m_delta;
     float m_boundary;
+    float m_low, m_high;
 	
 public:
 
@@ -53,6 +54,8 @@ public:
 	bool intersectBox(const float* b) const;
 
 	const float &boundary() const;
+
+	void limitStepSize(float &x) const;
 	
 protected:
 
@@ -89,6 +92,8 @@ void SsdfLookupRule<T>::attach(const T& field)
 	m_dim[3] = m_dim[1] - 1;
 	m_field = &field;
     m_delta = field.delta();
+    m_low = m_delta * .5f;
+    m_high = m_delta * 16.f;
 }
 
 template<typename T>
@@ -253,9 +258,15 @@ template<typename T>
 const float &SsdfLookupRule<T>::boundary() const
 { return m_boundary; }
 
+template<typename T>
+void SsdfLookupRule<T>::limitStepSize(float &x) const
+{ 
+	if(x > 1e-3f && x < m_low) x = m_low;
+	if(x > m_high) x = m_high;
 }
 
-}
+} /// end of namespace sdf
+
+} /// end of namespace alo
 
 #endif
-

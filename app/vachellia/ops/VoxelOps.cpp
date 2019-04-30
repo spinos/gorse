@@ -101,9 +101,6 @@ bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
 
         if(d < tt * 1e-5f) break;
 
-        if(d < param._stepSize) d = param._stepSize;
-        if(d > param._stepSize * 32.5f) d = param._stepSize * 32.5f;
-
         tt += d;
      
         if(tt > tLimit) return false;
@@ -265,13 +262,15 @@ float VoxelOps::mapLocalDistanceTo(const float *q, GridLookupResultTyp &result) 
     m_gridRule->lookup(result, q);
     if(result.isEmptySpace() 
         && result._distance > m_grid->cellSize() ) {
-        result.calcStepSize(result._distance * .8f);
-        return result._distance * .8f;
+        return result._distance * .7f;
     }
         
     findObjectClosestTo(q, result);
-    result.calcStepSize(m_pairs[result._instanceId]._rule->delta() * .5f );
-    return result._distance * .732f;
+    
+    result._distance *= .732f;
+    m_pairs[result._instanceId]._rule->limitStepSize(result._distance);
+
+    return result._distance;
 }
 
 Vector3F VoxelOps::mapLocalNormalAt(const float *q, GridLookupResultTyp &result) const

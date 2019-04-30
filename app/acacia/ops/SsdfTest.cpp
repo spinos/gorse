@@ -117,7 +117,8 @@ void SsdfTest::saveToFile(const std::string &filename)
 		buildField(fields[i], *m_ribbon[i]);
 		fields[i]->expandAabb(grdBox);
 
-		std::string fullName = boost::str(boost::format("/asset/foo_%1%") % i );
+		const std::string idName = boost::str(boost::format("%04i") % i);
+		const std::string fullName = boost::str(boost::format("/asset/fld%1%") % idName );
 
 		HSsdf writer(fullName);
 		writer.save<FieldTyp>(*fields[i]);
