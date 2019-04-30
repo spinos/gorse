@@ -28,6 +28,9 @@ public:
 
     void setResolution(const int& x);
 
+    void destroy();
+    void copyCell(const Tc *b);
+
     Tc *cell();
     const Tc *c_cell() const;
     
@@ -59,6 +62,17 @@ Tc *CubicGrid<T, Tc>::cell()
 template<typename T, typename Tc>
 const Tc *CubicGrid<T, Tc>::c_cell() const
 { return m_cells.c_data(); }
+
+template<typename T, typename Tc>
+void CubicGrid<T, Tc>::destroy()
+{
+	CubicField<T>::destroy();
+	m_cells.purgeBuffer();
+}
+
+template<typename T, typename Tc>
+void CubicGrid<T, Tc>::copyCell(const Tc *b)
+{ m_cells.copyFrom(b, numCells()); }
 
 } /// end of namespace sds
 

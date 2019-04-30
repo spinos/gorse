@@ -387,32 +387,26 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::save(Tf& field, Tr& rule)
 	field.setBBox(rule.bbox());
 				
 	const DistanceFieldTyp* rootField = m_uniformDistances.back();
-	field.copyCoarseDistanceValue(rootField);
+	field.copyValue(rootField);
     
     const NormalFieldTyp* rootNml = m_uniformNormals.back();
 	field.copyCoarseNormalValue(rootNml);
     
-	field.copyCellOffset(m_cellOffset);
+	field.copyCell(m_cellOffset);
 				
 	const int n = SvfBuilderTyp::NumPCells();
-	std::cout << "\n n p-cell " << n;
-	int nq = 0;
 	for(int i=0;i<n;++i) {
 		const int &j = m_cellInd[i];
-		if(j<0)
-			continue;
+		if(j<0) continue;
 			
-		const DistanceFieldTyp* cellField = m_uniformDistances[j];
-		const int offset = m_cellOffset[i];
+		const DistanceFieldTyp *cellField = m_uniformDistances[j];
+		const int &offset = m_cellOffset[i];
 		
 		field.copyFineDistanceValue(offset, cellField);
         
-        const NormalFieldTyp* cellNml = m_uniformNormals[j];  
+        const NormalFieldTyp *cellNml = m_uniformNormals[j];  
         field.copyFineNormalValue(offset, cellNml);
-		
-		nq++;
 	}
-	std::cout << "\n n q-field " << nq;
 }
 
 }

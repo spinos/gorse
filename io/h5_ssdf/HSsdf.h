@@ -67,7 +67,7 @@ bool HSsdf::save(const T& field)
 
     int nc = Round32(field.numValues())>>5;
     
-    coarsd->writeColumns((char *)field.c_coarseDistanceValue(), 0, nc);
+    coarsd->writeColumns((char *)field.c_value(), 0, nc);
     delete coarsd;
 
     typedef HOocArray<hdata::TInt, 32, 32> IntData;
@@ -79,7 +79,7 @@ bool HSsdf::save(const T& field)
 
     nc = Round32(field.numCells())>>5;
     
-    celld->writeColumns((char *)field.c_cellIndValue(), 0, nc);
+    celld->writeColumns((char *)field.c_cell(), 0, nc);
     delete celld;
 
     FltData *fined = createDataStorage<FltData>(".fine", true, stat);
@@ -146,7 +146,7 @@ bool HSsdf::load(T& field)
 
     int nc = Round32(field.numValues())>>5;
     
-    coarsed->readColumns((char *)field.coarseDistanceValue(), 0, nc);
+    coarsed->readColumns((char *)field.value(), 0, nc);
     delete coarsed;
 
     typedef HOocArray<hdata::TInt, 32, 32> IntData;
@@ -158,7 +158,7 @@ bool HSsdf::load(T& field)
 
     nc = Round32(field.numCells())>>5;
     
-    celld->readColumns((char *)field.cellIndValue(), 0, nc);
+    celld->readColumns((char *)field.cell(), 0, nc);
     delete celld;
 
     FltData *fined = openDataStorage<FltData>(".fine", stat);

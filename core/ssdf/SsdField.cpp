@@ -2,13 +2,10 @@
  *  SsdField.cpp
  *  aloe
  *
- *  Created by jian zhang on 3/4/18.
- *  Copyright 2018 __MyCompanyName__. All rights reserved.
- *
+ *  2019/4/30
  */
 
 #include "SsdField.h"
-#include <math/miscfuncs.h>
 
 namespace alo {
 
@@ -31,9 +28,8 @@ void SsdField::create(int p, int q, int l)
 	m_Q = q;
 	m_numFineValues = l;
 	const int d = 1<<p;
-	m_coarseDistance.setResolution(d);
+	PGridTyp::setResolution(d);
     m_coarseNormal.setResolution(d);
-	m_cellIndices.resetBuffer(d * d * d);
 	m_fineDistance.resetBuffer(l);
 	m_fineNormal.resetBuffer(l);
 }
@@ -41,33 +37,23 @@ void SsdField::create(int p, int q, int l)
 void SsdField::destroy()
 { 
 	m_P = m_Q = m_numFineValues = 0; 
-	m_coarseDistance.destroy();
+	PGridTyp::destroy();
 	m_coarseNormal.destroy();
-	m_cellIndices.purgeBuffer();
 	m_fineDistance.purgeBuffer();
 	m_fineNormal.purgeBuffer();
 }
 
 void SsdField::setOriginCellSize(const float* v)
 { 
-    m_coarseDistance.setOriginCellSize(v);
+    PGridTyp::setOriginCellSize(v);
     m_coarseNormal.setOriginCellSize(v);
     m_fieldBox.setMin(v[0], v[1], v[2]);
-    const int d = m_coarseDistance.resolution();
+    const int d = PGridTyp::resolution();
     m_fieldBox.setMax(v[0] + v[3] * d, v[1] + v[3] * d, v[2] + v[3] * d);
 }
 
-int* SsdField::cellIndValue()
-{ return m_cellIndices.data(); }
-
-float* SsdField::coarseDistanceValue()
-{ return m_coarseDistance.value(); }
-
 float* SsdField::fineDistanceValue()
 { return m_fineDistance.data(); }
-
-void SsdField::copyCoarseDistanceValue(const sds::CubicField<float>* b)
-{ m_coarseDistance.copyValue(b); }
 
 void SsdField::copyFineDistanceValue(const int offset, const sds::CubicField<float>* b)
 {
@@ -82,12 +68,6 @@ void SsdField::copyFineNormalValue(const int offset, const sds::CubicField<Vecto
     memcpy(&m_fineNormal.data()[offset], b->c_value(), b->numValues() * sizeof(Vector3F) );
 }
 
-void SsdField::copyCellOffset(const int* b)
-{ 
-	const int d = 1<<m_P;
-	memcpy(m_cellIndices.data(), b, (d*d*d)<<2 ); 
-}
-
 bool SsdField::isEmpty() const
 { return m_P < 1; }
 
@@ -97,20 +77,8 @@ const int& SsdField::P() const
 const int& SsdField::Q() const
 { return m_Q; }
 
-int SsdField::numValues() const
-{ return m_coarseDistance.numValues(); }
-
-int SsdField::numCells() const
-{ return m_coarseDistance.numCells(); }
-
 const int &SsdField::numFineValues() const
 { return m_numFineValues; }
-
-const float* SsdField::originCellSize() const
-{ return m_coarseDistance.originCellSize(); }
-
-const float* SsdField::c_coarseDistanceValue() const
-{ return m_coarseDistance.c_value(); }
 
 const float* SsdField::c_fineDistanceValue() const
 { return m_fineDistance.c_data(); }
@@ -121,26 +89,8 @@ const Vector3F *SsdField::c_coarseNormalValue() const
 const Vector3F *SsdField::c_fineNormalValue() const
 { return m_fineNormal.c_data(); }
 
-const int* SsdField::c_cellIndValue() const
-{ return m_cellIndices.c_data(); }
-
-void SsdField::getBox(float* b) const
-{ m_coarseDistance.getBox(b); }
-
-void SsdField::getCoord(float* c) const
-{ m_coarseDistance.getCoord(c); }
-
-void SsdField::getOriginCellSize(float* b) const
-{ m_coarseDistance.getOriginCellSize(b); }
-
-const float& SsdField::cellSize() const
-{ return m_coarseDistance.cellSize(); }
-
 float SsdField::delta() const
 { return cellSize() / (1<<(m_Q - m_P)); }
-
-float SsdField::lookup(const float* u) const
-{ return m_coarseDistance.lookup(u); }
 
 Vector3F SsdField::lookupNormal(const float* u) const
 { return m_coarseNormal.lookup(u); }
@@ -179,9 +129,14 @@ const float *SsdField::fieldAabb() const
 
 void SsdField::verbose() const
 {
+	const int d = 1<<(m_Q - m_P);
+	const int d1 = d + 1;
+	const int d3 = d1 * d1 * d1;
+	float nec = ((float)numFineValues()) / d3 / numCells() * 100;
 	std::cout << " SsdField "<<m_P<<" "<<m_Q<<" "<<numFineValues()
-	<<"\n origin ("<<originCellSize()[0]<<", "<<originCellSize()[1]<<", "<<originCellSize()[2]
-	<<") cell_size "<<originCellSize()[3] << " delta " << delta()
+	<<" "<< nec << " percent "
+	<<"\n box "<<m_fieldBox
+	<<" cell_size "<<originCellSize()[3] << " delta " << delta()
 	<<"\n aabb "<<m_bbox;
 }
 

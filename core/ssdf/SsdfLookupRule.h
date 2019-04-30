@@ -5,9 +5,7 @@
  *  ssdf lookup
  *  T is ssdf type
  *
- *  Created by jian zhang on 3/7/18.
- *  Copyright 2018 __MyCompanyName__. All rights reserved.
- *
+ *  2019/4/30
  */
 
 #ifndef ALO_SSDF_LOOKUP_RULE_H
@@ -120,7 +118,7 @@ float SsdfLookupRule<T>::lookup(const float* p) const
 	int u[3];
 	computeCellCoord(u, q);
 	const int c = computeCellInd(u);
-	const int offset = m_field->c_cellIndValue()[c];
+	const int offset = m_field->c_cell()[c];
 	if(offset >-1) {
 		const float *fv = &m_field->c_fineDistanceValue()[offset];
 		return lookupInCell<float>(q, u, fv) - m_boundary + toBox;
@@ -207,7 +205,7 @@ Vector3F SsdfLookupRule<T>::lookupNormal(const float* p) const
 	int u[3];
 	computeCellCoord(u, p);
 	const int c = computeCellInd(u);
-	const int offset = m_field->c_cellIndValue()[c];
+	const int offset = m_field->c_cell()[c];
 	if(offset >-1) {
 		const Vector3F *fv = &m_field->c_fineNormalValue()[offset];
 		return lookupInCell<Vector3F>(p, u, fv);
@@ -240,7 +238,7 @@ bool SsdfLookupRule<T>::intersectBox(const float* b) const
 	for(int k=0;k<d;++k) {
 		for(int j=0;j<d;++j) {
 			for(int i=0;i<d;++i) {
-				const int offset = m_field->c_cellIndValue()[c];
+				const int offset = m_field->c_cell()[c];
 				c++;
 				if(offset < 0) continue;
 
