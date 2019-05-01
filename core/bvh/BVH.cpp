@@ -20,8 +20,10 @@ void BVH::splitNode(int i)
 	BVHNode *parentNode = &m_nodes[i];
 	int lft = numNodes();
 	parentNode->setInner(lft);
-	m_nodes << BVHNode(); 
-	m_nodes << BVHNode(); 
+	m_nodes << BVHNode(i); 
+	m_nodes << BVHNode(i); 
+	m_nodes[lft].setSibling(lft+1);
+	m_nodes[lft + 1].setSibling(lft);
 }
 
 void BVH::addPrimitive(const BVHPrimitive &x)
@@ -106,10 +108,10 @@ BVHNodeIterator BVH::nextLeaf(BVHNodeIterator x) const
 
 std::ostream& operator<<(std::ostream &output, const BVH & p) 
 {
-    output << " aabb " << p.aabb() 
-    	<< " n primitive "<< p.numPrimitives()
-    	<< " n node "<<p.numNodes()
-    	<< " n leaf "<<p.numLeafNodes();
+    output << "\n bvh aabb " << p.aabb() 
+    	<< "\n n node "<<p.numNodes()
+    	<< " n leaf "<<p.numLeafNodes()
+    	<< " n primitive "<< p.numPrimitives();
     return output;
 }
 

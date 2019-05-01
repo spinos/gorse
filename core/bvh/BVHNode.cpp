@@ -5,8 +5,14 @@
 
 namespace alo {
 
-BVHNode::BVHNode()
+BVHNode::BVHNode() : m_parent(-1)
 {}
+
+BVHNode::BVHNode(int parent) : m_parent(parent)
+{}
+
+void BVHNode::setSibling(int x)
+{ m_sibling = x; }
 
 void BVHNode::resetAABB()
 { m_aabb.reset(); }
@@ -40,5 +46,11 @@ const int &BVHNode::leftChild() const
 
 const BoundingBox &BVHNode::aabb() const
 { return m_aabb; }
+
+const int &BVHNode::parent() const
+{ return m_parent; }
+
+const int &BVHNode::sibling() const
+{ return m_sibling; }
 
 }

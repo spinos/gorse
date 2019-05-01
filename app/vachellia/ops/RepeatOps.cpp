@@ -13,6 +13,11 @@
 #include <grd/InstanceBound.h>
 #include <sds/FZOrder.h>
 #include <svf/SvfBuildRule.h>
+#include <grd/WorldGridBuilder.h>
+#include <grd/WorldGridBuildRule.h>
+#include <grd/WorldGridLookupRule.h>
+#include <grd/TestCell.h>
+#include <sds/FZOrder.h>
 
 #include "BoxOps.h"
 
@@ -47,10 +52,52 @@ RepeatOps::RepeatOps()
     builder.attach(m_grid);
     builder.measure<InstanceBound, BuildRuleTyp >(inst, 0, rule);
     builder.detach();
+
+
+    m_worldGrid = new WorldTyp;
+    
+    m_worldRule = new WorldRuleTyp;
+    const int cencz[4] = {0,0,0,512};
+    m_worldRule->setCenterCellSize(cencz);
+
+    m_worldBuilder = new WorldBuilderTyp;
+
+    m_worldBuilder->attach(m_worldGrid);
+
+    grd::TestCell acube;
+
+    for(int i=0;i<32000;++i) {
+        int rx = -1000 + rand() % 2000;
+        int ry = -1000 + rand() % 2000;
+        int rz = -1000 + rand() % 2000;
+        acube._bbox.setMin(-5.f + 2.f * rx, -5.f + .5f * ry, -5.f + 3.f * rz);
+        acube._bbox.setMax( 5.f + 2.f * rx,  5.f + .5f * ry,  5.f + 3.f * rz);
+
+        m_worldBuilder->addObject<grd::TestCell, WorldRuleTyp >(acube, *m_worldRule);
+    }
+    
+    m_worldBuilder->detach();
+
+    m_worldLookupRule = new WorldLookupRuleTyp;
+    m_worldLookupRule->attach(m_worldGrid);
+
+    float rayD[8];
+    rayD[0] = 0.f; rayD[1] = 0.f; rayD[2] = 15000.f;
+    Vector3F dir(0.f, 0.f, -1.f); dir.normalize();
+    rayD[3] = dir.x; rayD[4] = dir.y; rayD[5] = dir.z; 
+    rayD[6] = 1.f; rayD[7] = 1e8f;
+
+    grd::WorldGridLookupResult param;
+    m_worldLookupRule->lookup(param, rayD);
+
+
 }
 
 RepeatOps::~RepeatOps()
 {
+    delete m_worldBuilder;
+    delete m_worldRule;
+    delete m_worldGrid;
 }
 
 std::string RepeatOps::opsName() const

@@ -9,17 +9,49 @@
 
 #include "TransformOps.h"
 #include <math/ElementVector.h>
+#include <sdb/Types.h>
 
 namespace alo {
 
 namespace grd {
 class IndexGrid;
+
+struct TestCell;
+
+template<typename T, typename Tc>
+class WorldGrid;
+
+template<typename T, typename Tc, typename Tf>
+class WorldGridBuildRule;
+
+template<typename T, typename Tc>
+class WorldGridBuilder;
+
+template<typename T>
+class WorldGridLookupRule;
+
+}
+
+namespace sds {
+struct FZOrderCurve;
 }
 
 class RepeatOps : public TransformOps {
 
 	ElementVector<RenderableOps> m_inOps;
     grd::IndexGrid *m_grid;
+
+    typedef grd::WorldGrid<int, grd::TestCell > WorldTyp;
+    WorldTyp *m_worldGrid;
+
+    typedef grd::WorldGridBuildRule<int, grd::TestCell, sds::FZOrderCurve > WorldRuleTyp;
+    WorldRuleTyp *m_worldRule;
+
+    typedef grd::WorldGridBuilder<int, grd::TestCell > WorldBuilderTyp;
+    WorldBuilderTyp *m_worldBuilder;
+
+    typedef grd::WorldGridLookupRule<WorldTyp > WorldLookupRuleTyp;
+    WorldLookupRuleTyp *m_worldLookupRule;
 
 public:
 	enum { Type = 800002 };

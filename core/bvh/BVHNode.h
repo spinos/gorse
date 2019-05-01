@@ -19,11 +19,16 @@ namespace alo {
 
 class BVHNode {
 
+	int m_parent;
+	int m_sibling;
 	BoundingBox m_aabb;
 
 public:
 
 	BVHNode();
+	BVHNode(int parent);
+
+	void setSibling(int x);
 
 	void resetAABB();
 	void expandAABB(const BoundingBox &box);
@@ -35,6 +40,8 @@ public:
 	const int &leafEnd() const;
 	const int &leftChild() const;
 	const BoundingBox &aabb() const;
+	const int &parent() const;
+	const int &sibling() const;
 
 private:
 

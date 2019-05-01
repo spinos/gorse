@@ -39,12 +39,16 @@ class IndexGridLookupRule {
 
 	float m_originCellSize[4];
 	float m_invCellSize[2];
+	int m_maxNumStep;
 	int m_dim[4];
 	const T* m_grid;
 	
 public:
 
 	IndexGridLookupRule();
+
+	void setMaxNumStep(int x);
+	const int &maxNumStep() const;
 	
 	void attach(const T& grid);
     void detach();
@@ -62,7 +66,8 @@ private:
 };
 
 template<typename T>
-IndexGridLookupRule<T>::IndexGridLookupRule() : m_grid(nullptr)
+IndexGridLookupRule<T>::IndexGridLookupRule() : m_grid(nullptr),
+m_maxNumStep(128)
 {}
 
 template<typename T>
@@ -125,6 +130,14 @@ void IndexGridLookupRule<T>::lookup(IndexGridLookupResult &result, const float* 
 	
 	result._distance = m_grid->lookup(q) + toBox; 
 }
+
+template<typename T>
+void IndexGridLookupRule<T>::setMaxNumStep(int x)
+{ m_maxNumStep = x; }
+
+template<typename T>
+const int &IndexGridLookupRule<T>::maxNumStep() const
+{ return m_maxNumStep; }
 
 } /// end of namespace grd
 
