@@ -16,6 +16,7 @@ namespace alo {
 namespace grd {
 class IndexGrid;
 
+template<typename T>
 struct TestCell;
 
 template<typename T, typename Tc>
@@ -27,8 +28,10 @@ class WorldGridBuildRule;
 template<typename T, typename Tc>
 class WorldGridBuilder;
 
-template<typename T>
+template<typename T, typename Tc>
 class WorldGridLookupRule;
+
+struct TestBox;
 
 }
 
@@ -41,17 +44,23 @@ class RepeatOps : public TransformOps {
 	ElementVector<RenderableOps> m_inOps;
     grd::IndexGrid *m_grid;
 
-    typedef grd::WorldGrid<int, grd::TestCell > WorldTyp;
+    typedef grd::TestCell<grd::IndexGrid> WorldCellTyp;
+
+    typedef grd::WorldGrid<int, WorldCellTyp > WorldTyp;
     WorldTyp *m_worldGrid;
 
-    typedef grd::WorldGridBuildRule<int, grd::TestCell, sds::FZOrderCurve > WorldRuleTyp;
+    typedef grd::WorldGridBuildRule<int, WorldCellTyp, sds::FZOrderCurve > WorldRuleTyp;
     WorldRuleTyp *m_worldRule;
 
-    typedef grd::WorldGridBuilder<int, grd::TestCell > WorldBuilderTyp;
+    typedef grd::WorldGridBuilder<int, WorldCellTyp > WorldBuilderTyp;
     WorldBuilderTyp *m_worldBuilder;
 
-    typedef grd::WorldGridLookupRule<WorldTyp > WorldLookupRuleTyp;
+    typedef grd::WorldGridLookupRule<WorldTyp, WorldCellTyp > WorldLookupRuleTyp;
     WorldLookupRuleTyp *m_worldLookupRule;
+
+    typedef grd::TestBox ObjectTyp;
+    SimpleBuffer<ObjectTyp> m_objs;
+
 
 public:
 	enum { Type = 800002 };

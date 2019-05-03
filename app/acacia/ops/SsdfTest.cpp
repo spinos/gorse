@@ -153,6 +153,8 @@ typedef sdf::SsdfLookupRule<FieldTyp> IndSampleTyp;
 	}
 
 	indBuilder.detach();
+    
+    indG.verbose();
 
 	HIndexGrid hindG("/asset/indexGrid");
 	hindG.save(indG);

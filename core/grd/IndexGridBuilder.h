@@ -31,7 +31,6 @@ public:
 	IndexGridBuilder();
 	~IndexGridBuilder();
 
-/// extract existing indices in grid
 	void attach(IndexGrid *grid);
 /// finish grid
 	void detach();
@@ -45,6 +44,8 @@ public:
 protected:
 
 private:
+/// extract existing indices in grid
+	void recordIndices(IndexGrid *grid);
 
 	struct CellKH {
 		int _key;
@@ -64,6 +65,7 @@ template<int P>
 void IndexGridBuilder<P>::attach(IndexGrid *grid)
 {
 	m_grid = grid;
+	if(grid->numIndices()) recordIndices(grid);
 }
 
 template<int P>
@@ -98,7 +100,7 @@ void IndexGridBuilder<P>::detach()
 		block = m_objectCellMap.next(block);
 	}
 
-	std::cout << "\n " << numInstances << " instances in " << countNonEmptyCells << " celles ";
+	m_objectCellMap.clear();
 
 }
 
@@ -142,6 +144,21 @@ void IndexGridBuilder<P>::measure(const T &sample, int objI, Tr &rule)
    	}
 	delete[] cs;
 
+}
+
+template<int P>
+void IndexGridBuilder<P>::recordIndices(IndexGrid *grid)
+{
+	const int n = grid->numCells();
+	for(int i=0;i<n;++i) {
+		const Int2 &range = grid->c_cell()[i];
+		if(range.x >= range.y) continue;
+
+		for(int j=range.x;j<range.y;++j) {
+			const int &objI = grid->c_indices()[j];
+			m_objectCellMap.insert(sdb::Coord2(objI, i), 0);
+		}
+	}
 }
 
 }

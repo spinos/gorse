@@ -119,60 +119,42 @@ inline float distanceInsidePointToBox(const float *a, const float *b)
     return md;
 }
 
+inline int closestBoxSideToPoint(const float *a, const float *b)
+{
+    float md = 1e10f;
+    int side = 0;
+
+    for(int j=0;j<2;++j) {
+        for(int i=0;i<3;++i) {
+            float d = a[i] - b[j * 3 + i];
+            if(d < 0) d = -d;
+
+            if(d < 1e-3f) {
+                return j * 3 + i;
+            }
+
+            if(md > d) {
+                md = d;
+                side = j * 3 + i;
+            }
+        }
+    }
+    return side;
+}
+
 static const float AabbSideNormal[6][3] = {
 {-1.f, 0.f, 0.f},
-{ 1.f, 0.f, 0.f},
 { 0.f,-1.f, 0.f},
-{ 0.f, 1.f, 0.f},
 { 0.f, 0.f,-1.f},
+{ 1.f, 0.f, 0.f},
+{ 0.f, 1.f, 0.f},
 { 0.f, 0.f, 1.f}
 };
 
+/// point a on box b
 inline void normalOnBox(float *nml, const float *a, const float *b)
 {
-    int side = 0;
-    float md = a[0] - b[0];
-    if(md < 0) md = -md;
-
-    float d = a[0] - b[3];
-    if(d < 0) d = -d;
-
-    if(md > d) {
-        md = d;
-        side = 1;
-    }
-
-    d = a[1] - b[1];
-    if(d < 0) d = -d;
-
-    if(md > d) {
-        md = d;
-        side = 2;
-    }
-
-    d = a[1] - b[4];
-    if(d < 0) d = -d;
-
-    if(md > d) {
-        md = d;
-        side = 3;
-    }
-
-    d = a[2] - b[2];
-    if(d < 0) d = -d;
-
-    if(md > d) {
-        md = d;
-        side = 4;
-    }
-
-    d = a[2] - b[5];
-    if(d < 0) d = -d;
-
-    if(md > d) {
-        md = d;
-        side = 5;
-    }
+    int side = closestBoxSideToPoint(a, b);
 
     memcpy(nml, AabbSideNormal[side], 12);
 }

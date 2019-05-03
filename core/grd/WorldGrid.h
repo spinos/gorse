@@ -26,9 +26,10 @@ namespace grd {
 template<typename T, typename Tc>
 class WorldGrid {
 
-	typedef Tc * CellPtrTyp;
+/// indirection
+	SimpleBuffer<int> m_cellInd;
 /// in serial
-	SimpleBuffer<CellPtrTyp> m_pcells;
+	SimpleBuffer<const Tc *> m_cellPtr;
 /// mapped
 	sdb::L3Tree<T, Tc, 2048, 512, 1024 > m_cells;
 	BVH m_bvh;
@@ -45,6 +46,10 @@ public:
 	void buildBvh();
 
 	const BVH *boundingVolumeHierarchy() const;
+/// leafBegin <= i < leafEnd
+	const Tc *c_cellPtr(int i) const;
+/// of bvh root
+	const BoundingBox &aabb() const;
 
 protected:
 
@@ -75,9 +80,9 @@ Tc *WorldGrid<T, Tc>::addCell(const T &k, Tc &x)
 template<typename T, typename Tc>
 void WorldGrid<T, Tc>::buildBvh()
 {
-	m_pcells.resetBuffer(m_cells.size());
-
 	m_bvh.clear();
+
+	m_cellPtr.resetBuffer(m_cells.size());
 
 	BVHPrimitive ap;
 
@@ -87,12 +92,12 @@ void WorldGrid<T, Tc>::buildBvh()
 	while(block) {
 		for (int i=0;i<block->count();++i) { 
         	
-        	Tc &ci = block->value(i);
+        	const Tc &ci = block->value(i);
 
 			ap.setAABB(ci.aabb());
         	ap.setIndex(offset);
 
-        	m_pcells[offset] = &ci;
+        	m_cellPtr[offset] = &ci;
 
         	offset++;
 
@@ -108,12 +113,40 @@ void WorldGrid<T, Tc>::buildBvh()
 
     BVHBuilder::Build(&m_bvh);
 
+    m_cellInd.resetBuffer(m_cells.size());
+
+    const BVHPrimitive *prims = m_bvh.c_primitives();
+    const BVHNode *ns = m_bvh.c_nodes();
+    const int &nn = m_bvh.numNodes();
+
+	for(int i=0;i<nn;++i) {
+		const BVHNode &ni = ns[i];
+		if(ni.isLeaf()) {
+
+			int b = ni.leafBegin();
+			int e = ni.leafEnd();
+			
+			for(int j=b;j<e;++j) {
+				m_cellInd[j] = prims[j].index();
+			}
+			
+		}
+	}
+
     std::cout << m_bvh;
 }
 
 template<typename T, typename Tc>
 const BVH *WorldGrid<T, Tc>::boundingVolumeHierarchy() const
 { return &m_bvh; }
+
+template<typename T, typename Tc>
+const Tc *WorldGrid<T, Tc>::c_cellPtr(int i) const
+{ return m_cellPtr[m_cellInd[i]]; }
+
+template<typename T, typename Tc>
+const BoundingBox &WorldGrid<T, Tc>::aabb() const
+{ return m_bvh.aabb(); }
 
 } /// end of namespace grd
 

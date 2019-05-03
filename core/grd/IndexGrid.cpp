@@ -72,18 +72,20 @@ bool IndexGrid::isCellEmpty(int i) const
 
 void IndexGrid::verbose() const
 {
-    std::cout << " IndexGrid rez "<<resolution()
-    <<"\n origin ("<<originCellSize()[0]<<", "<<originCellSize()[1]<<", "<<originCellSize()[2]
+    int nne = 0;
+    const int nc = numCells();
+    for(int i=0;i<nc;++i) {
+        if( c_cell()[i].x < c_cell()[i].y) nne++;
+    }
+    std::cout << "\n IndexGrid rez "<<resolution()
+    <<" origin ("<<originCellSize()[0]<<", "<<originCellSize()[1]<<", "<<originCellSize()[2]
     <<") cell_size "<<originCellSize()[3]
-    <<"\n aabb (("<<m_aabb[0]<<", "<<m_aabb[1]<<", "<<m_aabb[2]
-    <<"), ("<<m_aabb[3]<<", "<<m_aabb[4]<<", "<<m_aabb[5]
-    <<") )\n n index "<<numIndices();
+    //<<"\n aabb (("<<m_aabb[0]<<", "<<m_aabb[1]<<", "<<m_aabb[2]
+    //<<"), ("<<m_aabb[3]<<", "<<m_aabb[4]<<", "<<m_aabb[5]
+    <<"\n "<<numIndices()<< " instance in "<<nne<<" cell ";
 
     //const int nv = numValues();
     //for(int i=0;i<nv;++i) std::cout << " " << c_value()[i];
-
-    //const int nc = numCells();
-    //for(int i=0;i<nc;++i) std::cout << " " << c_cell()[i].x << ":" << c_cell()[i].y;
 }
 
 } /// end of namespace grd

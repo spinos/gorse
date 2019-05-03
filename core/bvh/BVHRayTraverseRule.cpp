@@ -30,15 +30,14 @@ void RayTraverseRule::detach()
 bool RayTraverseRule::isEmpty() const
 { return m_bvh == nullptr; }
 
-void RayTraverseRule::begin(RayTraverseResult &result, const float *rayData) const
+void RayTraverseRule::begin(RayTraverseResult &result) const
 {
-	memcpy(result._rayData, rayData, 32);
 	result._state = tFromParent;
 	result._current = 0;
 	result._primBegin = -1;
 }
 
-void RayTraverseRule::traverse(RayTraverseResult &result) const
+void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) const
 {
 	for(;;) {
 /// until reaching a leaf node, or finished	
@@ -53,19 +52,25 @@ void RayTraverseRule::traverse(RayTraverseResult &result) const
 
 		if(result._primBegin > -1) {
 /// end process leaf
+#ifdef RAY_BVH_DGB
 			result.printLeafOut();
+#endif
 
 			result._primBegin = -1;
 
 			if(state == tFromParent) {
 /// visited near child, going to far child
+#ifdef RAY_BVH_DGB
 				result.printHorizontal();
+#endif
 
 				state = tFromSibling;
 				result._current = findSibling(result._current);
 			} else {
 /// visited far child, going up
+#ifdef RAY_BVH_DGB
 				result.printUp();
+#endif
 
 				state = tFromChild;
 				result._child = result._current;
@@ -79,16 +84,20 @@ void RayTraverseRule::traverse(RayTraverseResult &result) const
 
 		if(state == tFromChild) {
 
-			if(result._child != findNearChild(result._rayData, n) ) {
+			if(result._child != findNearChild(rayData, n) ) {
 /// visited far child, going up
+#ifdef RAY_BVH_DGB
 				result.printUp();
+#endif
 
 				state = tFromChild;
 				result._child = result._current;
 				result._current = findParent(result._current);
 			} else {
 /// visited near child, going to far child
+#ifdef RAY_BVH_DGB
 				result.printHorizontal();
+#endif
 
 				state = tFromSibling;
 				result._current = findSibling(result._child);
@@ -97,11 +106,18 @@ void RayTraverseRule::traverse(RayTraverseResult &result) const
 			continue;
 		}
 
-		if(rayAabbIntersect(result._rayData, (const float *)&n.aabb())) {
+		float tmp[8];
+		memcpy(tmp, rayData, 32);
+	
+		if(rayAabbIntersect(tmp, (const float *)&n.aabb())) {
 
 			if(n.isLeaf()) {
+				result._t0 = tmp[6];
+				result._t1 = tmp[7];
 /// begin process leaf
+#ifdef RAY_BVH_DGB
 				result.printLeafIn();
+#endif
 
 				result._primBegin = n.leafBegin();
 				result._primEnd = n.leafEnd();
@@ -109,26 +125,33 @@ void RayTraverseRule::traverse(RayTraverseResult &result) const
 			}
 
 /// inner node, going down to near child
+#ifdef RAY_BVH_DGB
 			result.printDown();
+#endif
 
 			state = tFromParent;
 			
-			result._current = findNearChild(result._rayData, n);
+			result._current = findNearChild(rayData, n);
 			continue;
 		}
 
 		//std::cout << "\n missed " << result._current << n.aabb();
 
+
 /// missed
 		if(state == tFromParent) {
 /// missed near child, going to far child
+#ifdef RAY_BVH_DGB
 			result.printHorizontal();
+#endif
 
 			state = tFromSibling;
 			result._current = findSibling(result._current);
 		} else {
 /// missed far child, going up
+#ifdef RAY_BVH_DGB
 			result.printUp();
+#endif
 
 			state = tFromChild;
 			result._child = result._current;
@@ -138,6 +161,9 @@ void RayTraverseRule::traverse(RayTraverseResult &result) const
 	}
 	
 }
+
+bool RayTraverseRule::end(const RayTraverseResult &result) const
+{ return result._state == tNone; }
 
 int RayTraverseRule::findParent(int x) const
 { 

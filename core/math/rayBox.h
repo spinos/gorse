@@ -252,6 +252,13 @@ inline void getNormalOnAabb(float* nml, const float* pnt, const float* box, cons
 
 }
 
+inline void rayProgress(float *q, const float *ray, const float &t)
+{
+    q[0] = ray[0] + ray[3] * t;
+    q[1] = ray[1] + ray[4] * t;
+    q[2] = ray[2] + ray[5] * t;
+}
+
 }
 
 #endif

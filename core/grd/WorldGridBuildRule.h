@@ -34,6 +34,8 @@ public:
 	int calcCellCoords(T *ks, const float *b) const;
 
 	void calcCellAabb(float *b, const T &k) const;
+/// order of cell resolution
+	int P() const;
 
 protected:
 
@@ -136,6 +138,10 @@ void WorldGridBuildRule<T, Tc, Tf>::calcCellAabb(float *b, const T &k) const
 	b[4] = b[1] + m_centerCellSize[3];
 	b[5] = b[2] + m_centerCellSize[3];
 }
+
+template<typename T, typename Tc, typename Tf>
+int WorldGridBuildRule<T, Tc, Tf>::P() const
+{ return 4; }
 
 } /// end of namespace grd
 

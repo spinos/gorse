@@ -7,6 +7,7 @@
  *  down from parent to near child
  *  horizontal from near child to far sibling
  *  up from child to parent
+ *  exit when hit a leaf or back to root
  *
  *  2019/5/2
  */
@@ -24,17 +25,16 @@ class BVHNode;
 namespace bvh {
 
 struct RayTraverseResult {
-/// (origin, direction, t_min, t_max)
-	float _rayData[8];
 	int _state;
 	int _current;
 	int _child;
 	int _primBegin;
 	int _primEnd;
+	float _t0;
+	float _t1;
 
 	void printDown() const {
-		std::cout << "\n "<<_current
-			<< "\n down";
+		std::cout << "\n "<<_current<< " down ";
 	}
 
 	void printHorizontal() const {			
@@ -42,8 +42,7 @@ struct RayTraverseResult {
 	}
 
 	void printUp() const {
-		std::cout << "\n up"
-				  << "\n "<<_current;
+		std::cout << "\n up "<<_current;
 	}
 
 	void printLeafIn() const {
@@ -76,8 +75,9 @@ public:
     void detach();
     bool isEmpty() const;
 
-    void begin(RayTraverseResult &result, const float *rayData) const;
-	void traverse(RayTraverseResult &result) const;
+    void begin(RayTraverseResult &result) const;
+	void traverse(RayTraverseResult &result, const float *rayData) const;
+	bool end(const RayTraverseResult &result) const;
 
 protected:
 

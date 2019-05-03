@@ -36,8 +36,8 @@ RepeatOps::RepeatOps()
     sds::FZOrderCurve sfc;
     sfc.setCoord(32.f, 32.f, 32.f, 16.f);
     
-    typedef grd::IndexGridBuildRule<sds::FZOrderCurve> BuildRuleTyp;
-    BuildRuleTyp rule(&sfc);
+    typedef grd::IndexGridBuildRule<sds::FZOrderCurve> CellBuildRuleTyp;
+    CellBuildRuleTyp cellRule(&sfc);
     
     InstanceBound inst;
     inst._instanceId = 0;
@@ -48,11 +48,11 @@ RepeatOps::RepeatOps()
     inst._tm = &space;
     inst._invTm = &invSpace;
     
-    grd::IndexGridBuilder<4> builder;
-    builder.attach(m_grid);
-    builder.measure<InstanceBound, BuildRuleTyp >(inst, 0, rule);
-    builder.detach();
-
+    typedef grd::IndexGridBuilder<4> CellBuilderTyp;
+    CellBuilderTyp cellBuilder;
+    cellBuilder.attach(m_grid);
+    cellBuilder.measure<InstanceBound, CellBuildRuleTyp >(inst, 0, cellRule);
+    cellBuilder.detach();
 
     m_worldGrid = new WorldTyp;
     
@@ -64,16 +64,31 @@ RepeatOps::RepeatOps()
 
     m_worldBuilder->attach(m_worldGrid);
 
-    grd::TestCell acube;
+    m_objs.resetBuffer(5000);
+    
+    int acount = 0;
 
-    for(int i=0;i<32000;++i) {
-        int rx = -1000 + rand() % 2000;
-        int ry = -1000 + rand() % 2000;
-        int rz = -1000 + rand() % 2000;
-        acube._bbox.setMin(-5.f + 2.f * rx, -5.f + .5f * ry, -5.f + 3.f * rz);
-        acube._bbox.setMax( 5.f + 2.f * rx,  5.f + .5f * ry,  5.f + 3.f * rz);
+    for(int i=0;i<5000;++i) {
+        grd::TestBox &ccube = m_objs[i];
+        
+/// randomly placed boxes
+        int rx = -1600 + rand() % 3200;
+        int ry = -1600 + rand() % 3200;
+        int rz = -1600 + rand() % 3200;
+        ccube._bbox.setMin(-4.f + 4.f * rx, -3.f + 2.f * ry, -3.f + 3.f * rz);
+        ccube._bbox.setMax( 4.f + 4.f * rx,  5.f + 2.f * ry,  3.f + 3.f * rz);
 
-        m_worldBuilder->addObject<grd::TestCell, WorldRuleTyp >(acube, *m_worldRule);
+        m_worldBuilder->addObject<grd::TestBox, WorldRuleTyp >(ccube, i, *m_worldRule);
+
+        acount++;
+        if((acount & 1023) == 0) {
+            acount = 0;
+            m_worldBuilder->buildCells<grd::TestBox, CellBuilderTyp, CellBuildRuleTyp>(m_objs.c_data(), cellBuilder, cellRule);
+        }
+    }
+
+    if(acount > 0) {
+        m_worldBuilder->buildCells<grd::TestBox, CellBuilderTyp, CellBuildRuleTyp>(m_objs.c_data(), cellBuilder, cellRule);
     }
     
     m_worldBuilder->detach();
@@ -82,15 +97,16 @@ RepeatOps::RepeatOps()
     m_worldLookupRule->attach(m_worldGrid);
 
     float rayD[8];
-    rayD[0] = 0.f; rayD[1] = 0.f; rayD[2] = 15000.f;
-    Vector3F dir(0.f, 0.f, -1.f); dir.normalize();
+    rayD[0] = 0.f; rayD[1] = 0.f; rayD[2] = 1000.f;
+    Vector3F dir(0.7f, -0.1f, -1.f); dir.normalize();
     rayD[3] = dir.x; rayD[4] = dir.y; rayD[5] = dir.z; 
     rayD[6] = 1.f; rayD[7] = 1e8f;
 
     grd::WorldGridLookupResult param;
     m_worldLookupRule->lookup(param, rayD);
 
-
+    std::cout << " hit t0 " << param._t0<< " nml " << param._nml;
+    memcpy(RenderableObject::aabb(), &m_worldGrid->aabb(), 24);
 }
 
 RepeatOps::~RepeatOps()
@@ -128,14 +144,27 @@ void RepeatOps::update()
 
 bool RepeatOps::intersectRay(const Ray& aray, IntersectResult& result)
 {
-    const int ne = m_inOps.numElements();
-    if(ne < 1) return TransformOps::intersectRay(aray, result);
+    //const int ne = m_inOps.numElements();
+    //if(ne < 1
+    if(m_worldLookupRule->isEmpty() ) return TransformOps::intersectRay(aray, result);
 
     float rayData[8];
     result.copyRayData(rayData);
 
     rayToLocal(rayData);
 
+    grd::WorldGridLookupResult param;
+
+    if(!m_worldLookupRule->lookup(param, rayData)) return false;
+
+    rayData[6] = param._t0;
+
+    rayToWorld(rayData);
+    normalToWorld((float *)&param._nml);
+
+    return result.updateRayDistance(rayData[6], param._nml);
+
+/*
     if(!rayAabbIntersect(rayData, c_aabb())) return false;
 
     float &tt = rayData[6];
@@ -162,7 +191,7 @@ bool RepeatOps::intersectRay(const Ray& aray, IntersectResult& result)
     rayToWorld(rayData);
     normalToWorld((float *)&tn);
 
-    return result.updateRayDistance(tt, tn);
+    return result.updateRayDistance(tt, tn);*/
 }
 
 float RepeatOps::mapDistance(const float *q) const
