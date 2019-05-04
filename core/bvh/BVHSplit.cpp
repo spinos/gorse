@@ -58,7 +58,7 @@ void BVHSplit::splitDim(int dim, float dx)
 		bi.setSplitPos(a + dx * (i+1), i);
 
 	for(int i=m_begin;i<m_end;++i) {
-		const BoundingBox &box = m_primitives[i].aabb();
+		const BoundingBox &box = m_primitives[i].bbox();
 		bi.count(box.getMin(dim), box);
 	}
 
@@ -123,7 +123,7 @@ void BVHSplit::sortPrimitives()
 {
 	const float thre = splitPos();
 	for(int i=m_begin;i<m_end;++i) {
-		const BoundingBox &box = m_primitives[i].aabb();
+		const BoundingBox &box = m_primitives[i].bbox();
 		if(box.getMin(m_splitDim) < thre) 
 			m_primitives[i].setKey(0);
 		else

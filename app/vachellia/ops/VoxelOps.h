@@ -2,6 +2,7 @@
  *  VoxelOps.h
  *  vachellia
  *
+ *  2019/5/5
  */
 
 #ifndef VCHL_VOXEL_OPS_H
@@ -16,32 +17,34 @@ namespace sdf {
 class SsdField;
 template<typename T>
 class SsdfLookupRule;
+
+template<typename T>
+class MultiLookupRule;
+
 }
 
 namespace grd {
-class IndexGrid;
-struct IndexGridLookupResult;
+struct LocalGridLookupResult;
+
+template<typename T, typename Tp>
+class LocalGridLookupRule;
+
 template<typename T>
-class IndexGridLookupRule;
+class LocalGrid;
 }
 
 class VoxelOps : public TransformOps {
 
-    typedef sdf::SsdfLookupRule<sdf::SsdField> LookupRuleTyp;
+    typedef sdf::MultiLookupRule<sdf::SsdField> PrimitiveLookupRule;
+    PrimitiveLookupRule *m_primitiveLookup;
 
-    struct FieldLookupRulePair {
-        sdf::SsdField *_field;
-        LookupRuleTyp *_rule;
-    };
+    typedef grd::LocalGrid<float> GridTyp;
 
-    FieldLookupRulePair *m_pairs;
-    int m_numPairs;
+    GridTyp *m_grid;
 
-    grd::IndexGrid *m_grid;
+    typedef grd::LocalGridLookupRule<GridTyp, PrimitiveLookupRule > GridLookupRuleTyp;
 
-    typedef grd::IndexGridLookupRule<grd::IndexGrid> GridLookupRuleTyp;
-
-    typedef grd::IndexGridLookupResult GridLookupResultTyp;
+    typedef grd::LocalGridLookupResult GridLookupResultTyp;
 
     GridLookupRuleTyp *m_gridRule;
 
@@ -49,8 +52,6 @@ class VoxelOps : public TransformOps {
     
     std::string m_cachePath;
     ElementVector<RenderableOps> m_outOps;
-
-    int m_maxNumStep;
 
 public:
 	enum { Type = 703427 };
@@ -77,14 +78,7 @@ protected:
     
 private:
     bool loadCache(const std::string &fileName);
-    void clearAllPairs();
-    void setAllRelativeBoundaryOffset(float x);
-    float mapLocalDistanceTo(const float *q, GridLookupResultTyp &result) const;
-    Vector3F mapLocalNormalAt(const float *q, GridLookupResultTyp &result) const;
-    void findObjectClosestTo(const float *q, GridLookupResultTyp &result) const;
-    void findObjectInRangeClosestTo(const float *q, GridLookupResultTyp &result) const;
-
-
+    
 };
 
 } /// end of namespace alo

@@ -96,7 +96,7 @@ void WorldGrid<T, Tc>::buildBvh()
         	
         	const Tc &ci = block->value(i);
 
-			ap.setAABB(ci.bbox());
+			ap.setBBox(ci.bbox());
         	ap.setIndex(offset);
 
         	m_cellPtr[offset] = &ci;

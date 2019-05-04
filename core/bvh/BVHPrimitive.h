@@ -13,11 +13,11 @@ public:
 
 	BVHPrimitive();
 
-	void setAABB(const BoundingBox &box);
+	void setBBox(const BoundingBox &box);
 	void setIndex(int x);
 	void setKey(int x);
 
-	const BoundingBox &aabb() const;
+	const BoundingBox &bbox() const;
 	const int &index() const;
 	const int &key() const;
 

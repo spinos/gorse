@@ -185,7 +185,7 @@ void ViewFrustumCull::buildBvh()
 	m_primHexa.createBuffer(primCount);
 	for(int i=0;i<primCount;++i) {
 		const BVHPrimitive &p = prims[nodeInd[i]];
-		m_primHexa[i].set(p.aabb());
+		m_primHexa[i].set(p.bbox());
 	}
 }
 

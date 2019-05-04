@@ -3,7 +3,7 @@
  *  aloe
  *
  *  nodes and primitives
- *
+ *	2019/5/5
  */
 
 #ifndef ALO_BVH_H
@@ -40,6 +40,7 @@ public:
 	
 	const BVHNode *c_nodes() const;
 	const BVHPrimitive *c_primitives() const;
+	const BoundingBox &primitiveBox(int i) const;
 
 	friend std::ostream& operator<<(std::ostream &output, const BVH & p);
 

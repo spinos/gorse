@@ -11,11 +11,12 @@
 #include <interface/IntersectResult.h>
 #include <qt_base/AFileDlg.h>
 #include <ssdf/SparseSignedDistanceField.h>
-#include <grd/IndexGrid.h>
-#include <grd/IndexGridLookupRule.h>
+#include <ssdf/MultiLookupRule.h>
+#include <grd/LocalGrid.h>
+#include <grd/LocalGridLookupRule.h>
 #include <h5/V1H5IO.h>
 #include <h5_ssdf/HSsdf.h>
-#include <h5_ssdf/HIndexGrid.h>
+#include <h5_ssdf/HLocalGrid.h>
 #include <QProgressDialog>
 #include <QApplication>
 
@@ -30,20 +31,19 @@ AFileDlgProfile VoxelOps::SReadProfile(AFileDlgProfile::FRead,
         "./",
         "");
    
-VoxelOps::VoxelOps() : m_cachePath("unknown"),
-m_pairs(nullptr),
-m_numPairs(0),
-m_maxNumStep(128)
+VoxelOps::VoxelOps() : m_cachePath("unknown")
 {
-    m_grid = new grd::IndexGrid;
+    m_primitiveLookup = new PrimitiveLookupRule;
     m_gridRule = new GridLookupRuleTyp;
+    m_gridRule->setPrimitiveRule(m_primitiveLookup);
+    m_grid = new GridTyp;
 }
 
 VoxelOps::~VoxelOps()
 {
-    clearAllPairs();
     delete m_gridRule;
     delete m_grid;
+    delete m_primitiveLookup;
 }
 
 std::string VoxelOps::opsName() const
@@ -61,7 +61,9 @@ void VoxelOps::update()
 
     float boundary;
     getFloatAttribValue(boundary, "bthickness");
-    getIntAttribValue(m_maxNumStep, "amaxnstep");
+    int mns;
+    getIntAttribValue(mns, "amaxnstep");
+    m_gridRule->setMaxNumStep(mns);
 
     QAttrib * acp = findAttrib("cache_path");
     StringAttrib *fcp = static_cast<StringAttrib *>(acp);
@@ -70,45 +72,8 @@ void VoxelOps::update()
     if(m_cachePath != scachePath && scachePath.size() > 3)
         loadCache(scachePath);
 
-    setAllRelativeBoundaryOffset(boundary);
+    m_primitiveLookup->setAllRelativeBoundaryOffset(boundary);
     m_outOps.update();
-}
-
-bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
-{
-    if(m_numPairs < 1 || m_gridRule->isEmpty() )
-        return TransformOps::intersectRay(aray, result);
-
-    float rayData[8];
-    result.copyRayData(rayData);
-
-    rayToLocal(rayData);
-
-    if(!rayAabbIntersect(rayData, aabb())) return false;
-
-    float &tt = rayData[6];
-    const float &tLimit = rayData[7];
-    float q[3];
-    GridLookupResultTyp param;
-
-    for(int i=0;i<m_maxNumStep;++i) {
-        
-        rayTravel(q, rayData);
-
-        float d = mapLocalDistanceTo(q, param);
-
-        if(d < 1e-3f) break;
-
-        if(d < tt * 1e-5f) break;
-
-        tt += d;
-     
-        if(tt > tLimit) return false;
-    }
-
-    Vector3F tn = mapLocalNormalAt(q, param);
-    normalToWorld((float *)&tn);
-    return result.updateRayDistance(tt, tn);
 }
 
 AFileDlgProfile *VoxelOps::readFileProfileR () const
@@ -116,7 +81,8 @@ AFileDlgProfile *VoxelOps::readFileProfileR () const
 
 bool VoxelOps::loadCache(const std::string &fileName)
 {
-    clearAllPairs();
+    m_primitiveLookup->clear();
+    m_gridRule->detach();
 
     QProgressDialog progress("Processing...", QString(), 0, 1, QApplication::activeWindow() );
     progress.setWindowModality(Qt::ApplicationModal);
@@ -127,7 +93,6 @@ bool VoxelOps::loadCache(const std::string &fileName)
     bool stat = hio.begin(fileName);
     if(!stat) {
         m_cachePath = "unknown";
-        m_gridRule->detach();
         progress.setValue(1);
 /// todo unlock here
         return stat;
@@ -142,34 +107,30 @@ bool VoxelOps::loadCache(const std::string &fileName)
 
         ver1::HBase ga("/asset");
         ga.lsTypedChild<HSsdf>(fldNames);
-        bool hasGrd = ga.lsFirstTypedChild<HIndexGrid>(grdName);
+        bool hasGrd = ga.lsFirstTypedChild<HLocalGrid>(grdName);
         ga.close();
 
         stat = hasGrd && (fldNames.size() > 0);
 
         if(stat) {
 
-            HIndexGrid greader(grdName);
-            greader.load(*m_grid);
+            HLocalGrid greader(grdName);
+            greader.load<GridTyp>(*m_grid);
             greader.close();
 
             nfld = fldNames.size();
 
-            m_pairs = new FieldLookupRulePair[nfld];
+            m_primitiveLookup->create(nfld);
 
             for(int i=0;i<nfld;++i) {
 
-                FieldLookupRulePair &p = m_pairs[i];
-                p._field = new sdf::SsdField;
-                p._rule = new LookupRuleTyp;
-
                 HSsdf reader(fldNames[i]);
 
-                stat = reader. template load<sdf::SsdField>(*p._field);
+                stat = reader. template load<sdf::SsdField>(m_primitiveLookup->field(i));
     
                 reader.close();
 
-                p._rule->attach(*p._field);
+                m_primitiveLookup->attach(i);
             } 
         }
     }
@@ -178,13 +139,11 @@ bool VoxelOps::loadCache(const std::string &fileName)
 /// todo unlock here
     if(stat) {
         m_cachePath = fileName;
-        m_numPairs = nfld;
-        m_gridRule->attach(*m_grid);
-        memcpy(aabb(), m_grid->aabb(), 24);
+        m_gridRule->attach(m_grid);
+        memcpy(aabb(), &m_grid->bbox(), 24);
     }
     else {
         m_cachePath = "unknown";
-        m_gridRule->detach();
     }
     progress.setValue(1);
     return stat;
@@ -205,25 +164,47 @@ void VoxelOps::disconnectFrom(GlyphOps *another, const std::string &portName)
     std::cout << "\n VoxelOps " << this << " disconnectFrom renderable " << r;
 }
 
+bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
+{
+    if(m_primitiveLookup->isEmpty() || m_gridRule->isEmpty() )
+        return TransformOps::intersectRay(aray, result);
+
+    float rayData[8];
+    result.copyRayData(rayData);
+
+    rayToLocal(rayData);
+
+    GridLookupResultTyp param;
+
+    if(!m_gridRule->lookup(param, rayData)) return false;
+
+    rayData[6] = param._t0;
+
+    rayToWorld(rayData);
+    normalToWorld((float *)&param._nml);
+
+    return result.updateRayDistance(rayData[6], param._nml);
+}
+
 float VoxelOps::mapDistance(const float *q) const
 {
-    if(m_numPairs < 1 || m_gridRule->isEmpty() )
+    //if(m_numPairs < 1 || m_gridRule->isEmpty() )
         return TransformOps::mapDistance(q);
 
-    float a[3];
+   /* float a[3];
     memcpy(a, q, 12);
     pointToLocal(a);
 
     GridLookupResultTyp param;
-    return mapLocalDistanceTo(a, param);
+    return mapLocalDistanceTo(a, param);*/
 }
 
 Vector3F VoxelOps::mapNormal(const float *q) const
 {
-    if(m_numPairs < 1 || m_gridRule->isEmpty() )
+    //if(m_numPairs < 1 || m_gridRule->isEmpty() )
         return TransformOps::mapNormal(q);
     
-    float a[3];
+   /* float a[3];
     memcpy(a, q, 12);
     pointToLocal(a);
 
@@ -231,88 +212,7 @@ Vector3F VoxelOps::mapNormal(const float *q) const
     Vector3F tn = mapLocalNormalAt(a, param);
     
     normalToWorld((float *)&tn);
-    return tn;
-}
-
-void VoxelOps::clearAllPairs()
-{
-    if(m_numPairs<1) return;
-    const int n = m_numPairs;
-    m_numPairs = 0;
-    for(int i=0;i<n;++i) {
-        FieldLookupRulePair &p = m_pairs[i];
-        delete p._field;
-        delete p._rule;
-    }
-    delete[] m_pairs;
-}
-
-void VoxelOps::setAllRelativeBoundaryOffset(float x)
-{
-    if(m_numPairs<1) return;
-
-    for(int i=0;i<m_numPairs;++i) {
-        LookupRuleTyp *r = m_pairs[i]._rule;
-        r->setRelativeBoundaryOffset(x);
-    }
-}
-
-float VoxelOps::mapLocalDistanceTo(const float *q, GridLookupResultTyp &result) const
-{
-    m_gridRule->lookup(result, q);
-    if(result.isEmptySpace() 
-        && result._distance > m_grid->cellSize() ) {
-        return result._distance * .7f;
-    }
-        
-    findObjectClosestTo(q, result);
-    
-    result._distance *= .7f;
-    m_pairs[result._instanceId]._rule->limitStepSize(result._distance);
-
-    return result._distance;
-}
-
-Vector3F VoxelOps::mapLocalNormalAt(const float *q, GridLookupResultTyp &result) const
-{
-    if(result._instanceId < 0)
-        findObjectClosestTo(q, result);
-
-    const LookupRuleTyp *r = m_pairs[result._instanceId]._rule;
-
-    return r->lookupNormal(q);
-}
-
-void VoxelOps::findObjectClosestTo(const float *q, GridLookupResultTyp &result) const 
-{
-    if(result.hasInstanceRange()) return findObjectInRangeClosestTo(q, result);
-    
-    float &md = result._distance;
-    md = 1e10f;
-    for(int i=0;i<m_numPairs;++i) {
-        float d = m_pairs[i]._rule->lookup(q);
-        if(md > d) {
-            md = d;
-            result._instanceId = i;
-        }
-    }
-    
-}
-
-void VoxelOps::findObjectInRangeClosestTo(const float *q, GridLookupResultTyp &result) const 
-{
-    const int *ind = m_grid->c_indices();
-    float &md = result._distance;
-    md = 1e10f;
-    for(int i=result._instanceRange.x;i<result._instanceRange.y;++i) {
-        const int &objI = ind[i];
-
-        float d = m_pairs[objI]._rule->lookup(q);
-        if(md > d) {
-            md = d;
-            result._instanceId = objI;
-        }
-    }
+    return tn;*/
 }
 
 } /// end of namespace alo

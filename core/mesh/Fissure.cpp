@@ -33,7 +33,7 @@ int Fissure::granulate(const AdaptableMesh *inMesh)
         if((i+1 & 4095) == 0) std::cout << ".";
 		inMesh->getTriangleAabb(box, i);
 
-		ap.setAABB(box);
+		ap.setBBox(box);
         ap.setIndex(i);
 
 		m_bvh->addPrimitive(ap);

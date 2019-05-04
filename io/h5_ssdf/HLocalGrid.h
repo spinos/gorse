@@ -1,31 +1,46 @@
 /*
- *  HIndexGrid.cpp
+ *  HLocalGrid.h
  *
- *  2019/4/28
+ *  2019/5/4
  */
 
-#include "HIndexGrid.h"
-#include <grd/IndexGrid.h>
+#ifndef ALO_H_LOCAL_GRID_H
+#define ALO_H_LOCAL_GRID_H
+
+#include <h5/V1HBase.h>
+#include <math/miscfuncs.h>
 #include <h5/HOocArray.h>
 
 namespace alo {
 
-HIndexGrid::HIndexGrid(const std::string &name) :
-HBase(name)
-{}
+class HLocalGrid : public ver1::HBase {
 
-bool HIndexGrid::verifyType()
-{
-	return hasNamedAttr(".is_index_grid");
-}
+public:
 
-bool HIndexGrid::save(const grd::IndexGrid &grid)
+	HLocalGrid(const std::string &name);
+	
+	virtual bool verifyType();
+
+	template<typename T>
+	bool save(const T &grid);
+
+	template<typename T>
+	bool load(T &grid);
+	
+protected:
+
+private:
+
+};
+
+template<typename T>
+bool HLocalGrid::save(const T &grid)
 { 
-	if(!hasNamedAttr(".is_index_grid") )
-	    addIntAttr(".is_index_grid", 1);
+	if(!hasNamedAttr(".is_local_grid") )
+	    addIntAttr(".is_local_grid", 1);
 
 	int d = grid.resolution();
-	writeIntAttr(".is_index_grid", &d );
+	writeIntAttr(".is_local_grid", &d );
     
     if(!hasNamedAttr(".n_ind") )
         addIntAttr(".n_ind", 1);
@@ -37,38 +52,27 @@ bool HIndexGrid::save(const grd::IndexGrid &grid)
     int nobj = grid.numObjects();
     writeIntAttr(".n_obj", &nobj );
 
-    if(!hasNamedAttr(".aabb") )
-        addFloatAttr(".aabb", 6);
-    writeFloatAttr(".aabb", (float *)grid.aabb() );
+    if(!hasNamedAttr(".fld_box") )
+        addFloatAttr(".fld_box", 6);
+    writeFloatAttr(".fld_box", (float *)&grid.fieldBox() );
 
-	typedef HOocArray<hdata::TFloat, 32, 32> FltData;
-	bool stat;
-    FltData *distd = createDataStorage<FltData>(".grid_dist", true, stat);
-    if(!stat) {
-    	std::cout << "\n ERROR HIndexGrid cannot create ooc storage grid_dist";
-    	return false;
-    }
-    
-    int nc = Round32(grid.numValues())>>5;
-    
-    distd->writeColumns((char *)grid.c_value(), 0, nc);
-    delete distd;
+    bool stat;
 
     typedef HOocArray<hdata::TInt, 32, 32> IntData;
     IntData *celld = createDataStorage<IntData>(".cell_range", true, stat);
     if(!stat) {
-    	std::cout << "\n ERROR HIndexGrid cannot create ooc storage cell_range";
+    	std::cout << "\n ERROR HLocalGrid cannot create ooc storage cell_range";
     	return false;
     }
 
-    nc = Round32(grid.numCells() * 2)>>5;
+    int nc = Round32(grid.numCells() * 2)>>5;
     
     celld->writeColumns((char *)grid.c_cell(), 0, nc);
     delete celld;
 
     IntData *indd = createDataStorage<IntData>(".ind", true, stat);
     if(!stat) {
-    	std::cout << "\n ERROR HIndexGrid cannot create ooc storage ind";
+    	std::cout << "\n ERROR HLocalGrid cannot create ooc storage ind";
     	return false;
     }
 
@@ -77,16 +81,17 @@ bool HIndexGrid::save(const grd::IndexGrid &grid)
     indd->writeColumns((char *)grid.c_indices(), 0, nc);
     delete indd;
 
-    std::cout<<"\n HIndexGrid save "<<pathToObject();
+    std::cout<<"\n HLocalGrid save "<<pathToObject();
     grid.verbose();
 
 	return true; 
 }
 
-bool HIndexGrid::load(grd::IndexGrid &grid)
+template<typename T>
+bool HLocalGrid::load(T &grid)
 { 
     int d;
-    readIntAttr(".is_index_grid", &d );
+    readIntAttr(".is_local_grid", &d );
     grid.create(d);
 
     int nind;
@@ -98,21 +103,10 @@ bool HIndexGrid::load(grd::IndexGrid &grid)
     grid.setNumObjects(nobj);
 
     float b[6];
-    readFloatAttr(".aabb", b);
+    readFloatAttr(".fld_box", b);
     grid.setAabb(b);
 
-    typedef HOocArray<hdata::TFloat, 32, 32> FltData;
     bool stat;
-    FltData *distd = openDataStorage<FltData>(".grid_dist", stat);
-    if(!stat) {
-        std::cout << "\n ERROR HIndexGrid cannot open ooc storage grid_dist";
-        return false;
-    }
-
-    int nc = Round32(grid.numValues())>>5;
-    
-    distd->readColumns((char *)grid.value(), 0, nc);
-    delete distd;
 
     typedef HOocArray<hdata::TInt, 32, 32> IntData;
     IntData *celld = openDataStorage<IntData>(".cell_range", stat);
@@ -121,7 +115,7 @@ bool HIndexGrid::load(grd::IndexGrid &grid)
         return false;
     }
 
-    nc = Round32(grid.numCells() * 2)>>5;
+    int nc = Round32(grid.numCells() * 2)>>5;
     
     celld->readColumns((char *)grid.cell(), 0, nc);
     delete celld;
@@ -137,10 +131,13 @@ bool HIndexGrid::load(grd::IndexGrid &grid)
     indd->readColumns((char *)ind, 0, nc);
     delete indd;
 
-    std::cout<<"\n HIndexGrid load "<<pathToObject();
+    std::cout<<"\n HLocalGrid load "<<pathToObject();
+    grid.buildBvh();
     grid.verbose();
 
 	return true; 
 }
 
-} /// end of namespace alo
+}
+
+#endif

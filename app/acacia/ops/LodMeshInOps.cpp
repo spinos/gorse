@@ -146,7 +146,7 @@ bool LodMeshInOps::loadCache(const std::string &fileName)
     for(int i=0;i<n;++i) {
         m_cache.getMeshAabb(box, i);
 
-        ap.setAABB(box);
+        ap.setBBox(box);
         ap.setIndex(i);
 
         addBvhPrimitive(ap);

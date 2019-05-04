@@ -5,7 +5,7 @@ namespace alo {
 BVHPrimitive::BVHPrimitive()
 {}
 
-void BVHPrimitive::setAABB(const BoundingBox &box)
+void BVHPrimitive::setBBox(const BoundingBox &box)
 { memcpy(m_aabb.m_data, box.m_data, 24); }
 
 void BVHPrimitive::setIndex(int x)
@@ -14,7 +14,7 @@ void BVHPrimitive::setIndex(int x)
 void BVHPrimitive::setKey(int x)
 { m_aabb.m_padding1 = x; }
 
-const BoundingBox &BVHPrimitive::aabb() const
+const BoundingBox &BVHPrimitive::bbox() const
 { return m_aabb; }
 
 const int &BVHPrimitive::index() const

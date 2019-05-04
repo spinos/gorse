@@ -2,7 +2,7 @@
  *  SsdfTest.cpp
  *  aloe
  *
- *  2019/4/30
+ *  2019/5/5
  */
 
 #include "SsdfTest.h"
@@ -23,10 +23,10 @@
 #include <mesh/randomRibbon.h>
 #include <boost/format.hpp>
 #include <h5_ssdf/HSsdf.h>
-#include <grd/IndexGrid.h>
-#include <grd/IndexGridBuilder.h>
-#include <grd/IndexGridBuildRule.h>
-#include <h5_ssdf/HIndexGrid.h>
+#include <grd/LocalGrid.h>
+#include <grd/LocalGridBuilder.h>
+#include <grd/LocalGridBuildRule.h>
+#include <h5_ssdf/HLocalGrid.h>
 #include <QProgressDialog>
 #include <QApplication>
 
@@ -126,25 +126,26 @@ void SsdfTest::saveToFile(const std::string &filename)
 		progress.setValue(i);
 	}
 
-	grd::IndexGrid indG;
-	indG.create(1<<4);
-	indG.setAabb(grdBox);
+	grd::LocalGrid<float> locG;
+	locG.create(1<<4);
+	locG.setAabb(grdBox);
 
-	grd::IndexGridBuilder<4> indBuilder;
-	indBuilder.attach(&indG);
+	grd::LocalGridBuilder<grd::LocalGrid<float>, 4> locBuilder;
+	locBuilder.attach(&locG);
 
-typedef grd::IndexGridBuildRule<sds::FZOrderCurve> IndBuildTyp;
-	IndBuildTyp indRule(m_sfc);
-	indRule.setBBox(grdBox);
-	indRule.setBoxRelativeBoundary(8.f);
+typedef grd::LocalGridBuildRule<sds::FZOrderCurve> LocBuildTyp;
+	LocBuildTyp locRule(m_sfc);
+	locRule.setBBox(grdBox);
+	locRule.setBoxRelativeBoundary(2.f);
 
-typedef sdf::SsdfLookupRule<FieldTyp> IndSampleTyp;
-	IndSampleTyp indSample;
+typedef sdf::SsdfLookupRule<FieldTyp> LocSampleTyp;
+	LocSampleTyp locSample;
 
 	for(int i=0;i<NUM_RIBBONS;++i) {
 		progress.setValue(NUM_RIBBONS+i);
-		indSample.attach(*fields[i]);
-		indBuilder.measure<IndSampleTyp, IndBuildTyp>(indSample, i, indRule);
+		locSample.attach(*fields[i]);
+
+		locBuilder.measure<LocSampleTyp, LocBuildTyp>(locSample, i, locRule);
 
 	}
 
@@ -152,13 +153,11 @@ typedef sdf::SsdfLookupRule<FieldTyp> IndSampleTyp;
 		delete fields[i];
 	}
 
-	indBuilder.detach();
-    
-    indG.verbose();
+	locBuilder.detach();
 
-	HIndexGrid hindG("/asset/indexGrid");
-	hindG.save(indG);
-	hindG.close();
+	HLocalGrid hlocG("/asset/localGrid");
+	hlocG.save<grd::LocalGrid<float> >(locG);
+	hlocG.close();
 	
 	ga.close();
 	

@@ -29,7 +29,7 @@ void BVH::splitNode(int i)
 void BVH::addPrimitive(const BVHPrimitive &x)
 { 
 	m_primitives << x; 
-	m_nodes[0].expandAABB(x.aabb());
+	m_nodes[0].expandAABB(x.bbox());
 }
 
 void BVH::setRootLeaf()
@@ -105,6 +105,9 @@ BVHNodeIterator BVH::nextLeaf(BVHNodeIterator x) const
 	it._node = 0;
 	return it;
 }
+
+const BoundingBox &BVH::primitiveBox(int i) const
+{ return m_primitives[i].bbox(); }
 
 std::ostream& operator<<(std::ostream &output, const BVH & p) 
 {
