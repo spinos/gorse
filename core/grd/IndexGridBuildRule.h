@@ -2,7 +2,7 @@
  *  IndexGridBuildRule.h
  *  gorse
  *
- *  2019/4/28
+ *  2019/5/4
  */
 
 #ifndef INDEX_GRID_BUILD_RULE_H

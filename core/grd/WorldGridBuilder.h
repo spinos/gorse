@@ -31,18 +31,20 @@ public:
 	void attach(WorldGrid<T, Tc> *grid);
 	void detach();
 
-/// object of T1 to cell(s) by rule Tr
-/// keep object-cell map for later build
-	template<typename T1, typename Tr>
-	void addObject(const T1 &obj, const int &objI, Tr &rule);
-/// build mapped cells by objects of T1, builder of Tb, and rule of Tr 
-/// clear the object-cell map
-	template<typename T1, typename Tb, typename Tr>
-	void buildCells(const T1 *objs, Tb &builder, Tr &rule);
+	template<typename Ti, typename Tr, typename Tcb, typename Tcr>
+	void addInstances(const Ti &instancer, Tr &gridRule, Tcb &cellBuilder, Tcr &cellRule);
 
 protected:
 
 private:
+/// object to cell(s) by rule Tr
+/// keep object-cell map for later build
+	template<typename Tr>
+	void mapCells(const float *b, const int &objI, Tr &rule);
+/// build mapped cells by objects of T1, builder of Tb, and rule of Tr 
+/// clear the object-cell map
+	template<typename Ti, typename Tcb, typename Tcr>
+	void buildCells(const Ti &instancer, Tcb &cellBuilder, Tcr &cellRule);
 
 };
 
@@ -68,12 +70,33 @@ void WorldGridBuilder<T, Tc>::detach()
 }
 
 template<typename T, typename Tc>
-template<typename T1, typename Tr>
-void WorldGridBuilder<T, Tc>::addObject(const T1 &obj, const int &objI, Tr &rule)
+template<typename Ti, typename Tr, typename Tcb, typename Tcr>
+void WorldGridBuilder<T, Tc>::addInstances(const Ti &instancer, Tr &gridRule, Tcb &cellBuilder, Tcr &cellRule)
 {
 	float b[6];
-	obj.getAabb(b);
+	int offset = 0;
+	const int &n = instancer.numInstances();
+	for(int i=0;i<n;++i) {
+		instancer.getAabb(b, i);
 
+		mapCells <Tr>(b, i, gridRule);
+
+		offset++;
+		if((offset & 1023) == 0) {
+            offset = 0;
+            buildCells<Ti, Tcb, Tcr>(instancer, cellBuilder, cellRule);
+        }
+	}
+
+	if(offset > 0) {
+		buildCells<Ti, Tcb, Tcr>(instancer, cellBuilder, cellRule);
+	}
+}
+
+template<typename T, typename Tc>
+template<typename Tr>
+void WorldGridBuilder<T, Tc>::mapCells(const float *b, const int &objI, Tr &rule)
+{
 	float cellBox[6];
 	T k[8];
 	int n = rule.calcCellCoords(k, b);
@@ -99,9 +122,11 @@ void WorldGridBuilder<T, Tc>::addObject(const T1 &obj, const int &objI, Tr &rule
 }
 
 template<typename T, typename Tc>
-template<typename T1, typename Tb, typename Tr>
-void WorldGridBuilder<T, Tc>::buildCells(const T1 *objs, Tb &builder, Tr &rule)
+template<typename Ti, typename Tcb, typename Tcr>
+void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, Tcr &cellRule)
 {
+	const int ninst = m_objectCellMap.size();
+	int nmc = 0;
 	int preInd = -1;
 
 	sdb::L3Node<sdb::Coord2, int, 1024> *block = m_objectCellMap.begin();
@@ -112,7 +137,10 @@ void WorldGridBuilder<T, Tc>::buildCells(const T1 *objs, Tb &builder, Tr &rule)
 
 			if(preInd < ci.y) {
 
-				if(preInd > -1) builder.detach();
+				if(preInd > -1) {
+					nmc++;
+					cellBuilder.detach();
+				}
 
 				preInd = ci.y;
 
@@ -122,20 +150,26 @@ void WorldGridBuilder<T, Tc>::buildCells(const T1 *objs, Tb &builder, Tr &rule)
 					continue;
 				}
 
-				rule.setBBox((const float *)&cell->aabb());
-				rule.setBoxRelativeBoundary(2.f);
+				cellRule.setBBox((const float *)&cell->bbox());
+				cellRule.setBoxRelativeBoundary(8.f);
 				
-				builder.attach(cell->_grid);
+				cellBuilder.attach(cell->_grid);
 			}
 
-			builder. template measure<T1, Tr>(objs[ci.x], ci.x, rule);
+			cellBuilder. template measureInstance<Ti, Tcr>(instancer, ci.x, cellRule);
 		}
 		block = m_objectCellMap.next(block);
 	}
 
-	if(preInd > -1) builder.detach();
+	if(preInd > -1) {
+		nmc++;
+		cellBuilder.detach();
+	}
 
 	m_objectCellMap.clear();
+
+	std::cout << "\n INFO WorldGridBuilder built "<<ninst<<" instance in "<<nmc<<" cell ";
+
 }
 
 } /// end of namespace grd

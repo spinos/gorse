@@ -17,6 +17,7 @@
 #include <grd/WorldGridBuildRule.h>
 #include <grd/WorldGridLookupRule.h>
 #include <grd/TestCell.h>
+#include <grd/GridInCell.h>
 #include <sds/FZOrder.h>
 
 #include "BoxOps.h"
@@ -27,90 +28,61 @@ RepeatOps::RepeatOps()
 {
     BoxOps *abox = new BoxOps;
     m_inOps.append(abox);
-    
-    m_grid = new grd::IndexGrid;
-    m_grid->create(16);
-    float originH[4] = {0.f, 0.f, 0.f, 4.f};
-    m_grid->setOriginCellSize(originH);
-    
+
+    grd::BoxObject *bo = new grd::BoxObject;
+    bo->_bbox.setMin(-5.f, -5.f, -5.f);
+    bo->_bbox.setMax( 5.f, 5.f,  5.f);
+
+    m_instancer = new InstancerTyp;
+    m_instancer->addObject(bo);
+
+    m_instancer->createInstances(9000);
+    for(int i=0;i<9000;++i) {
+        grd::TestInstance &sample = m_instancer->instance(i);
+
+        int rx = -1000 + rand() % 2000;
+        int ry = -1000 + rand() % 2000;
+        int rz = -1000 + rand() % 2000;
+
+        sample.setObjectId(0);
+        sample.resetSpace();
+        sample.setPosition(2.f * rx, 1.f * ry, 1.5f * rz);
+        sample.calcSpace();
+    }
+
     sds::FZOrderCurve sfc;
     sfc.setCoord(32.f, 32.f, 32.f, 16.f);
     
     typedef grd::IndexGridBuildRule<sds::FZOrderCurve> CellBuildRuleTyp;
     CellBuildRuleTyp cellRule(&sfc);
     
-    InstanceBound inst;
-    inst._instanceId = 0;
-    inst._aabb = abox->c_aabb();
-    
-    Matrix44F space = Matrix44F::IdentityMatrix;
-    Matrix44F invSpace = Matrix44F::IdentityMatrix;
-    inst._tm = &space;
-    inst._invTm = &invSpace;
-    
     typedef grd::IndexGridBuilder<4> CellBuilderTyp;
     CellBuilderTyp cellBuilder;
-    cellBuilder.attach(m_grid);
-    cellBuilder.measure<InstanceBound, CellBuildRuleTyp >(inst, 0, cellRule);
-    cellBuilder.detach();
 
     m_worldGrid = new WorldTyp;
     
     m_worldRule = new WorldRuleTyp;
-    const int cencz[4] = {0,0,0,512};
+    const int cencz[4] = {0,0,0,256};
     m_worldRule->setCenterCellSize(cencz);
 
     m_worldBuilder = new WorldBuilderTyp;
 
     m_worldBuilder->attach(m_worldGrid);
 
-    m_objs.resetBuffer(5000);
-    
-    int acount = 0;
-
-    for(int i=0;i<5000;++i) {
-        grd::TestBox &ccube = m_objs[i];
-        
-/// randomly placed boxes
-        int rx = -1600 + rand() % 3200;
-        int ry = -1600 + rand() % 3200;
-        int rz = -1600 + rand() % 3200;
-        ccube._bbox.setMin(-4.f + 4.f * rx, -3.f + 2.f * ry, -3.f + 3.f * rz);
-        ccube._bbox.setMax( 4.f + 4.f * rx,  5.f + 2.f * ry,  3.f + 3.f * rz);
-
-        m_worldBuilder->addObject<grd::TestBox, WorldRuleTyp >(ccube, i, *m_worldRule);
-
-        acount++;
-        if((acount & 1023) == 0) {
-            acount = 0;
-            m_worldBuilder->buildCells<grd::TestBox, CellBuilderTyp, CellBuildRuleTyp>(m_objs.c_data(), cellBuilder, cellRule);
-        }
-    }
-
-    if(acount > 0) {
-        m_worldBuilder->buildCells<grd::TestBox, CellBuilderTyp, CellBuildRuleTyp>(m_objs.c_data(), cellBuilder, cellRule);
-    }
-    
+    m_worldBuilder->addInstances<InstancerTyp, WorldRuleTyp, CellBuilderTyp, CellBuildRuleTyp >(*m_instancer, *m_worldRule, cellBuilder, cellRule);
+   
     m_worldBuilder->detach();
 
     m_worldLookupRule = new WorldLookupRuleTyp;
-    m_worldLookupRule->attach(m_worldGrid);
+    m_worldLookupRule->attach(m_worldGrid, m_instancer);
 
-    float rayD[8];
-    rayD[0] = 0.f; rayD[1] = 0.f; rayD[2] = 1000.f;
-    Vector3F dir(0.7f, -0.1f, -1.f); dir.normalize();
-    rayD[3] = dir.x; rayD[4] = dir.y; rayD[5] = dir.z; 
-    rayD[6] = 1.f; rayD[7] = 1e8f;
-
-    grd::WorldGridLookupResult param;
-    m_worldLookupRule->lookup(param, rayD);
-
-    std::cout << " hit t0 " << param._t0<< " nml " << param._nml;
     memcpy(RenderableObject::aabb(), &m_worldGrid->aabb(), 24);
 }
 
 RepeatOps::~RepeatOps()
 {
+    delete m_worldLookupRule;
+    delete m_instancer;
     delete m_worldBuilder;
     delete m_worldRule;
     delete m_worldGrid;

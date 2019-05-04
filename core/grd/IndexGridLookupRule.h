@@ -2,7 +2,7 @@
  *  IndexGridLookupRule.h
  *  gorse
  *
- *  2019/4/29
+ *  2019/5/4
  */
 
 #ifndef ALO_INDEX_GRID_LOOKUP_RULE_H
@@ -37,24 +37,28 @@ struct IndexGridLookupResult {
 template<typename T>
 class IndexGridLookupRule {
 
-	float m_originCellSize[4];
-	float m_invCellSize[2];
-	int m_maxNumStep;
-	int m_dim[4];
 	const T* m_grid;
+	const float *m_originCellSize;
+	float m_invCellSize;
+	int m_dim[3];
 	
 public:
 
 	IndexGridLookupRule();
 
-	void setMaxNumStep(int x);
-	const int &maxNumStep() const;
-	
 	void attach(const T& grid);
     void detach();
     bool isEmpty() const;
 
 	void lookup(IndexGridLookupResult &result, const float* p) const;
+
+	const float *aabb() const;
+/// i withing instance_range
+	const int &index(int i) const;
+
+	const int &numObjects() const;
+
+	const float &cellSize() const;
 
 protected:
 
@@ -66,20 +70,19 @@ private:
 };
 
 template<typename T>
-IndexGridLookupRule<T>::IndexGridLookupRule() : m_grid(nullptr),
-m_maxNumStep(128)
+IndexGridLookupRule<T>::IndexGridLookupRule() : m_grid(nullptr)
 {}
 
 template<typename T>
 void IndexGridLookupRule<T>::attach(const T& grid)
 {
-	grid.getOriginCellSize(m_originCellSize);
-	m_invCellSize[0] = 1.f / m_originCellSize[3];
+	m_grid = &grid;
+	m_originCellSize = grid.originCellSize();
+	m_invCellSize = 1.f / m_originCellSize[3];
 	const int d = grid.resolution();
 	m_dim[0] = d;
 	m_dim[1] = d * d;
 	m_dim[2] = m_dim[0] - 1;
-	m_grid = &grid;
 }
 
 template<typename T>
@@ -93,9 +96,9 @@ bool IndexGridLookupRule<T>::isEmpty() const
 template<typename T>
 void IndexGridLookupRule<T>::computeCellCoord(int* u, const float* p) const
 {
-	u[0] = (p[0] - m_originCellSize[0]) * m_invCellSize[0];
-	u[1] = (p[1] - m_originCellSize[1]) * m_invCellSize[0];
-	u[2] = (p[2] - m_originCellSize[2]) * m_invCellSize[0];
+	u[0] = (p[0] - m_originCellSize[0]) * m_invCellSize;
+	u[1] = (p[1] - m_originCellSize[1]) * m_invCellSize;
+	u[2] = (p[2] - m_originCellSize[2]) * m_invCellSize;
 	Clamp0b(u[0], m_dim[2]);
 	Clamp0b(u[1], m_dim[2]);
 	Clamp0b(u[2], m_dim[2]);
@@ -132,12 +135,20 @@ void IndexGridLookupRule<T>::lookup(IndexGridLookupResult &result, const float* 
 }
 
 template<typename T>
-void IndexGridLookupRule<T>::setMaxNumStep(int x)
-{ m_maxNumStep = x; }
+const float *IndexGridLookupRule<T>::aabb() const
+{ return (const float *)&m_grid->fieldBox(); }
 
 template<typename T>
-const int &IndexGridLookupRule<T>::maxNumStep() const
-{ return m_maxNumStep; }
+const int &IndexGridLookupRule<T>::index(int i) const
+{ return m_grid->c_indices()[i]; }
+
+template<typename T>
+const int &IndexGridLookupRule<T>::numObjects() const
+{ return m_grid->numObjects(); }
+
+template<typename T>
+const float &IndexGridLookupRule<T>::cellSize() const
+{ return m_grid->cellSize(); }
 
 } /// end of namespace grd
 

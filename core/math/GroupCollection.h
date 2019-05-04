@@ -42,6 +42,7 @@ bool GroupCollection<T>::addToCollection(const T &item, int k)
 	if(m_elementMap.find(k) != m_elementMap.end() )
 		return false;
 	m_elementMap[k] = item;
+	return true;
 }
 	
 template<typename T>

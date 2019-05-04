@@ -31,6 +31,11 @@ bool HIndexGrid::save(const grd::IndexGrid &grid)
         addIntAttr(".n_ind", 1);
     int nind = grid.numIndices();
     writeIntAttr(".n_ind", &nind );
+    
+    if(!hasNamedAttr(".n_obj") )
+        addIntAttr(".n_obj", 1);
+    int nobj = grid.numObjects();
+    writeIntAttr(".n_obj", &nobj );
 
     if(!hasNamedAttr(".aabb") )
         addFloatAttr(".aabb", 6);
@@ -87,6 +92,10 @@ bool HIndexGrid::load(grd::IndexGrid &grid)
     int nind;
     readIntAttr(".n_ind", &nind );
     int *ind = grid.createIndices(nind);
+    
+    int nobj;
+    readIntAttr(".n_obj", &nobj );
+    grid.setNumObjects(nobj);
 
     float b[6];
     readFloatAttr(".aabb", b);

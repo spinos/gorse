@@ -73,6 +73,7 @@ public:
 /// p is float[n] n is 3(1+d)^3
 	static void GetCellGrid(float* p, const float* cellBox, int d);
 	static int GetGridNumValues(int d);
+	static void PrintAabb(const float *b);
 	
 protected:
 
@@ -380,6 +381,13 @@ void SvfBuildRule<Tc>::setBBox(const BoundingBox &b)
 template<typename Tc>
 const BoundingBox &SvfBuildRule<Tc>::bbox() const
 { return m_bbox; }
+
+template<typename Tc>
+void SvfBuildRule<Tc>::PrintAabb(const float *b)
+{ 
+	std::cout<<" aabb (("<<b[0]<<","<<b[1]<<","<<b[2]
+				<<"), ("<<b[3]<<","<<b[4]<<","<<b[5]<<")) "; 
+}
 
 }
 

@@ -2,8 +2,12 @@
  *  WorldGridLookupRule.h
  *  gorse
  *
+ *  three layered distance lookup
+ *  top bvh intersection of cells
+ *  middle instance index within a cell
+ *  low distance to instanced object
  *
- *  2019/5/2
+ *  2019/5/4
  */
 
 #ifndef ALO_GRD_WORLD_GRID_LOOK_UP_RULE_H
@@ -25,27 +29,27 @@ struct WorldGridLookupResult {
 	float _t0;
 };
 
-template<typename T, typename Tc>
+template<typename T, typename Tc, typename Ti>
 class WorldGridLookupRule {
 
 	const T *m_grid;
+	const Ti *m_instancer;
 	bvh::RayTraverseRule m_rayBvhRule;
-/// per-cell?
-	IndexGridLookupRule<Tc> m_cellRule;
+
+	typedef IndexGridLookupRule<IndexGrid> CellIndexRuleTyp;
+	SimpleBuffer<CellIndexRuleTyp> m_cellRules;
 
 public:
 
 	WorldGridLookupRule();
 
-	void attach(const T *grid);
+	void attach(const T *grid, const Ti *instancer);
     void detach();
     bool isEmpty() const;
 
 	bool lookup(WorldGridLookupResult &result, const float *rayData) const;
 
 protected:
-/// q <- ray.o + ray.d * t
-	static void rayTravel(float *q, const float *ray, const float &t);
 
 private:
 
@@ -54,35 +58,53 @@ private:
 	int findClosestHit(bvh::RayTraverseResult &result, float *t, float *rayD) const;
 
 	bool intersectPrimitive(WorldGridLookupResult &result, 
-					const Tc *cell,
-					const float *t,
+					const CellIndexRuleTyp &rule,
+					const float *tLimit,
 					const float *rayData) const;
+
+	float mapDistance(const float *q, IndexGridLookupResult &result, 
+		const CellIndexRuleTyp &rule) const;
+
+	void mapNormal(float *nml, const float *q, IndexGridLookupResult &result, 
+		const CellIndexRuleTyp &rule) const;
+
+	float findObjectClosestTo(const float *q, IndexGridLookupResult &result,
+		const CellIndexRuleTyp &rule) const;
 
 };
 
-template<typename T, typename Tc>
-WorldGridLookupRule<T, Tc>::WorldGridLookupRule() : m_grid(nullptr)
+template<typename T, typename Tc, typename Ti>
+WorldGridLookupRule<T, Tc, Ti>::WorldGridLookupRule() : m_grid(nullptr)
 {}
 
-template<typename T, typename Tc>
-void WorldGridLookupRule<T, Tc>::attach(const T *grid)
+template<typename T, typename Tc, typename Ti>
+void WorldGridLookupRule<T, Tc, Ti>::attach(const T *grid, const Ti *instancer)
 {
 	m_grid = grid;
 	m_rayBvhRule.attach(grid->boundingVolumeHierarchy());
+
+	const int n = grid->numCells();
+	m_cellRules.resetBuffer(n);
+	for(int i=0;i<n;++i) {
+		const Tc *ci = m_grid->c_cellPtr(i);
+		m_cellRules[i].attach(*ci->_grid);
+	}
+
+	m_instancer = instancer;
 }
 
-template<typename T, typename Tc>
-void WorldGridLookupRule<T, Tc>::detach()
+template<typename T, typename Tc, typename Ti>
+void WorldGridLookupRule<T, Tc, Ti>::detach()
 {
 	m_grid = nullptr;
 }
 
-template<typename T, typename Tc>
-bool WorldGridLookupRule<T, Tc>::isEmpty() const
+template<typename T, typename Tc, typename Ti>
+bool WorldGridLookupRule<T, Tc, Ti>::isEmpty() const
 { return m_grid == nullptr; }
 
-template<typename T, typename Tc>
-bool WorldGridLookupRule<T, Tc>::lookup(WorldGridLookupResult &result, const float *rayData) const
+template<typename T, typename Tc, typename Ti>
+bool WorldGridLookupRule<T, Tc, Ti>::lookup(WorldGridLookupResult &result, const float *rayData) const
 {
 	bvh::RayTraverseResult &bvhResult = result._rayBvh;
 	m_rayBvhRule.begin(bvhResult);
@@ -100,8 +122,8 @@ bool WorldGridLookupRule<T, Tc>::lookup(WorldGridLookupResult &result, const flo
 	return false;
 }
 
-template<typename T, typename Tc>
-bool WorldGridLookupRule<T, Tc>::processLeaf(WorldGridLookupResult &result, const float *rayData) const
+template<typename T, typename Tc, typename Ti>
+bool WorldGridLookupRule<T, Tc, Ti>::processLeaf(WorldGridLookupResult &result, const float *rayData) const
 {
 	bvh::RayTraverseResult &bvhResult = result._rayBvh;
 
@@ -116,22 +138,19 @@ bool WorldGridLookupRule<T, Tc>::processLeaf(WorldGridLookupResult &result, cons
 		int firstHit = findClosestHit(bvhResult, t, tmpRay);
 		if(firstHit < 0) break;
 
-		const Tc *ci = m_grid->c_cellPtr(firstHit);
-		if(intersectPrimitive(result, ci, t, rayData)) {
-			result._t0 = t[0];
-			return true;
-		}
+		const CellIndexRuleTyp &cr = m_cellRules[firstHit];
+		if(intersectPrimitive(result, cr, t, rayData)) return true;
 
 /// advance to exit point
-		tmpRay[6] = t[1] + 1e-3f;
+		tmpRay[6] = t[1] + 1e-4f;
 		tmpRay[7] = bvhResult._t1;
 	}
 
 	return false;
 }
 
-template<typename T, typename Tc>
-int WorldGridLookupRule<T, Tc>::findClosestHit(bvh::RayTraverseResult &result, float *t, float *rayD) const
+template<typename T, typename Tc, typename Ti>
+int WorldGridLookupRule<T, Tc, Ti>::findClosestHit(bvh::RayTraverseResult &result, float *t, float *rayD) const
 {
 	const float t0 = rayD[6];
 	const float t1 = rayD[7];
@@ -140,9 +159,7 @@ int WorldGridLookupRule<T, Tc>::findClosestHit(bvh::RayTraverseResult &result, f
 	t[0] = 1e10f;
 	for(int i=result._primBegin;i<result._primEnd;++i) {
 
-		const Tc *ci = m_grid->c_cellPtr(i);
-
-		const float *cellBox = (const float *)&ci->aabb();
+		const float *cellBox = m_cellRules[i].aabb();
 
 		if(rayAabbIntersect(rayD, cellBox)) {
 			if(t[0] > rayD[6]) {
@@ -161,20 +178,83 @@ int WorldGridLookupRule<T, Tc>::findClosestHit(bvh::RayTraverseResult &result, f
 	return prim;
 }
 
-template<typename T, typename Tc>
-bool WorldGridLookupRule<T, Tc>::intersectPrimitive(WorldGridLookupResult &result, 
-									const Tc *cell,
-									const float *t,
+template<typename T, typename Tc, typename Ti>
+bool WorldGridLookupRule<T, Tc, Ti>::intersectPrimitive(WorldGridLookupResult &result, 
+									const CellIndexRuleTyp &rule,
+									const float *tLimit,
 									const float *rayData) const
 {
-/// advance to entry point
+	IndexGridLookupResult &param = result._indGrd;
+
+	float tt = tLimit[0];
 	float q[3];
-	rayProgress(q, rayData, t[0]);
+	for(int i=0;i<128;++i) {
+		rayProgress(q, rayData, tt);
 
-	const float *cellBox = (const float *)&cell->aabb();
+		float d = mapDistance(q, param, rule);
 
-	normalOnBox((float *)&result._nml, q, cellBox);
+		if(d < 1e-3f) break;
+
+        if(d < tt * 1e-5f) break;
+
+        tt += d;
+
+        if(tt > tLimit[1]) return false;
+	}
+
+	mapNormal((float *)&result._nml, q, param, rule);
+
+	result._t0 = tt;
 	return true;
+}
+
+template<typename T, typename Tc, typename Ti>
+float WorldGridLookupRule<T, Tc, Ti>::mapDistance(const float *q, IndexGridLookupResult &result, const CellIndexRuleTyp &rule) const
+{
+	rule.lookup(result, q);
+	if(result.isEmptySpace() ) {
+		//&& result._distance > rule.cellSize() ) {
+        return result._distance * .8f;
+    }
+
+    float md = findObjectClosestTo(q, result, rule);
+
+    result._distance = md * .7f;
+    m_instancer->limitStepSize(result._distance, result._instanceId);
+    return result._distance;
+}
+
+template<typename T, typename Tc, typename Ti>
+void WorldGridLookupRule<T, Tc, Ti>::mapNormal(float *nml, const float *q, IndexGridLookupResult &result, const CellIndexRuleTyp &rule) const
+{
+	if(result._instanceId < 0) findObjectClosestTo(q, result, rule);
+
+	m_instancer->mapNormal(nml, q, result._instanceId);
+}
+
+template<typename T, typename Tc, typename Ti>
+float WorldGridLookupRule<T, Tc, Ti>::findObjectClosestTo(const float *q, IndexGridLookupResult &result, const CellIndexRuleTyp &rule) const
+{
+	int begin = result._instanceRange.x;
+	int end = result._instanceRange.y;
+	if(begin >= end) {
+		begin = 0;
+		end = rule.numObjects();
+	}
+
+	float md = 1e10f;
+    for(int i=begin;i<end;++i) {
+    	const int &objI = rule.index(i);
+
+    	float d = m_instancer->mapDistance(q, objI);
+        if(md > d) {
+            md = d;
+            result._instanceId = objI;
+        }
+
+    }
+
+    return md;
 }
 
 } /// end of namepsace grd

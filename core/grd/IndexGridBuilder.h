@@ -41,6 +41,9 @@ public:
 	template<typename T, typename Tr>
 	void measure(const T &sample, int objI, Tr &rule);
 
+	template<typename Ti, typename Tr>
+	void measureInstance(const Ti &instancer, int instanceI, Tr &rule);
+
 protected:
 
 private:
@@ -71,19 +74,43 @@ void IndexGridBuilder<P>::attach(IndexGrid *grid)
 template<int P>
 void IndexGridBuilder<P>::detach()
 {
-	const int numInstances = m_objectCellMap.size();
-	int *inds = m_grid->createIndices(numInstances);
-	
-	int countNonEmptyCells = 0;
-	int preCell = -1;
-	int instanceOffset = 0;
-
+	sdb::L3Tree<int, int, 2048, 512, 1024 > allObjs;
 	sdb::L3Node<sdb::Coord2, int, 1024> *block = m_objectCellMap.begin();
 	while(block) {
 		for (int i=0;i<block->count();++i) { 
 			const sdb::Coord2 &ci = block->key(i);
+			allObjs.insert(ci.x, 0);
 
-			inds[instanceOffset] = ci.x;
+		}
+		block = m_objectCellMap.next(block);
+	}
+
+	const int nObjs = allObjs.size();
+	m_grid->setNumObjects(nObjs);
+
+	const int numInstances = m_objectCellMap.size();
+	int *inds = m_grid->createIndices(nObjs + numInstances);
+
+	int offset = 0;
+
+	sdb::L3Node<int, int, 1024> *oblock = allObjs.begin();
+	while(oblock) {
+		for (int i=0;i<oblock->count();++i) { 
+			inds[offset] = oblock->key(i);
+			offset++;
+		}
+		oblock = allObjs.next(oblock);
+	}
+	
+	int countNonEmptyCells = 0;
+	int preCell = -1;
+	
+	block = m_objectCellMap.begin();
+	while(block) {
+		for (int i=0;i<block->count();++i) { 
+			const sdb::Coord2 &ci = block->key(i);
+
+			inds[offset] = ci.x;
 			
 			Int2 &cellRange = m_grid->cell()[ci.y];
 
@@ -91,11 +118,11 @@ void IndexGridBuilder<P>::detach()
 				preCell = ci.y;
 				countNonEmptyCells++;
 
-				cellRange.x = instanceOffset;
+				cellRange.x = offset;
 			}
 
-			instanceOffset++;
-			cellRange.y = instanceOffset;
+			offset++;
+			cellRange.y = offset;
 		}
 		block = m_objectCellMap.next(block);
 	}
@@ -117,7 +144,7 @@ void IndexGridBuilder<P>::measure(const T &sample, int objI, Tr &rule)
     float pos[3];
     for(int i=0;i<n;++i) {
         rule.computePosition(pos, ks[i]);
-        const float dist = sample.mapDistance(pos);
+        float dist = sample.mapDistance(pos);
 /// shorten the distance
         if(distOnGrid[i] > dist) distOnGrid[i] = dist;
 
@@ -159,6 +186,47 @@ void IndexGridBuilder<P>::recordIndices(IndexGrid *grid)
 			m_objectCellMap.insert(sdb::Coord2(objI, i), 0);
 		}
 	}
+}
+
+template<int P>
+template<typename Ti, typename Tr>
+void IndexGridBuilder<P>::measureInstance(const Ti &instancer, int instanceI, Tr &rule)
+{
+	const int d = 1<<P;
+    const int n = (d+1)*(d+1)*(d+1);
+	int* ks = new int[n];
+	rule.getLevelGrid(ks, 0, 0, P);
+    
+    float *distOnGrid = m_grid->value();
+    float pos[3];
+    for(int i=0;i<n;++i) {
+        rule.computePosition(pos, ks[i]);
+        float dist = instancer.mapDistance(pos, instanceI);
+/// shorten the distance
+        if(distOnGrid[i] > dist) distOnGrid[i] = dist;
+
+    }
+    
+    delete[] ks;
+    
+/// store objects in cell 
+	const int nc = d * d * d; 
+	CellKH *cs = new CellKH[6 * nc];  
+	rule. template getLevelCells<CellKH>(cs, 0, 0, P);  
+
+	float b[6];
+    for(int i=0;i<nc;++i) {
+
+    	rule. template getCellBox<CellKH>(b, cs[i]);
+
+    	rule.expandBox(b);
+
+    	if(instancer.intersectBox(b, instanceI)) {
+    		m_objectCellMap.insert(sdb::Coord2(instanceI, i), 0);
+    	}
+
+   	}
+	delete[] cs;
 }
 
 }

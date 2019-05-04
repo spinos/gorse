@@ -50,6 +50,8 @@ class VoxelOps : public TransformOps {
     std::string m_cachePath;
     ElementVector<RenderableOps> m_outOps;
 
+    int m_maxNumStep;
+
 public:
 	enum { Type = 703427 };
 

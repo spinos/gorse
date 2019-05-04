@@ -12,7 +12,8 @@ namespace alo {
 namespace grd {
 
 IndexGrid::IndexGrid() :
-m_numIndices(0)
+m_numIndices(0),
+m_numObjects(0)
 {}
 
 IndexGrid::~IndexGrid()
@@ -45,6 +46,9 @@ void IndexGrid::setAabb(const float *b)
     PGridTyp::setOriginCellSize(orih);
 }
 
+void IndexGrid::setNumObjects(int x)
+{ m_numObjects = x; }
+
 int *IndexGrid::createIndices(int n)
 { 
     m_numIndices = n;
@@ -64,6 +68,9 @@ const float *IndexGrid::aabb() const
 const int &IndexGrid::numIndices() const
 { return m_numIndices; }
 
+const int &IndexGrid::numObjects() const
+{ return m_numObjects; }
+
 bool IndexGrid::isCellEmpty(int i) const
 {
     const Int2 &r = c_cell()[i];
@@ -82,7 +89,7 @@ void IndexGrid::verbose() const
     <<") cell_size "<<originCellSize()[3]
     //<<"\n aabb (("<<m_aabb[0]<<", "<<m_aabb[1]<<", "<<m_aabb[2]
     //<<"), ("<<m_aabb[3]<<", "<<m_aabb[4]<<", "<<m_aabb[5]
-    <<"\n "<<numIndices()<< " instance in "<<nne<<" cell ";
+    <<"\n "<< numObjects() << " object " <<numIndices() - numObjects() << " instance in "<<nne<<" cell ";
 
     //const int nv = numValues();
     //for(int i=0;i<nv;++i) std::cout << " " << c_value()[i];

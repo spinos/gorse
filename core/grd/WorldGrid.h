@@ -51,6 +51,8 @@ public:
 /// of bvh root
 	const BoundingBox &aabb() const;
 
+	int numCells() const;
+
 protected:
 
 private:
@@ -94,7 +96,7 @@ void WorldGrid<T, Tc>::buildBvh()
         	
         	const Tc &ci = block->value(i);
 
-			ap.setAABB(ci.aabb());
+			ap.setAABB(ci.bbox());
         	ap.setIndex(offset);
 
         	m_cellPtr[offset] = &ci;
@@ -147,6 +149,10 @@ const Tc *WorldGrid<T, Tc>::c_cellPtr(int i) const
 template<typename T, typename Tc>
 const BoundingBox &WorldGrid<T, Tc>::aabb() const
 { return m_bvh.aabb(); }
+
+template<typename T, typename Tc>
+int WorldGrid<T, Tc>::numCells() const
+{ return m_cells.size(); }
 
 } /// end of namespace grd
 

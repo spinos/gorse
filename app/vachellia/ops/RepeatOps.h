@@ -2,6 +2,7 @@
  *  RepeatOps.h
  *  vachellia
  *
+ *  2019/5/4
  */
 
 #ifndef VCHL_REPEAT_OPS_H
@@ -17,7 +18,7 @@ namespace grd {
 class IndexGrid;
 
 template<typename T>
-struct TestCell;
+struct GridInCell;
 
 template<typename T, typename Tc>
 class WorldGrid;
@@ -28,10 +29,15 @@ class WorldGridBuildRule;
 template<typename T, typename Tc>
 class WorldGridBuilder;
 
-template<typename T, typename Tc>
+template<typename T, typename Tc, typename Ti>
 class WorldGridLookupRule;
 
-struct TestBox;
+template<typename T1, typename T2>
+class ObjectInstancer;
+
+struct TestInstance;
+
+struct BoxObject;
 
 }
 
@@ -42,9 +48,8 @@ struct FZOrderCurve;
 class RepeatOps : public TransformOps {
 
 	ElementVector<RenderableOps> m_inOps;
-    grd::IndexGrid *m_grid;
 
-    typedef grd::TestCell<grd::IndexGrid> WorldCellTyp;
+    typedef grd::GridInCell<grd::IndexGrid> WorldCellTyp;
 
     typedef grd::WorldGrid<int, WorldCellTyp > WorldTyp;
     WorldTyp *m_worldGrid;
@@ -55,12 +60,11 @@ class RepeatOps : public TransformOps {
     typedef grd::WorldGridBuilder<int, WorldCellTyp > WorldBuilderTyp;
     WorldBuilderTyp *m_worldBuilder;
 
-    typedef grd::WorldGridLookupRule<WorldTyp, WorldCellTyp > WorldLookupRuleTyp;
+    typedef grd::ObjectInstancer<grd::TestInstance, grd::BoxObject> InstancerTyp;
+    InstancerTyp *m_instancer;
+
+    typedef grd::WorldGridLookupRule<WorldTyp, WorldCellTyp, InstancerTyp > WorldLookupRuleTyp;
     WorldLookupRuleTyp *m_worldLookupRule;
-
-    typedef grd::TestBox ObjectTyp;
-    SimpleBuffer<ObjectTyp> m_objs;
-
 
 public:
 	enum { Type = 800002 };

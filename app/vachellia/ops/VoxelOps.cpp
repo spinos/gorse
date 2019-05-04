@@ -32,7 +32,8 @@ AFileDlgProfile VoxelOps::SReadProfile(AFileDlgProfile::FRead,
    
 VoxelOps::VoxelOps() : m_cachePath("unknown"),
 m_pairs(nullptr),
-m_numPairs(0)
+m_numPairs(0),
+m_maxNumStep(128)
 {
     m_grid = new grd::IndexGrid;
     m_gridRule = new GridLookupRuleTyp;
@@ -60,9 +61,7 @@ void VoxelOps::update()
 
     float boundary;
     getFloatAttribValue(boundary, "bthickness");
-    int nstep;
-    getIntAttribValue(nstep, "amaxnstep");
-    m_gridRule->setMaxNumStep(nstep);
+    getIntAttribValue(m_maxNumStep, "amaxnstep");
 
     QAttrib * acp = findAttrib("cache_path");
     StringAttrib *fcp = static_cast<StringAttrib *>(acp);
@@ -92,7 +91,7 @@ bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
     float q[3];
     GridLookupResultTyp param;
 
-    for(int i=0;i<m_gridRule->maxNumStep();++i) {
+    for(int i=0;i<m_maxNumStep;++i) {
         
         rayTravel(q, rayData);
 
