@@ -26,6 +26,7 @@
 #include <grd/LocalGrid.h>
 #include <grd/LocalGridBuilder.h>
 #include <grd/LocalGridBuildRule.h>
+#include <grd/GridSamples.h>
 #include <h5_ssdf/HLocalGrid.h>
 #include <QProgressDialog>
 #include <QApplication>
@@ -138,14 +139,14 @@ typedef grd::LocalGridBuildRule<sds::FZOrderCurve> LocBuildTyp;
 	locRule.setBBox(grdBox);
 	locRule.setBoxRelativeBoundary(2.f);
 
-typedef sdf::SsdfLookupRule<FieldTyp> LocSampleTyp;
-	LocSampleTyp locSample;
+	grd::PointGridSamplesTyp samples;
 
 	for(int i=0;i<NUM_RIBBONS;++i) {
 		progress.setValue(NUM_RIBBONS+i);
-		locSample.attach(*fields[i]);
 
-		locBuilder.measure<LocSampleTyp, LocBuildTyp>(locSample, i, locRule);
+		samples.create<FieldTyp>(fields[i]);
+
+		locBuilder.measure<grd::PointGridSamplesTyp, LocBuildTyp>(samples, i, locRule);
 
 	}
 

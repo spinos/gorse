@@ -7,6 +7,8 @@
 #ifndef ALO_POINT_BOX_H
 #define ALO_POINT_BOX_H
 
+#include "miscfuncs.h"
+
 namespace alo {
 
 static const int AabbCornerInd[8][3] = {
@@ -157,6 +159,13 @@ inline void normalOnBox(float *nml, const float *a, const float *b)
     int side = closestBoxSideToPoint(a, b);
 
     memcpy(nml, AabbSideNormal[side], 12);
+}
+
+inline void randomPointInsideCube(float *q, const float *orih)
+{
+    q[0] = orih[0] + RandomF01() * orih[3];
+    q[1] = orih[1] + RandomF01() * orih[3];
+    q[2] = orih[2] + RandomF01() * orih[3];
 }
 
 }

@@ -24,7 +24,6 @@ class MultiLookupRule;
 }
 
 namespace grd {
-struct LocalGridLookupResult;
 
 template<typename T, typename Tp>
 class LocalGridLookupRule;
@@ -43,8 +42,6 @@ class VoxelOps : public TransformOps {
     GridTyp *m_grid;
 
     typedef grd::LocalGridLookupRule<GridTyp, PrimitiveLookupRule > GridLookupRuleTyp;
-
-    typedef grd::LocalGridLookupResult GridLookupResultTyp;
 
     GridLookupRuleTyp *m_gridRule;
 

@@ -46,6 +46,7 @@ public:
 	void buildBvh();
 
 	const BVH *boundingVolumeHierarchy() const;
+	const BoundingBox &primitiveBox(int i) const;
 /// leafBegin <= i < leafEnd
 	const Tc *c_cellPtr(int i) const;
 /// of bvh root
@@ -141,6 +142,10 @@ void WorldGrid<T, Tc>::buildBvh()
 template<typename T, typename Tc>
 const BVH *WorldGrid<T, Tc>::boundingVolumeHierarchy() const
 { return &m_bvh; }
+
+template<typename T, typename Tc>
+const BoundingBox &WorldGrid<T, Tc>::primitiveBox(int i) const
+{ return m_bvh.primitiveBox(i);}
 
 template<typename T, typename Tc>
 const Tc *WorldGrid<T, Tc>::c_cellPtr(int i) const

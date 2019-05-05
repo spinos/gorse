@@ -47,9 +47,6 @@ public:
     float mapDistance(const float* p) const;
     
     const float &delta() const;
-/// any nonempty cell intersects box b
-/// b is (low, high)	
-	bool intersectBox(const float* b) const;
 
 	const float &boundary() const;
 
@@ -227,29 +224,6 @@ void SsdfLookupRule<T>::getCellBox(float *b, int i, int j, int k) const
 	b[3] = b[0] + h;
 	b[4] = b[1] + h;
 	b[5] = b[2] + h;
-}
-
-template<typename T>
-bool SsdfLookupRule<T>::intersectBox(const float* b) const
-{ 
-	const int d = m_dim[0];
-	float cb[6];
-	int c = 0;
-	for(int k=0;k<d;++k) {
-		for(int j=0;j<d;++j) {
-			for(int i=0;i<d;++i) {
-				const int offset = m_field->c_cell()[c];
-				c++;
-				if(offset < 0) continue;
-
-				getCellBox(cb, i, j, k);
-
-				if(boxIntersectBox(cb, b)) return true;
-			}
-		}
-	}
-	
-	return false; 
 }
 
 template<typename T>

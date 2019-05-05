@@ -30,6 +30,7 @@ struct RayTraverseResult {
 	int _child;
 	int _primBegin;
 	int _primEnd;
+	float _rayD[8];
 	float _t0;
 	float _t1;
 

@@ -115,9 +115,12 @@ public:
 	const int &numInstances() const;
 
 	void getAabb(float *b, int ii) const;
-	float mapDistance(const float *p, int ii) const;
+	float mapDistance(const float *q, 
+				const int *inds, const Int2 &range, 
+				int &closestObjectId) const;
+	float mapDistanceInstance(const float *p, int i) const;
 	bool intersectBox(const float* b, int ii) const;
-	void mapNormal(float *nml, const float *p, int ii) const;
+	void mapNormal(Vector3F &nml, const float *p, int ii) const;
 	void limitStepSize(float &d, int ii) const;
 
 };
@@ -167,14 +170,33 @@ void ObjectInstancer<T1, T2>::getAabb(float *b, int ii) const
 }
 
 template<typename T1, typename T2>
-float ObjectInstancer<T1, T2>::mapDistance(const float *p, int ii) const
+float ObjectInstancer<T1, T2>::mapDistance(const float *q, 
+				const int *inds, const Int2 &range, 
+				int &closestObjectId) const
 {
-	const T1 &inst = m_instances[ii];
+	float md = 1e10f;
+	for(int i=range.x;i<range.y;++i) {
+        const int &objI = inds[i];
+
+        float d = mapDistanceInstance(q, objI);
+        if(md > d) {
+            md = d;
+            closestObjectId = objI;
+        }
+    }
+    return md;
+}
+
+template<typename T1, typename T2>
+float ObjectInstancer<T1, T2>::mapDistanceInstance(const float *p, int i) const
+{
+	const T1 &inst = m_instances[i];
 	const T2 *shape = m_objs.element(inst.objectId()); 
 
 	float q[3];
 	memcpy(q, p, 12);
 	inst.pointToLocal(q);
+/// todo to world scaling
 	return shape->mapDistance(q);
 }
 
@@ -197,16 +219,16 @@ bool ObjectInstancer<T1, T2>::intersectBox(const float* b, int ii) const
 }
 
 template<typename T1, typename T2>
-void ObjectInstancer<T1, T2>::mapNormal(float *nml, const float *p, int ii) const
+void ObjectInstancer<T1, T2>::mapNormal(Vector3F &nml, const float *p, int i) const
 {
-	const T1 &inst = m_instances[ii];
+	const T1 &inst = m_instances[i];
 	const T2 *shape = m_objs.element(inst.objectId()); 
 
 	float q[3];
 	memcpy(q, p, 12);
 	inst.pointToLocal(q);
-
-	shape->mapNormal(nml, q);
+/// todo to world scaling
+	shape->mapNormal((float *)&nml, q);
 }
 
 template<typename T1, typename T2>

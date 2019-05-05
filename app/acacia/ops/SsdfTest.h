@@ -2,9 +2,7 @@
  *  SsdfTest.h
  *  acacia
  *
- *  Created by zhang on 19-4-18.
- *  Copyright 2018 __MyCompanyName__. All rights reserved.
- *
+ *  2019/5/5
  */
 
 #ifndef ACAC_SSDF_TEST_H

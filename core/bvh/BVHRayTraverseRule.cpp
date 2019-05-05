@@ -39,6 +39,8 @@ void RayTraverseRule::begin(RayTraverseResult &result) const
 
 void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) const
 {
+	memcpy(result._rayD, rayData, 24);
+
 	for(;;) {
 /// until reaching a leaf node, or finished	
 
@@ -106,14 +108,13 @@ void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) 
 			continue;
 		}
 
-		float tmp[8];
-		memcpy(tmp, rayData, 32);
+		memcpy(&result._rayD[6], &rayData[6], 8);
 	
-		if(rayAabbIntersect(tmp, (const float *)&n.aabb())) {
+		if(rayAabbIntersect(result._rayD, (const float *)&n.aabb())) {
 
 			if(n.isLeaf()) {
-				result._t0 = tmp[6];
-				result._t1 = tmp[7];
+				result._t0 = result._rayD[6];
+				result._t1 = result._rayD[7];
 /// begin process leaf
 #ifdef RAY_BVH_DGB
 				result.printLeafIn();
@@ -134,9 +135,6 @@ void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) 
 			result._current = findNearChild(rayData, n);
 			continue;
 		}
-
-		//std::cout << "\n missed " << result._current << n.aabb();
-
 
 /// missed
 		if(state == tFromParent) {

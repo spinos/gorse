@@ -8,9 +8,10 @@
 #include <interface/RenderableScene.h>
 #include <interface/IntersectResult.h>
 #include <math/rayBox.h>
-#include <grd/IndexGridBuilder.h>
-#include <grd/IndexGridBuildRule.h>
-#include <grd/InstanceBound.h>
+#include <grd/LocalGrid.h>
+#include <grd/LocalGridBuilder.h>
+#include <grd/LocalGridBuildRule.h>
+#include <grd/LocalGridLookupRule.h>
 #include <sds/FZOrder.h>
 #include <svf/SvfBuildRule.h>
 #include <grd/WorldGridBuilder.h>
@@ -30,33 +31,36 @@ RepeatOps::RepeatOps()
     m_inOps.append(abox);
 
     grd::BoxObject *bo = new grd::BoxObject;
-    bo->_bbox.setMin(-5.f, -5.f, -5.f);
-    bo->_bbox.setMax( 5.f, 5.f,  5.f);
+    bo->_bbox.setMin(-5.f, 0.f, -5.f);
+    bo->_bbox.setMax( 5.f, 25.f,  5.f);
 
     m_instancer = new InstancerTyp;
     m_instancer->addObject(bo);
 
-    m_instancer->createInstances(9000);
-    for(int i=0;i<9000;++i) {
+    static const int ninst = 7000;
+    static const int coverSpan = 1600;
+    static const int coverOrigin = -500;
+    m_instancer->createInstances(ninst);
+    for(int i=0;i<ninst;++i) {
         grd::TestInstance &sample = m_instancer->instance(i);
 
-        int rx = -1000 + rand() % 2000;
-        int ry = -1000 + rand() % 2000;
-        int rz = -1000 + rand() % 2000;
+        int rx = coverOrigin + rand() % coverSpan;
+        int ry = coverOrigin + rand() % coverSpan;
+        int rz = coverOrigin + rand() % coverSpan;
 
         sample.setObjectId(0);
         sample.resetSpace();
-        sample.setPosition(2.f * rx, 1.f * ry, 1.5f * rz);
+        sample.setPosition(1.f * rx, .25f * ry, 1.f * rz);
         sample.calcSpace();
     }
 
     sds::FZOrderCurve sfc;
     sfc.setCoord(32.f, 32.f, 32.f, 16.f);
     
-    typedef grd::IndexGridBuildRule<sds::FZOrderCurve> CellBuildRuleTyp;
+    typedef grd::LocalGridBuildRule<sds::FZOrderCurve> CellBuildRuleTyp;
     CellBuildRuleTyp cellRule(&sfc);
     
-    typedef grd::IndexGridBuilder<4> CellBuilderTyp;
+    typedef grd::LocalGridBuilder<grd::LocalGrid<float>, 4> CellBuilderTyp;
     CellBuilderTyp cellBuilder;
 
     m_worldGrid = new WorldTyp;
@@ -74,7 +78,8 @@ RepeatOps::RepeatOps()
     m_worldBuilder->detach();
 
     m_worldLookupRule = new WorldLookupRuleTyp;
-    m_worldLookupRule->attach(m_worldGrid, m_instancer);
+    m_worldLookupRule->attach(m_worldGrid);
+    m_worldLookupRule->setPrimitiveRule<InstancerTyp>(m_instancer);
 
     memcpy(RenderableObject::aabb(), &m_worldGrid->aabb(), 24);
 }
@@ -116,16 +121,15 @@ void RepeatOps::update()
 
 bool RepeatOps::intersectRay(const Ray& aray, IntersectResult& result)
 {
-    //const int ne = m_inOps.numElements();
-    //if(ne < 1
-    if(m_worldLookupRule->isEmpty() ) return TransformOps::intersectRay(aray, result);
+    if(m_worldLookupRule->isEmpty() ) 
+        return TransformOps::intersectRay(aray, result);
 
     float rayData[8];
     result.copyRayData(rayData);
 
     rayToLocal(rayData);
 
-    grd::WorldGridLookupResult param;
+    WorldLookupRuleTyp::LookupResultTyp param;
 
     if(!m_worldLookupRule->lookup(param, rayData)) return false;
 
@@ -136,34 +140,6 @@ bool RepeatOps::intersectRay(const Ray& aray, IntersectResult& result)
 
     return result.updateRayDistance(rayData[6], param._nml);
 
-/*
-    if(!rayAabbIntersect(rayData, c_aabb())) return false;
-
-    float &tt = rayData[6];
-    const float &tLimit = rayData[7];
-    float q[3];
-
-    for(int i=0;i<256;++i) {
-        
-        rayTravel(q, rayData);
-
-        float d = mapDistance(q);
-
-        if(d < 1e-3f) break;
-
-        if(d < tt * 1e-5f) break;
-
-        tt += d * .9f;
-     
-        if(tt > tLimit) return false;
-    }
-
-    Vector3F tn = mapNormal(q);
-
-    rayToWorld(rayData);
-    normalToWorld((float *)&tn);
-
-    return result.updateRayDistance(tt, tn);*/
 }
 
 float RepeatOps::mapDistance(const float *q) const

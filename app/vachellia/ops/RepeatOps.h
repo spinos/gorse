@@ -15,7 +15,9 @@
 namespace alo {
 
 namespace grd {
-class IndexGrid;
+
+template<typename T>
+class LocalGrid;
 
 template<typename T>
 struct GridInCell;
@@ -23,7 +25,7 @@ struct GridInCell;
 template<typename T, typename Tc>
 class WorldGrid;
 
-template<typename T, typename Tc, typename Tf>
+template<typename T, typename Tf>
 class WorldGridBuildRule;
 
 template<typename T, typename Tc>
@@ -39,6 +41,9 @@ struct TestInstance;
 
 struct BoxObject;
 
+template<typename T, typename Tp>
+class LocalGridLookupRule;
+
 }
 
 namespace sds {
@@ -49,12 +54,12 @@ class RepeatOps : public TransformOps {
 
 	ElementVector<RenderableOps> m_inOps;
 
-    typedef grd::GridInCell<grd::IndexGrid> WorldCellTyp;
+    typedef grd::GridInCell<grd::LocalGrid<float> > WorldCellTyp;
 
     typedef grd::WorldGrid<int, WorldCellTyp > WorldTyp;
     WorldTyp *m_worldGrid;
 
-    typedef grd::WorldGridBuildRule<int, WorldCellTyp, sds::FZOrderCurve > WorldRuleTyp;
+    typedef grd::WorldGridBuildRule<int, sds::FZOrderCurve > WorldRuleTyp;
     WorldRuleTyp *m_worldRule;
 
     typedef grd::WorldGridBuilder<int, WorldCellTyp > WorldBuilderTyp;
@@ -63,7 +68,9 @@ class RepeatOps : public TransformOps {
     typedef grd::ObjectInstancer<grd::TestInstance, grd::BoxObject> InstancerTyp;
     InstancerTyp *m_instancer;
 
-    typedef grd::WorldGridLookupRule<WorldTyp, WorldCellTyp, InstancerTyp > WorldLookupRuleTyp;
+    typedef grd::LocalGridLookupRule<grd::LocalGrid<float>, InstancerTyp > LocalLookupRuleTyp;
+
+    typedef grd::WorldGridLookupRule<WorldTyp, WorldCellTyp, LocalLookupRuleTyp > WorldLookupRuleTyp;
     WorldLookupRuleTyp *m_worldLookupRule;
 
 public:

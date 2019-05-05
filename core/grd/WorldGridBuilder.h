@@ -74,23 +74,15 @@ template<typename Ti, typename Tr, typename Tcb, typename Tcr>
 void WorldGridBuilder<T, Tc>::addInstances(const Ti &instancer, Tr &gridRule, Tcb &cellBuilder, Tcr &cellRule)
 {
 	float b[6];
-	int offset = 0;
 	const int &n = instancer.numInstances();
 	for(int i=0;i<n;++i) {
 		instancer.getAabb(b, i);
 
 		mapCells <Tr>(b, i, gridRule);
-
-		offset++;
-		if((offset & 1023) == 0) {
-            offset = 0;
-            buildCells<Ti, Tcb, Tcr>(instancer, cellBuilder, cellRule);
-        }
 	}
 
-	if(offset > 0) {
-		buildCells<Ti, Tcb, Tcr>(instancer, cellBuilder, cellRule);
-	}
+	buildCells<Ti, Tcb, Tcr>(instancer, cellBuilder, cellRule);
+
 }
 
 template<typename T, typename Tc>
@@ -151,7 +143,7 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 				}
 
 				cellRule.setBBox((const float *)&cell->bbox());
-				cellRule.setBoxRelativeBoundary(8.f);
+				cellRule.setBoxRelativeBoundary(1.f);
 				
 				cellBuilder.attach(cell->_grid);
 			}

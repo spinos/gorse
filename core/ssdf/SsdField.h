@@ -13,6 +13,8 @@
 #define ALO_SSD_FIELD_H
 
 #include <sds/CubicGrid.h>
+#include <sds/SpaceFillingVector.h>
+#include <math/pointBox.h>
 
 namespace alo {
 
@@ -65,6 +67,10 @@ public:
 	void getAabb(float *b) const;
 	void expandAabb(float *b) const;
 	const float *aabb() const;
+
+/// fill nonempty cells
+	template<typename T>
+	void genSamples(sds::SpaceFillingVector<T> &samples) const;
 	
 	void verbose() const;
     
@@ -73,6 +79,34 @@ protected:
 private:
 
 };
+
+template<typename T>
+void SsdField::genSamples(sds::SpaceFillingVector<T> &samples) const
+{
+	T ap;
+	BoundingBox b;
+	const float t = cellSize() * 0.01f;
+	float orih[4];
+	orih[3] = cellSize() * 1.01f;
+	const int n = numCells();
+	for(int i=0;i<n;++i) {
+		const int offset = c_cell()[i];
+		if(offset < 0) continue;
+
+		getCellBox(b, i);
+		memcpy(orih, b.data(), 12);
+		orih[0] -= t;
+		orih[1] -= t;
+		orih[2] -= t;
+
+		for(int j=0;j<512;++j) {
+
+			randomPointInsideCube((float *)&ap._pos, orih);
+			samples.push_back(ap);
+		}
+	}
+}
+
 
 }
 

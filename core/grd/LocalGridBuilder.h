@@ -14,6 +14,7 @@
 #include "LocalGrid.h"
 #include <sdb/Types.h>
 #include <sdb/L3Tree.h>
+#include <sds/SpaceFillingVector.h>
 
 namespace alo {
     
@@ -137,26 +138,35 @@ template<typename T, int P>
 template<typename Ts, typename Tr>
 void LocalGridBuilder<T, P>::measure(const Ts &sample, int objI, Tr &rule)
 {
-    const int d = 1<<P;
-    
-/// store objects in cell 
-	const int nc = d * d * d; 
-	CellKH *cs = new CellKH[6 * nc];  
-	rule. template getLevelCells<CellKH>(cs, 0, 0, P);  
+	const sds::SpaceFillingVector<Ts::SampleTyp> &orignalSamples = sample.samples();
+	int n = orignalSamples.size();
+	const BoundingBox &b = rule.bbox();
+	Ts::SampleTyp ap;
+	sds::SpaceFillingVector<Ts::SampleTyp> destSamples;
+	for(int i=0;i<n;++i) {
+		const Ts::SampleTyp &si = orignalSamples[i];
+		const float *q = (const float *)&si._pos;
+		if(isPointOutsideBox(q, b.data())) continue;
 
-	float b[6];
-    for(int i=0;i<nc;++i) {
+		ap._key = rule.computeKeyAtLevel(q, P);
 
-    	rule. template getCellBox<CellKH>(b, cs[i]);
+		destSamples.push_back(ap);
+	}
 
-    	rule.expandBox(b);
+	destSamples.sort();
+	n = destSamples.size();
 
-    	if(sample.intersectBox(b)) {
-    		m_objectCellMap.insert(sdb::Coord2(objI, i), 0);
-    	}
+	int prek =-1;
+	for(int i=0;i<n;++i) {
+		const Ts::SampleTyp &si = destSamples[i];
+		if(si._key != prek) {
 
-   	}
-	delete[] cs;
+			prek = si._key;
+
+			const int celli = rule.computeCellInd(si._key, P);
+			m_objectCellMap.insert(sdb::Coord2(objI, celli), 0);
+		}
+	}
 
 }
 

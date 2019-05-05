@@ -174,7 +174,7 @@ bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
 
     rayToLocal(rayData);
 
-    GridLookupResultTyp param;
+    GridLookupRuleTyp::LookupResultTyp param;
 
     if(!m_gridRule->lookup(param, rayData)) return false;
 

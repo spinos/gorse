@@ -13,7 +13,7 @@ namespace alo {
 
 namespace grd {
 
-template<typename T, typename Tc, typename Tf>
+template<typename T, typename Tf>
 class WorldGridBuildRule {
 
 	Tf m_sfc;
@@ -43,16 +43,16 @@ private:
 
 };
 
-template<typename T, typename Tc, typename Tf>
-WorldGridBuildRule<T, Tc, Tf>::WorldGridBuildRule()
+template<typename T, typename Tf>
+WorldGridBuildRule<T, Tf>::WorldGridBuildRule()
 {}
 
-template<typename T, typename Tc, typename Tf>
-WorldGridBuildRule<T, Tc, Tf>::~WorldGridBuildRule()
+template<typename T, typename Tf>
+WorldGridBuildRule<T, Tf>::~WorldGridBuildRule()
 {}
 
-template<typename T, typename Tc, typename Tf>
-void WorldGridBuildRule<T, Tc, Tf>::setCenterCellSize(const int *x)
+template<typename T, typename Tf>
+void WorldGridBuildRule<T, Tf>::setCenterCellSize(const int *x)
 {
 	m_centerCellSize[0] = x[0];
 	m_centerCellSize[1] = x[1];
@@ -68,8 +68,8 @@ void WorldGridBuildRule<T, Tc, Tf>::setCenterCellSize(const int *x)
 	m_sfc.setCoord(centerHalfSpan);
 }
 
-template<typename T, typename Tc, typename Tf>
-int WorldGridBuildRule<T, Tc, Tf>::calcCellCoords(T *ks, const float *b) const
+template<typename T, typename Tf>
+int WorldGridBuildRule<T, Tf>::calcCellCoords(T *ks, const float *b) const
 {
 	T c[8];
 
@@ -95,7 +95,6 @@ int WorldGridBuildRule<T, Tc, Tf>::calcCellCoords(T *ks, const float *b) const
 	x[1] = b[4];
 	x[2] = b[2];
 	c[3] = m_sfc.computeKey(x);
-
 
 	x[0] = b[0];
 	x[1] = b[1];
@@ -130,8 +129,8 @@ int WorldGridBuildRule<T, Tc, Tf>::calcCellCoords(T *ks, const float *b) const
 	return nk;
 }
 
-template<typename T, typename Tc, typename Tf>
-void WorldGridBuildRule<T, Tc, Tf>::calcCellAabb(float *b, const T &k) const
+template<typename T, typename Tf>
+void WorldGridBuildRule<T, Tf>::calcCellAabb(float *b, const T &k) const
 {
 	m_sfc.decodeKey(b, k);
 	b[3] = b[0] + m_centerCellSize[3];
@@ -139,8 +138,8 @@ void WorldGridBuildRule<T, Tc, Tf>::calcCellAabb(float *b, const T &k) const
 	b[5] = b[2] + m_centerCellSize[3];
 }
 
-template<typename T, typename Tc, typename Tf>
-int WorldGridBuildRule<T, Tc, Tf>::P() const
+template<typename T, typename Tf>
+int WorldGridBuildRule<T, Tf>::P() const
 { return 4; }
 
 } /// end of namespace grd

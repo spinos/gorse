@@ -54,6 +54,8 @@ class LocalGridLookupRule {
 
 public:
 
+	typedef LocalGridLookupResult LookupResultTyp;
+
 	LocalGridLookupRule();
 
 	void setPrimitiveRule(const Tp *x);
