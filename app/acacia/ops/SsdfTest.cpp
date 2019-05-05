@@ -126,18 +126,19 @@ void SsdfTest::saveToFile(const std::string &filename)
 		writer.close();
 		progress.setValue(i);
 	}
+    
+    typedef grd::LocalGridBuildRule<sds::FZOrderCurve> LocBuildTyp;
+	LocBuildTyp locRule(m_sfc);
+	locRule.setBBox(grdBox);
+	locRule.setBoxRelativeBoundary(2.f);
+    //locRule.setP(5);
 
 	grd::LocalGrid<float> locG;
-	locG.create(1<<4);
+	locG.create(1<<locRule.P());
 	locG.setAabb(grdBox);
 
 	grd::LocalGridBuilder<grd::LocalGrid<float> > locBuilder;
 	locBuilder.attach(&locG);
-
-typedef grd::LocalGridBuildRule<sds::FZOrderCurve> LocBuildTyp;
-	LocBuildTyp locRule(m_sfc);
-	locRule.setBBox(grdBox);
-	locRule.setBoxRelativeBoundary(2.f);
 
 	grd::PointGridSamplesTyp samples;
 

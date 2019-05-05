@@ -9,6 +9,8 @@
 #ifndef ALO_GRD_WORLD_GRID_BUILD_RULE_H
 #define ALO_GRD_WORLD_GRID_BUILD_RULE_H
 
+#include <math/SimpleBuffer.h>
+
 namespace alo {
 
 namespace grd {
@@ -19,6 +21,7 @@ class WorldGridBuildRule {
 	BoundingBox m_bbox;
 	Tf m_sfc;
 	float m_centerCellSize[4];
+	SimpleBuffer<T> m_ks;
 
 public:
 
@@ -30,15 +33,17 @@ public:
 	void setCenterCellSize(const int *x);
 /// cells touched by box 
 /// b is float[6] (low, high)
-/// ks is T[8] 
-/// return #key 1-8
-	int calcCellCoords(T *ks, const float *b) const;
+/// cell keys stored in m_ks
+	void calcCellCoords(const float *b);
 
 	void calcCellAabb(float *b, const T &k) const;
 	
 	T computeKey(const float *x) const;
 
 	const BoundingBox &bbox() const;
+
+	int numKeys() const;
+	const T &key(int i) const;
 
 protected:
 
@@ -81,64 +86,44 @@ void WorldGridBuildRule<T, Tf>::setCenterCellSize(const int *x)
 }
 
 template<typename T, typename Tf>
-int WorldGridBuildRule<T, Tf>::calcCellCoords(T *ks, const float *b) const
+void WorldGridBuildRule<T, Tf>::calcCellCoords(const float *b)
 {
-	T c[8];
+	m_ks.purgeBuffer();
 
-	c[0] = m_sfc.computeKey(b);
-	c[7] = m_sfc.computeKey(&b[3]);
-	if(c[0] == c[7]) {
-		ks[0] = c[0];
-		return 1;
-	}
+	const float &h = m_centerCellSize[3];
+	const float *bx = m_bbox.data();
 
-	float x[3];
-	x[0] = b[3];
-	x[1] = b[1];
-	x[2] = b[2];
-	c[1] = m_sfc.computeKey(x);
+	int u0[3];
+	u0[0] = (b[0] - bx[0]) / h; 
+	u0[1] = (b[1] - bx[1]) / h; 
+	u0[2] = (b[2] - bx[2]) / h; 
 
-	x[0] = b[0];
-	x[1] = b[4];
-	x[2] = b[2];
-	c[2] = m_sfc.computeKey(x);
+	int u1[3];
+	u1[0] = (b[3] - bx[0]) / h; 
+	u1[1] = (b[4] - bx[1]) / h; 
+	u1[2] = (b[5] - bx[2]) / h; 
 
-	x[0] = b[3];
-	x[1] = b[4];
-	x[2] = b[2];
-	c[3] = m_sfc.computeKey(x);
+	float p[3];
 
-	x[0] = b[0];
-	x[1] = b[1];
-	x[2] = b[5];
-	c[4] = m_sfc.computeKey(x);
+	for(int k=u0[2];k<=u1[2];++k) {
 
-	x[0] = b[3];
-	x[1] = b[1];
-	x[2] = b[5];
-	c[5] = m_sfc.computeKey(x);
+		p[2] = bx[2] + h * k;
 
-	x[0] = b[0];
-	x[1] = b[4];
-	x[2] = b[5];
-	c[6] = m_sfc.computeKey(x);
+		for(int j=u0[1];j<=u1[1];++j) {
 
-	int nk = 0;
-	for(int k=0;k<2;++k) {
-		if(k>0 && c[4] == c[0]) continue;
+			p[1] = bx[1] + h * j;
 
-		for(int j=0;j<2;++j) {
-			if(j>0 && c[k * 4 + 2] == c[k * 4]) continue;
+			for(int i=u0[0];i<=u1[0];++i) {
 
-			for(int i=0;i<2;++i) {
-				if(i>0 && c[k * 4 + j * 2 + 1] == c[k * 4 + j * 2]) continue;
-				
-				ks[nk] = c[k * 4 + j * 2 + i];
-				nk++;
+				p[0] = bx[0] + h * i;
+
+				T c = m_sfc.computeKey(p);
+
+				m_ks << c;
 			}
 		}
 	}
-	return nk;
+
 }
 
 template<typename T, typename Tf>
@@ -157,6 +142,14 @@ void WorldGridBuildRule<T, Tf>::calcCellAabb(float *b, const T &k) const
 template<typename T, typename Tf>
 const BoundingBox &WorldGridBuildRule<T, Tf>::bbox() const
 { return m_bbox; }
+
+template<typename T, typename Tf>
+int WorldGridBuildRule<T, Tf>::numKeys() const
+{ return m_ks.count(); }
+
+template<typename T, typename Tf>
+const T &WorldGridBuildRule<T, Tf>::key(int i) const
+{ return m_ks[i]; }
 
 } /// end of namespace grd
 

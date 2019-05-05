@@ -90,25 +90,26 @@ template<typename Tr, typename Tcr>
 void WorldGridBuilder<T, Tc>::mapCells(const float *b, const int &objI, Tr &rule, Tcr &cellRule)
 {
 	float cellBox[6];
-	T k[8];
-	int n = rule.calcCellCoords(k, b);
+	rule.calcCellCoords(b);
+	const int n = rule.numKeys();
 
 	for(int i=0;i<n;++i) {
-		Tc *ci = m_grid->findCell(k[i]);
+		const T & ki = rule.key(i);
+		Tc *ci = m_grid->findCell(ki);
 		if(!ci) {
 			m_toRebuild = true;
 
-			rule.calcCellAabb(cellBox, k[i]);
+			rule.calcCellAabb(cellBox, ki);
 
 			Tc acell;
 			acell.create(1<<cellRule.P());
 			acell.setAabb(cellBox);
 
-			ci = m_grid->addCell(k[i], acell);
+			ci = m_grid->addCell(ki, acell);
 
 		}
 
-		m_objectCellMap.insert(sdb::Coord2(objI, k[i]), 0);
+		m_objectCellMap.insert(sdb::Coord2(objI, ki), 0);
 	}
 
 }
