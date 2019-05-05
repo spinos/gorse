@@ -16,6 +16,7 @@ namespace grd {
 template<typename T, typename Tf>
 class WorldGridBuildRule {
 
+	BoundingBox m_bbox;
 	Tf m_sfc;
 	float m_centerCellSize[4];
 
@@ -34,8 +35,10 @@ public:
 	int calcCellCoords(T *ks, const float *b) const;
 
 	void calcCellAabb(float *b, const T &k) const;
-/// order of cell resolution
-	int P() const;
+	
+	T computeKey(const float *x) const;
+
+	const BoundingBox &bbox() const;
 
 protected:
 
@@ -66,6 +69,15 @@ void WorldGridBuildRule<T, Tf>::setCenterCellSize(const int *x)
 	centerHalfSpan[2] = x[2] - h;
 	centerHalfSpan[3] = x[3]<<9;
 	m_sfc.setCoord(centerHalfSpan);
+
+	m_bbox.setMin(centerHalfSpan[0] - centerHalfSpan[3], 
+		centerHalfSpan[1] - centerHalfSpan[3],
+		centerHalfSpan[2] - centerHalfSpan[3]);
+	m_bbox.setMax(centerHalfSpan[0] + centerHalfSpan[3], 
+		centerHalfSpan[1] + centerHalfSpan[3],
+		centerHalfSpan[2] + centerHalfSpan[3]);
+
+	std::cout << "\n world box " << m_bbox;
 }
 
 template<typename T, typename Tf>
@@ -130,6 +142,10 @@ int WorldGridBuildRule<T, Tf>::calcCellCoords(T *ks, const float *b) const
 }
 
 template<typename T, typename Tf>
+T WorldGridBuildRule<T, Tf>::computeKey(const float *x) const
+{ return m_sfc.computeKey(x); }
+
+template<typename T, typename Tf>
 void WorldGridBuildRule<T, Tf>::calcCellAabb(float *b, const T &k) const
 {
 	m_sfc.decodeKey(b, k);
@@ -139,8 +155,8 @@ void WorldGridBuildRule<T, Tf>::calcCellAabb(float *b, const T &k) const
 }
 
 template<typename T, typename Tf>
-int WorldGridBuildRule<T, Tf>::P() const
-{ return 4; }
+const BoundingBox &WorldGridBuildRule<T, Tf>::bbox() const
+{ return m_bbox; }
 
 } /// end of namespace grd
 

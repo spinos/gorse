@@ -102,15 +102,13 @@ int KeyDataArray<KeyType, DataType, Dim>::insert(const KeyType &x, const DataTyp
 		return m_count-1;
 	}
 
-	KeyType *bk = new KeyType[n];
+	KeyType bk[Dim];
 	memcpy(bk, &m_key[loc+1], n * sizeof(KeyType));
 	memcpy(&m_key[loc+2], bk, n * sizeof(KeyType));
-	delete[] bk;
 
-	DataType *bd = new DataType[n];
+	DataType bd[Dim];
 	memcpy(bd, &m_data[loc+1], n * sizeof(DataType));
 	memcpy(&m_data[loc+2], bd, n * sizeof(DataType));
-	delete[] bd;
 
 	m_key[loc+1] = x;
 	m_data[loc+1] = a;

@@ -3,7 +3,7 @@
  *  gorse
  *
  *
- *  2019/5/1
+ *  2019/5/5
  */
 
 #ifndef ALO_GRD_WORLD_GRID_BUILDER_H
@@ -39,8 +39,8 @@ protected:
 private:
 /// object to cell(s) by rule Tr
 /// keep object-cell map for later build
-	template<typename Tr>
-	void mapCells(const float *b, const int &objI, Tr &rule);
+	template<typename Tr, typename Tcr>
+	void mapCells(const float *b, const int &objI, Tr &rule, Tcr &cellRule);
 /// build mapped cells by objects of T1, builder of Tb, and rule of Tr 
 /// clear the object-cell map
 	template<typename Ti, typename Tcb, typename Tcr>
@@ -78,7 +78,7 @@ void WorldGridBuilder<T, Tc>::addInstances(const Ti &instancer, Tr &gridRule, Tc
 	for(int i=0;i<n;++i) {
 		instancer.getAabb(b, i);
 
-		mapCells <Tr>(b, i, gridRule);
+		mapCells <Tr, Tcr>(b, i, gridRule, cellRule);
 	}
 
 	buildCells<Ti, Tcb, Tcr>(instancer, cellBuilder, cellRule);
@@ -86,8 +86,8 @@ void WorldGridBuilder<T, Tc>::addInstances(const Ti &instancer, Tr &gridRule, Tc
 }
 
 template<typename T, typename Tc>
-template<typename Tr>
-void WorldGridBuilder<T, Tc>::mapCells(const float *b, const int &objI, Tr &rule)
+template<typename Tr, typename Tcr>
+void WorldGridBuilder<T, Tc>::mapCells(const float *b, const int &objI, Tr &rule, Tcr &cellRule)
 {
 	float cellBox[6];
 	T k[8];
@@ -101,7 +101,7 @@ void WorldGridBuilder<T, Tc>::mapCells(const float *b, const int &objI, Tr &rule
 			rule.calcCellAabb(cellBox, k[i]);
 
 			Tc acell;
-			acell.create(1<<rule.P());
+			acell.create(1<<cellRule.P());
 			acell.setAabb(cellBox);
 
 			ci = m_grid->addCell(k[i], acell);
@@ -127,7 +127,7 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
         	
         	const sdb::Coord2 &ci = block->key(i);
 
-			if(preInd < ci.y) {
+			if(preInd != ci.y) {
 
 				if(preInd > -1) {
 					nmc++;
@@ -138,7 +138,7 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 
 				Tc *cell = m_grid->findCell(ci.y);
 				if(!cell) {
-					std::cout << " ERROR WorldGridBuilder::buildCells cannot find cell " << ci.y;
+					std::cout << "\n ERROR WorldGridBuilder::buildCells cannot find cell " << ci.y;
 					continue;
 				}
 
@@ -148,8 +148,12 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 				cellBuilder.attach(cell->_grid);
 			}
 
-			cellBuilder. template measureInstance<Ti, Tcr>(instancer, ci.x, cellRule);
+			Ti::OutSampleTyp samples;
+			instancer.genInstanceSamples(samples, ci.x);
+
+			cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(samples, ci.x, cellRule);
 		}
+
 		block = m_objectCellMap.next(block);
 	}
 

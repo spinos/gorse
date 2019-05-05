@@ -4,6 +4,7 @@
 #include <math/BoundingBox.h>
 #include <math/pointBox.h>
 #include <math/boxBox.h>
+#include "GridSamples.h"
 
 namespace alo {
 
@@ -36,11 +37,6 @@ struct BoxObject {
 
         return -distanceInsidePointToBox(p, _bbox.data());
     }
-    
-    bool intersectBox(const float* b) const
-    {
-        return boxIntersectBox(b, _bbox.data());
-    }
 
     void mapNormal(float *nml, const float *p) const 
     {
@@ -52,6 +48,18 @@ struct BoxObject {
     	//if(x > 1e-3f && x < .1f) x = .1f;
 		//if(x > 2.f) x = 2.f;
     }
+/// cover the faces
+    template<typename T>
+	void genSamples(sds::SpaceFillingVector<T> &samples) const
+	{
+		T ap;
+		for(int i=0;i<6;++i) {
+			for(int j=0;j<512;++j) {
+				randomPointOnBoxSide((float *)&ap._pos, _bbox.data(), i);
+				samples.push_back(ap);
+			}
+		}
+	}
 
 };
 
@@ -97,10 +105,12 @@ class ObjectInstancer {
 
 	SimpleBuffer<T1> m_instances;
 	ElementVector<T2> m_objs;
+	ElementVector<PointGridSamplesTyp> m_samps;
 
 public:
 
 	typedef T1 InstanceTyp;
+	typedef sds::SpaceFillingVector<PointGridSamplesTyp::SampleTyp> OutSampleTyp;
 
 	ObjectInstancer();
 
@@ -119,9 +129,10 @@ public:
 				const int *inds, const Int2 &range, 
 				int &closestObjectId) const;
 	float mapDistanceInstance(const float *p, int i) const;
-	bool intersectBox(const float* b, int ii) const;
 	void mapNormal(Vector3F &nml, const float *p, int ii) const;
 	void limitStepSize(float &d, int ii) const;
+
+	void genInstanceSamples(OutSampleTyp &dest, int ii) const;
 
 };
 
@@ -131,7 +142,12 @@ ObjectInstancer<T1, T2>::ObjectInstancer()
 
 template<typename T1, typename T2>
 void ObjectInstancer<T1, T2>::addObject(T2 *x)
-{ m_objs.append(x); }
+{ 
+	m_objs.append(x); 
+	PointGridSamplesTyp *s = new PointGridSamplesTyp;
+	s-> template create<T2>(x);
+	m_samps.append(s);
+}
 
 template<typename T1, typename T2>
 void ObjectInstancer<T1, T2>::createInstances(int n)
@@ -201,24 +217,6 @@ float ObjectInstancer<T1, T2>::mapDistanceInstance(const float *p, int i) const
 }
 
 template<typename T1, typename T2>
-bool ObjectInstancer<T1, T2>::intersectBox(const float* b, int ii) const
-{
-	const T1 &inst = m_instances[ii];
-	const T2 *shape = m_objs.element(inst.objectId()); 
-
-	const BoundingBox wb(b);
-
-	BoundingBox lb;
-	for(int i=0;i<8;++i) {
-		Vector3F v = wb.corner(i);
-		inst.pointToLocal((float *)&v);
-		lb.expandBy(v);
-	}
-
-	return shape->intersectBox((const float *)&lb);
-}
-
-template<typename T1, typename T2>
 void ObjectInstancer<T1, T2>::mapNormal(Vector3F &nml, const float *p, int i) const
 {
 	const T1 &inst = m_instances[i];
@@ -238,6 +236,25 @@ void ObjectInstancer<T1, T2>::limitStepSize(float &d, int ii) const
 //	const T2 *shape = m_objs.element(inst.objectId()); 
 /// todo scaling distance
 //	shape->limitStepSize(d);
+}
+
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::genInstanceSamples(OutSampleTyp &dest, int ii) const
+{
+	const T1 &inst = m_instances[ii];
+	const PointGridSamplesTyp *shapeSamps = m_samps.element(inst.objectId());
+
+	const OutSampleTyp &src = shapeSamps->samples(); 
+
+	PointGridSamplesTyp::SampleTyp ap;
+	const int n = src.size();
+	for(int i=0;i<n;++i) {
+		ap._pos = src[i]._pos;
+
+		inst.pointToWorld((float *)&ap._pos);
+
+		dest.push_back(ap);
+	}
 }
 
 }

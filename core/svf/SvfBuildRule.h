@@ -325,6 +325,10 @@ int SvfBuildRule<Tc>::computeCellInd(int coord, int level) const
 {
 	int u[3];
 	m_sfc->decodeKey(u, coord);
+	if(u[0] > 1023) u[0] = 1023;
+	if(u[1] > 1023) u[1] = 1023;
+	if(u[2] > 1023) u[2] = 1023;
+
 	u[0] = u[0]>>(10-level);
 	u[1] = u[1]>>(10-level);
 	u[2] = u[2]>>(10-level);

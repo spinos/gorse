@@ -20,16 +20,21 @@ class LocalGridBuildRule : public svf::SvfBuildRule<Tc> {
 typedef svf::SvfBuildRule<Tc> SvfRuleTyp;
 
 	float m_boundary;
+	int m_P;
 
 public:
 
     LocalGridBuildRule(Tc *sfc);
+
+    void setP(int x);
 
     void setBoxRelativeBoundary(float x);
 
     void expandBox(float *b) const;
 
     const float &boundary() const;
+
+    const int &P() const;
     
 protected:
 
@@ -38,8 +43,14 @@ private:
 };
 
 template<typename Tc>
-LocalGridBuildRule<Tc>::LocalGridBuildRule(Tc* sfc) : svf::SvfBuildRule<Tc>(sfc)
-{ m_boundary = 0.1f; }
+LocalGridBuildRule<Tc>::LocalGridBuildRule(Tc* sfc) : svf::SvfBuildRule<Tc>(sfc),
+m_boundary(.1f),
+m_P(4)
+{}
+
+template<typename Tc>
+void LocalGridBuildRule<Tc>::setP(int x)
+{ m_P = x; }
 
 template<typename Tc>
 void LocalGridBuildRule<Tc>::setBoxRelativeBoundary(float x)
@@ -59,6 +70,10 @@ void LocalGridBuildRule<Tc>::expandBox(float *b) const
 template<typename Tc>
 const float &LocalGridBuildRule<Tc>::boundary() const
 { return m_boundary; }
+
+template<typename Tc>
+const int &LocalGridBuildRule<Tc>::P() const
+{ return m_P; }
 
 }
 

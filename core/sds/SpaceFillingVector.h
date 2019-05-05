@@ -27,6 +27,8 @@ class SpaceFillingVector {
 	
 public:
 
+	typedef T ValueTyp;
+
 	SpaceFillingVector();
 	virtual ~SpaceFillingVector();
 	

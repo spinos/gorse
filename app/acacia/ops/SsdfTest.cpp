@@ -131,7 +131,7 @@ void SsdfTest::saveToFile(const std::string &filename)
 	locG.create(1<<4);
 	locG.setAabb(grdBox);
 
-	grd::LocalGridBuilder<grd::LocalGrid<float>, 4> locBuilder;
+	grd::LocalGridBuilder<grd::LocalGrid<float> > locBuilder;
 	locBuilder.attach(&locG);
 
 typedef grd::LocalGridBuildRule<sds::FZOrderCurve> LocBuildTyp;
@@ -146,7 +146,10 @@ typedef grd::LocalGridBuildRule<sds::FZOrderCurve> LocBuildTyp;
 
 		samples.create<FieldTyp>(fields[i]);
 
-		locBuilder.measure<grd::PointGridSamplesTyp, LocBuildTyp>(samples, i, locRule);
+		typedef sds::SpaceFillingVector<grd::PointGridSamplesTyp::SampleTyp> OutSampleTyp;
+		const OutSampleTyp &orignalSamples = samples.samples();
+
+		locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, i, locRule);
 
 	}
 

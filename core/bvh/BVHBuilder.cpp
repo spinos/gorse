@@ -48,7 +48,7 @@ void BVHBuilder::Build(BVH *hierarchy)
 			maxQLen = buildQueue.size();
 
 	}
-	std::cout<<" max queued splits "<<maxQLen;
+	std::cout<<".";
 }
 
 }

@@ -65,6 +65,8 @@ public:
     const BVH *boundingVolumeHierarchy() const;
     const BoundingBox &primitiveBox(int i) const;
 
+    bool isEmpty() const;
+
     void verbose() const;
     
 protected:
@@ -147,8 +149,8 @@ void LocalGrid<T>::buildBvh()
 
     m_bvh.setRootLeaf();
 
-    BVHSplit::InnerNumPrimitives = 8;
-    BVHSplit::LeafNumPrimitives = 2;
+    BVHSplit::InnerNumPrimitives = 16;
+    BVHSplit::LeafNumPrimitives = 4;
 
     BVHBuilder::Build(&m_bvh);
 
@@ -212,6 +214,10 @@ const BVH *LocalGrid<T>::boundingVolumeHierarchy() const
 template<typename T>
 const BoundingBox &LocalGrid<T>::primitiveBox(int i) const
 { return m_bvh.primitiveBox(i);}
+
+template<typename T>
+bool LocalGrid<T>::isEmpty() const
+{ return m_numIndices < 1; }
 
 template<typename T>
 void LocalGrid<T>::verbose() const

@@ -97,6 +97,8 @@ void WorldGrid<T, Tc>::buildBvh()
         	
         	const Tc &ci = block->value(i);
 
+        	if(ci.isEmpty()) continue;
+
 			ap.setBBox(ci.bbox());
         	ap.setIndex(offset);
 
@@ -111,8 +113,8 @@ void WorldGrid<T, Tc>::buildBvh()
 
 	m_bvh.setRootLeaf();
 
-	BVHSplit::InnerNumPrimitives = 8;
-	BVHSplit::LeafNumPrimitives = 2;
+	BVHSplit::InnerNumPrimitives = 16;
+	BVHSplit::LeafNumPrimitives = 4;
 
     BVHBuilder::Build(&m_bvh);
 

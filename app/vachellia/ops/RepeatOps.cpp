@@ -59,14 +59,15 @@ RepeatOps::RepeatOps()
     
     typedef grd::LocalGridBuildRule<sds::FZOrderCurve> CellBuildRuleTyp;
     CellBuildRuleTyp cellRule(&sfc);
+    cellRule.setP(4);
     
-    typedef grd::LocalGridBuilder<grd::LocalGrid<float>, 4> CellBuilderTyp;
+    typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
     CellBuilderTyp cellBuilder;
 
     m_worldGrid = new WorldTyp;
     
     m_worldRule = new WorldRuleTyp;
-    const int cencz[4] = {0,0,0,256};
+    const int cencz[4] = {0,0,0,128};
     m_worldRule->setCenterCellSize(cencz);
 
     m_worldBuilder = new WorldBuilderTyp;
@@ -121,7 +122,7 @@ void RepeatOps::update()
 
 bool RepeatOps::intersectRay(const Ray& aray, IntersectResult& result)
 {
-    if(m_worldLookupRule->isEmpty() ) 
+   if(m_worldLookupRule->isEmpty() ) 
         return TransformOps::intersectRay(aray, result);
 
     float rayData[8];

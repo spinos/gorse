@@ -38,6 +38,9 @@ struct GridInCell {
 	void getAabb(float *b) const
 	{ memcpy(b, _grid->fieldAabb(), 24); }
 
+	bool isEmpty() const
+	{ return _grid->isEmpty(); }
+
 };
 
 }

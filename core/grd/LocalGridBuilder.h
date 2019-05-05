@@ -20,7 +20,7 @@ namespace alo {
     
 namespace grd {
 
-template<typename T, int P>
+template<typename T>
 class LocalGridBuilder {
 
 	T *m_grid;
@@ -35,15 +35,11 @@ public:
 	void attach(T *grid);
 /// finish grid
 	void detach();
-/// distance to sample
 /// index in cell
-/// Ts is sample type
+/// Ts is sample array type, value must have _key and _pos
 /// Tr is build rule
 	template<typename Ts, typename Tr>
-	void measure(const Ts &sample, int objI, Tr &rule);
-
-	template<typename Ti, typename Tr>
-	void measureInstance(const Ti &instancer, int instanceI, Tr &rule);
+	void measure(const Ts &samples, int objI, Tr &rule);
 
 protected:
 
@@ -57,23 +53,23 @@ private:
 	};
 };
 
-template<typename T, int P>
-LocalGridBuilder<T, P>::LocalGridBuilder()
+template<typename T>
+LocalGridBuilder<T>::LocalGridBuilder()
 {}
 
-template<typename T, int P>
-LocalGridBuilder<T, P>::~LocalGridBuilder()
+template<typename T>
+LocalGridBuilder<T>::~LocalGridBuilder()
 {}
 
-template<typename T, int P>
-void LocalGridBuilder<T, P>::attach(T *grid)
+template<typename T>
+void LocalGridBuilder<T>::attach(T *grid)
 {
 	m_grid = grid;
-	if(grid->numIndices()) recordIndices(grid);
+	if(grid->numIndices() > 0) recordIndices(grid);
 }
 
-template<typename T, int P>
-void LocalGridBuilder<T, P>::detach()
+template<typename T>
+void LocalGridBuilder<T>::detach()
 {
 	sdb::L3Tree<int, int, 2048, 512, 1024 > allObjs;
 	sdb::L3Node<sdb::Coord2, int, 1024> *block = m_objectCellMap.begin();
@@ -111,8 +107,12 @@ void LocalGridBuilder<T, P>::detach()
 		for (int i=0;i<block->count();++i) { 
 			const sdb::Coord2 &ci = block->key(i);
 
+			if(ci.y > m_grid->numCells() ) {
+				std::cout << "\n ERROR cell ind " << ci.y << " > " << m_grid->numCells();
+			}
+
 			inds[offset] = ci.x;
-			
+
 			Int2 &cellRange = m_grid->cell()[ci.y];
 
 			if(preCell != ci.y) {
@@ -132,46 +132,54 @@ void LocalGridBuilder<T, P>::detach()
 
 	m_grid->buildBvh();
 
+	//m_grid->verbose();
 }
 
-template<typename T, int P>
+template<typename T>
 template<typename Ts, typename Tr>
-void LocalGridBuilder<T, P>::measure(const Ts &sample, int objI, Tr &rule)
+void LocalGridBuilder<T>::measure(const Ts &samples, int objI, Tr &rule)
 {
-	const sds::SpaceFillingVector<Ts::SampleTyp> &orignalSamples = sample.samples();
-	int n = orignalSamples.size();
+	int n = samples.size();
 	const BoundingBox &b = rule.bbox();
-	Ts::SampleTyp ap;
-	sds::SpaceFillingVector<Ts::SampleTyp> destSamples;
+	Ts::ValueTyp ap;
+	sds::SpaceFillingVector<Ts::ValueTyp> destSamples;
 	for(int i=0;i<n;++i) {
-		const Ts::SampleTyp &si = orignalSamples[i];
+		const Ts::ValueTyp &si = samples[i];
 		const float *q = (const float *)&si._pos;
 		if(isPointOutsideBox(q, b.data())) continue;
 
-		ap._key = rule.computeKeyAtLevel(q, P);
+		ap._key = rule.computeKeyAtLevel(q, rule.P());
 
 		destSamples.push_back(ap);
 	}
 
-	destSamples.sort();
 	n = destSamples.size();
+	if(n < 1) return;
+
+	destSamples.sort();
 
 	int prek =-1;
 	for(int i=0;i<n;++i) {
-		const Ts::SampleTyp &si = destSamples[i];
+		const Ts::ValueTyp &si = destSamples[i];
 		if(si._key != prek) {
 
 			prek = si._key;
 
-			const int celli = rule.computeCellInd(si._key, P);
+			const int celli = rule.computeCellInd(si._key, rule.P());
+
+			if(celli > m_grid->numCells() ) {
+				std::cout << "\n ERROR cell ind " << celli << " > " << m_grid->numCells();
+				rule.printCoord(si._key);
+			}
+
 			m_objectCellMap.insert(sdb::Coord2(objI, celli), 0);
 		}
 	}
-
+	
 }
 
-template<typename T, int P>
-void LocalGridBuilder<T, P>::recordIndices(T *grid)
+template<typename T>
+void LocalGridBuilder<T>::recordIndices(T *grid)
 {
 	const int n = grid->numCells();
 	for(int i=0;i<n;++i) {
@@ -183,32 +191,6 @@ void LocalGridBuilder<T, P>::recordIndices(T *grid)
 			m_objectCellMap.insert(sdb::Coord2(objI, i), 0);
 		}
 	}
-}
-
-template<typename T, int P>
-template<typename Ti, typename Tr>
-void LocalGridBuilder<T, P>::measureInstance(const Ti &instancer, int instanceI, Tr &rule)
-{
-	const int d = 1<<P;
-    
-/// store objects in cell 
-	const int nc = d * d * d; 
-	CellKH *cs = new CellKH[6 * nc];  
-	rule. template getLevelCells<CellKH>(cs, 0, 0, P);  
-
-	float b[6];
-    for(int i=0;i<nc;++i) {
-
-    	rule. template getCellBox<CellKH>(b, cs[i]);
-
-    	rule.expandBox(b);
-
-    	if(instancer.intersectBox(b, instanceI)) {
-    		m_objectCellMap.insert(sdb::Coord2(instanceI, i), 0);
-    	}
-
-   	}
-	delete[] cs;
 }
 
 }
