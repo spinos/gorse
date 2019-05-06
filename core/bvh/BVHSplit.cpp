@@ -1,4 +1,5 @@
 #include "BVHSplit.h"
+#include "BVH.h"
 #include "BVHNode.h"
 #include "Binning.h"
 #include <math/QuickSort.h>
@@ -8,19 +9,18 @@ namespace alo {
 int BVHSplit::InnerNumPrimitives = 64;
 int BVHSplit::LeafNumPrimitives = 16;
 
-BVHSplit::BVHSplit(int ind, BVHNode *nodes, BVHPrimitive *primtives)
+BVHSplit::BVHSplit(int ind, BVH *hierarchy)
 { 
 	m_nodeIndex = ind;
-	BVHNode *parentNode = &nodes[ind];
-	m_aabb = parentNode->aabb();
-	m_primitives = primtives;
-	m_begin = parentNode->leafBegin();
-	m_end = parentNode->leafEnd();
-	m_bins = new Binning[3];
+	m_hierarchy = hierarchy;
+	const BVHNode &parentNode = hierarchy->c_nodes()[ind];
+	m_aabb = parentNode.aabb();
+	m_begin = parentNode.leafBegin();
+	m_end = parentNode.leafEnd();
 }
 
 BVHSplit::~BVHSplit()
-{ delete[] m_bins; }
+{}
 
 const int &BVHSplit::nodeIndex() const
 { return m_nodeIndex; }
@@ -58,7 +58,7 @@ void BVHSplit::splitDim(int dim, float dx)
 		bi.setSplitPos(a + dx * (i+1), i);
 
 	for(int i=m_begin;i<m_end;++i) {
-		const BoundingBox &box = m_primitives[i].bbox();
+		const BoundingBox &box = m_hierarchy->c_primitives()[i].bbox();
 		bi.count(box.getMin(dim), box);
 	}
 
@@ -123,14 +123,14 @@ void BVHSplit::sortPrimitives()
 {
 	const float thre = splitPos();
 	for(int i=m_begin;i<m_end;++i) {
-		const BoundingBox &box = m_primitives[i].bbox();
+		const BoundingBox &box = m_hierarchy->c_primitives()[i].bbox();
 		if(box.getMin(m_splitDim) < thre) 
-			m_primitives[i].setKey(0);
+			m_hierarchy->primitives()[i].setKey(0);
 		else
-			m_primitives[i].setKey(1);
+			m_hierarchy->primitives()[i].setKey(1);
 	}
 
-	QuickSort1::SortByKeyF<int, BVHPrimitive >(m_primitives, m_begin, m_end - 1);
+	QuickSort1::SortByKeyF<int, BVHPrimitive >(m_hierarchy->primitives(), m_begin, m_end - 1);
 }
 
 void BVHSplit::setChildren(BVHNode *leftChild, BVHNode *rightChild)

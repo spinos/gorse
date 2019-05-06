@@ -1,26 +1,32 @@
+/*
+ *  BVHSplit.h
+ *
+ *  2019/5/7
+ */
+
 #ifndef BVH_SPLIT_H
 #define BVH_SPLIT_H
 
-#include "BVHPrimitive.h"
+#include "Binning.h"
 
 namespace alo {
 
+class BVH;
 class BVHNode;
-class Binning;
 
 class BVHSplit {
 
-	BVHPrimitive *m_primitives;
-	int m_nodeIndex;
 	BoundingBox m_aabb;
+	Binning m_bins[3];
+	BVH *m_hierarchy;
+	int m_nodeIndex;
 	int m_begin, m_end;
-	Binning *m_bins;
 	float m_splitCost;
 	int m_splitDim;
 	int m_splitInd;
 	
 public:
-	BVHSplit(int ind, BVHNode *nodes, BVHPrimitive *primtives);
+	BVHSplit(int ind, BVH *hierarchy);
 	~BVHSplit();
 
 	bool compute();

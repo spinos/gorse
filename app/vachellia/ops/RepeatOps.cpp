@@ -12,7 +12,6 @@
 #include <grd/LocalGridBuilder.h>
 #include <grd/LocalGridBuildRule.h>
 #include <grd/LocalGridLookupRule.h>
-#include <sds/FZOrder.h>
 #include <svf/SvfBuildRule.h>
 #include <grd/WorldGridBuilder.h>
 #include <grd/WorldGridBuildRule.h>
@@ -20,6 +19,8 @@
 #include <grd/TestCell.h>
 #include <grd/GridInCell.h>
 #include <sds/FZOrder.h>
+#include <QProgressDialog>
+#include <QApplication>
 
 #include "BoxOps.h"
 
@@ -27,31 +28,40 @@ namespace alo {
     
 RepeatOps::RepeatOps()
 {
+    QProgressDialog progress("Processing...", QString(), 0, 1, QApplication::activeWindow() );
+    progress.setWindowModality(Qt::ApplicationModal);
+    progress.show();
+
     BoxOps *abox = new BoxOps;
     m_inOps.append(abox);
 
     grd::BoxObject *bo = new grd::BoxObject;
-    bo->_bbox.setMin(-5.f, 0.f, -5.f);
-    bo->_bbox.setMax( 5.f, 25.f,  5.f);
+    bo->_bbox.setMin(-3.f, 0.f, -4.f);
+    bo->_bbox.setMax( 3.f, 25.f,  4.f);
 
     m_instancer = new InstancerTyp;
     m_instancer->addObject(bo);
 
-    static const int ninst = 7000;
-    static const int coverSpan = 1600;
-    static const int coverOrigin = -500;
-    m_instancer->createInstances(ninst);
-    for(int i=0;i<ninst;++i) {
-        grd::TestInstance &sample = m_instancer->instance(i);
+    static const int udim = 100;
+    static const int vdim = 100;
+    static const float spacing = 23.9;
+    static const float xzSpan = 2.5f;
+    static const float ySpan = 0.1f;
+    static const float coverOrigin = 0;
+    m_instancer->createInstances(udim * vdim);
+    for(int j=0;j<vdim;++j) {
+        for(int i=0;i<udim;++i) {
+            grd::TestInstance &sample = m_instancer->instance(j*udim + i);
 
-        int rx = coverOrigin + rand() % coverSpan;
-        int ry = coverOrigin + rand() % coverSpan;
-        int rz = coverOrigin + rand() % coverSpan;
+            float rx = coverOrigin + RandomFn11() * xzSpan + spacing * i;
+            float ry = coverOrigin + RandomFn11() * ySpan;
+            float rz = coverOrigin + RandomFn11() * xzSpan + spacing * j;
 
         sample.setObjectId(0);
         sample.resetSpace();
-        sample.setPosition(1.f * rx, .25f * ry, 1.f * rz);
+        sample.setPosition(rx, ry, rz);
         sample.calcSpace();
+        }
     }
 
     sds::FZOrderCurve sfc;
@@ -59,7 +69,7 @@ RepeatOps::RepeatOps()
     
     typedef grd::LocalGridBuildRule<sds::FZOrderCurve> CellBuildRuleTyp;
     CellBuildRuleTyp cellRule(&sfc);
-    cellRule.setP(4);
+    cellRule.setP(5);
     
     typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
     CellBuilderTyp cellBuilder;
@@ -83,6 +93,8 @@ RepeatOps::RepeatOps()
     m_worldLookupRule->setPrimitiveRule<InstancerTyp>(m_instancer);
 
     memcpy(RenderableObject::aabb(), &m_worldGrid->aabb(), 24);
+
+    progress.setValue(1);
 }
 
 RepeatOps::~RepeatOps()
@@ -106,7 +118,7 @@ void RepeatOps::addRenderableTo(RenderableScene *scene)
 void RepeatOps::update()
 {
     TransformOps::update();
-
+return;
     const int ne = m_inOps.numElements();
     if(ne < 1) {
         RenderableOps::resetAabb();

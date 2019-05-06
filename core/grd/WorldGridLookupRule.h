@@ -140,13 +140,13 @@ bool WorldGridLookupRule<T, Tc, Tp>::processLeaf(LookupResultTyp &result, const 
 		int firstHit = findClosestHit(bvhResult, t, tmpRay);
 		if(firstHit < 0) break;
 
-		t[0] += 1e-4f;
+		t[0] += 1e-1f;
 
 		const Tp &cr = m_cellRules[firstHit];
 		if(intersectPrimitive(result, cr, t, rayData)) return true;
 
 /// advance to exit point
-		tmpRay[6] = t[1] + 1e-4f;
+		tmpRay[6] = t[1] + 1e-1f;
 		tmpRay[7] = bvhResult._t1;
 	}
 

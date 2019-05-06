@@ -10,7 +10,7 @@ void BVHBuilder::Build(BVH *hierarchy)
 {
 	std::deque<BVHSplit *> buildQueue;
 
-	BVHSplit *split = new BVHSplit(0, hierarchy->nodes(), hierarchy->primitives() );
+	BVHSplit *split = new BVHSplit(0, hierarchy );
 	buildQueue.push_back(split);
 
 	int maxQLen = 1;
@@ -21,8 +21,8 @@ void BVHBuilder::Build(BVH *hierarchy)
 		if(active->compute() ) {
 
 			hierarchy->splitNode(active->nodeIndex());
-			BVHNode *parent = &hierarchy->nodes()[active->nodeIndex()];
-			const int ileft = parent->leftChild();
+			const BVHNode &parent = hierarchy->c_nodes()[active->nodeIndex()];
+			const int ileft = parent.leftChild();
 
 			BVHNode *lft = &hierarchy->nodes()[ileft];
 			BVHNode *rgt = lft++;
@@ -31,10 +31,10 @@ void BVHBuilder::Build(BVH *hierarchy)
 
 			active->sortPrimitives();
 
-			BVHSplit *lftSplit = new BVHSplit(ileft, hierarchy->nodes(), hierarchy->primitives() );
+			BVHSplit *lftSplit = new BVHSplit(ileft, hierarchy );
 			buildQueue.push_back(lftSplit);
 
-			BVHSplit *rgtSplit = new BVHSplit(ileft + 1, hierarchy->nodes(), hierarchy->primitives() );
+			BVHSplit *rgtSplit = new BVHSplit(ileft + 1, hierarchy );
 			buildQueue.push_back(rgtSplit);
 
 		}

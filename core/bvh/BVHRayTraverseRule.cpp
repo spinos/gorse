@@ -125,14 +125,26 @@ void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) 
 				return;
 			}
 
+			int hitChild = findNearChild(rayData, n);
+
+			if(hitChild < 0) {
+
+				state = tFromChild;
+				result._child = result._current;
+				result._current = findParent(result._current);
+
+			} else {
+
 /// inner node, going down to near child
 #ifdef RAY_BVH_DGB
 			result.printDown();
 #endif
 
-			state = tFromParent;
-			
-			result._current = findNearChild(rayData, n);
+				state = tFromParent;
+				result._current = hitChild;
+
+			}
+
 			continue;
 		}
 
@@ -189,21 +201,24 @@ int RayTraverseRule::findNearChild(const float *rayData, const BVHNode &parentNo
 	float leftRay[8];
 	memcpy(leftRay, rayData, 32);
 
-	if(!rayAabbIntersect(leftRay, leftBox) ) {
-/// missed left, right is near
-		return near + 1;
-	}
+	bool hitLeft = rayAabbIntersect(leftRay, leftBox);
 
 	const BVHNode &right = m_nodes[near + 1];
+	const float *rightBox = (const float *)&right.aabb();
 	
 	float rightRay[8];
 	memcpy(rightRay, rayData, 32);
 
-	const float *rightBox = (const float *)&right.aabb();
-	if(!rayAabbIntersect(rightRay, rightBox) ) {
-/// missed right, left is near
+	bool hitRight = rayAabbIntersect(rightRay, rightBox);
+
+	if(!hitLeft && !hitRight)
+		return -1;
+
+	if(hitLeft && !hitRight)
 		return near;
-	}
+
+	if(!hitLeft && hitRight)
+		return near + 1;
 	
 	if(leftRay[6] < rightRay[6])
 		return near;

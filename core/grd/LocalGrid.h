@@ -31,7 +31,7 @@ typedef sds::CubicGrid<T, Int2> PGridTyp;
 	SimpleBuffer<int> m_indices;
 	int m_numIndices;
     int m_numObjects;
-    BVH m_bvh;
+    BVH *m_bvh;
 /// indirection to cell
     SimpleBuffer<int> m_cellInd;
 
@@ -77,14 +77,16 @@ private:
 };
 
 template<typename T>
-LocalGrid<T>::LocalGrid() :
+LocalGrid<T>::LocalGrid() : m_bvh(nullptr),
 m_numIndices(0),
 m_numObjects(0)
 {}
 
 template<typename T>
 LocalGrid<T>::~LocalGrid()
-{}
+{
+    if(m_bvh) delete m_bvh;
+}
 
 template<typename T>
 void LocalGrid<T>::create(const int& x)
@@ -127,7 +129,9 @@ int *LocalGrid<T>::createIndices(int n)
 template<typename T>
 void LocalGrid<T>::buildBvh()
 {
-    m_bvh.clear();
+    if(m_bvh) delete m_bvh;
+    m_bvh = new BVH;
+    m_bvh->clear();
 
     BVHPrimitive ap;
     BoundingBox ab;
@@ -144,19 +148,19 @@ void LocalGrid<T>::buildBvh()
 
         offset++;
 
-        m_bvh.addPrimitive(ap);
+        m_bvh->addPrimitive(ap);
     }
 
-    m_bvh.setRootLeaf();
+    m_bvh->setRootLeaf();
 
     BVHSplit::InnerNumPrimitives = 16;
     BVHSplit::LeafNumPrimitives = 4;
 
-    BVHBuilder::Build(&m_bvh);
+    BVHBuilder::Build(m_bvh);
 
-    const BVHPrimitive *prims = m_bvh.c_primitives();
-    const BVHNode *ns = m_bvh.c_nodes();
-    const int &nn = m_bvh.numNodes();
+    const BVHPrimitive *prims = m_bvh->c_primitives();
+    const BVHNode *ns = m_bvh->c_nodes();
+    const int &nn = m_bvh->numNodes();
 
     m_cellInd.resetBuffer(nn);
 
@@ -186,7 +190,7 @@ const int *LocalGrid<T>::c_indices() const
 
 template<typename T>
 const BoundingBox &LocalGrid<T>::bbox() const
-{ return m_bvh.aabb(); }
+{ return m_bvh->aabb(); }
 
 template<typename T>
 const int &LocalGrid<T>::numIndices() const
@@ -209,11 +213,11 @@ const Int2 &LocalGrid<T>::cellIndexRange(int i) const
 
 template<typename T>
 const BVH *LocalGrid<T>::boundingVolumeHierarchy() const
-{ return &m_bvh; }
+{ return m_bvh; }
 
 template<typename T>
 const BoundingBox &LocalGrid<T>::primitiveBox(int i) const
-{ return m_bvh.primitiveBox(i);}
+{ return m_bvh->primitiveBox(i);}
 
 template<typename T>
 bool LocalGrid<T>::isEmpty() const

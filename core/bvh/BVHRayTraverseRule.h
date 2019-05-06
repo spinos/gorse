@@ -9,7 +9,7 @@
  *  up from child to parent
  *  exit when hit a leaf or back to root
  *
- *  2019/5/2
+ *  2019/5/7
  */
 
 #ifndef ALO_BVH_RAY_TRAVERSE_RULE_H

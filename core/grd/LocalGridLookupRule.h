@@ -152,12 +152,12 @@ bool LocalGridLookupRule<T, Tp>::processLeaf(LocalGridLookupResult &result, cons
 		int firstHit = findClosestHit(bvhResult, t, tmpRay);
 		if(firstHit < 0) break;
 
-		t[0] += 1e-4f;
+		t[0] += 1e-3f;
 
 		if(intersectPrimitive(result, t, rayData)) return true;
 
 /// advance to exit point
-		tmpRay[6] = t[1] + 1e-4f;
+		tmpRay[6] = t[1] + 1e-3f;
 		tmpRay[7] = bvhResult._t1;
 	}
 

@@ -32,7 +32,7 @@ class WorldGrid {
 	SimpleBuffer<const Tc *> m_cellPtr;
 /// mapped
 	sdb::L3Tree<T, Tc, 2048, 512, 1024 > m_cells;
-	BVH m_bvh;
+	BVH *m_bvh;
 
 public:
 
@@ -61,12 +61,14 @@ private:
 };
 
 template<typename T, typename Tc>
-WorldGrid<T, Tc>::WorldGrid()
+WorldGrid<T, Tc>::WorldGrid() : m_bvh(nullptr)
 {}
 
 template<typename T, typename Tc>
 WorldGrid<T, Tc>::~WorldGrid()
-{}
+{
+    if(m_bvh) delete m_bvh;
+}
 
 template<typename T, typename Tc>
 Tc *WorldGrid<T, Tc>::findCell(const T &k)
@@ -83,7 +85,9 @@ Tc *WorldGrid<T, Tc>::addCell(const T &k, Tc &x)
 template<typename T, typename Tc>
 void WorldGrid<T, Tc>::buildBvh()
 {
-	m_bvh.clear();
+    if(m_bvh) delete m_bvh;
+    m_bvh = new BVH;
+	m_bvh->clear();
 
 	m_cellPtr.resetBuffer(m_cells.size());
 
@@ -106,23 +110,23 @@ void WorldGrid<T, Tc>::buildBvh()
 
         	offset++;
 
-			m_bvh.addPrimitive(ap);
+			m_bvh->addPrimitive(ap);
 		}
 		block = m_cells.next(block);
 	}
 
-	m_bvh.setRootLeaf();
+	m_bvh->setRootLeaf();
 
 	BVHSplit::InnerNumPrimitives = 16;
 	BVHSplit::LeafNumPrimitives = 4;
 
-    BVHBuilder::Build(&m_bvh);
+    BVHBuilder::Build(m_bvh);
 
     m_cellInd.resetBuffer(m_cells.size());
 
-    const BVHPrimitive *prims = m_bvh.c_primitives();
-    const BVHNode *ns = m_bvh.c_nodes();
-    const int &nn = m_bvh.numNodes();
+    const BVHPrimitive *prims = m_bvh->c_primitives();
+    const BVHNode *ns = m_bvh->c_nodes();
+    const int &nn = m_bvh->numNodes();
 
 	for(int i=0;i<nn;++i) {
 		const BVHNode &ni = ns[i];
@@ -138,16 +142,16 @@ void WorldGrid<T, Tc>::buildBvh()
 		}
 	}
 
-    std::cout << m_bvh;
+    std::cout << *m_bvh;
 }
 
 template<typename T, typename Tc>
 const BVH *WorldGrid<T, Tc>::boundingVolumeHierarchy() const
-{ return &m_bvh; }
+{ return m_bvh; }
 
 template<typename T, typename Tc>
 const BoundingBox &WorldGrid<T, Tc>::primitiveBox(int i) const
-{ return m_bvh.primitiveBox(i);}
+{ return m_bvh->primitiveBox(i);}
 
 template<typename T, typename Tc>
 const Tc *WorldGrid<T, Tc>::c_cellPtr(int i) const
@@ -155,7 +159,7 @@ const Tc *WorldGrid<T, Tc>::c_cellPtr(int i) const
 
 template<typename T, typename Tc>
 const BoundingBox &WorldGrid<T, Tc>::aabb() const
-{ return m_bvh.aabb(); }
+{ return m_bvh->aabb(); }
 
 template<typename T, typename Tc>
 int WorldGrid<T, Tc>::numCells() const
