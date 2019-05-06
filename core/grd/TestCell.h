@@ -80,6 +80,10 @@ struct TestInstance {
     void setPosition(float x, float y, float z) {
     	_tm.setTranslation(x, y, z);
     }
+    
+    void setRotation(const Quaternion &q) {
+        _tm.setRotation(q);
+    }
 
     void calcSpace() {
     	_invTm = _tm;
@@ -94,6 +98,9 @@ struct TestInstance {
 
     void pointToLocal(float *q) const
     { _invTm.transformPoint(q); }
+    
+    void normalToWorld(float *nml) const
+    { _tm.transformNormal(nml); }
 
 };
 
@@ -225,8 +232,9 @@ void ObjectInstancer<T1, T2>::mapNormal(Vector3F &nml, const float *p, int i) co
 	float q[3];
 	memcpy(q, p, 12);
 	inst.pointToLocal(q);
-/// todo to world scaling
 	shape->mapNormal((float *)&nml, q);
+    
+    inst.normalToWorld((float *)&nml);
 }
 
 template<typename T1, typename T2>
