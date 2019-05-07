@@ -15,6 +15,8 @@ namespace alo {
 
 namespace bvh {
 
+//#define RAY_BVH_DGB
+
 RayTraverseRule::RayTraverseRule() : m_bvh(nullptr)
 {}
 

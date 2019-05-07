@@ -118,6 +118,8 @@ bool VoxelOps::loadCache(const std::string &fileName)
             greader.load<GridTyp>(*m_grid);
             greader.close();
 
+            m_grid->buildBvh();
+
             nfld = fldNames.size();
 
             m_primitiveLookup->create(nfld);

@@ -110,6 +110,9 @@ BVHNodeIterator BVH::nextLeaf(BVHNodeIterator x) const
 const BoundingBox &BVH::primitiveBox(int i) const
 { return m_primitives[i].bbox(); }
 
+const int &BVH::primitiveIndex(int i) const
+{ return m_primitives[i].index(); }
+
 BVHNode &BVH::node(int i)
 { return m_nodes[i]; }
 

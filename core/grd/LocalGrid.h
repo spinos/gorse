@@ -60,6 +60,7 @@ public:
 
     const BVH *boundingVolumeHierarchy() const;
     const BoundingBox &primitiveBox(int i) const;
+    const int &primitiveIndex(int i) const;
 
     bool isEmpty() const;
 
@@ -132,7 +133,6 @@ void LocalGrid<T>::buildBvh()
     BVHPrimitive ap;
     BoundingBox ab;
 
-    int offset = 0;
     const int nc = numCells();
     for(int i=0;i<nc;++i) {
         if(isCellEmpty(i)) continue;
@@ -140,9 +140,9 @@ void LocalGrid<T>::buildBvh()
         getCellBox(ab, i);
 
         ap.setBBox(ab);
-        ap.setIndex(offset);
+/// cell ind as primitive ind
+        ap.setIndex(i);
 
-        offset++;
 
         m_bvh->addPrimitive(ap);
     }
@@ -192,6 +192,10 @@ const BVH *LocalGrid<T>::boundingVolumeHierarchy() const
 template<typename T>
 const BoundingBox &LocalGrid<T>::primitiveBox(int i) const
 { return m_bvh->primitiveBox(i);}
+
+template<typename T>
+const int &LocalGrid<T>::primitiveIndex(int i) const
+{ return m_bvh->primitiveIndex(i); }
 
 template<typename T>
 bool LocalGrid<T>::isEmpty() const

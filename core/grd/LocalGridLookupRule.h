@@ -11,7 +11,6 @@
 
 #include <bvh/BVH.h>
 #include <bvh/BVHRayTraverseRule.h>
-#include "IndexGridLookupRule.h"
 #include <math/rayBox.h>
 
 namespace alo {
@@ -47,9 +46,6 @@ class LocalGridLookupRule {
 	const T *m_grid;
 	bvh::RayTraverseRule m_rayBvhRule;
 	const Tp *m_primitiveRule;
-	const float *m_originCellSize;
-	float m_invCellSize;
-	int m_dim[3];
 	int m_maxNumStep;
 
 public:
@@ -80,9 +76,6 @@ private:
 					const float *tLimit,
 					const float *rayData) const;
 
-	void computeCellCoord(int* u, const float* p) const;
-	int computeCellInd(const int* u) const;
-
 };
 
 template<typename T, typename Tp>
@@ -97,14 +90,8 @@ void LocalGridLookupRule<T, Tp>::setPrimitiveRule(const Tp *x)
 template<typename T, typename Tp>
 void LocalGridLookupRule<T, Tp>::attach(const T *grid)
 {
-	m_grid = grid;
 	m_rayBvhRule.attach(grid->boundingVolumeHierarchy());
-	m_originCellSize = grid->originCellSize();
-	m_invCellSize = 1.f / m_originCellSize[3];
-	const int d = grid->resolution();
-	m_dim[0] = d;
-	m_dim[1] = d * d;
-	m_dim[2] = m_dim[0] - 1;
+	m_grid = grid;
 }
 
 template<typename T, typename Tp>
@@ -154,6 +141,11 @@ bool LocalGridLookupRule<T, Tp>::processLeaf(LocalGridLookupResult &result, cons
 
 		t[0] += 1e-3f;
 
+		const int &celli = m_grid->primitiveIndex(firstHit);
+		result._instanceRange = m_grid->c_cell()[celli];
+		if(result.isEmptySpace())
+			result._instanceRange.set(0, m_grid->numObjects());
+
 		if(intersectPrimitive(result, t, rayData)) return true;
 
 /// advance to exit point
@@ -194,32 +186,10 @@ int LocalGridLookupRule<T, Tp>::findClosestHit(bvh::RayTraverseResult &result, f
 }
 
 template<typename T, typename Tp>
-void LocalGridLookupRule<T, Tp>::computeCellCoord(int* u, const float* p) const
-{
-	u[0] = (p[0] - m_originCellSize[0]) * m_invCellSize;
-	u[1] = (p[1] - m_originCellSize[1]) * m_invCellSize;
-	u[2] = (p[2] - m_originCellSize[2]) * m_invCellSize;
-	Clamp0b(u[0], m_dim[2]);
-	Clamp0b(u[1], m_dim[2]);
-	Clamp0b(u[2], m_dim[2]);
-}
-
-template<typename T, typename Tp>
-int LocalGridLookupRule<T, Tp>::computeCellInd(const int* u) const
-{ return (u[2]*m_dim[1] + u[1]*m_dim[0] + u[0]); }
-
-template<typename T, typename Tp>
 bool LocalGridLookupRule<T, Tp>::intersectPrimitive(LocalGridLookupResult &result, 
 									const float *tLimit,
 									const float *rayData) const
 {
-	rayProgress(result._q, rayData, tLimit[0]);
-	computeCellCoord(result._u, result._q);
-	const int offset = computeCellInd(result._u);
-	result._instanceRange = m_grid->c_cell()[offset];
-	if(result.isEmptySpace())
-		result._instanceRange.set(0, m_grid->numObjects());
-
 	float tt = tLimit[0];
 
 	for(int i=0;i<m_maxNumStep;++i) {

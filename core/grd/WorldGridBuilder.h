@@ -107,7 +107,7 @@ void WorldGridBuilder<T, Tc>::mapCells(const float *b, const int &objI, Tr &rule
 			acell.setAabb(cellBox);
 
 			ci = m_grid->addCell(ki, acell);
-
+			std::cout << ".";
 		}
 
 		m_objectCellMap.insert(sdb::Coord2(objI, ki), 0);

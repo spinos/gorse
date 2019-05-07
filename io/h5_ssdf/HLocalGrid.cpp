@@ -5,8 +5,6 @@
  */
 
 #include "HLocalGrid.h"
-#include <grd/IndexGrid.h>
-#include <h5/HOocArray.h>
 
 namespace alo {
 

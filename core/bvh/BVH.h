@@ -50,6 +50,7 @@ public:
 	const BVHNode *c_nodes() const;
 	const BVHPrimitive *c_primitives() const;
 	const BoundingBox &primitiveBox(int i) const;
+	const int &primitiveIndex(int i) const;
 
 	friend std::ostream& operator<<(std::ostream &output, const BVH & p);
 

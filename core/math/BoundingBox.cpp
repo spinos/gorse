@@ -125,8 +125,8 @@ const float BoundingBox::getLongestDistance() const
     float dx = m_data[3] - m_data[0];
     float dy = m_data[4] - m_data[1];
     float dz = m_data[5] - m_data[2];
-	if(dy >= dx && dy >= dz) return dy;
-	if(dz >= dx && dz >= dy) return dz;
+	if(dy > dx) dx = dy;
+	if(dz > dx) dx = dz;
 	return dx;
 }
 
