@@ -154,7 +154,7 @@ void LocalGrid<T>::buildBvh()
 
     BVHBuilder::Build(m_bvh);
     
-    std::cout << *m_bvh;
+    //std::cout << *m_bvh;
 
 }
 

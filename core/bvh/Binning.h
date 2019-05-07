@@ -23,7 +23,6 @@ class Binning {
 #define MAX_NUM_SPLIT 32
 #define MAX_NUM_OBJECT 33
 
-	int m_numSplits;
 	float m_splitPos[MAX_NUM_SPLIT];
 	int m_objectInBin[MAX_NUM_OBJECT];
 	int m_countLeft[MAX_NUM_SPLIT];
@@ -31,7 +30,8 @@ class Binning {
 	BoundingBox m_aabbInBin[MAX_NUM_OBJECT];
 	BoundingBox m_aabbLeft[MAX_NUM_SPLIT];
 	BoundingBox m_aabbRight[MAX_NUM_SPLIT];
-
+    int m_numSplits;
+	
 public:
 
 	Binning();

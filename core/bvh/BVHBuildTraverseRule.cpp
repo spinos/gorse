@@ -74,8 +74,6 @@ void BuildTraverseRule::traverse(BuildTraverseResult &result) const
                 
             } else {
                 
-                //state = tNone;
-                //return;
 /// no split, going up
 #ifdef BUILD_BVH_DGB
 				result.printUp();

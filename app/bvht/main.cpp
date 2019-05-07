@@ -1,3 +1,8 @@
+/*
+ *  World/Local grid with bvh test
+ *  2019/5/8
+ */
+
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
@@ -70,7 +75,7 @@ void testBvh()
     
     typedef grd::WorldGridBuildRule<int, sds::FZOrderCurve > WorldRuleTyp;
     WorldRuleTyp *m_worldRule = new WorldRuleTyp;
-    const int cencz[4] = {0,0,0,512};
+    const int cencz[4] = {0,0,0,256};
     m_worldRule->setCenterCellSize(cencz);
 
     typedef grd::WorldGridBuilder<int, WorldCellTyp > WorldBuilderTyp;
@@ -81,13 +86,21 @@ void testBvh()
     m_worldBuilder->addInstances<InstancerTyp, WorldRuleTyp, CellBuilderTyp, CellBuildRuleTyp >(*m_instancer, *m_worldRule, cellBuilder, cellRule);
    
     m_worldBuilder->detach();
+    
+    typedef grd::LocalGridLookupRule<grd::LocalGrid<float>, InstancerTyp > LocalLookupRuleTyp;
+    
+    typedef grd::WorldGridLookupRule<WorldTyp, WorldCellTyp, LocalLookupRuleTyp > WorldLookupRuleTyp;
+    WorldLookupRuleTyp *m_worldLookupRule = new WorldLookupRuleTyp;
+    m_worldLookupRule->attach(m_worldGrid);
+    m_worldLookupRule->setPrimitiveRule<InstancerTyp>(m_instancer);
+    
 }
 
 int main(int argc, char *argv[])
 {
     std::cout<<"\n test bvh ";
     testBvh();
-    std::cout<<"\n passed ";
+    std::cout<<"\n passed test ";
       
     return 0;
 }

@@ -72,7 +72,7 @@ RepeatOps::RepeatOps()
     
     typedef grd::LocalGridBuildRule<sds::FZOrderCurve> CellBuildRuleTyp;
     CellBuildRuleTyp cellRule(&sfc);
-    //cellRule.setP(5);
+    cellRule.setP(5);
     
     typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
     CellBuilderTyp cellBuilder;
@@ -98,6 +98,7 @@ RepeatOps::RepeatOps()
     memcpy(RenderableObject::aabb(), &m_worldGrid->aabb(), 24);
 
     progress.setValue(1);
+    
 }
 
 RepeatOps::~RepeatOps()
