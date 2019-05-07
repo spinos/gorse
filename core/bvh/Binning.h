@@ -19,15 +19,18 @@
 namespace alo {
 
 class Binning {
+	
+#define MAX_NUM_SPLIT 32
+#define MAX_NUM_OBJECT 33
 
 	int m_numSplits;
-	float *m_splitPos;
-	int *m_objectInBin;
-	int *m_countLeft;
-	int *m_countRight;
-	BoundingBox *m_aabbInBin;
-	BoundingBox *m_aabbLeft;
-	BoundingBox *m_aabbRight;
+	float m_splitPos[MAX_NUM_SPLIT];
+	int m_objectInBin[MAX_NUM_OBJECT];
+	int m_countLeft[MAX_NUM_SPLIT];
+	int m_countRight[MAX_NUM_SPLIT];
+	BoundingBox m_aabbInBin[MAX_NUM_OBJECT];
+	BoundingBox m_aabbLeft[MAX_NUM_SPLIT];
+	BoundingBox m_aabbRight[MAX_NUM_SPLIT];
 
 public:
 

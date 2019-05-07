@@ -2,6 +2,8 @@
 #define ALO_GRD_TEST_CELL_H
 
 #include <math/BoundingBox.h>
+#include <math/Matrix44F.h>
+#include <math/ElementVector.h>
 #include <math/pointBox.h>
 #include <math/boxBox.h>
 #include "GridSamples.h"

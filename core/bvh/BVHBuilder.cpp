@@ -12,7 +12,7 @@ void BVHBuilder::Build(BVH *hierarchy)
 
 	BVHSplit *split = new BVHSplit(0, hierarchy );
 	buildQueue.push_back(split);
-
+	
 	int maxQLen = 1;
 
 	for(;;) {

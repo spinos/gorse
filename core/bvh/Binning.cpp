@@ -2,33 +2,11 @@
 
 namespace alo {
 
-Binning::Binning() : m_numSplits(0),
-m_splitPos(0),
-m_objectInBin(0),
-m_aabbInBin(0),
-m_countLeft(0),
-m_countRight(0),
-m_aabbLeft(0),
-m_aabbRight(0)
+Binning::Binning() : m_numSplits(0)
 {}
 
 Binning::~Binning()
-{
-	if(m_splitPos)
-		delete[] m_splitPos;
-	if(m_objectInBin)
-		delete[] m_objectInBin;
-	if(m_aabbInBin)
-		delete[] m_aabbInBin;
-	if(m_countLeft)
-		delete[] m_countLeft;
-	if(m_countRight)
-		delete[] m_countRight;
-	if(m_aabbLeft)
-		delete[] m_aabbLeft;
-	if(m_aabbRight)
-		delete[] m_aabbRight;
-}
+{}
 
 void Binning::setEmpty()
 { m_numSplits = 0; }
@@ -36,17 +14,10 @@ void Binning::setEmpty()
 void Binning::create(int n)
 {
 	m_numSplits = n;
-	m_splitPos = new float[n];
-	m_objectInBin = new int[n+1];
-	m_aabbInBin = new BoundingBox[n+1];
 	for(int i=0;i<n+1;++i) {
 		m_objectInBin[i] = 0;
 		m_aabbInBin[i].reset();
 	}
-	m_countLeft = new int[n];
-	m_countRight = new int[n];
-	m_aabbLeft = new BoundingBox[n];
-	m_aabbRight = new BoundingBox[n];
 }
 
 void Binning::setSplitPos(float x, int i)

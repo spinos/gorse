@@ -72,7 +72,7 @@ RepeatOps::RepeatOps()
     
     typedef grd::LocalGridBuildRule<sds::FZOrderCurve> CellBuildRuleTyp;
     CellBuildRuleTyp cellRule(&sfc);
-    cellRule.setP(5);
+    //cellRule.setP(5);
     
     typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
     CellBuilderTyp cellBuilder;
