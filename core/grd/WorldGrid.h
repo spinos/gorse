@@ -143,6 +143,21 @@ void WorldGrid<T, Tc>::buildBvh()
 	}
 
     std::cout << *m_bvh;
+    
+    block = m_cells.begin();
+	while(block) {
+		for (int i=0;i<block->count();++i) { 
+        	
+        	const Tc &ci = block->value(i);
+
+        	if(ci.isEmpty()) continue;
+
+			ci._grid->buildBvh();
+            
+		}
+		block = m_cells.next(block);
+	}
+    
 }
 
 template<typename T, typename Tc>

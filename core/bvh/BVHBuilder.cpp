@@ -1,13 +1,47 @@
 #include "BVHBuilder.h"
 #include "BVH.h"
-#include "BVHNode.h"
+#include "BVHBuildTraverseRule.h"
 #include "BVHSplit.h"
-#include <deque>
+
+//#include <deque>
 
 namespace alo {
 
 void BVHBuilder::Build(BVH *hierarchy)
 {
+    
+    bvh::BuildTraverseRule rule;
+    rule.attach(hierarchy);
+    
+    bvh::BuildTraverseResult param;
+    rule.begin(param);
+    
+    for(;;) {
+        
+        rule.traverse(param);
+        
+        if(rule.end(param) ) break;
+        
+        //param.printCurrent();
+        
+        BVHSplit split(param._current, hierarchy);
+        param._toSplit = split.compute();
+        if(param._toSplit) {
+            const int ileft = hierarchy->splitNode(param._current);
+            //std::cout << " split " << param._current << " " << ileft;
+            
+            BVHNode *lft = &hierarchy->node(ileft);
+			BVHNode *rgt = lft++;
+            
+            split.setChildren(lft, rgt);
+
+			split.sortPrimitives();
+        }
+    }
+    
+    hierarchy->buildIndirection();
+    
+    /*
 	std::deque<BVHSplit *> buildQueue;
 
 	BVHSplit *split = new BVHSplit(0, hierarchy );
@@ -47,7 +81,8 @@ void BVHBuilder::Build(BVH *hierarchy)
 		if(maxQLen < buildQueue.size())
 			maxQLen = buildQueue.size();
 
-	}
+	}*/
+    
 	std::cout<<".";
 }
 

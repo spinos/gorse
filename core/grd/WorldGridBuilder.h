@@ -128,12 +128,17 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
         	
         	const sdb::Coord2 &ci = block->key(i);
 
-			if(preInd != ci.y) {
+			if(preInd < ci.y) {
 
 				if(preInd > -1) {
 					nmc++;
+                    
+                    //std::cout << "\n loc grd detach " << preInd;
+                    
 					cellBuilder.detach();
 				}
+                
+                //std::cout << " next cell " << ci.y;
 
 				preInd = ci.y;
 
@@ -146,6 +151,8 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 				cellRule.setBBox((const float *)&cell->bbox());
 				cellRule.setBoxRelativeBoundary(1.f);
 				
+                //std::cout << "\n loc grd attach " << ci.y;
+    
 				cellBuilder.attach(cell->_grid);
 			}
 

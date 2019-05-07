@@ -121,7 +121,7 @@ void RepeatOps::addRenderableTo(RenderableScene *scene)
 void RepeatOps::update()
 {
     TransformOps::update();
-return;
+
     const int ne = m_inOps.numElements();
     if(ne < 1) {
         RenderableOps::resetAabb();
@@ -137,7 +137,7 @@ return;
 
 bool RepeatOps::intersectRay(const Ray& aray, IntersectResult& result)
 {
-   if(m_worldLookupRule->isEmpty() ) 
+    if(m_worldLookupRule->isEmpty() ) 
         return TransformOps::intersectRay(aray, result);
 
     float rayData[8];

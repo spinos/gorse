@@ -15,15 +15,16 @@ void BVH::clear()
 	m_primitives.resetBuffer(0);
 }
 
-void BVH::splitNode(int i)
+int BVH::splitNode(int i)
 { 
 	BVHNode *parentNode = &m_nodes[i];
-	int lft = numNodes();
+	const int lft = numNodes();
 	parentNode->setInner(lft);
 	m_nodes << BVHNode(i); 
 	m_nodes << BVHNode(i); 
-	m_nodes[lft].setSibling(lft+1);
-	m_nodes[lft + 1].setSibling(lft);
+	node(lft).setSibling(lft+1);
+	node(lft + 1).setSibling(lft);
+    return lft;
 }
 
 void BVH::addPrimitive(const BVHPrimitive &x)
@@ -108,6 +109,38 @@ BVHNodeIterator BVH::nextLeaf(BVHNodeIterator x) const
 
 const BoundingBox &BVH::primitiveBox(int i) const
 { return m_primitives[i].bbox(); }
+
+BVHNode &BVH::node(int i)
+{ return m_nodes[i]; }
+
+BVHPrimitive &BVH::primitive(int i)
+{ return m_primitives[i]; }
+
+const BVHNode &BVH::c_node(int i) const
+{ return m_nodes[i]; }
+
+const BVHPrimitive &BVH::c_primitive(int i) const
+{ return m_primitives[i]; }
+
+void BVH::buildIndirection()
+{
+    m_indirections.resetBuffer(numPrimitives());
+    
+    const int &n = numNodes();
+    for(int i=0;i<n;++i) {
+        const BVHNode &ni = c_node(i);
+        if(ni.isLeaf()) {
+
+            int b = ni.leafBegin();
+            int e = ni.leafEnd();
+            
+            for(int j=b;j<e;++j) {
+                m_indirections[j] = c_primitive(j).index();
+            }
+            
+        }
+    }
+}
 
 std::ostream& operator<<(std::ostream &output, const BVH & p) 
 {

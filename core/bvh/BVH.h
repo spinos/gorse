@@ -19,15 +19,19 @@ class BVH {
 
 	SimpleBuffer<BVHNode > m_nodes;
 	SimpleBuffer<BVHPrimitive > m_primitives;
+    SimpleBuffer<int > m_indirections;
 
 public:
 	BVH();
 	~BVH();
 
 	void clear();
-	void splitNode(int i);
+/// left child of node i
+	int splitNode(int i);
 	void addPrimitive(const BVHPrimitive &x);
 	void setRootLeaf();
+/// after build
+    void buildIndirection();
 
 	const int &numNodes() const;
 	const int &numPrimitives() const;
@@ -37,6 +41,11 @@ public:
 	BVHNode *lastNode();
 	BVHNode *nodes();
 	BVHPrimitive *primitives();
+    
+    BVHNode &node(int i);
+    const BVHNode &c_node(int i) const;
+    BVHPrimitive &primitive(int i);
+    const BVHPrimitive &c_primitive(int i) const;
 	
 	const BVHNode *c_nodes() const;
 	const BVHPrimitive *c_primitives() const;

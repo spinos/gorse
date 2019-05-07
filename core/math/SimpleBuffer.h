@@ -97,7 +97,7 @@ void SimpleBuffer<T>::createBuffer(int n)
 template<typename T>
 void SimpleBuffer<T>::resetBuffer(int n)
 {
-    int nr = Round1024(n);
+    const int nr = Round1024(n);
 	if (m_cap < nr || m_cap > nr + 3072) {
 		relocateBuffer(nr);
 	}

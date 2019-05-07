@@ -129,10 +129,14 @@ void LocalGridBuilder<T>::detach()
 	}
 
 	m_objectCellMap.clear();
+    
+    m_grid->verbose();
+    
+/// skip for bvht
+    //std::cout << "\n loc grd bvh " << m_grid;
+	//m_grid->buildBvh();
 
-	m_grid->buildBvh();
-
-	//m_grid->verbose();
+	
 }
 
 template<typename T>

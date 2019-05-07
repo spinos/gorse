@@ -58,7 +58,7 @@ void testBvh()
     
     typedef grd::LocalGridBuildRule<sds::FZOrderCurve> CellBuildRuleTyp;
     CellBuildRuleTyp cellRule(&sfc);
-    //cellRule.setP(5);
+    cellRule.setP(5);
 	
 	typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
     CellBuilderTyp cellBuilder;
@@ -70,7 +70,7 @@ void testBvh()
     
     typedef grd::WorldGridBuildRule<int, sds::FZOrderCurve > WorldRuleTyp;
     WorldRuleTyp *m_worldRule = new WorldRuleTyp;
-    const int cencz[4] = {0,0,0,128};
+    const int cencz[4] = {0,0,0,512};
     m_worldRule->setCenterCellSize(cencz);
 
     typedef grd::WorldGridBuilder<int, WorldCellTyp > WorldBuilderTyp;

@@ -32,8 +32,6 @@ typedef sds::CubicGrid<T, Int2> PGridTyp;
 	int m_numIndices;
     int m_numObjects;
     BVH *m_bvh;
-/// indirection to cell
-    SimpleBuffer<int> m_cellInd;
 
 public:
 
@@ -59,8 +57,6 @@ public:
     const int &numObjects() const;
 /// i-th cell range y > x
     bool isCellEmpty(int i) const;
-/// within leaf 
-    const Int2 &cellIndexRange(int i) const;
 
     const BVH *boundingVolumeHierarchy() const;
     const BoundingBox &primitiveBox(int i) const;
@@ -157,26 +153,8 @@ void LocalGrid<T>::buildBvh()
     BVHSplit::LeafNumPrimitives = 4;
 
     BVHBuilder::Build(m_bvh);
-
-    const BVHPrimitive *prims = m_bvh->c_primitives();
-    const BVHNode *ns = m_bvh->c_nodes();
-    const int &nn = m_bvh->numNodes();
-
-    m_cellInd.resetBuffer(nn);
-
-    for(int i=0;i<nn;++i) {
-        const BVHNode &ni = ns[i];
-        if(ni.isLeaf()) {
-
-            int b = ni.leafBegin();
-            int e = ni.leafEnd();
-            
-            for(int j=b;j<e;++j) {
-                m_cellInd[j] = prims[j].index();
-            }
-            
-        }
-    }
+    
+    std::cout << *m_bvh;
 
 }
 
@@ -206,10 +184,6 @@ bool LocalGrid<T>::isCellEmpty(int i) const
     const Int2 &r = c_cell()[i];
     return r.x >= r.y;
 }
-
-template<typename T>
-const Int2 &LocalGrid<T>::cellIndexRange(int i) const
-{ return c_cell()[m_cellInd[i]]; }
 
 template<typename T>
 const BVH *LocalGrid<T>::boundingVolumeHierarchy() const
