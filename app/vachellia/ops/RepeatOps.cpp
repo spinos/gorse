@@ -12,7 +12,6 @@
 #include <grd/LocalGridBuilder.h>
 #include <grd/LocalGridBuildRule.h>
 #include <grd/LocalGridLookupRule.h>
-#include <svf/SvfBuildRule.h>
 #include <grd/WorldGridBuilder.h>
 #include <grd/WorldGridBuildRule.h>
 #include <grd/WorldGridLookupRule.h>
@@ -21,7 +20,7 @@
 #include <sds/FZOrder.h>
 #include <QProgressDialog>
 #include <QApplication>
-
+#include <ctime>
 #include "BoxOps.h"
 
 namespace alo {
@@ -36,8 +35,7 @@ RepeatOps::RepeatOps()
     m_inOps.append(abox);
 
     grd::BoxObject *bo = new grd::BoxObject;
-    bo->_bbox.setMin(-3.f, 0.f, -4.f);
-    bo->_bbox.setMax( 3.f, 25.f,  4.f);
+    bo->_bbox.set(-4.f, 0.f, -3.f, 4.f, 25.f, 3.f);
 
     m_instancer = new InstancerTyp;
     m_instancer->addObject(bo);
@@ -45,27 +43,13 @@ RepeatOps::RepeatOps()
     static const int udim = 100;
     static const int vdim = 100;
     static const float spacing = 23.9;
-    static const float xzSpan = 2.5f;
-    static const float ySpan = 0.1f;
+    static const float xzSpan = 4.5f;
+    static const float ySpan = 0.3f;
     static const float coverOrigin = 0;
-    m_instancer->createInstances(udim * vdim);
-    for(int j=0;j<vdim;++j) {
-        for(int i=0;i<udim;++i) {
-            grd::TestInstance &sample = m_instancer->instance(j*udim + i);
+    static const float scaleSpan = .5f;
 
-            float rx = coverOrigin + RandomFn11() * xzSpan + spacing * i;
-            float ry = coverOrigin + RandomFn11() * ySpan;
-            float rz = coverOrigin + RandomFn11() * xzSpan + spacing * j;
-            
-            Quaternion roty(RandomFn11() * 3.14f, Vector3F::YAxis);
-
-        sample.setObjectId(0);
-        sample.resetSpace();
-        sample.setPosition(rx, ry, rz);
-        sample.setRotation(roty);
-        sample.calcSpace();
-        }
-    }
+    std::time_t secs = std::time(0);
+    m_instancer->createPhalanx(udim, vdim, spacing, xzSpan, ySpan, coverOrigin, scaleSpan, secs);
 
     sds::FZOrderCurve sfc;
     sfc.setCoord(32.f, 32.f, 32.f, 16.f);
@@ -80,7 +64,7 @@ RepeatOps::RepeatOps()
     m_worldGrid = new WorldTyp;
     
     m_worldRule = new WorldRuleTyp;
-    const int cencz[4] = {0,0,0,128};
+    const int cencz[4] = {0,0,0,256};
     m_worldRule->setCenterCellSize(cencz);
 
     m_worldBuilder = new WorldBuilderTyp;

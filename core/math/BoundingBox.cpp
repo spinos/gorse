@@ -1,11 +1,10 @@
 /*
  *  BoundingBox.cpp
- *  kdtree
+ *  gorse
  *
- *  Created by jian zhang on 10/17/12.
- *  Copyright 2012 __MyCompanyName__. All rights reserved.
- *
+ *  2019/5/8
  */
+ 
 #include "BoundingBox.h"
 #include <math/Ray.h>
 #include <math/miscfuncs.h>
@@ -20,17 +19,23 @@ BoundingBox::BoundingBox()
 BoundingBox::BoundingBox(const float & x0, const float & y0, const float & z0,
 	            const float & x1, const float & y1, const float & z1)
 {
+    set(x0, y0, z0, x1, y1, z1);
+}
+
+BoundingBox::BoundingBox(const float * d)
+{
+	memcpy(m_data, d, 24);
+}
+
+void BoundingBox::set(const float & x0, const float & y0, const float & z0,
+	            const float & x1, const float & y1, const float & z1)
+{
     m_data[0] = x0;
     m_data[1] = y0;
     m_data[2] = z0;
     m_data[3] = x1;
     m_data[4] = y1;
     m_data[5] = z1;
-}
-
-BoundingBox::BoundingBox(const float * d)
-{
-	memcpy(m_data, d, 24);
 }
 
 void BoundingBox::setCenterHalfSpan(const float* & c)

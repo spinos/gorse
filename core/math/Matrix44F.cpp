@@ -244,6 +244,14 @@ void Matrix44F::transformNormal(float* p) const
     
 }
 
+void Matrix44F::transformDistance(float &p) const
+{
+    float tx = p * M(2, 0);
+	float ty = p * M(2, 1);
+	float tz = p * M(2, 2);
+    p = sqrt(tx * tx + ty * ty + tz * tz);
+}
+
 void Matrix44F::translate(const Vector3F& p)
 {
 	translate( p.x, p.y, p.z);

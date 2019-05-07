@@ -234,7 +234,7 @@ bool LocalGridLookupRule<T, Tp>::intersectPrimitive(LocalGridLookupResult &resul
 
         if(d < tt * 1e-5f) break;
 
-        tt += d * .7f;
+        tt += d * .8f;
      
         if(tt > tLimit[1]) return false;
     }

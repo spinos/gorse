@@ -44,6 +44,7 @@ namespace alo {
 	Vector3F transformAsNormal(const Vector3F& p) const;
     void transformPoint(float* p) const;
     void transformNormal(float* p) const;
+    void transformDistance(float &p) const;
 	const Matrix44F transformBy(const Matrix44F & a) const;
 	void translate(const Vector3F& p);
 	void translate(float x, float y, float z);

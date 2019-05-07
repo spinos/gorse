@@ -1,11 +1,10 @@
 /*
  *  BoundingBox.h
- *  aloe
+ *  gorse
  *
- *  Created by jian zhang on 10/17/12.
- *  Copyright 2012 __MyCompanyName__. All rights reserved.
- *
+ *  2019/5/8
  */
+ 
 #ifndef ALO_BOUNDING_BOX_H
 #define ALO_BOUNDING_BOX_H
 
@@ -24,6 +23,8 @@ public:
 	            const float & x1, const float & y1, const float & z1);
 	BoundingBox(const float * d);
 	
+    void set(const float & x0, const float & y0, const float & z0,
+	            const float & x1, const float & y1, const float & z1);
 	void setCenterHalfSpan(const float* & c);
 	void set(const Vector3F & center,
 			const float & h);

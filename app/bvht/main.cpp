@@ -12,13 +12,13 @@
 #include <grd/LocalGridBuilder.h>
 #include <grd/LocalGridBuildRule.h>
 #include <grd/LocalGridLookupRule.h>
-#include <svf/SvfBuildRule.h>
 #include <grd/WorldGridBuilder.h>
 #include <grd/WorldGridBuildRule.h>
 #include <grd/WorldGridLookupRule.h>
 #include <grd/TestCell.h>
 #include <grd/GridInCell.h>
 #include <sds/FZOrder.h>
+#include <ctime>
 
 using namespace alo;
 
@@ -39,24 +39,10 @@ void testBvh()
     static const float xzSpan = 2.5f;
     static const float ySpan = 0.1f;
     static const float coverOrigin = 0;
-    m_instancer->createInstances(udim * vdim);
-    for(int j=0;j<vdim;++j) {
-        for(int i=0;i<udim;++i) {
-            grd::TestInstance &sample = m_instancer->instance(j*udim + i);
-
-            float rx = coverOrigin + RandomFn11() * xzSpan + spacing * i;
-            float ry = coverOrigin + RandomFn11() * ySpan;
-            float rz = coverOrigin + RandomFn11() * xzSpan + spacing * j;
-            
-            Quaternion roty(RandomFn11() * 3.14f, Vector3F::YAxis);
-
-        sample.setObjectId(0);
-        sample.resetSpace();
-        sample.setPosition(rx, ry, rz);
-        sample.setRotation(roty);
-        sample.calcSpace();
-        }
-    }
+    static const float scaleSpan = .5f;
+    
+    std::time_t secs = std::time(0);
+    m_instancer->createPhalanx(udim, vdim, spacing, xzSpan, ySpan, coverOrigin, scaleSpan, secs);
 	
 	sds::FZOrderCurve sfc;
     sfc.setCoord(32.f, 32.f, 32.f, 16.f);

@@ -79,6 +79,7 @@ void WorldGridBuilder<T, Tc>::addInstances(const Ti &instancer, Tr &gridRule, Tc
 		instancer.getAabb(b, i);
 
 		mapCells <Tr, Tcr>(b, i, gridRule, cellRule);
+        
 	}
 
 	buildCells<Ti, Tcb, Tcr>(instancer, cellBuilder, cellRule);

@@ -6,6 +6,8 @@
 #include <math/ElementVector.h>
 #include <math/pointBox.h>
 #include <math/boxBox.h>
+#include <rng/Lehmer.h>
+#include <rng/Uniform.h>
 #include "GridSamples.h"
 
 namespace alo {
@@ -86,6 +88,10 @@ struct TestInstance {
     void setRotation(const Quaternion &q) {
         _tm.setRotation(q);
     }
+    
+    void setScale(float x) {
+        _tm.scaleBy(x);
+    }
 
     void calcSpace() {
     	_invTm = _tm;
@@ -103,6 +109,9 @@ struct TestInstance {
     
     void normalToWorld(float *nml) const
     { _tm.transformNormal(nml); }
+    
+    void distanceToWorld(float &d) const
+    { _tm.transformDistance(d); }
 
 };
 
@@ -142,6 +151,11 @@ public:
 	void limitStepSize(float &d, int ii) const;
 
 	void genInstanceSamples(OutSampleTyp &dest, int ii) const;
+    
+    void createPhalanx(const int &udim, const int &vdim, 
+                    const float &spacing, const float &xzSpan, const float &ySpan, 
+                    const float &coverOrigin, const float &scaleSpan,
+                    const int &iseed);
 
 };
 
@@ -221,8 +235,11 @@ float ObjectInstancer<T1, T2>::mapDistanceInstance(const float *p, int i) const
 	float q[3];
 	memcpy(q, p, 12);
 	inst.pointToLocal(q);
-/// todo to world scaling
-	return shape->mapDistance(q);
+    
+    float d = shape->mapDistance(q);
+    
+    inst.distanceToWorld(d);
+	return d;
 }
 
 template<typename T1, typename T2>
@@ -265,6 +282,37 @@ void ObjectInstancer<T1, T2>::genInstanceSamples(OutSampleTyp &dest, int ii) con
 
 		dest.push_back(ap);
 	}
+}
+
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::createPhalanx(const int &udim, const int &vdim, 
+                    const float &spacing, const float &xzSpan, const float &ySpan, 
+                    const float &coverOrigin, const float &scaleSpan,
+                    const int &iseed)
+{
+    createInstances(udim * vdim);
+    
+    Uniform<Lehmer> lmlcg(iseed);
+    
+    for(int j=0;j<vdim;++j) {
+        for(int i=0;i<udim;++i) {
+            T1 &sample = instance(j*udim + i);
+
+            float rx = coverOrigin + (lmlcg.randf1() - .5f) * xzSpan + spacing * i;
+            float ry = (lmlcg.randf1() - .5f) * ySpan;
+            float rz = coverOrigin + (lmlcg.randf1() - .5f) * xzSpan + spacing * j;
+            float sc = 1.f + (lmlcg.randf1() - .5f) * scaleSpan;
+            
+            Quaternion roty((lmlcg.randf1() - .5f) * 3.14f, Vector3F::YAxis);
+
+            sample.setObjectId(0);
+            sample.resetSpace();
+            sample.setPosition(rx, ry, rz);
+            sample.setRotation(roty);
+            sample.setScale(sc);
+            sample.calcSpace();
+        }
+    }
 }
 
 }
