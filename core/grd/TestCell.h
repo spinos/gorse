@@ -60,7 +60,7 @@ struct BoxObject {
 		for(int i=0;i<6;++i) {
 			for(int j=0;j<512;++j) {
 				randomPointOnBoxSide((float *)&ap._pos, _bbox.data(), i);
-				samples.push_back(ap);
+				samples << ap;
 			}
 		}
 	}

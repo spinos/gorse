@@ -53,6 +53,8 @@ public:
 	
 	T& operator[](int i);
 	const T& operator[](int i) const;
+
+	void operator<<(const T &x);
 	
 protected:
 	
@@ -90,6 +92,10 @@ T& SpaceFillingVector<T>::operator[](int i)
 template<typename T>
 const T& SpaceFillingVector<T>::operator[](int i) const
 { return m_v[i]; }
+
+template<typename T>
+void SpaceFillingVector<T>::operator<<(const T &x)
+{ m_v.push_back(x); }
 
 template<typename T>
 template<typename Tc>

@@ -21,7 +21,6 @@
 #include <QProgressDialog>
 #include <QApplication>
 #include <ctime>
-#include "BoxOps.h"
 
 namespace alo {
     
@@ -30,9 +29,6 @@ RepeatOps::RepeatOps()
     QProgressDialog progress("Processing...", QString(), 0, 1, QApplication::activeWindow() );
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
-
-    BoxOps *abox = new BoxOps;
-    m_inOps.append(abox);
 
     grd::BoxObject *bo = new grd::BoxObject;
     bo->_bbox.set(-4.f, 0.f, -3.f, 4.f, 25.f, 3.f);
@@ -109,15 +105,11 @@ void RepeatOps::update()
 
     const int ne = m_inOps.numElements();
     if(ne < 1) {
+//todo clear instancer
         RenderableOps::resetAabb();
         return;
     }
-
-    setAabbNull();
-    for(int i=0;i<ne;++i) {
-        const RenderableOps *e = m_inOps.element(i);
-        e->expandAabb(aabb());
-    }
+//todo build instancer
 }
 
 bool RepeatOps::intersectRay(const Ray& aray, IntersectResult& result)
@@ -145,49 +137,14 @@ bool RepeatOps::intersectRay(const Ray& aray, IntersectResult& result)
 
 float RepeatOps::mapDistance(const float *q) const
 {
-    float md = 1e10f;
-    const int ne = m_inOps.numElements();
-    
-    for(int i=0;i<ne;++i) {
-        const RenderableOps *e = m_inOps.element(i);
-        float d = e->mapDistance(q);
-        if(md > d) md = d;
-    }
-
-    return md;
+    return TransformOps::mapDistance(q);
+//todo
 }
 
 Vector3F RepeatOps::mapNormal(const float *q) const
 {
-    Vector3F tn;
-
-    float q0[3];
-    float q1[3];
-
-    memcpy(q0, q, 12);
-    memcpy(q1, q, 12);
-
-    q0[0] -= 1e-3f;
-    q1[0] += 1e-3f;
-
-    tn.x = mapDistance(q1) - mapDistance(q0);
-
-    q0[0] = q[0];
-    q1[0] = q[0];
-    q0[1] -= 1e-3f;
-    q1[1] += 1e-3f;
-
-    tn.y = mapDistance(q1) - mapDistance(q0);
-
-    q0[1] = q[1];
-    q1[1] = q[1];
-    q0[2] -= 1e-3f;
-    q1[2] += 1e-3f;
-
-    tn.z = mapDistance(q1) - mapDistance(q0);
-
-    tn.normalize();
-    return tn;
+    return TransformOps::mapNormal(q);
+//todo
 }
 
 bool RepeatOps::canConnectTo(GlyphOps *another, const std::string &portName) const
