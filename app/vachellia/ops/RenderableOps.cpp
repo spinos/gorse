@@ -1,3 +1,10 @@
+/*
+ *  RenderableOps.cpp
+ *  vachellia
+ *
+ *  2019/5/11
+ */
+
 #include "RenderableOps.h"
 #include <interface/RenderableScene.h>
 
@@ -19,6 +26,6 @@ void RenderableOps::setRenderableScene(RenderableScene *x)
 { m_scene = x; }
 
 void RenderableOps::removeRenderableFromScene()
-{ m_scene->enqueueRemoveRenderable(objectId(), opsId() ); }
+{ m_scene->removeRenderable(objectId(), opsId() ); }
 
 }

@@ -26,14 +26,12 @@ m_changed(false)
 {
 	RenderableCoordinateSystem *b = new RenderableCoordinateSystem;
     b->setOverlay(true);
-	enqueueCreateRenderable(b, 0);
+	createRenderable(b, 0);
     
     TranslateController *t = new TranslateController;
     t->setOverlay(true);
     t->setVisible(false);
-    enqueueCreateRenderable(t, 1);
-    
-    processCreateRenderableQueue();
+    createRenderable(t, 1);
     
 }
 
@@ -73,17 +71,33 @@ void RenderableScene::getBackgroundColor(float* col, const Vector3F& dir, Sample
 const EnvLightTyp* RenderableScene::environmentLight() const
 { return 0; }
 
-void RenderableScene::enqueueCreateRenderable(RenderableObject* d, int groupId)
+void RenderableScene::createRenderable(RenderableObject* d, int groupId)
 {
-	CreateRenderableObjectState a;
-    a._group= groupId;
-    a._object = d;
-    m_createQueue.push_back(a);
+    RenderableObjectState b;
+    b._object = d;
+
+    const int i = m_objectCount;
+    m_objectCount++;
+
+    b._object->setObjectId(i);
+
+    m_drawQueue.insert(sdb::Coord2(i, groupId), b);
 }
 
-void RenderableScene::enqueueRemoveRenderable(int objectId, int groupId)
+void RenderableScene::removeRenderable(int objectId, int groupId)
 {
-    m_removeQueue.push_back(sdb::Coord2(objectId, groupId));
+    sdb::Coord2 a(objectId, groupId);
+
+    if(a.x > -1) {
+        RenderableObjectState *b = m_drawQueue.find(a);
+        if(b) b->_object->setToDestroy();
+    }
+    else {
+        setToRemoveGroup(a.y);
+    }
+
+    compressQueue();
+
 }
 
 void RenderableScene::setToRemoveGroup(int groupId)
@@ -95,46 +109,6 @@ void RenderableScene::setToRemoveGroup(int groupId)
         RenderableObject *obj = it.second->_object;
         if(obj) obj->setToDestroy();
     }
-}
-
-void RenderableScene::processCreateRenderableQueue()
-{
-    while(m_createQueue.size() > 0) {
-
-        CreateRenderableObjectState &a = m_createQueue.front();
-
-        RenderableObjectState b;
-        b._object = a._object;
-
-        const int i = m_objectCount;
-        m_objectCount++;
-
-        b._object->setObjectId(i);
-
-        m_drawQueue.insert(sdb::Coord2(i, a._group), b);
-
-        m_createQueue.erase(m_createQueue.begin());
-    }
-}
-
-void RenderableScene::processRemoveRenderableQueue()
-{
-    while(m_removeQueue.size() > 0) {
-
-        sdb::Coord2 &a = m_removeQueue.front();
-
-        if(a.x > -1) {
-            RenderableObjectState *b = m_drawQueue.find(a);
-            if(b) b->_object->setToDestroy();
-        }
-        else {
-            setToRemoveGroup(a.y);
-        }
-
-        m_removeQueue.erase(m_removeQueue.begin());
-    }
-
-    compressQueue();
 }
 
 void RenderableScene::compressQueue()
@@ -157,15 +131,11 @@ void RenderableScene::compressQueue()
 
 bool RenderableScene::sceneChanged() const
 {
-    if(m_createQueue.size() > 0) return true;
-    if(m_removeQueue.size() > 0) return true;
     return m_changed;
 }
 
-void RenderableScene::updateRenderQueue()
+void RenderableScene::updateScene()
 {
-    processCreateRenderableQueue();
-    processRemoveRenderableQueue();
     m_changed = false;
 }
 

@@ -19,6 +19,8 @@
 #include <h5_ssdf/HLocalGrid.h>
 #include <QProgressDialog>
 #include <QApplication>
+#include <interface/GlobalFence.h>
+#include <boost/thread/lock_guard.hpp>
 
 namespace alo {
     
@@ -52,7 +54,7 @@ std::string VoxelOps::opsName() const
 void VoxelOps::addRenderableTo(RenderableScene *scene)
 {
     setRenderableScene(scene);
-    scene->enqueueCreateRenderable(this, opsId());
+    scene->createRenderable(this, opsId());
 }
   
 void VoxelOps::update()
@@ -81,6 +83,9 @@ AFileDlgProfile *VoxelOps::readFileProfileR () const
 
 bool VoxelOps::loadCache(const std::string &fileName)
 {
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+	boost::lock_guard<interface::GlobalFence> guard(fence);
+        
     m_primitiveLookup->clear();
     m_gridRule->detach();
 

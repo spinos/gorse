@@ -44,9 +44,8 @@ void RenderThread::interruptRender()
 	}
 }
 
-void RenderThread::interruptAndRestart(bool toResizeImage, bool toChangeScene)
+void RenderThread::interruptAndRestart(bool toResizeImage)
 {
-//qDebug()<<"interruptAndRestart";	
 	interruptRender();
 	
 	if(toResizeImage)
@@ -55,37 +54,36 @@ void RenderThread::interruptAndRestart(bool toResizeImage, bool toChangeScene)
 	
 	m_interface->updateDisplayView();
 
-	if(toChangeScene) 
-		m_interface->updateScene();
-
 	emit preRenderRestart();
 	
 	this->m_abort = false;
 	start(LowPriority);
 }
 
-void RenderThread::render()
+void RenderThread::rerender()
 {
-	bool imageResized = m_interface->imageSizeChanged();
-	bool viewChanged = m_interface->cameraChanged();
-	bool sceneChanged = m_interface->sceneChanged();
-    
-    //if(sceneChanged) qDebug() << " RenderThread::render scene changed ";
-
-	if(imageResized || viewChanged || sceneChanged) {
-		interruptAndRestart(imageResized, sceneChanged);
-		return;
-	}
-
+	m_interface->updateDisplayView();
+	m_interface->updateScene();
+	
+	emit preRenderRestart();
+	
 	QMutexLocker locker(&mutex);
 	
 	this->m_abort = false;
 	
-	if (!isRunning()) {
+	if (!isRunning())
         start(LowPriority);
-    } else {
-        condition.wakeOne();
-    }
+
+}
+
+void RenderThread::render()
+{
+	bool imageResized = m_interface->imageSizeChanged();
+	bool viewChanged = m_interface->cameraChanged();
+	
+	if(imageResized || viewChanged)
+		interruptAndRestart(imageResized);
+
 }
 
 void RenderThread::renderWork(BufferBlock* packet, RenderBuffer *buf)

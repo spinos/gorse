@@ -49,10 +49,11 @@ bool TransformOps::intersectRay(const Ray& aray, IntersectResult& result) const
 /// near intersection
 	const float &tt = rayData[6];
 
-	const Vector3F pnt(rayData[0] + rayData[3] * tt, 
-						rayData[1] + rayData[4] * tt, 
-						rayData[2] + rayData[5] * tt);
-    Vector3F tn = mapNormal((const float *)&pnt);
+	float q[3];
+	rayTravel(q, rayData);
+
+    Vector3F tn = mapNormal(q);
+    
     rayToWorld(rayData);
 	normalToWorld((float *)&tn);
 

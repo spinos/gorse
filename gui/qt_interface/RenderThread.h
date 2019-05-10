@@ -37,6 +37,8 @@ public:
     RenderThread(RenderInterface* interf, QObject *parent = 0);
     ~RenderThread();
 
+/// fenced after scene changed
+    void rerender();
     void render();
 	
 signals:
@@ -48,13 +50,13 @@ protected:
 
 private:
 	void interruptRender();
-	void interruptAndRestart(bool toResizeImage, bool toChangeScene);
+	void interruptAndRestart(bool toResizeImage);
 	
 private:
     QMutex mutex;
     QWaitCondition condition;
 /// loop again
-	bool m_restart;
+	//bool m_restart;
 /// end before loop
     bool m_abort;
 	

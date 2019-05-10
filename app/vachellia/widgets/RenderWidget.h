@@ -35,6 +35,7 @@ public:
 
 public slots:
     //void cleanup();
+    void recvUpdateScene();
     void recvRerender();
     void recvBound(const alo::Hexahedron &x);
     void recvFocusCameraOn(const alo::Float4 &centerRadius);

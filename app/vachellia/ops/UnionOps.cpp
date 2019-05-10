@@ -9,8 +9,6 @@
 #include <interface/RenderableScene.h>
 #include <interface/IntersectResult.h>
 #include <math/rayBox.h>
-#include <interface/GlobalFence.h>
-#include <boost/thread/lock_guard.hpp>
 
 namespace alo {
    
@@ -29,7 +27,7 @@ std::string UnionOps::opsName() const
 void UnionOps::addRenderableTo(RenderableScene *scene)
 {
     setRenderableScene(scene);
-    scene->enqueueCreateRenderable(this, opsId());
+    scene->createRenderable(this, opsId());
 }
   
 void UnionOps::update()
@@ -135,8 +133,6 @@ bool UnionOps::canConnectTo(GlyphOps *another, const std::string &portName) cons
 void UnionOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     RenderableOps *r = static_cast<RenderableOps *>(another);
-    interface::GlobalFence &fence = interface::GlobalFence::instance();
-    boost::lock_guard<interface::GlobalFence> guard(fence);
     m_inOps.append(r);
     combineInputs();
 }
@@ -144,8 +140,6 @@ void UnionOps::connectTo(GlyphOps *another, const std::string &portName, GlyphCo
 void UnionOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     RenderableOps *r = static_cast<RenderableOps *>(another);
-    interface::GlobalFence &fence = interface::GlobalFence::instance();
-    boost::lock_guard<interface::GlobalFence> guard(fence);
     m_inOps.remove(r);
     combineInputs();
 }

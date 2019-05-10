@@ -1,6 +1,7 @@
 #ifndef VCHL_ALL_OPS_H
 #define VCHL_ALL_OPS_H
 
+#include "SphereOps.h"
 #include "BoxOps.h"
 #include "HorizonOps.h"
 #include "VoxelOps.h"

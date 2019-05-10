@@ -33,10 +33,23 @@ RepeatOps::RepeatOps()
     m_worldRule = new WorldRuleTyp;
     m_worldBuilder = new WorldBuilderTyp;
     m_worldLookupRule = new WorldLookupRuleTyp;
-#if 0
-    interface::GlobalFence &fence = interface::GlobalFence::instance();
-    boost::lock_guard<interface::GlobalFence> guard(fence);
+}
 
+RepeatOps::~RepeatOps()
+{
+    delete m_worldLookupRule;
+    delete m_instancer;
+    delete m_worldBuilder;
+    delete m_worldRule;
+    delete m_worldGrid;
+}
+
+std::string RepeatOps::opsName() const
+{ return "union"; }
+
+void RepeatOps::addRenderableTo(RenderableScene *scene)
+{
+#if 1
     QProgressDialog progress("Processing...", QString(), 0, 1, QApplication::activeWindow() );
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
@@ -83,24 +96,8 @@ RepeatOps::RepeatOps()
 
     progress.setValue(1);
 #endif 
-}
-
-RepeatOps::~RepeatOps()
-{
-    delete m_worldLookupRule;
-    delete m_instancer;
-    delete m_worldBuilder;
-    delete m_worldRule;
-    delete m_worldGrid;
-}
-
-std::string RepeatOps::opsName() const
-{ return "union"; }
-
-void RepeatOps::addRenderableTo(RenderableScene *scene)
-{
     setRenderableScene(scene);
-    scene->enqueueCreateRenderable(this, opsId());
+    scene->createRenderable(this, opsId());
 }
   
 void RepeatOps::update()

@@ -2,9 +2,12 @@
  *  VachellScene.cpp
  *  vachellia
  *
- *  Created by jian zhang on 4/16/19.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
- *
+ *  interrupt render condition
+ *  create/remove item
+ *  visibility/attribute changed
+ *  create/remove connection
+ *  
+ *  2019/5/11
  */
 
 #include "VachellScene.h"
@@ -15,13 +18,14 @@
 #include <math/CameraEvent.h>
 #include <math/AFrustum.h>
 #include <math/Hexahedron.h>
+#include <interface/GlobalFence.h>
+#include <boost/thread/lock_guard.hpp>
 #include <QDebug>
 
 using namespace alo;
 
-VachellScene::VachellScene(QObject *parent)
-    : GlyphScene(parent)
-{ m_garbageOp = nullptr; }
+VachellScene::VachellScene(QObject *parent) : GlyphScene(parent)
+{}
 
 VachellScene::~VachellScene()
 {}
@@ -30,6 +34,8 @@ GlyphOps *VachellScene::createOps(const QJsonObject &content)
 {
     int k = content["id"].toInt();
     switch(k) {
+        case SphereOps::Type :
+            return new SphereOps;
         case BoxOps::Type :
             return new BoxOps;
         case HorizonOps::Type :
@@ -48,24 +54,34 @@ GlyphOps *VachellScene::createOps(const QJsonObject &content)
 
 void VachellScene::postCreation(GlyphItem *item)
 {
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+    boost::lock_guard<interface::GlobalFence> guard(fence);
+
 	GlyphOps *op = item->ops();
 	if(op->hasRenderable()) { 
 		RenderableOps *dop = static_cast<RenderableOps *>(op);
 		dop->addRenderableTo(this);
 	}
-    emit sendUpdateDrawable();
+
+    RenderableScene::setSceneChanged();
+    emit sendUpdateScene();
 }
 
 void VachellScene::preDestruction(GlyphItem *item)
 {
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+    boost::lock_guard<interface::GlobalFence> guard(fence);
+
     GlyphOps *op = item->ops();
     if(op->hasRenderable()) { 
         RenderableOps *dop = static_cast<RenderableOps *>(op);
         dop->removeRenderableFromScene();
     }
     op->preDestruction();
-    m_garbageOp = op;
-    emit sendUpdateDrawable();
+    delete op;
+
+    RenderableScene::setSceneChanged();
+    emit sendUpdateScene();
 }
 
 void VachellScene::recvCameraChanged(const CameraEvent &x)
@@ -93,36 +109,40 @@ void VachellScene::recvRequestBound()
 
 void VachellScene::onItemVisibilityChanged()
 {
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+    boost::lock_guard<interface::GlobalFence> guard(fence);
+
 	RenderableScene::setSceneChanged();
-	emit sendUpdateDrawable();
+	emit sendUpdateScene();
 }
 
 void VachellScene::recvAttribChanged()
 {
-    RenderableScene::setSceneChanged();
-	emit sendUpdateDrawable();
-}
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+    boost::lock_guard<interface::GlobalFence> guard(fence);
 
-void VachellScene::recvPreRenderRestart()
-{
-    if(m_garbageOp) {
-        delete m_garbageOp;
-        m_garbageOp = nullptr;
-    } 
+    RenderableScene::setSceneChanged();
+	emit sendUpdateScene();
 }
 
 void VachellScene::createConnection(GlyphConnection *conn, GlyphPort *port)
 {
     if(!conn->canConnectTo(port) ) return;
+
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+    boost::lock_guard<interface::GlobalFence> guard(fence);
 	
 	conn->destinationTo(port);
     RenderableScene::setSceneChanged();
-	emit sendUpdateDrawable();
+	emit sendUpdateScene();
 }
 
 void VachellScene::removeConnection(GlyphConnection *conn)
 {
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+    boost::lock_guard<interface::GlobalFence> guard(fence);
+
 	conn->breakUp();
     RenderableScene::setSceneChanged();
-	emit sendUpdateDrawable();
+	emit sendUpdateScene();
 }

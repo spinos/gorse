@@ -51,6 +51,9 @@ QSize RenderWidget::sizeHint() const
     return QSize(500, 500);
 }
 
+void RenderWidget::recvUpdateScene()
+{ m_thread->rerender(); }
+
 void RenderWidget::recvRerender()
 { 
 //qDebug() << "RenderWidget::recvRerender";	

@@ -16,6 +16,37 @@
                     "icon": ":images/primitive_small.png",
                     "children": [
                         {
+                            "id": 299099,
+                            "name": "sphere_sdf",
+                            "label": "Sphere",
+                            "icon": ":images/sphere.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "r",
+                                    "label": "Radius",
+                                    "typ": 3,
+                                    "value": 5.0,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "transform",
+                                    "typ": 16
+                                },
+                                {
+                                    "name": "outsdf",
+                                    "typ": 3,
+                                    "port": {
+                                        "outgoing": true,
+                                        "side": 2,
+                                        "px": 2,
+                                        "py": 20
+                                    }
+                                }
+                            ]
+                        },
+                        {
                             "id": 299100,
                             "name": "box_sdf",
                             "label": "Box",

@@ -39,6 +39,6 @@ bool RenderContext::sceneChanged() const
 { return m_scene->sceneChanged(); }
 
 void RenderContext::updateScene()
-{ m_scene->updateRenderQueue(); }
+{ m_scene->updateScene(); }
 
 }

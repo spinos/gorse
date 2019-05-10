@@ -2,9 +2,7 @@
  *  VachellScene.h
  *  vachellia
  *
- *  Created by jian zhang on 4/11/19.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
- *
+ *  2019/5/11
  */
 
 #ifndef VCHL_VACHELL_SCENE_H
@@ -32,22 +30,20 @@ public:
     virtual void removeConnection(alo::GlyphConnection *conn) override;
 	
 signals:
-	void sendUpdateDrawable();
+	void sendUpdateScene();
 	void sendBound(const alo::Hexahedron &x);
 
 public slots:
     void recvAttribChanged();
 	void recvCameraChanged(const alo::CameraEvent &x);
 	void recvRequestBound();
-	void recvPreRenderRestart();
-		
+
 protected:
     virtual alo::GlyphOps *createOps(const QJsonObject &content) override;
     virtual void postCreation(alo::GlyphItem *item) override;
     virtual void preDestruction(alo::GlyphItem *item) override;
 	
 private:
-	alo::GlyphOps *m_garbageOp;
 
 };
 

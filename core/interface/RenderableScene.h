@@ -31,14 +31,6 @@ class RenderableScene {
         RenderableObject* _object;
     };
 
-    struct CreateRenderableObjectState {
-        int _group;
-        RenderableObject* _object;
-    };
-
-    std::vector<CreateRenderableObjectState> m_createQueue;
-    std::vector<sdb::Coord2> m_removeQueue;
-
     sdb::L3Tree<sdb::Coord2, RenderableObjectState, 2048, 512, 1024 > m_drawQueue;
     typedef sdb::L3Node<sdb::Coord2, RenderableObjectState, 1024> ObjectDataType;
     typedef sdb::L3DataIterator<sdb::Coord2, RenderableObjectState, 1024> ObjectIteratorType;
@@ -53,14 +45,12 @@ public:
 	
 	virtual const EnvLightTyp* environmentLight() const;
 
-    void enqueueCreateRenderable(RenderableObject* d, int groupId);
-    
+    void createRenderable(RenderableObject* d, int groupId);
 /// remove entire group when objectId = -1
-    void enqueueRemoveRenderable(int objectId, int groupId);
-    
-/// has create remove queue
+    void removeRenderable(int objectId, int groupId);
+
     bool sceneChanged() const;
-    void updateRenderQueue();
+    void updateScene();
 	
 protected:
     void setSceneChanged();
@@ -68,8 +58,6 @@ protected:
 private:
     void setToRemoveGroup(int groupId);
     void compressQueue();
-    void processCreateRenderableQueue();
-    void processRemoveRenderableQueue();
     
 };
 
