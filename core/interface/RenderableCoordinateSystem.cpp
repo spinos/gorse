@@ -53,7 +53,7 @@ RenderableCoordinateSystem::~RenderableCoordinateSystem()
 	delete m_arrow[2];
 }
 
-bool RenderableCoordinateSystem::intersectRay(const Ray& aray, IntersectResult& result) 
+bool RenderableCoordinateSystem::intersectRay(const Ray& aray, IntersectResult& result) const
 { 
 	bool stat = false;
 

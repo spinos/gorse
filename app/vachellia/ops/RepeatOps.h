@@ -83,13 +83,15 @@ public:
 
     virtual void addRenderableTo(RenderableScene *scene) override;
 
+    virtual bool hasInstance() const override;
+
     virtual void update() override;
     
-    virtual bool intersectRay(const Ray& aray, IntersectResult& result) override;
+    virtual bool intersectRay(const Ray& aray, IntersectResult& result) const override;
 
     virtual bool canConnectTo(GlyphOps *another, const std::string &portName) const override;
-    virtual void connectTo(GlyphOps *another, const std::string &portName) override;
-    virtual void disconnectFrom(GlyphOps *another, const std::string &portName) override;
+    virtual void connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
+    virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
 
     virtual float mapDistance(const float *q) const override;
     virtual Vector3F mapNormal(const float *q) const override;

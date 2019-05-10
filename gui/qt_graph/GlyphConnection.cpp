@@ -130,8 +130,8 @@ void GlyphConnection::destinationTo(GlyphPort* p1)
     setPort1(p1);
 	updatePath();
 			
-	destNode->postConnection(srcNode, p1);
-    srcNode->postConnection(destNode, port0());
+	destNode->postConnection(srcNode, p1, this);
+    srcNode->postConnection(destNode, port0(), this);
 }
 
 void GlyphConnection::breakUp()
@@ -140,14 +140,14 @@ void GlyphConnection::breakUp()
     GlyphItem * n0 = node0();
 	if(m_port1) {
         
-        n1->preDisconnection(n0, m_port1);
+        n1->preDisconnection(n0, m_port1, this);
         m_port1->removeConnection(this);
         n1->postDisconnection(m_port1);
         m_port1 = nullptr;
 	}
     if(m_port0) {
         
-        n0->preDisconnection(n1, m_port0);
+        n0->preDisconnection(n1, m_port0, this);
         m_port0->removeConnection(this);
         n0->postDisconnection(m_port0);
         m_port0 = nullptr;
@@ -162,5 +162,12 @@ GlyphItem *GlyphConnection::node1() const
 
 GlyphItem *GlyphConnection::PortToNode(const GlyphPort *pt)
 { return static_cast<GlyphItem *>(pt->parentItem() ); }
+
+void GlyphConnection::sendImpulse()
+{
+	GlyphItem * n0 = node0();
+	GlyphItem * n1 = node1();
+	n1->onInputChange(n0, port1());
+}
 
 }

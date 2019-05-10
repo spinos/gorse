@@ -152,21 +152,21 @@ bool VoxelOps::loadCache(const std::string &fileName)
 
 }
 
-void VoxelOps::connectTo(GlyphOps *another, const std::string &portName)
+void VoxelOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     RenderableOps *r = static_cast<RenderableOps *>(another);
     std::cout << "\n VoxelOps " << this << " connectTo renderable " << r;
     m_outOps.append(r);
 }
 
-void VoxelOps::disconnectFrom(GlyphOps *another, const std::string &portName)
+void VoxelOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     RenderableOps *r = static_cast<RenderableOps *>(another);
     m_outOps.remove(r);
     std::cout << "\n VoxelOps " << this << " disconnectFrom renderable " << r;
 }
 
-bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result)
+bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result) const
 {
     if(m_primitiveLookup->isEmpty() || m_gridRule->isEmpty() )
         return TransformOps::intersectRay(aray, result);
@@ -216,5 +216,8 @@ Vector3F VoxelOps::mapNormal(const float *q) const
     normalToWorld((float *)&tn);
     return tn;*/
 }
+
+bool VoxelOps::hasInstance() const
+{ return false; }
 
 } /// end of namespace alo

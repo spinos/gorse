@@ -53,7 +53,7 @@ TranslateController::~TranslateController()
 	delete m_arrow[2];
 }
 
-bool TranslateController::intersectRay(const Ray& aray, IntersectResult& result) 
+bool TranslateController::intersectRay(const Ray& aray, IntersectResult& result) const
 { 
 	bool stat = false;
 

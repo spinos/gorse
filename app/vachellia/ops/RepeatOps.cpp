@@ -20,12 +20,23 @@
 #include <sds/FZOrder.h>
 #include <QProgressDialog>
 #include <QApplication>
+#include <interface/GlobalFence.h>
+#include <boost/thread/lock_guard.hpp>
 #include <ctime>
 
 namespace alo {
     
 RepeatOps::RepeatOps()
 {
+    m_instancer = new InstancerTyp;
+    m_worldGrid = new WorldTyp;
+    m_worldRule = new WorldRuleTyp;
+    m_worldBuilder = new WorldBuilderTyp;
+    m_worldLookupRule = new WorldLookupRuleTyp;
+#if 0
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+    boost::lock_guard<interface::GlobalFence> guard(fence);
+
     QProgressDialog progress("Processing...", QString(), 0, 1, QApplication::activeWindow() );
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
@@ -33,7 +44,6 @@ RepeatOps::RepeatOps()
     grd::BoxObject *bo = new grd::BoxObject;
     bo->_bbox.set(-4.f, 0.f, -3.f, 4.f, 25.f, 3.f);
 
-    m_instancer = new InstancerTyp;
     m_instancer->addObject(bo);
 
     static const int udim = 100;
@@ -56,14 +66,9 @@ RepeatOps::RepeatOps()
     
     typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
     CellBuilderTyp cellBuilder;
-
-    m_worldGrid = new WorldTyp;
     
-    m_worldRule = new WorldRuleTyp;
     const int cencz[4] = {0,0,0,256};
     m_worldRule->setCenterCellSize(cencz);
-
-    m_worldBuilder = new WorldBuilderTyp;
 
     m_worldBuilder->attach(m_worldGrid);
 
@@ -71,14 +76,13 @@ RepeatOps::RepeatOps()
    
     m_worldBuilder->detach();
 
-    m_worldLookupRule = new WorldLookupRuleTyp;
     m_worldLookupRule->attach(m_worldGrid);
     m_worldLookupRule->setPrimitiveRule<InstancerTyp>(m_instancer);
 
     memcpy(RenderableObject::aabb(), &m_worldGrid->aabb(), 24);
 
     progress.setValue(1);
-    
+#endif 
 }
 
 RepeatOps::~RepeatOps()
@@ -103,6 +107,11 @@ void RepeatOps::update()
 {
     TransformOps::update();
 
+    if(m_inOps.isDirty()) {
+        std::cout << "\n in ops dirty ";
+        m_inOps.setClean();
+    }
+
     const int ne = m_inOps.numElements();
     if(ne < 1) {
 //todo clear instancer
@@ -112,7 +121,7 @@ void RepeatOps::update()
 //todo build instancer
 }
 
-bool RepeatOps::intersectRay(const Ray& aray, IntersectResult& result)
+bool RepeatOps::intersectRay(const Ray& aray, IntersectResult& result) const
 {
     if(m_worldLookupRule->isEmpty() ) 
         return TransformOps::intersectRay(aray, result);
@@ -151,11 +160,12 @@ bool RepeatOps::canConnectTo(GlyphOps *another, const std::string &portName) con
 { 
     if(!another->hasRenderable()) return false;
     RenderableOps *r = static_cast<RenderableOps *>(another);
+    if(!r->hasInstance()) return false;
     if(m_inOps.contains(r)) return false;
     return true;
 }
 
-void RepeatOps::connectTo(GlyphOps *another, const std::string &portName)
+void RepeatOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     RenderableOps *r = static_cast<RenderableOps *>(another);
     std::cout << "\n RepeatOps " << this << " connectTo renderable " << r;
@@ -163,12 +173,15 @@ void RepeatOps::connectTo(GlyphOps *another, const std::string &portName)
     update();
 }
 
-void RepeatOps::disconnectFrom(GlyphOps *another, const std::string &portName)
+void RepeatOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     RenderableOps *r = static_cast<RenderableOps *>(another);
     m_inOps.remove(r);
     update();
     std::cout << "\n RepeatOps " << this << " disconnectFrom renderable " << r;
 }
+
+bool RepeatOps::hasInstance() const
+{ return false; }
 
 }

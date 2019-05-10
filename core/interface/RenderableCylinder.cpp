@@ -29,7 +29,7 @@ void RenderableCylinder::setPoints(const Vector3F &p0, const Vector3F &p1)
 void RenderableCylinder::setRadius(float x)
 { m_r = x; }
 
-bool RenderableCylinder::intersectRay(const Ray& aray, IntersectResult& result)
+bool RenderableCylinder::intersectRay(const Ray& aray, IntersectResult& result) const
 {
 	float tt = result.rayDistance();
 	Vector3F tn;

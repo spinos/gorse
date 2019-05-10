@@ -45,7 +45,7 @@ bool RenderableObject::isHidden() const
 bool RenderableObject::isOverlay() const
 { return (m_state & stOverlayMask) > stOverlay; }
 
-bool RenderableObject::intersectRay(const Ray& aray, IntersectResult& result)
+bool RenderableObject::intersectRay(const Ray& aray, IntersectResult& result) const
 { 
 	float rayData[8];
 	result.copyRayData(rayData);

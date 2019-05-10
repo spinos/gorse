@@ -20,7 +20,7 @@ void RenderableSphere::setRadius(float x)
 void RenderableSphere::setPoint(const Vector3F &p)
 { m_center = p; }
 
-bool RenderableSphere::intersectRay(const Ray& aray, IntersectResult& result)
+bool RenderableSphere::intersectRay(const Ray& aray, IntersectResult& result) const
 {
     float tt = result.rayDistance();
 	if(!raySphereIntersect(tt, aray, m_center, m_radius) ) {

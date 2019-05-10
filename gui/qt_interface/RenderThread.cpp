@@ -1,11 +1,9 @@
 /*
  *  RenderThread.cpp
- *  aloe
+ *  vachellia
  *  
  *
- *  Created by jian zhang on 8/8/17.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
- *
+ *  2019/5/11
  */
  
 #include "RenderThread.h"
@@ -14,7 +12,9 @@
 #include <interface/Renderer.h>
 #include <interface/RenderBuffer.h>
 #include <interface/DisplayImage.h>
+#include <interface/GlobalFence.h>
 #include <QtConcurrent/QtConcurrent>
+#include <boost/thread/lock_guard.hpp>
 #include <QDebug>
 #include <QFuture>
 
@@ -103,9 +103,9 @@ void RenderThread::run()
 {
     forever {
 		
-        mutex.lock();
+        //mutex.lock();
         
-        mutex.unlock();
+        //mutex.unlock();
 				
 		if (m_abort) {
 			//qDebug()<<" abort";
@@ -115,6 +115,9 @@ void RenderThread::run()
 		if(m_interface->isResidualLowEnough() ) {
 			return;
 		}
+
+		interface::GlobalFence &fence = interface::GlobalFence::instance();
+		boost::lock_guard<interface::GlobalFence> guard(fence);
 
         m_interface->sortBlocks();
         
@@ -140,12 +143,12 @@ void RenderThread::run()
         
 		emit renderedImage();
 
-        mutex.lock();
+        //mutex.lock();
        // if (!restart)
 		//condition.wait(&mutex);
 			
         //restart = false;
-        mutex.unlock();
+        //mutex.unlock();
     }
 }
 

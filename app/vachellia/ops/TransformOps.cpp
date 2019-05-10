@@ -38,14 +38,14 @@ void TransformOps::update()
 	TransformComponent::calculateSpace();
 }
 
-bool TransformOps::intersectRay(const Ray& aray, IntersectResult& result)
+bool TransformOps::intersectRay(const Ray& aray, IntersectResult& result) const
 {
     float rayData[8];
 	result.copyRayData(rayData);
 
 	rayToLocal(rayData);
 
-	if(!rayAabbIntersect(rayData, aabb())) return false;
+	if(!rayAabbIntersect(rayData, c_aabb())) return false;
 /// near intersection
 	const float &tt = rayData[6];
 
@@ -53,6 +53,7 @@ bool TransformOps::intersectRay(const Ray& aray, IntersectResult& result)
 						rayData[1] + rayData[4] * tt, 
 						rayData[2] + rayData[5] * tt);
     Vector3F tn = mapNormal((const float *)&pnt);
+    rayToWorld(rayData);
 	normalToWorld((float *)&tn);
 
 	return result.updateRayDistance(tt, tn);
@@ -97,14 +98,22 @@ void TransformOps::expandAabb(float *box) const
 
 float TransformOps::mapDistance(const float *q) const
 {
-	const float *b = c_aabb();
 	float a[3];
 	memcpy(a, q, 12);
 	pointToLocal(a);
-	if(isPointOutsideBox(a, b))
-		return distanceOutsidePointToBox(a, b);
 
-	return -distanceInsidePointToBox(a, b);
+	const float *b = c_aabb();
+	
+	float d = -1.f;
+	if(isPointOutsideBox(a, b))
+		d = 1.f;
+
+	movePointOntoBox(a, b);
+	pointToWorld(a);
+
+	d = GetSign(d) * distancePointToPoint(q, a);
+
+	return d;
 }
 
 Vector3F TransformOps::mapNormal(const float *q) const

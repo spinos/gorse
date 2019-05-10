@@ -136,7 +136,7 @@ void GlyphScene::removeActiveGlyph()
 	foreach(GlyphConnection *conn, conns) {
 		conn->breakUp();
 		QGraphicsScene::removeItem(conn);
-		delete conn;
+		//delete conn;
 	}
 
 	preDestruction(m_activeGlyph);

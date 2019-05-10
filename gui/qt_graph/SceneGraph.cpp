@@ -1,10 +1,8 @@
 /*
  *  SceneGraph.cpp
- *  
+ *  gorse
  *
- *  Created by jian zhang on 2019/4/24.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
- *
+ *  2019/5/10
  */
 
 #include <QtGui>
@@ -238,9 +236,12 @@ void SceneGraph::doConnectItem(QGraphicsItem* item)
 	
 	if(!m_selectedConnection->isComplete() ) {
 		scene()->removeItem( m_selectedConnection );
-		delete m_selectedConnection;
+/// graphic scene stops responding if destroy the connection
+/// send to garbage?
+		//delete m_selectedConnection;
 	}
-	m_selectedConnection = NULL;
+	
+	m_selectedConnection = nullptr;
 }
 
 void SceneGraph::doRemoveConnection(QGraphicsItem* item)

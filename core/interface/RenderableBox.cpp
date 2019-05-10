@@ -17,7 +17,7 @@ RenderableBox::RenderableBox()
 	m_centerHalfSpan[3] = 5.f;
 }
 
-bool RenderableBox::intersectRay(const Ray& aray, IntersectResult& result)
+bool RenderableBox::intersectRay(const Ray& aray, IntersectResult& result) const
 {
     float rayData[8];
 	aray.get(rayData);

@@ -57,12 +57,16 @@ inline float distanceOutsidePointToBox(const float *a, const float *b)
 {
     float q[3];
     memcpy(q, a, 12);
+
     if(q[0] < b[0]) q[0] = b[0];
     if(q[0] > b[3]) q[0] = b[3];
+
     if(q[1] < b[1]) q[1] = b[1];
     if(q[1] > b[4]) q[1] = b[4];
+
     if(q[2] < b[2]) q[2] = b[2];
     if(q[2] > b[5]) q[2] = b[5];
+
     q[0] -= a[0];
     q[1] -= a[1];
     q[2] -= a[2];
@@ -194,6 +198,14 @@ inline void randomPointOnBoxSide(float *q, const float *b, int s)
     q[0] = odudv[0] + odudv[3] * u + odudv[6] * v;
     q[1] = odudv[1] + odudv[4] * u + odudv[7] * v;
     q[2] = odudv[2] + odudv[5] * u + odudv[8] * v; 
+}
+
+inline float distancePointToPoint(const float *a, const float *b)
+{
+    float dx = a[0] - b[0];
+    float dy = a[1] - b[1];
+    float dz = a[2] - b[2];
+    return sqrt(dx * dx + dy * dy + dz * dz);
 }
 
 }

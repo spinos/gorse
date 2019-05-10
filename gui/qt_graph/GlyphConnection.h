@@ -3,9 +3,7 @@
  *
  *  from port0 to port1
  *
- *  Created by jian zhang on 4/1/17.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
- *
+ *  2019/5/10
  */
 
 #ifndef ALO_GLYPH_CONNECTION_H
@@ -40,6 +38,7 @@ public:
 	bool canConnectTo(GlyphPort* p1) const;
     void destinationTo(GlyphPort* p1);
 	void breakUp();
+	void sendImpulse();
 	
 	int type() const { return Type; }
 	

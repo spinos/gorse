@@ -34,7 +34,7 @@ void HorizonOps::update()
     m_center.y = -radiusInMeters();
 }
 
-bool HorizonOps::intersectRay(const Ray& aray, IntersectResult& result)
+bool HorizonOps::intersectRay(const Ray& aray, IntersectResult& result) const
 {
     float tt = result.rayDistance();
 	if(!raySphereIntersect(tt, aray, m_center, radiusInMeters() ) )
@@ -61,5 +61,8 @@ Vector3F HorizonOps::mapNormal(const float *q) const
 
 float HorizonOps::radiusInMeters() const
 { return m_planetRadius * 1000.f; }
+
+bool HorizonOps::hasInstance() const
+{ return false; }
 
 }

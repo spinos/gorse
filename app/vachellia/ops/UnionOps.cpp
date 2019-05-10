@@ -2,12 +2,15 @@
  *  UnionOps.cpp
  *  vachellia
  *
+ *  2019/5/11
  */
 
 #include "UnionOps.h"
 #include <interface/RenderableScene.h>
 #include <interface/IntersectResult.h>
 #include <math/rayBox.h>
+#include <interface/GlobalFence.h>
+#include <boost/thread/lock_guard.hpp>
 
 namespace alo {
    
@@ -33,20 +36,9 @@ void UnionOps::update()
 {
     TransformOps::update();
 
-    const unsigned ne = m_inOps.numElements();
-    if(ne < 1) {
-        RenderableOps::resetAabb();
-        return;
-    }
-
-    setAabbNull();
-    for(unsigned i=0;i<ne;++i) {
-        const RenderableOps *e = m_inOps.element(i);
-        e->expandAabb(aabb());
-    }
 }
 
-bool UnionOps::intersectRay(const Ray& aray, IntersectResult& result)
+bool UnionOps::intersectRay(const Ray& aray, IntersectResult& result) const
 {
     const unsigned ne = m_inOps.numElements();
     if(ne < 1) return TransformOps::intersectRay(aray, result);
@@ -72,7 +64,7 @@ bool UnionOps::intersectRay(const Ray& aray, IntersectResult& result)
 
         if(d < tt * 1e-5f) break;
 
-        tt += d * .9f;
+        tt += d;
      
         if(tt > tLimit) return false;
     }
@@ -140,20 +132,46 @@ bool UnionOps::canConnectTo(GlyphOps *another, const std::string &portName) cons
     return true;
 }
 
-void UnionOps::connectTo(GlyphOps *another, const std::string &portName)
+void UnionOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     RenderableOps *r = static_cast<RenderableOps *>(another);
-    std::cout << "\n UnionOps " << this << " connectTo renderable " << r;
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+    boost::lock_guard<interface::GlobalFence> guard(fence);
     m_inOps.append(r);
-    update();
+    combineInputs();
 }
 
-void UnionOps::disconnectFrom(GlyphOps *another, const std::string &portName)
+void UnionOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     RenderableOps *r = static_cast<RenderableOps *>(another);
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+    boost::lock_guard<interface::GlobalFence> guard(fence);
     m_inOps.remove(r);
-    update();
-    std::cout << "\n UnionOps " << this << " disconnectFrom renderable " << r;
+    combineInputs();
 }
+
+void UnionOps::receiveImpulse(GlyphOps *another, const std::string &portName)
+{
+    combineInputs();
+}
+
+void UnionOps::combineInputs()
+{
+    const unsigned ne = m_inOps.numElements();
+    if(ne < 1) {
+        RenderableOps::resetAabb();
+        return;
+    }
+
+    setAabbNull();
+    for(unsigned i=0;i<ne;++i) {
+        const RenderableOps *e = m_inOps.element(i);
+        e->expandAabb(aabb());
+    }
+
+}
+
+bool UnionOps::hasInstance() const
+{ return false; }
 
 }

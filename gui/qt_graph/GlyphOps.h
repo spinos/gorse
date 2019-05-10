@@ -19,6 +19,7 @@ class CameraEvent;
 struct AFileDlgProfile;
 class Hexahedron;
 class GlyphScene;
+class GlyphConnection;
 
 class GlyphOps
 {
@@ -63,9 +64,10 @@ public:
 
 	virtual bool canConnectTo(GlyphOps *another, const std::string &portName) const;
 	virtual void preConnectTo(GlyphOps *another, const std::string &portName);
-	virtual void connectTo(GlyphOps *another, const std::string &portName);
-	virtual void disconnectFrom(GlyphOps *another, const std::string &portName);
+	virtual void connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line);
+	virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line);
 	virtual void postConnectionChange(const std::string &portName);
+	virtual void receiveImpulse(GlyphOps *another, const std::string &portName);
 
 	virtual void preDestruction();
 

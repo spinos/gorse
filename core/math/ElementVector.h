@@ -2,6 +2,8 @@
  *  ElementVector.h
  *  gorse
  *
+ *  vector of pointers of type T
+ *
  *  2019/4/24
  */
 
@@ -16,6 +18,7 @@ template<typename T>
 class ElementVector
 {
     std::vector<T *> m_elms;
+    bool m_isDirty;
     
 public:
     ElementVector();
@@ -29,6 +32,11 @@ public:
     T * element(int i);
     const T *element(int i) const;
 
+    const bool &isDirty() const;
+    void setClean();
+
+    void sendImpulse();
+
 protected:
     
 private:
@@ -36,7 +44,7 @@ private:
 };
 
 template<typename T>
-ElementVector<T>::ElementVector()
+ElementVector<T>::ElementVector() : m_isDirty(false)
 {}
 
 template<typename T>
@@ -61,7 +69,10 @@ bool ElementVector<T>::contains(T *x) const
 
 template<typename T>
 void ElementVector<T>::append(T *x)
-{ m_elms.push_back(x); }
+{ 
+    m_elms.push_back(x); 
+    m_isDirty = true;
+}
 
 template<typename T>
 bool ElementVector<T>::remove(T *x)
@@ -69,6 +80,7 @@ bool ElementVector<T>::remove(T *x)
     std::vector<T *>::iterator it = std::find(m_elms.begin(), m_elms.end(), x);
     if(it==m_elms.end()) return false;
     m_elms.erase(it);
+    m_isDirty = true;
     return true;
 }
 
@@ -84,6 +96,23 @@ template<typename T>
 const T *ElementVector<T>::element(int i) const
 { return m_elms[i]; }
 
+template<typename T>
+const bool &ElementVector<T>::isDirty() const
+{ return m_isDirty; }
+
+template<typename T>
+void ElementVector<T>::setClean()
+{ m_isDirty = false; }
+
+template<typename T>
+void ElementVector<T>::sendImpulse()
+{
+    std::vector<T *>::iterator it = m_elms.begin();
+    for(;it!=m_elms.end();++it) {
+        (*it)->sendImpulse();
+    }
 }
+
+} /// end of alo
 
 #endif

@@ -26,9 +26,11 @@ public:
 
     virtual void addRenderableTo(RenderableScene *scene) override;
 
+    virtual bool hasInstance() const override;
+
     virtual void update() override;
     
-    virtual bool intersectRay(const Ray& aray, IntersectResult& result) override;
+    virtual bool intersectRay(const Ray& aray, IntersectResult& result) const override;
     
     virtual void expandAabb(float *box) const override;
 

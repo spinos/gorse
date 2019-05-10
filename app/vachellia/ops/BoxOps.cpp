@@ -2,10 +2,11 @@
  *  BoxOps.cpp
  *  vachellia
  *
- *  2019/4/26
+ *  2019/5/10
  */
 
 #include "BoxOps.h"
+#include <qt_graph/GlyphConnection.h>
 #include <interface/RenderableScene.h>
 #include <interface/IntersectResult.h>
 
@@ -41,21 +42,20 @@ void BoxOps::update()
 
     setAabb(-bx, -by, -bz, bx, by, bz);
 
-    m_outOps.update();
+    m_outOps.sendImpulse();
 }
 
-void BoxOps::connectTo(GlyphOps *another, const std::string &portName)
+bool BoxOps::hasInstance() const
+{ return true; }
+
+void BoxOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
-    RenderableOps *r = static_cast<RenderableOps *>(another);
-    std::cout << "\n BoxOps " << this << " connectTo renderable " << r;
-    m_outOps.append(r);
+    m_outOps.append(line);
 }
 
-void BoxOps::disconnectFrom(GlyphOps *another, const std::string &portName)
+void BoxOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
-    RenderableOps *r = static_cast<RenderableOps *>(another);
-    m_outOps.remove(r);
-    std::cout << "\n BoxOps " << this << " disconnectFrom renderable " << r;
+    m_outOps.remove(line);
 }
 
 }

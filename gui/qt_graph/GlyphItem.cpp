@@ -244,10 +244,13 @@ void GlyphItem::preConnection(GlyphItem* another, GlyphPort* viaPort)
 				viaPort->portName().toStdString() ); 
 }
 
-void GlyphItem::postConnection(GlyphItem* another, GlyphPort* viaPort)
+void GlyphItem::postConnection(GlyphItem* another, GlyphPort* viaPort, GlyphConnection *conn)
 { 
+	std::cout << "\n connect " << glyphName() << " to " << another->glyphName()
+			<< " via " << viaPort->portName().toStdString();
+
 	m_ops->connectTo(another->ops(), 
-				viaPort->portName().toStdString() ); 
+				viaPort->portName().toStdString(), conn ); 
 }
 
 void GlyphItem::postSelection()
@@ -256,10 +259,13 @@ void GlyphItem::postSelection()
     m_ops->onSelection();
 }
 
-void GlyphItem::preDisconnection(GlyphItem* another, GlyphPort* viaPort)
+void GlyphItem::preDisconnection(GlyphItem* another, GlyphPort* viaPort, GlyphConnection *conn)
 {
+	std::cout << "\n disconnect " << glyphName() << " from " << another->glyphName()
+			<< " via " << viaPort->portName().toStdString();
+
 	m_ops->disconnectFrom(another->ops(),
-					viaPort->portName().toStdString() );
+					viaPort->portName().toStdString(), conn );
 }
 
 void GlyphItem::postDisconnection(GlyphPort* viaPort)
@@ -276,6 +282,12 @@ void GlyphItem::getConnections(std::vector<GlyphConnection *> &conns)
 		port->getConnections(conns);
 		
 	}
+}
+
+void GlyphItem::onInputChange(GlyphItem* another, GlyphPort* viaPort)
+{
+	m_ops->receiveImpulse(another->ops(), 
+				viaPort->portName().toStdString() ); 
 }
 
 } /// end of namespace alo

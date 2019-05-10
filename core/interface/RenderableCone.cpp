@@ -34,7 +34,7 @@ void RenderableCone::setRadius(float x)
 	m_lcrc = sqrt(m_r*m_r + m_l*m_l);
 }
 
-bool RenderableCone::intersectRay(const Ray& aray, IntersectResult& result)
+bool RenderableCone::intersectRay(const Ray& aray, IntersectResult& result) const
 {
 	float tt = result.rayDistance();
 	Vector3F tn;

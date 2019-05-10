@@ -448,12 +448,12 @@ void GlyphOps::preConnectTo(GlyphOps *another, const std::string &portName)
 	std::cout << "\n GlyphOps::preConnectTo " << another << " via " << portName;
 }
 
-void GlyphOps::connectTo(GlyphOps *another, const std::string &portName)
+void GlyphOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
 	std::cout << "\n GlyphOps::connectTo " << another << " via " << portName;
 }
 
-void GlyphOps::disconnectFrom(GlyphOps *another, const std::string &portName)
+void GlyphOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
 	std::cout << "\n GlyphOps::disconnectFrom " << another << " via " << portName;
 }
@@ -466,6 +466,11 @@ void GlyphOps::postConnectionChange(const std::string &portName)
 void GlyphOps::preDestruction()
 {
 	std::cout << "\n GlyphOps::preDestruction "; 
+}
+
+void GlyphOps::receiveImpulse(GlyphOps *another, const std::string &portName)
+{
+	std::cout << "\n GlyphOps::receiveImpulse from " << another << " via " << portName;
 }
 
 } /// end of namespace alo

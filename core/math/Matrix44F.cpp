@@ -232,7 +232,7 @@ void Matrix44F::transformNormal(float* p) const
     float tx = p[0] * M(0, 0) + p[1] * M(1, 0) + p[2] * M(2, 0);
 	float ty = p[0] * M(0, 1) + p[1] * M(1, 1) + p[2] * M(2, 1);
 	float tz = p[0] * M(0, 2) + p[1] * M(1, 2) + p[2] * M(2, 2);
-   float l = sqrt(tx*tx + ty*ty + tz*tz);
+    float l = sqrt(tx*tx + ty*ty + tz*tz);
     if(l > 1e-9f) {
         tx /= l;
         ty /= l;
@@ -249,7 +249,7 @@ void Matrix44F::transformDistance(float &p) const
     float tx = p * M(2, 0);
 	float ty = p * M(2, 1);
 	float tz = p * M(2, 2);
-    p = sqrt(tx * tx + ty * ty + tz * tz);
+    p = sqrt(tx * tx + ty * ty + tz * tz) * GetSign(p);
 }
 
 void Matrix44F::translate(const Vector3F& p)

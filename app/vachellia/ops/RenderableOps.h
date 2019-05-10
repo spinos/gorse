@@ -28,6 +28,8 @@ public:
     
     virtual void addRenderableTo(RenderableScene *scene) = 0;
 	virtual void removeRenderableFromScene();
+
+    virtual bool hasInstance() const = 0;
     
     virtual void expandAabb(float *box) const = 0;
     virtual float mapDistance(const float *q) const = 0;

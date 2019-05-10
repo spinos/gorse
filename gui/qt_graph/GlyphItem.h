@@ -61,9 +61,9 @@ public:
 
     bool canConnectTo(GlyphItem* another, GlyphPort* viaPort);
     void preConnection(GlyphItem* another, GlyphPort* viaPort);
-	void postConnection(GlyphItem* another, GlyphPort* viaPort);
-	void preDisconnection(GlyphItem* another, GlyphPort* viaPort);
-/// after connection via port is changed
+	void postConnection(GlyphItem* another, GlyphPort* viaPort, GlyphConnection *conn);
+	void preDisconnection(GlyphItem* another, GlyphPort* viaPort, GlyphConnection *conn);
+	void onInputChange(GlyphItem* another, GlyphPort* viaPort);
 	void postDisconnection(GlyphPort* viaPort);
 	void postSelection();
 

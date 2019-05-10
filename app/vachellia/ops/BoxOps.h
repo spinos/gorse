@@ -15,7 +15,7 @@ namespace alo {
 
 class BoxOps : public TransformOps {
     
-    ElementVector<RenderableOps> m_outOps;
+    ElementVector<GlyphConnection> m_outOps;
 
 public:
 	enum { Type = 299100 };
@@ -27,10 +27,12 @@ public:
 
     virtual void addRenderableTo(RenderableScene *scene) override;
 
+    virtual bool hasInstance() const override;
+
     virtual void update() override;
     
-    virtual void connectTo(GlyphOps *another, const std::string &portName) override;
-    virtual void disconnectFrom(GlyphOps *another, const std::string &portName) override;
+    virtual void connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
+    virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
 
 protected:
     

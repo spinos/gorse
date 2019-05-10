@@ -19,7 +19,7 @@ m_l(10.f),
 m_dir(1.f, 0.f, 0.f)
 {}
 
-bool RenderableCapsule::intersectRay(const Ray& aray, IntersectResult& result)
+bool RenderableCapsule::intersectRay(const Ray& aray, IntersectResult& result) const
 {
 	float tt = result.rayDistance();
 	Vector3F tn;
