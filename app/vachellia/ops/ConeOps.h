@@ -39,6 +39,7 @@ public:
     virtual void connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
     virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
 
+    virtual float mapDistance(const float *q) const override;
     virtual Vector3F mapNormal(const float *q) const override;
     
 protected:

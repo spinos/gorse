@@ -77,4 +77,7 @@ void RenderableObject::setAabb(float x0, float y0, float z0,
     m_aabb[5] = z1;
 }
 
+void RenderableObject::getAabb(float *y) const
+{ memcpy(y, m_aabb, 24); }
+
 }

@@ -34,6 +34,7 @@ public:
 	virtual bool intersectRay(IntersectResult& result) const = 0;
 
     const float *c_aabb() const;
+    void getAabb(float *y) const;
     
 protected:
     float *aabb();

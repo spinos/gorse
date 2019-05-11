@@ -10,6 +10,7 @@
 #include <interface/RenderableScene.h>
 #include <interface/IntersectResult.h>
 #include <math/rayCylinder.h>
+#include <math/pointBox.h>
 
 namespace alo {
    
@@ -65,13 +66,27 @@ bool CylinderOps::intersectRay(IntersectResult& result) const
     return result.updateRayDistance(tt, tn);
 }
 
+float CylinderOps::mapDistance(const float *q) const
+{
+    Vector3F va(q[0], q[1], q[2]);
+    pointToLocal((float *)&va);
+
+    float d = movePointOntoLocalCylinder(va, m_radius, m_height);
+
+    pointToWorld((float *)&va);
+
+    d = GetSign(d) * distancePointToPoint(q, (const float *)&va);
+
+    return d;
+}
+
 Vector3F CylinderOps::mapNormal(const float *q) const
 {
     return normalOnLocalCylinder(q, m_radius, m_height);
 }
 
 bool CylinderOps::hasInstance() const
-{ return true; }
+{ return false; }
 
 void CylinderOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {

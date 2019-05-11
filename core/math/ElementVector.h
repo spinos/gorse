@@ -24,13 +24,16 @@ public:
     ElementVector();
     virtual ~ElementVector();
     
-    void update();
+    void clear();
+    
     bool contains(T *x) const;
     void append(T *x);
     bool remove(T *x);
     size_t numElements() const;
     T * element(int i);
     const T *element(int i) const;
+    T * back();
+    const T *back() const;
 
     const bool &isDirty() const;
     void setClean();
@@ -52,13 +55,8 @@ ElementVector<T>::~ElementVector()
 {}
 
 template<typename T>
-void ElementVector<T>::update()
-{
-    std::vector<T *>::iterator it = m_elms.begin();
-    for(;it!=m_elms.end();++it) {
-        (*it)->update();
-    }
-}
+void ElementVector<T>::clear()
+{ m_elms.clear(); }
 
 template<typename T>
 bool ElementVector<T>::contains(T *x) const
@@ -112,6 +110,14 @@ void ElementVector<T>::sendImpulse()
         (*it)->sendImpulse();
     }
 }
+
+template<typename T>
+T *ElementVector<T>::back()
+{ return m_elms.back(); }
+
+template<typename T>
+const T *ElementVector<T>::back() const
+{ return m_elms.back(); }
 
 } /// end of alo
 

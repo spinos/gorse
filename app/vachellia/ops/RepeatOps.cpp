@@ -45,57 +45,10 @@ RepeatOps::~RepeatOps()
 }
 
 std::string RepeatOps::opsName() const
-{ return "union"; }
+{ return "repeat"; }
 
 void RepeatOps::addRenderableTo(RenderableScene *scene)
 {
-#if 1
-    QProgressDialog progress("Processing...", QString(), 0, 1, QApplication::activeWindow() );
-    progress.setWindowModality(Qt::ApplicationModal);
-    progress.show();
-
-    grd::BoxObject *bo = new grd::BoxObject;
-    bo->_bbox.set(-4.f, 0.f, -3.f, 4.f, 25.f, 3.f);
-
-    m_instancer->addObject(bo);
-
-    static const int udim = 100;
-    static const int vdim = 100;
-    static const float spacing = 23.9;
-    static const float xzSpan = 4.5f;
-    static const float ySpan = 0.3f;
-    static const float coverOrigin = 0;
-    static const float scaleSpan = .5f;
-
-    std::time_t secs = std::time(0);
-    m_instancer->createPhalanx(udim, vdim, spacing, xzSpan, ySpan, coverOrigin, scaleSpan, secs);
-
-    sds::FZOrderCurve sfc;
-    sfc.setCoord(32.f, 32.f, 32.f, 16.f);
-    
-    typedef grd::LocalGridBuildRule<sds::FZOrderCurve> CellBuildRuleTyp;
-    CellBuildRuleTyp cellRule(&sfc);
-    cellRule.setP(5);
-    
-    typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
-    CellBuilderTyp cellBuilder;
-    
-    const int cencz[4] = {0,0,0,256};
-    m_worldRule->setCenterCellSize(cencz);
-
-    m_worldBuilder->attach(m_worldGrid);
-
-    m_worldBuilder->addInstances<InstancerTyp, WorldRuleTyp, CellBuilderTyp, CellBuildRuleTyp >(*m_instancer, *m_worldRule, cellBuilder, cellRule);
-   
-    m_worldBuilder->detach();
-
-    m_worldLookupRule->attach(m_worldGrid);
-    m_worldLookupRule->setPrimitiveRule<InstancerTyp>(m_instancer);
-
-    memcpy(RenderableObject::aabb(), &m_worldGrid->aabb(), 24);
-
-    progress.setValue(1);
-#endif 
     setRenderableScene(scene);
     scene->createRenderable(this, opsId());
 }
@@ -167,18 +120,86 @@ void RepeatOps::connectTo(GlyphOps *another, const std::string &portName, GlyphC
     RenderableOps *r = static_cast<RenderableOps *>(another);
     std::cout << "\n RepeatOps " << this << " connectTo renderable " << r;
     m_inOps.append(r);
-    update();
+    updateInstancer(true);
 }
 
 void RepeatOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     RenderableOps *r = static_cast<RenderableOps *>(another);
     m_inOps.remove(r);
-    update();
+    updateInstancer(false);
     std::cout << "\n RepeatOps " << this << " disconnectFrom renderable " << r;
 }
 
 bool RepeatOps::hasInstance() const
 { return false; }
+
+void RepeatOps::updateInstancer(bool isAppending)
+{
+    QProgressDialog progress("Processing...", QString(), 0, 2, QApplication::activeWindow() );
+    progress.setWindowModality(Qt::ApplicationModal);
+    progress.show();
+    
+    if(isAppending) {
+       m_instancer->addObject(m_inOps.back());
+    } else {
+/// order changed
+       m_instancer->clear();
+       const int n = m_inOps.numElements();
+       for(int i=0;i<n;++i) {
+           m_instancer->addObject(m_inOps.element(i));
+       }
+    }
+    
+    progress.setValue(1);
+    
+    m_instancer->verbose();
+    
+    if(m_instancer->numObjects() > 0) {
+        
+        const float spacing = m_instancer->getMediumObjectSize() * 1.4f;
+        const float xzSpan = spacing * .25f;
+        
+        static const int udim = 100;
+        static const int vdim = 100;
+            
+        static const float ySpan = 0.3f;
+        static const float coverOrigin = 0;
+        static const float scaleSpan = .5f;
+
+        std::time_t secs = std::time(0);
+        m_instancer->createPhalanx(udim, vdim, spacing, xzSpan, ySpan, coverOrigin, scaleSpan, secs);
+
+        sds::FZOrderCurve sfc;
+        sfc.setCoord(32.f, 32.f, 32.f, 16.f);
+        
+        typedef grd::LocalGridBuildRule<sds::FZOrderCurve> CellBuildRuleTyp;
+        CellBuildRuleTyp cellRule(&sfc);
+        cellRule.setP(5);
+        
+        typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
+        CellBuilderTyp cellBuilder;
+        
+/// todo adaptive cell size
+        const int cencz[4] = {0,0,0,256};
+        m_worldRule->setCenterCellSize(cencz);
+
+        m_worldBuilder->attach(m_worldGrid);
+
+        m_worldBuilder->addInstances<InstancerTyp, WorldRuleTyp, CellBuilderTyp, CellBuildRuleTyp >(*m_instancer, *m_worldRule, cellBuilder, cellRule);
+       
+        m_worldBuilder->detach();
+
+        m_worldLookupRule->attach(m_worldGrid);
+        m_worldLookupRule->setPrimitiveRule<InstancerTyp>(m_instancer);
+
+        memcpy(RenderableObject::aabb(), &m_worldGrid->aabb(), 24);
+        
+    } else {
+        m_worldLookupRule->detach();
+    }
+    
+    progress.setValue(2);
+}
 
 }

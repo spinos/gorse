@@ -42,7 +42,8 @@ template<typename T1>
 void GridSamples<T>::create(const T1 *obj)
 {
 	m_samples.clear();
-	obj-> template genSamples<T>(m_samples);
+	//obj-> template genSamples<T>(m_samples);
+    obj->genSamples(m_samples);
 }
 
 template<typename T>

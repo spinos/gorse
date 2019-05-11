@@ -75,7 +75,7 @@ void VoxelOps::update()
         loadCache(scachePath);
 
     m_primitiveLookup->setAllRelativeBoundaryOffset(boundary);
-    m_outOps.update();
+    //m_outOps.update();
 }
 
 AFileDlgProfile *VoxelOps::readFileProfileR () const

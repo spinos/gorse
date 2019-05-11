@@ -9,6 +9,7 @@
 #include <qt_graph/GlyphConnection.h>
 #include <interface/RenderableScene.h>
 #include <interface/IntersectResult.h>
+#include <math/pointBox.h>
 
 namespace alo {
    
@@ -56,6 +57,17 @@ void BoxOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConn
 void BoxOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     m_outOps.remove(line);
+}
+
+void BoxOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
+{
+    grd::PointSample ap;
+    for(int i=0;i<6;++i) {
+        for(int j=0;j<512;++j) {
+            randomPointOnBoxSide((float *)&ap._pos, c_aabb(), i);
+            samples << ap;
+        }
+    }
 }
 
 }

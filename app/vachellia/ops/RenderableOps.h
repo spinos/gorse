@@ -10,6 +10,7 @@
 
 #include <qt_graph/GlyphOps.h>
 #include <interface/RenderableObject.h>
+#include <grd/GridSamples.h>
 
 namespace alo {
     
@@ -34,6 +35,8 @@ public:
     virtual void expandAabb(float *box) const = 0;
     virtual float mapDistance(const float *q) const = 0;
     virtual Vector3F mapNormal(const float *q) const = 0;
+    
+	virtual void genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const {}
     
 protected:
     void setRenderableScene(RenderableScene *x);

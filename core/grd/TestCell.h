@@ -131,6 +131,8 @@ public:
 	typedef sds::SpaceFillingVector<PointGridSamplesTyp::SampleTyp> OutSampleTyp;
 
 	ObjectInstancer();
+    
+    void clear();
 
 	void addObject(T2 *x);
 
@@ -139,7 +141,8 @@ public:
 	T1 &instance(int i);
 
 	const T1 &c_instance(int i) const;
-
+    
+    int numObjects() const;
 	const int &numInstances() const;
 
 	void getAabb(float *b, int ii) const;
@@ -156,12 +159,28 @@ public:
                     const float &spacing, const float &xzSpan, const float &ySpan, 
                     const float &coverOrigin, const float &scaleSpan,
                     const int &iseed);
+                    
+    float getMediumObjectSize() const;
 
+    void verbose() const;
+    
 };
 
 template<typename T1, typename T2>
 ObjectInstancer<T1, T2>::ObjectInstancer()
 {}
+
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::clear()
+{
+    m_instances.purgeBuffer();
+    m_objs.clear();
+    const int n = m_samps.numElements();
+    for(int i=0;i<n;++i) {
+        delete m_samps.element(i);
+    }
+    m_samps.clear();
+}
 
 template<typename T1, typename T2>
 void ObjectInstancer<T1, T2>::addObject(T2 *x)
@@ -251,7 +270,7 @@ void ObjectInstancer<T1, T2>::mapNormal(Vector3F &nml, const float *p, int i) co
 	float q[3];
 	memcpy(q, p, 12);
 	inst.pointToLocal(q);
-	shape->mapNormal((float *)&nml, q);
+	nml = shape->mapNormal(q);
     
     inst.normalToWorld((float *)&nml);
 }
@@ -312,6 +331,54 @@ void ObjectInstancer<T1, T2>::createPhalanx(const int &udim, const int &vdim,
             sample.setScale(sc);
             sample.calcSpace();
         }
+    }
+}
+
+template<typename T1, typename T2>
+int ObjectInstancer<T1, T2>::numObjects() const
+{ return m_objs.numElements(); }
+
+template<typename T1, typename T2>
+float ObjectInstancer<T1, T2>::getMediumObjectSize() const
+{
+    float mnD = 1e8f;
+    float mxD = -1e8f;
+    const int nobj = m_objs.numElements();
+    for(int i=0;i<nobj;++i) {
+        const T2 *iobj = m_objs.element(i);
+        const float *b = iobj->c_aabb();
+        float dx = b[3] - b[0];
+        float dy = b[4] - b[1];
+        float dz = b[5] - b[2];
+        if(dx < dy) dx = dy;
+        if(dx < dz) dx = dz;
+        
+        if(mnD > dx) mnD = dx;
+        if(mxD < dx) mxD = dx;
+    }
+    
+    return (mnD + mxD) * .5f;
+}
+
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::verbose() const
+{
+    std::cout << "\n ObjectInstancer n obj "<< m_objs.numElements()
+            << " n instance " << m_instances.count();
+            
+    const int nobj = m_objs.numElements();
+    for(int i=0;i<nobj;++i) {
+        const T2 *iobj = m_objs.element(i);
+        const float *b = iobj->c_aabb();
+        std::cout << "\n object["<<i<<"] box (("<<b[0]<<","<<b[1]<<","<<b[2]
+                                        <<"),("<<b[3]<<","<<b[4]<<","<<b[5]<<"))";
+    }
+    
+    const int n = m_samps.numElements();
+    for(int i=0;i<n;++i) {
+        const PointGridSamplesTyp *shapeSamps = m_samps.element(i);
+        const OutSampleTyp &s = shapeSamps->samples();
+        std::cout << "\n object["<<i<<"] n sample " << s.size();
     }
 }
 

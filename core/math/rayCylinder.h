@@ -215,6 +215,47 @@ inline Vector3F normalOnLocalCylinder(const float *q,
 
 }
 
+inline float movePointOntoLocalCylinder(Vector3F &q, 
+	const float &radius, const float &height) 
+{
+    const float &h = q.y;
+    Vector3F vq(q.x, 0.f, q.z);
+    const float lvq = vq.length();
+    
+    float d;
+    if(h < 1e-3f) {
+        d = -h;
+        if(lvq < radius) {
+            q.y = 0.f;
+            return d;
+        }
+        vq *= radius / lvq;
+        d = q.distanceTo(vq);
+        q = vq;
+        return d;
+    }
+    
+    if(h > height - 1e-3f) {
+        d = h - height;
+        if(lvq < radius) {
+            q.y = height;
+            return d;
+        }
+        vq = vq * (radius / lvq) + Vector3F(0.f, height, 0.f);
+        d = q.distanceTo(vq);
+        q = vq;
+        return d;
+    }
+    
+    d = lvq - radius;
+    
+    vq *= radius / lvq;
+    q.x = vq.x;
+    q.z = vq.z;
+    
+    return d;
+}
+
 }
 
 #endif

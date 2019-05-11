@@ -10,6 +10,7 @@
 #include <interface/RenderableScene.h>
 #include <interface/IntersectResult.h>
 #include <math/raySphere.h>
+#include <math/pointBox.h>
 
 namespace alo {
    
@@ -60,6 +61,23 @@ bool SphereOps::intersectRay(IntersectResult& result) const
     return result.updateRayDistance(tt, tn);
 }
 
+float SphereOps::mapDistance(const float *q) const
+{
+    Vector3F va(q[0], q[1], q[2]);
+    pointToLocal((float *)&va);
+
+    float lva = va.length();
+
+    float d = lva - m_radius;
+    va *= m_radius / lva;
+
+    pointToWorld((float *)&va);
+
+    d = GetSign(d) * distancePointToPoint(q, (const float *)&va);
+
+    return d;
+}
+
 Vector3F SphereOps::mapNormal(const float *q) const
 {
     Vector3F nml(q[0], q[1], q[2]);
@@ -67,7 +85,7 @@ Vector3F SphereOps::mapNormal(const float *q) const
 }
 
 bool SphereOps::hasInstance() const
-{ return true; }
+{ return false; }
 
 void SphereOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {

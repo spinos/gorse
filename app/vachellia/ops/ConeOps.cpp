@@ -10,6 +10,7 @@
 #include <interface/RenderableScene.h>
 #include <interface/IntersectResult.h>
 #include <math/rayCone.h>
+#include <math/pointBox.h>
 
 namespace alo {
    
@@ -67,13 +68,27 @@ bool ConeOps::intersectRay(IntersectResult& result) const
     return result.updateRayDistance(tt, tn);
 }
 
+float ConeOps::mapDistance(const float *q) const
+{
+    Vector3F va(q[0], q[1], q[2]);
+    pointToLocal((float *)&va);
+
+    float d = movePointOntoLocalCone(va, m_height, m_radius, m_lcrc);
+
+    pointToWorld((float *)&va);
+
+    d = GetSign(d) * distancePointToPoint(q, (const float *)&va);
+
+    return d;
+}
+
 Vector3F ConeOps::mapNormal(const float *q) const
 {
     return normalOnLocalCone(q, m_radius, m_height, m_lcrc);
 }
 
 bool ConeOps::hasInstance() const
-{ return true; }
+{ return false; }
 
 void ConeOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {

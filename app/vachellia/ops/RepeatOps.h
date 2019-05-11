@@ -39,7 +39,7 @@ class ObjectInstancer;
 
 struct TestInstance;
 
-struct BoxObject;
+//struct BoxObject;
 
 template<typename T, typename Tp>
 class LocalGridLookupRule;
@@ -65,7 +65,7 @@ class RepeatOps : public TransformOps {
     typedef grd::WorldGridBuilder<int, WorldCellTyp > WorldBuilderTyp;
     WorldBuilderTyp *m_worldBuilder;
 
-    typedef grd::ObjectInstancer<grd::TestInstance, grd::BoxObject> InstancerTyp;
+    typedef grd::ObjectInstancer<grd::TestInstance, RenderableOps > InstancerTyp;
     InstancerTyp *m_instancer;
 
     typedef grd::LocalGridLookupRule<grd::LocalGrid<float>, InstancerTyp > LocalLookupRuleTyp;
@@ -99,7 +99,8 @@ public:
 protected:
     
 private:
-
+    void updateInstancer(bool isAppending);
+    
 };
 
 }
