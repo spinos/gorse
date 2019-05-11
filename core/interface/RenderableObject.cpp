@@ -45,22 +45,6 @@ bool RenderableObject::isHidden() const
 bool RenderableObject::isOverlay() const
 { return (m_state & stOverlayMask) > stOverlay; }
 
-bool RenderableObject::intersectRay(const Ray& aray, IntersectResult& result) const
-{ 
-	float rayData[8];
-	result.copyRayData(rayData);
-
-	if(!rayAabbIntersect(rayData, m_aabb)) return false;
-	const float &tt = rayData[6];
-
-	const Vector3F pnt = aray.travel(tt);
-    Vector3F tn;
-/// side on box
-	getNormalOnAabb((float *)&tn, (const float *)&pnt, m_aabb, tt * 1e-5f);
-
-	return result.updateRayDistance(tt, tn);
-}
-
 float *RenderableObject::aabb()
 { return m_aabb; }
 

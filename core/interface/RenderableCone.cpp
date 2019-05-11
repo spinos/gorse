@@ -34,11 +34,14 @@ void RenderableCone::setRadius(float x)
 	m_lcrc = sqrt(m_r*m_r + m_l*m_l);
 }
 
-bool RenderableCone::intersectRay(const Ray& aray, IntersectResult& result) const
+bool RenderableCone::intersectRay(IntersectResult& result) const
 {
+	float rayData[8];
+    result.copyRayData(rayData);
+    
 	float tt = result.rayDistance();
 	Vector3F tn;
-	if(!rayConeIntersect(tt, tn, aray, m_p0, m_p1, m_r, m_l, m_lcrc, m_dir) )
+	if(!rayConeIntersect(tt, tn, rayData, m_p0, m_p1, m_r, m_l, m_lcrc, m_dir) )
 		return false;
 
 	return result.updateRayDistance(tt, tn);

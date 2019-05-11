@@ -53,29 +53,29 @@ TranslateController::~TranslateController()
 	delete m_arrow[2];
 }
 
-bool TranslateController::intersectRay(const Ray& aray, IntersectResult& result) const
+bool TranslateController::intersectRay(IntersectResult& result) const
 { 
 	bool stat = false;
 
-	if(m_sphere->intersectRay(aray, result))
+	if(m_sphere->intersectRay(result))
 		stat = true;
 
-	if(m_axis[0]->intersectRay(aray, result))
+	if(m_axis[0]->intersectRay(result))
 		stat = true;
 
-	if(m_axis[1]->intersectRay(aray, result))
+	if(m_axis[1]->intersectRay(result))
 		stat = true;
 
-	if(m_axis[2]->intersectRay(aray, result))
+	if(m_axis[2]->intersectRay(result))
 		stat = true;
 
-	if(m_arrow[0]->intersectRay(aray, result))
+	if(m_arrow[0]->intersectRay(result))
 		stat = true;
 
-	if(m_arrow[1]->intersectRay(aray, result))
+	if(m_arrow[1]->intersectRay(result))
 		stat = true;
 
-	if(m_arrow[2]->intersectRay(aray, result))
+	if(m_arrow[2]->intersectRay(result))
 		stat = true;
 
 	return stat;

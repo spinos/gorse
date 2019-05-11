@@ -23,7 +23,7 @@ public:
 	void setRadius(float x);
 	void setPoint(const Vector3F &p);
 
-	virtual bool intersectRay(const Ray& aray, IntersectResult& result) const override;
+	virtual bool intersectRay(IntersectResult& result) const override;
 
 };
 

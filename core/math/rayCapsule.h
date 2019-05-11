@@ -36,14 +36,15 @@ inline float distanceToCapsule(Vector3F &normal,
 /// t ray distance
 
 inline bool rayCapsuleIntersect(float& t, Vector3F &hitNormal,
-		const Ray& r, 
+		const float *rayD, 
 		const Vector3F& p0, const Vector3F& p1, const float& rc, const float &lc, const Vector3F &vp0p1)
 {
 /// ignore ray t0
-	const Vector3F &rayBegin = r.origin();
-	const Vector3F rayEnd = r.travel(t);
+	const Vector3F rayBegin(rayD[0], rayD[1], rayD[2]);
+    const Vector3F rayDir(rayD[3], rayD[4], rayD[5]);
+	const Vector3F rayEnd = rayBegin + rayDir * t;
     
-    if(clipRayCapsule(rayBegin, rayEnd, r.direction(), p0, p1, rc, vp0p1)) 
+    if(clipRayCapsule(rayBegin, rayEnd, rayDir, p0, p1, rc, vp0p1)) 
         return false;
 
 	const float tLimit = t;
@@ -62,13 +63,13 @@ inline bool rayCapsuleIntersect(float& t, Vector3F &hitNormal,
         if(preStep < tq) return false;
         preStep = tq;
         
-        float ang = (r.direction()).dot(hitNormal);
+        float ang = rayDir.dot(hitNormal);
         if(ang <0) ang = -ang;
         ang = 1.f / (1e-3f + ang);
             
 		t += tq*ang;
 		if(t > tLimit) return false;
-		q = r.travel(t);
+		q = rayBegin + rayDir * t;
 	}
 
     return false;

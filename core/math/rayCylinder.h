@@ -3,6 +3,7 @@
 
 #include "line_math.h"
 #include "rayPlane.h"
+#include "rayBox.h"
 #include "Ray.h"
 
 namespace alo {
@@ -48,16 +49,17 @@ inline float distanceToCylinder(Vector3F &normal, bool &isOnBody,
 }
 
 inline bool rayCylinderIntersect(float& t, Vector3F &hitNormal,
-		const Ray& r, 
+		const float *rayD, 
 		const Vector3F& p0, const Vector3F& p1, const float& rc, const float &lc, const Vector3F &vp0p1)
 {
 /// ignore ray t0
-	const Vector3F &rayBegin = r.origin();
-	const Vector3F rayEnd = r.travel(t);
+	const Vector3F rayBegin(rayD[0], rayD[1], rayD[2]);
+	const Vector3F rayDir(rayD[3], rayD[4], rayD[5]);
+	const Vector3F rayEnd = rayBegin + rayDir * t;
 	
-    if(clipRayCapsule(rayBegin, rayEnd, r.direction(), p0, p1, rc, vp0p1)) 
+    if(clipRayCapsule(rayBegin, rayEnd, rayDir, p0, p1, rc, vp0p1)) 
         return false;
-
+    
 	const float tLimit = t;
     
 	Vector3F q;
@@ -94,14 +96,14 @@ inline bool rayCylinderIntersect(float& t, Vector3F &hitNormal,
 	q = rayBegin;
 	for(int i=0;i<29;++i) {
 		tq = distanceToCylinder(hitNormal, isOnBody, q, p0, p1, rc, lc, vp0p1);
-        if(hitNormal.dot(r.direction()) > 0) return false;
+        if(hitNormal.dot(rayDir) > 0) return false;
 
 		if(tq < t * 1.4e-5f) return true;
         if(preStep < tq) return false;
 		preStep = tq;
         
         if(isOnBody) {
-            float ang = (r.direction()).dot(hitNormal);
+            float ang = rayDir.dot(hitNormal);
             if(ang <0) ang = -ang;
             ang = 1.f / (1e-3f + ang);
             tq *= ang;
@@ -111,10 +113,106 @@ inline bool rayCylinderIntersect(float& t, Vector3F &hitNormal,
 
 		if(t > tLimit) return false;
 
-		q = r.travel(t);
+		q = rayBegin + rayDir * t;
 	}
 
 	return false;
+}
+
+inline float distanceToLocalCylinder(Vector3F &normal, bool &isOnBody,
+	const Vector3F &q, 
+	const float &radius, const float &height)
+{
+    isOnBody = true;
+        
+    Vector3F p, v;
+	const float h = q.y;
+	if(h < 0) {
+        normal.set(0.f, -1.f, 0.f);
+        p.set(q.x, 0.f, q.z);
+        if(p.length() > radius) {
+            isOnBody = false;
+            v = p;
+            v.normalize();
+            return q.distanceTo(v * radius);
+        } 
+        return -h;
+	}
+    
+    const Vector3F p1(0.f, height, 0.f);
+    p.set(q.x, height, q.z);
+	
+    if(h > height) {
+        normal = Vector3F::YAxis;
+        if(p.distanceTo(p1) > radius) {
+            isOnBody = false;
+            v = p - p1;
+            v.normalize();
+            return q.distanceTo(p1 + v * radius);
+        }
+        return h - height;
+	} 
+    
+    normal = p - p1;
+    float nl = normal.length();
+	normal /= nl;
+
+	return nl - radius;
+
+}
+
+inline bool rayLocalCylinderIntersect(float *rayD, const float &height, const float &radius, const float *aabb)
+{
+    const Vector3F rayBegin(rayD[0], rayD[1], rayD[2]);
+	const Vector3F rayDir(rayD[3], rayD[4], rayD[5]);
+
+    if(!rayAabbIntersect(rayD, aabb)) return false;
+
+    const float tLimit = rayD[7];
+    
+	Vector3F q;
+    Vector3F hitNormal;
+
+    bool isOnBody;
+    float &t = rayD[6];
+	q = rayBegin + rayDir * t;
+	for(int i=0;i<29;++i) {
+		float tq = distanceToLocalCylinder(hitNormal, isOnBody, q, radius, height);
+
+		if(tq < 1e-3f) return true;
+        
+        if(isOnBody) {
+            float ang = rayDir.dot(hitNormal);
+            if(ang <0) ang = -ang;
+            ang = 1.f / (1e-3f + ang);
+            tq *= ang;
+        }
+        
+        t += tq;
+
+		if(t > tLimit) return false;
+
+		q = rayBegin + rayDir * t;
+	}
+    
+    return true;
+}
+
+inline Vector3F normalOnLocalCylinder(const float *q, 
+	const float &radius, const float &height)
+{
+	const float &h = q[1];
+	if(h < 1e-3f)
+        return Vector3F(0.f, -1.f, 0.f);
+    
+    if(h > height - 1e-3f)
+        return Vector3F::YAxis;
+    
+    Vector3F n(q[0], 0.f, q[2]);
+    n.normalize();
+
+	return n;
+
 }
 
 }

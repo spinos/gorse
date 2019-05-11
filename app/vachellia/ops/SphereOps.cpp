@@ -39,7 +39,7 @@ void SphereOps::update()
     m_outOps.sendImpulse();
 }
 
-bool SphereOps::intersectRay(const Ray& aray, IntersectResult& result) const
+bool SphereOps::intersectRay(IntersectResult& result) const
 {
     float rayData[8];
     result.copyRayData(rayData);

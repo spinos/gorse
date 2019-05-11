@@ -34,14 +34,18 @@ void HorizonOps::update()
     m_center.y = -radiusInMeters();
 }
 
-bool HorizonOps::intersectRay(const Ray& aray, IntersectResult& result) const
+bool HorizonOps::intersectRay(IntersectResult& result) const
 {
-    float tt = result.rayDistance();
-	if(!raySphereIntersect(tt, aray, m_center, radiusInMeters() ) )
+	float rayData[8];
+    result.copyRayData(rayData);
+
+	if(!raySphereIntersect(rayData, m_center, radiusInMeters() ) )
 		return false;
 	
-	Vector3F tn = aray.travel(tt);
-	tn.y += radiusInMeters();
+	float &tt = rayData[6];
+	Vector3F tn(rayData[0] + rayData[3] * tt,
+				rayData[1] + rayData[4] * tt + radiusInMeters(),
+				rayData[2] + rayData[5] * tt);
 	tn.normalize();
 	return result.updateRayDistance(tt, tn);
 }

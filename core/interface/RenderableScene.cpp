@@ -12,7 +12,6 @@
 #include <math/Ray.h>
 #include "IntersectResult.h"
 #include "RenderableSphere.h"
-#include "RenderableBox.h"
 #include "RenderableCapsule.h"
 #include "RenderableCylinder.h"
 #include "RenderableCone.h"
@@ -49,7 +48,7 @@ bool RenderableScene::intersectRay(const Ray& aray, IntersectResult& result) con
             if(it._object->isHidden())
                 continue;
 
-            if(it._object->intersectRay(aray, result))
+            if(it._object->intersectRay(result))
             	hasIntersection = true;
 
             if(hasIntersection && it._object->isOverlay()) {

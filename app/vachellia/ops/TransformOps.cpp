@@ -38,7 +38,7 @@ void TransformOps::update()
 	TransformComponent::calculateSpace();
 }
 
-bool TransformOps::intersectRay(const Ray& aray, IntersectResult& result) const
+bool TransformOps::intersectRay(IntersectResult& result) const
 {
     float rayData[8];
 	result.copyRayData(rayData);

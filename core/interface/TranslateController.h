@@ -26,7 +26,7 @@ public:
 	TranslateController();
 	virtual ~TranslateController();
 
-	virtual bool intersectRay(const Ray& aray, IntersectResult& result) const override;
+	virtual bool intersectRay(IntersectResult& result) const override;
 
 };
 

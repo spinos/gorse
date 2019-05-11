@@ -65,7 +65,7 @@ public:
     virtual void update() override;
     virtual AFileDlgProfile *readFileProfileR () const override;
     
-    virtual bool intersectRay(const Ray& aray, IntersectResult& result) const override;
+    virtual bool intersectRay(IntersectResult& result) const override;
 
     virtual void connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
     virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;

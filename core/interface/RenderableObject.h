@@ -31,7 +31,7 @@ public:
     bool isHidden() const;
     bool isOverlay() const;
     
-	virtual bool intersectRay(const Ray& aray, IntersectResult& result) const;
+	virtual bool intersectRay(IntersectResult& result) const = 0;
 
     const float *c_aabb() const;
     

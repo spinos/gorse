@@ -4,6 +4,7 @@
 #include "line_math.h"
 #include "Ray.h"
 #include "rayPlane.h"
+#include "rayBox.h"
 
 namespace alo {
 
@@ -57,26 +58,27 @@ inline float distanceToCone(Vector3F &nml, Vector3F &hitTangent, bool &isOnBody,
 }
 
 inline bool rayConeIntersect(float& t, Vector3F &hitNormal,
-		const Ray& r, 
+		const float *rayD, 
 		const Vector3F& p0, const Vector3F& p1, 
 		const float& rc, const float &lc, const float &lcrc,
 		const Vector3F &vp0p1)
 {
 /// ignore ray t0
-	const Vector3F &rayBegin = r.origin();
-	const Vector3F rayEnd = r.travel(t);
+	const Vector3F rayBegin(rayD[0], rayD[1], rayD[2]);
+	const Vector3F rayDir(rayD[3], rayD[4], rayD[5]);
+	const Vector3F rayEnd = rayBegin + rayDir * t;
 	const float tLimit = t;
     
-    if(clipRayCapsule(rayBegin, rayEnd, r.direction(), p0, p1, rc, vp0p1)) 
+    if(clipRayCapsule(rayBegin, rayEnd, rayDir, p0, p1, rc, vp0p1)) 
         return false;
     
     Vector3F q;
 	float tq;
     const Vector3F vp1p0 = vp0p1 * -1.f;
 
-	if(rayPlaneIntersect(tq, rayBegin, r.direction(), p0, vp1p0)) {
+	if(rayPlaneIntersect(tq, rayBegin, rayDir, p0, vp1p0)) {
 		
-		q = r.travel(tq);
+		q = rayBegin + rayDir * tq;//r.travel(tq);
 		if(q.distanceTo(p0) <= rc) {
 			if(tq > t) return false;
 			t = tq;
@@ -86,7 +88,7 @@ inline bool rayConeIntersect(float& t, Vector3F &hitNormal,
 		}
 
 /// behind bottom
-		if(r.direction().dot(vp0p1) > lc/lcrc) return false;
+		if(rayDir.dot(vp0p1) > lc/lcrc) return false;
 
 	}
 
@@ -107,7 +109,7 @@ inline bool rayConeIntersect(float& t, Vector3F &hitNormal,
 		preStep = d2c;
 
 		if(isOnBody) {
-			float ang = (r.direction()).dot(hitTangent);
+			float ang = rayDir.dot(hitTangent);
 			ang = 1.f / (1e-4f + sqrt(1.f - ang * ang));
 			t += d2c * ang;
 		}
@@ -115,12 +117,127 @@ inline bool rayConeIntersect(float& t, Vector3F &hitNormal,
 			t += d2c;
 
 		if(t > tLimit) return false;
-		q = r.travel(t);
+		q = rayBegin + rayDir * t;
 
 	}	
 
 	return false;
 	
+}
+
+inline float distanceToLocalCone(Vector3F &hitTangent, bool &isOnBody,
+			const Vector3F &q, 
+			const float& radius, const float &height, const float &lcrc)
+{
+	const float ang = radius/lcrc;
+    
+    const Vector3F p1(0.f, height, 0.f);
+
+	if((q-p1).normal().y * -1.f < -ang) {
+		isOnBody = false;
+		return (q-p1).length();
+	}
+
+	Vector3F vp(q.x, 0.f, q.z);
+
+	const float &h = q.y;
+	
+	if(h < 0 && vp.length() < radius) {
+		isOnBody = false;
+		return -h;
+	}
+
+	vp.normalize();
+	vp = vp * radius;
+
+	hitTangent = p1 - vp;
+	
+	vp = q - vp;
+
+	float lvp = vp.length();
+	if(lvp < 1e-4f) return 0.f;
+	vp = vp / lvp;
+
+	if(-vp.y >= -ang) {
+		isOnBody = false;
+		return lvp;
+	}
+
+	isOnBody = true;
+	hitTangent.normalize();
+
+	float r = sqrt(q.length2() - h * h) - radius * (1.f - h / height);
+	return r * height/lcrc;
+}
+
+inline bool rayLocalConeIntersect(float *rayD, const float &height, const float &radius, const float &lcrc, const float *aabb)
+{
+    const Vector3F rayBegin(rayD[0], rayD[1], rayD[2]);
+	const Vector3F rayDir(rayD[3], rayD[4], rayD[5]);
+
+    if(!rayAabbIntersect(rayD, aabb)) return false;
+    
+    float &t = rayD[6];
+	Vector3F q = rayBegin + rayDir * t;
+    
+    if(q.y < 1e-3f) {
+        if(sqrt(q.x * q.x + q.z * q.z) < radius) return true;
+    }
+
+    const float tLimit = rayD[7];
+    
+    Vector3F hitTangent;
+
+    bool isOnBody;
+    
+
+	for(int i=0;i<29;++i) {
+		float tq = distanceToLocalCone(hitTangent, isOnBody, q, radius, height, lcrc);
+
+		if(tq < 1e-3f) return true;
+        
+        if(isOnBody) {
+            float ang = rayDir.dot(hitTangent);
+            ang = 1.f / (1e-4f + sqrt(1.f - ang * ang));
+            t += tq * ang;
+        }
+        else 
+            t += tq;
+
+		if(t > tLimit) return false;
+
+		q = rayBegin + rayDir * t;
+	}
+    
+    return true;
+}
+
+inline Vector3F normalOnLocalCone(const float *q, 
+	const float &radius, const float &height, const float &lcrc)
+{
+    const float ang = radius/lcrc;
+    const Vector3F p1(0.f, height, 0.f);
+    
+    Vector3F nml = Vector3F(q[0], q[1], q[2]) - p1;
+    nml.normalize();
+    
+    if(nml.y * -1.f < -ang) return nml;
+    
+    Vector3F vp(q[0], 0.f, q[2]);
+    
+	const float &h = q[1];
+	if(h < 1e-3f && vp.length() < radius - 1e-3f)
+        return Vector3F(0.f, -1.f, 0.f);
+    
+    vp.normalize();
+	
+    nml = Vector3F(q[0], q[1], q[2]) - vp * radius;
+    nml.normalize();
+    
+    nml = vp + Vector3F(0.f, ang, 0.f);
+    nml.normalize();
+	return nml;
+
 }
 
 }

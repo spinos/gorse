@@ -23,7 +23,7 @@ class RenderableCapsule : public RenderableObject {
 public:
 	RenderableCapsule();
 
-	virtual bool intersectRay(const Ray& aray, IntersectResult& result) const override;
+	virtual bool intersectRay(IntersectResult& result) const override;
 
 };
 

@@ -36,10 +36,10 @@ void UnionOps::update()
 
 }
 
-bool UnionOps::intersectRay(const Ray& aray, IntersectResult& result) const
+bool UnionOps::intersectRay(IntersectResult& result) const
 {
     const unsigned ne = m_inOps.numElements();
-    if(ne < 1) return TransformOps::intersectRay(aray, result);
+    if(ne < 1) return TransformOps::intersectRay(result);
 
     float rayData[8];
     result.copyRayData(rayData);

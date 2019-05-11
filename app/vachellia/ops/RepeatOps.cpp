@@ -118,10 +118,10 @@ void RepeatOps::update()
 //todo build instancer
 }
 
-bool RepeatOps::intersectRay(const Ray& aray, IntersectResult& result) const
+bool RepeatOps::intersectRay(IntersectResult& result) const
 {
     if(m_worldLookupRule->isEmpty() ) 
-        return TransformOps::intersectRay(aray, result);
+        return TransformOps::intersectRay(result);
 
     float rayData[8];
     result.copyRayData(rayData);

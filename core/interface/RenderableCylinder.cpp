@@ -29,11 +29,14 @@ void RenderableCylinder::setPoints(const Vector3F &p0, const Vector3F &p1)
 void RenderableCylinder::setRadius(float x)
 { m_r = x; }
 
-bool RenderableCylinder::intersectRay(const Ray& aray, IntersectResult& result) const
+bool RenderableCylinder::intersectRay(IntersectResult& result) const
 {
+	float rayData[8];
+    result.copyRayData(rayData);
+
 	float tt = result.rayDistance();
 	Vector3F tn;
-	if(!rayCylinderIntersect(tt, tn, aray, m_p0, m_p1, m_r, m_l, m_dir) )
+	if(!rayCylinderIntersect(tt, tn, rayData, m_p0, m_p1, m_r, m_l, m_dir) )
 		return false;
 
 	return result.updateRayDistance(tt, tn);

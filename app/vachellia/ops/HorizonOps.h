@@ -30,7 +30,7 @@ public:
 
     virtual void update() override;
     
-    virtual bool intersectRay(const Ray& aray, IntersectResult& result) const override;
+    virtual bool intersectRay(IntersectResult& result) const override;
     
     virtual void expandAabb(float *box) const override;
 

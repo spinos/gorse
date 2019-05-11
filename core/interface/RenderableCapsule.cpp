@@ -19,12 +19,15 @@ m_l(10.f),
 m_dir(1.f, 0.f, 0.f)
 {}
 
-bool RenderableCapsule::intersectRay(const Ray& aray, IntersectResult& result) const
+bool RenderableCapsule::intersectRay(IntersectResult& result) const
 {
+	float rayData[8];
+    result.copyRayData(rayData);
+
 	float tt = result.rayDistance();
 	Vector3F tn;
 	if(!rayCapsuleIntersect(tt, tn,
-		aray, 
+		rayData, 
 		m_p0, m_p1, m_r, m_l, m_dir) ) {
 		return false;
 	}

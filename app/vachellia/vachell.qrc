@@ -27,6 +27,8 @@
     <file>images/eyeHalf.png</file>
     <file>images/eyeClose.png</file>
     <file>images/sphere.png</file>
+    <file>images/cone.png</file>
+    <file>images/cylinder.png</file>
     <file>images/geodesic_distance.png</file>
     <file>images/sdf_small.png</file>
     <file>images/primitive_small.png</file>

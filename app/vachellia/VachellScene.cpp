@@ -34,6 +34,10 @@ GlyphOps *VachellScene::createOps(const QJsonObject &content)
 {
     int k = content["id"].toInt();
     switch(k) {
+        case ConeOps::Type :
+            return new ConeOps;
+        case CylinderOps::Type :
+            return new CylinderOps;
         case SphereOps::Type :
             return new SphereOps;
         case BoxOps::Type :

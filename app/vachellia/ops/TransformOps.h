@@ -21,7 +21,7 @@ public:
 	virtual ~TransformOps();
 
 	virtual void update() override;
-	virtual bool intersectRay(const Ray& aray, IntersectResult& result) const override;
+	virtual bool intersectRay(IntersectResult& result) const override;
 
 	virtual bool hasMenu() const override;
     virtual void getMenuItems(std::vector<std::pair<std::string, int > > &ks) const override;

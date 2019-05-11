@@ -171,10 +171,10 @@ void VoxelOps::disconnectFrom(GlyphOps *another, const std::string &portName, Gl
     std::cout << "\n VoxelOps " << this << " disconnectFrom renderable " << r;
 }
 
-bool VoxelOps::intersectRay(const Ray& aray, IntersectResult& result) const
+bool VoxelOps::intersectRay(IntersectResult& result) const
 {
     if(m_primitiveLookup->isEmpty() || m_gridRule->isEmpty() )
-        return TransformOps::intersectRay(aray, result);
+        return TransformOps::intersectRay(result);
 
     float rayData[8];
     result.copyRayData(rayData);

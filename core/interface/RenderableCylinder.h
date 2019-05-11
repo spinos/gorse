@@ -26,7 +26,7 @@ public:
 	void setPoints(const Vector3F &p0, const Vector3F &p1);
 	void setRadius(float x);
 
-	virtual bool intersectRay(const Ray& aray, IntersectResult& result) const override;
+	virtual bool intersectRay(IntersectResult& result) const override;
 
 };
 

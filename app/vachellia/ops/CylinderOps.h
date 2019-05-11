@@ -1,28 +1,29 @@
 /*
- *  SphereOps.h
+ *  CylinderOps.h
  *  vachellia
  *
  *  2019/5/11
  */
 
-#ifndef VCHL_SPHERE_OPS_H
-#define VCHL_SPHERE_OPS_H
+#ifndef VCHL_CYLINDER_OPS_H
+#define VCHL_CYLINDER_OPS_H
 
 #include "TransformOps.h"
 #include <math/ElementVector.h>
 
 namespace alo {
 
-class SphereOps : public TransformOps {
+class CylinderOps : public TransformOps {
     
     ElementVector<GlyphConnection> m_outOps;
+    float m_height;
     float m_radius;
 
 public:
-	enum { Type = 299099 };
+	enum { Type = 299098 };
 
-    SphereOps();
-    virtual ~SphereOps();
+    CylinderOps();
+    virtual ~CylinderOps();
 
     virtual std::string opsName() const override;
 

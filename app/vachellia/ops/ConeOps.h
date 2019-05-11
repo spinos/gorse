@@ -1,28 +1,30 @@
 /*
- *  SphereOps.h
+ *  ConeOps.h
  *  vachellia
  *
  *  2019/5/11
  */
 
-#ifndef VCHL_SPHERE_OPS_H
-#define VCHL_SPHERE_OPS_H
+#ifndef VCHL_CONE_OPS_H
+#define VCHL_CONE_OPS_H
 
 #include "TransformOps.h"
 #include <math/ElementVector.h>
 
 namespace alo {
 
-class SphereOps : public TransformOps {
+class ConeOps : public TransformOps {
     
     ElementVector<GlyphConnection> m_outOps;
+    float m_height;
     float m_radius;
+    float m_lcrc;
 
 public:
-	enum { Type = 299099 };
+	enum { Type = 299097 };
 
-    SphereOps();
-    virtual ~SphereOps();
+    ConeOps();
+    virtual ~ConeOps();
 
     virtual std::string opsName() const override;
 
