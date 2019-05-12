@@ -69,4 +69,10 @@ float HorizonOps::radiusInMeters() const
 bool HorizonOps::hasInstance() const
 { return false; }
 
+float HorizonOps::mapLocalDistance(const float *q) const
+{ return mapDistance(q); }
+
+void HorizonOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
+{}
+
 }

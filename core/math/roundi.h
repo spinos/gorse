@@ -19,6 +19,22 @@ inline int Round32(int a)
     return b<<5;
 }
 
+inline int Round64(int a)
+{
+    if(a < 64) return 64;
+    int b = a>>6;
+    if(a & 63) b++;
+    return b<<6;
+}
+
+inline int Round128(int a)
+{
+    if(a < 128) return 128;
+    int b = a>>7;
+    if(a & 127) b++;
+    return b<<7;
+}
+
 inline int Round256(int a)
 {
     if(a < 256) return 256;

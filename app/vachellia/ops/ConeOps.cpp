@@ -10,7 +10,8 @@
 #include <interface/RenderableScene.h>
 #include <interface/IntersectResult.h>
 #include <math/rayCone.h>
-#include <math/pointBox.h>
+#include <math/pointPoint.h>
+#include <math/pointCone.h>
 
 namespace alo {
    
@@ -88,7 +89,7 @@ Vector3F ConeOps::mapNormal(const float *q) const
 }
 
 bool ConeOps::hasInstance() const
-{ return false; }
+{ return true; }
 
 void ConeOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
@@ -98,6 +99,24 @@ void ConeOps::connectTo(GlyphOps *another, const std::string &portName, GlyphCon
 void ConeOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     m_outOps.remove(line);
+}
+
+float ConeOps::mapLocalDistance(const float *q) const 
+{
+    Vector3F va(q[0], q[1], q[2]);
+    return movePointOntoLocalCone(va, m_height, m_radius, m_lcrc);
+}
+
+void ConeOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
+{
+    const float capArea = m_radius * m_radius * PIF;
+    const float bodyArea = capArea * m_lcrc / m_radius;
+    const float bodyRatio = bodyArea / (bodyArea + capArea);
+    grd::PointSample ap;
+    for(int i=0;i<2000;++i) {
+        randomPointOnCone((float *)&ap._pos, m_radius, m_height, bodyRatio);
+        samples << ap;
+    }
 }
 
 }

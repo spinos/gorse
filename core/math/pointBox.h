@@ -200,14 +200,6 @@ inline void randomPointOnBoxSide(float *q, const float *b, int s)
     q[2] = odudv[2] + odudv[5] * u + odudv[8] * v; 
 }
 
-inline float distancePointToPoint(const float *a, const float *b)
-{
-    float dx = a[0] - b[0];
-    float dy = a[1] - b[1];
-    float dz = a[2] - b[2];
-    return sqrt(dx * dx + dy * dy + dz * dz);
-}
-
 }
 
 #endif

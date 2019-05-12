@@ -255,7 +255,7 @@ float ObjectInstancer<T1, T2>::mapDistanceInstance(const float *p, int i) const
 	memcpy(q, p, 12);
 	inst.pointToLocal(q);
     
-    float d = shape->mapDistance(q);
+    float d = shape->mapLocalDistance(q);
     
     inst.distanceToWorld(d);
 	return d;
@@ -310,6 +310,8 @@ void ObjectInstancer<T1, T2>::createPhalanx(const int &udim, const int &vdim,
                     const int &iseed)
 {
     createInstances(udim * vdim);
+
+    const int nobj = numObjects();
     
     Uniform<Lehmer> lmlcg(iseed);
     
@@ -324,7 +326,10 @@ void ObjectInstancer<T1, T2>::createPhalanx(const int &udim, const int &vdim,
             
             Quaternion roty((lmlcg.randf1() - .5f) * 3.14f, Vector3F::YAxis);
 
-            sample.setObjectId(0);
+            int objInd = 0;
+            if(nobj > 1) objInd = lmlcg.rand(nobj);
+
+            sample.setObjectId(objInd);
             sample.resetSpace();
             sample.setPosition(rx, ry, rz);
             sample.setRotation(roty);

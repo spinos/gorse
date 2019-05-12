@@ -2,7 +2,7 @@
  *  TransformOps.cpp
  *  vachellia
  *
- *  2019/4/25
+ *  2019/5/12
  */
 
 #include "TransformOps.h"
@@ -12,6 +12,7 @@
 #include <qt_graph/GlyphScene.h>
 #include <math/BaseCamera.h>
 #include <math/pointBox.h>
+#include <math/pointPoint.h>
 
 namespace alo {
 
@@ -122,6 +123,33 @@ Vector3F TransformOps::mapNormal(const float *q) const
 	Vector3F tn;
 	normalOnBox((float *)&tn, q, c_aabb());
 	return tn;
+}
+
+float TransformOps::mapLocalDistance(const float *q) const
+{
+	float a[3];
+	memcpy(a, q, 12);
+
+	const float *b = c_aabb();
+	
+	float d = -1.f;
+	if(isPointOutsideBox(a, b))
+		d = 1.f;
+
+	d = GetSign(d) * movePointOntoBox(a, b);
+
+	return d;
+}
+
+void TransformOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
+{
+    grd::PointSample ap;
+    for(int i=0;i<6;++i) {
+        for(int j=0;j<512;++j) {
+            randomPointOnBoxSide((float *)&ap._pos, c_aabb(), i);
+            samples << ap;
+        }
+    }
 }
 
 }

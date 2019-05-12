@@ -2,7 +2,7 @@
  *  TransformOps.h
  *  vachellia
  *
- *  2019/4/25
+ *  2019/5/12
  */
 
 #ifndef VCHL_TRANSFORM_OPS_H
@@ -28,12 +28,16 @@ public:
     virtual void recvAction(int x) override;
     
     virtual void expandAabb(float *box) const override;
-
+/// q is world
     virtual float mapDistance(const float *q) const override;
 /// gradient of distance
 /// q is local
     virtual Vector3F mapNormal(const float *q) const override;
+/// q is local
+    virtual float mapLocalDistance(const float *q) const override;
 
+    virtual void genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const override;
+    
 protected:
 
 private:

@@ -71,10 +71,14 @@ void VachellScene::postCreation(GlyphItem *item)
     emit sendUpdateScene();
 }
 
-void VachellScene::preDestruction(GlyphItem *item)
+void VachellScene::preDestruction(GlyphItem *item, const std::vector<GlyphConnection *> &connectionsToBreak)
 {
     interface::GlobalFence &fence = interface::GlobalFence::instance();
     boost::lock_guard<interface::GlobalFence> guard(fence);
+
+    foreach(GlyphConnection *conn, connectionsToBreak) {
+        conn->breakUp();
+    }
 
     GlyphOps *op = item->ops();
     if(op->hasRenderable()) { 

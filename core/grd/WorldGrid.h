@@ -39,6 +39,8 @@ public:
 	WorldGrid();
 	virtual ~WorldGrid();
 
+	void clear();
+
 	Tc *addCell(const T &k, Tc &x);
 
 	Tc *findCell(const T &k);
@@ -68,6 +70,25 @@ template<typename T, typename Tc>
 WorldGrid<T, Tc>::~WorldGrid()
 {
     if(m_bvh) delete m_bvh;
+}
+
+template<typename T, typename Tc>
+void WorldGrid<T, Tc>::clear()
+{
+	m_cellInd.purgeBuffer();
+	m_cellPtr.purgeBuffer();
+
+	sdb::L3Node<T, Tc, 1024> *block = m_cells.begin();
+	while(block) {
+		for (int i=0;i<block->count();++i) { 
+        	
+        	const Tc &ci = block->value(i);
+			delete ci._grid;
+            
+		}
+		block = m_cells.next(block);
+	}
+	m_cells.clear();
 }
 
 template<typename T, typename Tc>

@@ -11,6 +11,8 @@
 #include <interface/IntersectResult.h>
 #include <math/raySphere.h>
 #include <math/pointBox.h>
+#include <math/pointSphere.h>
+#include <math/pointPoint.h>
 
 namespace alo {
    
@@ -84,8 +86,22 @@ Vector3F SphereOps::mapNormal(const float *q) const
     return nml;
 }
 
+float SphereOps::mapLocalDistance(const float *q) const
+{
+    return vectorLength(q) - m_radius;
+}
+
 bool SphereOps::hasInstance() const
-{ return false; }
+{ return true; }
+
+void SphereOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
+{
+    grd::PointSample ap;
+    for(int i=0;i<2000;++i) {
+        randomPointOnSphere((float *)&ap._pos, m_radius);
+        samples << ap;
+    }
+}
 
 void SphereOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {

@@ -63,7 +63,7 @@ void AcaciaScene::postCreation(GlyphItem *item)
     emit sendUpdateDrawable();
 }
 
-void AcaciaScene::preDestruction(GlyphItem *item)
+void AcaciaScene::preDestruction(GlyphItem *item, const std::vector<GlyphConnection *> &connectionsToBreak)
 {
     GlyphOps *op = item->ops();
     if(op->hasDrawable()) { 

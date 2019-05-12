@@ -65,7 +65,7 @@ protected:
 	virtual GlyphOps *createOps(const QJsonObject &content);
 	
 	virtual void postCreation(GlyphItem *item) = 0;
-	virtual void preDestruction(GlyphItem *item) = 0;
+	virtual void preDestruction(GlyphItem *item, const std::vector<GlyphConnection *> &connectionsToBreak) = 0;
 
 	typedef sdb::L3Node<int, GlyphItem *, 128> GlyphDataType;
 	GlyphDataType *firstGlyph();

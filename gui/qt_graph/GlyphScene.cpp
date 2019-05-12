@@ -15,6 +15,7 @@
 #include "GlyphOps.h"
 #include "VisibilityControlItem.h"
 #include <math/GroupCollection.h>
+#include <QDebug>
 #include <ctime>
 
 namespace alo {
@@ -133,13 +134,13 @@ void GlyphScene::removeActiveGlyph()
 
 	std::vector<GlyphConnection *> conns;
 	m_activeGlyph->getConnections(conns);
+
+	preDestruction(m_activeGlyph, conns);
+
 	foreach(GlyphConnection *conn, conns) {
-		conn->breakUp();
 		QGraphicsScene::removeItem(conn);
 		//delete conn;
 	}
-
-	preDestruction(m_activeGlyph);
 
 	QGraphicsScene::removeItem(m_activeGlyph);
 

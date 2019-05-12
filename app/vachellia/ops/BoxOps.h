@@ -34,8 +34,6 @@ public:
     virtual void connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
     virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
 
-    virtual void genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const override;
-    
 protected:
     
 private:

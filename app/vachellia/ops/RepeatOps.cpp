@@ -2,6 +2,7 @@
  *  RepeatOps.cpp
  *  vachellia
  *
+ *  2019/5/12
  */
 
 #include "RepeatOps.h"
@@ -59,16 +60,8 @@ void RepeatOps::update()
 
     if(m_inOps.isDirty()) {
         std::cout << "\n in ops dirty ";
-        m_inOps.setClean();
-    }
-
-    const int ne = m_inOps.numElements();
-    if(ne < 1) {
-//todo clear instancer
-        RenderableOps::resetAabb();
-        return;
-    }
 //todo build instancer
+    }
 }
 
 bool RepeatOps::intersectRay(IntersectResult& result) const
@@ -158,7 +151,7 @@ void RepeatOps::updateInstancer(bool isAppending)
     if(m_instancer->numObjects() > 0) {
         
         const float spacing = m_instancer->getMediumObjectSize() * 1.4f;
-        const float xzSpan = spacing * .25f;
+        const float xzSpan = spacing * .33f;
         
         static const int udim = 100;
         static const int vdim = 100;
@@ -180,10 +173,12 @@ void RepeatOps::updateInstancer(bool isAppending)
         typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
         CellBuilderTyp cellBuilder;
         
-/// todo adaptive cell size
-        const int cencz[4] = {0,0,0,256};
+        int cellSize = spacing * 15.f;
+        cellSize = Round64(cellSize);
+        const int cencz[4] = {0,0,0,cellSize};
         m_worldRule->setCenterCellSize(cencz);
 
+        m_worldGrid->clear();
         m_worldBuilder->attach(m_worldGrid);
 
         m_worldBuilder->addInstances<InstancerTyp, WorldRuleTyp, CellBuilderTyp, CellBuildRuleTyp >(*m_instancer, *m_worldRule, cellBuilder, cellRule);
@@ -197,9 +192,11 @@ void RepeatOps::updateInstancer(bool isAppending)
         
     } else {
         m_worldLookupRule->detach();
+        RenderableOps::resetAabb();
     }
-    
+
     progress.setValue(2);
-}
 
 }
+
+} /// end of alo

@@ -145,6 +145,7 @@ void GlyphConnection::breakUp()
         n1->postDisconnection(m_port1);
         m_port1 = nullptr;
 	}
+	
     if(m_port0) {
         
         n0->preDisconnection(n1, m_port0, this);
@@ -152,6 +153,7 @@ void GlyphConnection::breakUp()
         n0->postDisconnection(m_port0);
         m_port0 = nullptr;
 	}
+
 }
 
 GlyphItem *GlyphConnection::node0() const

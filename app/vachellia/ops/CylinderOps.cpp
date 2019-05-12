@@ -10,7 +10,8 @@
 #include <interface/RenderableScene.h>
 #include <interface/IntersectResult.h>
 #include <math/rayCylinder.h>
-#include <math/pointBox.h>
+#include <math/pointCylinder.h>
+#include <math/pointPoint.h>
 
 namespace alo {
    
@@ -85,8 +86,14 @@ Vector3F CylinderOps::mapNormal(const float *q) const
     return normalOnLocalCylinder(q, m_radius, m_height);
 }
 
+float CylinderOps::mapLocalDistance(const float *q) const
+{
+    Vector3F va(q[0], q[1], q[2]);
+    return movePointOntoLocalCylinder(va, m_radius, m_height);
+}
+
 bool CylinderOps::hasInstance() const
-{ return false; }
+{ return true; }
 
 void CylinderOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
@@ -96,6 +103,17 @@ void CylinderOps::connectTo(GlyphOps *another, const std::string &portName, Glyp
 void CylinderOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     m_outOps.remove(line);
+}
+
+void CylinderOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
+{
+    const float bodyArea = m_height * m_radius * TWOPIF;
+    const float bodyRatio = bodyArea / (bodyArea + m_radius * m_radius * TWOPIF);
+    grd::PointSample ap;
+    for(int i=0;i<2000;++i) {
+        randomPointOnCylinder((float *)&ap._pos, m_radius, m_height, bodyRatio);
+        samples << ap;
+    }
 }
 
 }
