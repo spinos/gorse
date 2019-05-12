@@ -107,7 +107,6 @@ void SsdField::genSamples(sds::SpaceFillingVector<T> &samples) const
 	}
 }
 
-
 }
 
 }

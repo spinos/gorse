@@ -31,7 +31,7 @@ public:
 	void attach(int i);
 
 	void setAllRelativeBoundaryOffset(float x);
-
+/// find the closest one
 	float mapDistance(const float *q, 
 		const int *inds, const Int2 &range, 
 		int &closestObjectId) const;

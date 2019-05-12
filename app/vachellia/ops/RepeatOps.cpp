@@ -150,7 +150,8 @@ void RepeatOps::updateInstancer(bool isAppending)
     
     if(m_instancer->numObjects() > 0) {
         
-        const float spacing = m_instancer->getMediumObjectSize() * 1.4f;
+        const float spacing = m_instancer->getMediumObjectSize();
+        std::cout << "\n spacing " << spacing;
         const float xzSpan = spacing * .33f;
         
         static const int udim = 100;
@@ -168,13 +169,14 @@ void RepeatOps::updateInstancer(bool isAppending)
         
         typedef grd::LocalGridBuildRule<sds::FZOrderCurve> CellBuildRuleTyp;
         CellBuildRuleTyp cellRule(&sfc);
-        cellRule.setP(5);
+        cellRule.setP(6);
         
         typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
         CellBuilderTyp cellBuilder;
         
-        int cellSize = spacing * 15.f;
+        int cellSize = spacing * 9.f;
         cellSize = Round64(cellSize);
+        std::cout << "\n cell size " << cellSize;
         const int cencz[4] = {0,0,0,cellSize};
         m_worldRule->setCenterCellSize(cencz);
 

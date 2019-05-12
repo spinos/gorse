@@ -6,7 +6,7 @@
  *  first n_obj indices are object ids
  *  ray-intersect nonempty cells using bvh
  *
- *  2019/5/4
+ *  2019/5/12
  */
 
 #ifndef ALO_GRD_LOCAL_GRID_H
@@ -18,6 +18,8 @@
 #include <bvh/BVHBuilder.h>
 #include <bvh/BVHSplit.h>
 #include <bvh/BVHPrimitive.h>
+#include <sds/SpaceFillingVector.h>
+#include <math/pointBox.h>
 
 namespace alo {
     
@@ -63,6 +65,9 @@ public:
     const int &primitiveIndex(int i) const;
 
     bool isEmpty() const;
+
+    template<typename Ts>
+    void genSamples(sds::SpaceFillingVector<Ts> &samples) const;
 
     void verbose() const;
     
@@ -200,6 +205,33 @@ const int &LocalGrid<T>::primitiveIndex(int i) const
 template<typename T>
 bool LocalGrid<T>::isEmpty() const
 { return m_numIndices < 1; }
+
+template<typename T>
+template<typename Ts>
+void LocalGrid<T>::genSamples(sds::SpaceFillingVector<Ts> &samples) const
+{
+    Ts ap;
+    BoundingBox b;
+    const float t = cellSize() * 0.01f;
+    float orih[4];
+    orih[3] = cellSize() * 1.01f;
+    const int n = numCells();
+    for(int i=0;i<n;++i) {
+        if(isCellEmpty(i)) continue;
+
+        getCellBox(b, i);
+        memcpy(orih, b.data(), 12);
+        orih[0] -= t;
+        orih[1] -= t;
+        orih[2] -= t;
+
+        for(int j=0;j<32;++j) {
+
+            randomPointInsideCube((float *)&ap._pos, orih);
+            samples << ap;
+        }
+    }
+}
 
 template<typename T>
 void LocalGrid<T>::verbose() const

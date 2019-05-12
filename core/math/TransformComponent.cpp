@@ -125,6 +125,9 @@ void TransformComponent::pointToLocal(float *p) const
 void TransformComponent::pointToWorld(float *p) const
 { m_tm.transformPoint(p); }
 
+void TransformComponent::distanceToWorld(float &x) const
+{ m_tm.transformDistance(x); }
+
 void TransformComponent::rayTravel(float *q, const float *rayData) const
 {
 	q[0] = rayData[0] + rayData[3] * rayData[6]; 

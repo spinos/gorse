@@ -3,7 +3,7 @@
  *  gorse
  *
  *
- *  2019/5/4
+ *  2019/5/12
  */
 
 #ifndef ALO_GRD_LOCAL_GRID_LOOK_UP_RULE_H
@@ -47,6 +47,9 @@ class LocalGridLookupRule {
 	bvh::RayTraverseRule m_rayBvhRule;
 	const Tp *m_primitiveRule;
 	int m_maxNumStep;
+	const float *m_originCellSize;
+	float m_invCellSize;
+	int m_dim[3];
 
 public:
 
@@ -61,6 +64,8 @@ public:
     bool isEmpty() const;
 
 	bool lookup(LocalGridLookupResult &result, const float *rayData) const;
+	float mapDistance(LocalGridLookupResult &result, const float *q) const;
+	void mapNormal(LocalGridLookupResult &result, const float *q) const;
 
 	void setMaxNumStep(int x);
 
@@ -75,6 +80,8 @@ private:
 	bool intersectPrimitive(LocalGridLookupResult &result, 
 					const float *tLimit,
 					const float *rayData) const;
+	void computeCellCoord(int* u, const float* p) const;
+	int computeCellInd(const int* u) const;
 
 };
 
@@ -90,6 +97,12 @@ void LocalGridLookupRule<T, Tp>::setPrimitiveRule(const Tp *x)
 template<typename T, typename Tp>
 void LocalGridLookupRule<T, Tp>::attach(const T *grid)
 {
+	m_originCellSize = grid->originCellSize();
+	m_invCellSize = 1.f / m_originCellSize[3];
+	const int d = grid->resolution();
+	m_dim[0] = d;
+	m_dim[1] = d * d;
+	m_dim[2] = m_dim[0] - 1;
 	m_rayBvhRule.attach(grid->boundingVolumeHierarchy());
 	m_grid = grid;
 }
@@ -219,6 +232,47 @@ bool LocalGridLookupRule<T, Tp>::intersectPrimitive(LocalGridLookupResult &resul
 template<typename T, typename Tp>
 void LocalGridLookupRule<T, Tp>::setMaxNumStep(int x)
 { m_maxNumStep = x; }
+
+template<typename T, typename Tp>
+void LocalGridLookupRule<T, Tp>::computeCellCoord(int* u, const float* p) const
+{
+	u[0] = (p[0] - m_originCellSize[0]) * m_invCellSize;
+	u[1] = (p[1] - m_originCellSize[1]) * m_invCellSize;
+	u[2] = (p[2] - m_originCellSize[2]) * m_invCellSize;
+	Clamp0b(u[0], m_dim[2]);
+	Clamp0b(u[1], m_dim[2]);
+	Clamp0b(u[2], m_dim[2]);
+}
+
+template<typename T, typename Tp>
+int LocalGridLookupRule<T, Tp>::computeCellInd(const int* u) const
+{ return (u[2]*m_dim[1] + u[1]*m_dim[0] + u[0]); }
+
+template<typename T, typename Tp>
+float LocalGridLookupRule<T, Tp>::mapDistance(LocalGridLookupResult &result, const float *q) const
+{
+    memcpy(result._q, q, 12);
+
+    movePointOntoBox(result._q, m_grid->fieldAabb() );
+
+	computeCellCoord(result._u, result._q);
+	const int celli = computeCellInd(result._u);
+	result._instanceRange = m_grid->c_cell()[celli];
+	if(result.isEmptySpace())
+		result._instanceRange.set(0, m_grid->numObjects());
+
+	return m_primitiveRule->mapDistance(q, 
+        	m_grid->c_indices(), result._instanceRange, 
+        	result._instanceId);
+}
+
+template<typename T, typename Tp>
+void LocalGridLookupRule<T, Tp>::mapNormal(LocalGridLookupResult &result, const float *q) const
+{
+	mapDistance(result, q);
+	m_primitiveRule->mapNormal(result._nml, result._q,
+        	result._instanceId);
+}
 
 } /// end of namepsace grd
 

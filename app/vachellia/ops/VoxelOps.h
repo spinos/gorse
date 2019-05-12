@@ -72,7 +72,10 @@ public:
     
     virtual float mapDistance(const float *q) const override;
     virtual Vector3F mapNormal(const float *q) const override;
+    virtual float mapLocalDistance(const float *q) const override;
 
+    virtual void genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const override;
+    
 protected:
     
 private:

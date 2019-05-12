@@ -62,7 +62,7 @@ bool UnionOps::intersectRay(IntersectResult& result) const
 
         if(d < tt * 1e-5f) break;
 
-        tt += d;
+        tt += d * .8f;
      
         if(tt > tLimit) return false;
     }

@@ -75,7 +75,7 @@ void VoxelOps::update()
         loadCache(scachePath);
 
     m_primitiveLookup->setAllRelativeBoundaryOffset(boundary);
-    //m_outOps.update();
+
 }
 
 AFileDlgProfile *VoxelOps::readFileProfileR () const
@@ -93,13 +93,11 @@ bool VoxelOps::loadCache(const std::string &fileName)
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
 
-/// todo lock here
     ver1::H5IO hio;
     bool stat = hio.begin(fileName);
     if(!stat) {
         m_cachePath = "unknown";
         progress.setValue(1);
-/// todo unlock here
         return stat;
     }
 
@@ -143,7 +141,7 @@ bool VoxelOps::loadCache(const std::string &fileName)
     }
 
     hio.end();
-/// todo unlock here
+
     if(stat) {
         m_cachePath = fileName;
         m_gridRule->attach(m_grid);
@@ -195,34 +193,57 @@ bool VoxelOps::intersectRay(IntersectResult& result) const
 
 float VoxelOps::mapDistance(const float *q) const
 {
-    //if(m_numPairs < 1 || m_gridRule->isEmpty() )
+    if(m_gridRule->isEmpty() )
         return TransformOps::mapDistance(q);
 
-   /* float a[3];
+    float a[3];
     memcpy(a, q, 12);
     pointToLocal(a);
 
-    GridLookupResultTyp param;
-    return mapLocalDistanceTo(a, param);*/
+    GridLookupRuleTyp::LookupResultTyp param;
+    float d = m_gridRule->mapDistance(param, a);
+    distanceToWorld(d);
+    return d;
 }
 
 Vector3F VoxelOps::mapNormal(const float *q) const
 {
-    //if(m_numPairs < 1 || m_gridRule->isEmpty() )
+    if(m_gridRule->isEmpty() )
         return TransformOps::mapNormal(q);
     
-   /* float a[3];
+    float a[3];
     memcpy(a, q, 12);
     pointToLocal(a);
 
-    GridLookupResultTyp param;
-    Vector3F tn = mapLocalNormalAt(a, param);
+    GridLookupRuleTyp::LookupResultTyp param;
+    m_gridRule->mapNormal(param, a);
     
+    Vector3F &tn = param._nml;
     normalToWorld((float *)&tn);
-    return tn;*/
+    return tn;
+}
+
+float VoxelOps::mapLocalDistance(const float *q) const
+{
+    if(m_gridRule->isEmpty() )
+        return TransformOps::mapLocalDistance(q);
+
+    float a[3];
+    memcpy(a, q, 12);
+
+    GridLookupRuleTyp::LookupResultTyp param;
+    return m_gridRule->mapDistance(param, a);
 }
 
 bool VoxelOps::hasInstance() const
-{ return false; }
+{ return true; }
+
+void VoxelOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
+{
+    if(m_gridRule->isEmpty() )
+        return TransformOps::genSamples(samples);
+
+    m_grid->genSamples<grd::PointSample>(samples);
+}
 
 } /// end of namespace alo
