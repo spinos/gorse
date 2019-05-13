@@ -99,7 +99,7 @@ void SsdField::genSamples(sds::SpaceFillingVector<T> &samples) const
 		orih[1] -= t;
 		orih[2] -= t;
 
-		for(int j=0;j<1024;++j) {
+		for(int j=0;j<64;++j) {
 
 			randomPointInsideCube((float *)&ap._pos, orih);
 			samples.push_back(ap);

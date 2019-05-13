@@ -68,21 +68,47 @@ inline float movePointOntoLocalCone(Vector3F &q, const float &height, const floa
 	
 /// on body or either of the caps
 inline void randomPointOnCone(float *q, const float &radius, const float &height,
-								const float &bodyRatio) 
+								const float &bodyRatio, const float &fuzziness) 
 {
 	const float theta = TWOPIF * RandomF01();
 	const float u = sqrt(RandomF01());
     const float r = u * radius;
+    const float fr = 1.f - RandomF01() * fuzziness;
 
 	if(RandomF01() < bodyRatio)	{
-        q[0] = cos(theta) * r;
+        q[0] = cos(theta) * r * fr;
 		q[1] = (1.f - u) * height;
-        q[2] = sin(theta) * r;
+        q[2] = sin(theta) * r * fr;
     } else {
+        const float h = (radius < height) ? radius : height;
         q[0] = cos(theta) * r;
-        q[1] = 0.f;
+        q[1] = h * .1f * (1.f - fr);
         q[2] = sin(theta) * r;
     }
+
+}
+
+inline Vector3F normalOnLocalCone(const float *q, 
+	const float &radius, const float &height, const float &lcrc)
+{
+    const float ang = radius/lcrc;
+    const Vector3F p1(0.f, height, 0.f);
+    
+    Vector3F nml = Vector3F(q[0], q[1], q[2]) - p1;
+    nml.normalize();
+    
+    if(nml.y > ang) return nml;
+    
+    Vector3F vp(q[0], 0.f, q[2]);
+	const float &h = q[1];
+	if(h < 1e-3f && vp.length() < radius - 1e-3f)
+        return Vector3F(0.f, -1.f, 0.f);
+    
+    vp.normalize();
+	
+    nml = vp + Vector3F(0.f, ang, 0.f);
+    nml.normalize();
+	return nml;
 
 }
 

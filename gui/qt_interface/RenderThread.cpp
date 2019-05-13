@@ -65,14 +65,12 @@ void RenderThread::rerender()
 	m_interface->updateDisplayView();
 	m_interface->updateScene();
 	
+	if (isRunning()) return;
+	
 	emit preRenderRestart();
-	
-	QMutexLocker locker(&mutex);
-	
+
 	this->m_abort = false;
-	
-	if (!isRunning())
-        start(LowPriority);
+	start(LowPriority);
 
 }
 
@@ -100,19 +98,10 @@ void RenderThread::renderWork(BufferBlock* packet, RenderBuffer *buf)
 void RenderThread::run()
 {
     forever {
-		
-        //mutex.lock();
-        
-        //mutex.unlock();
 				
-		if (m_abort) {
-			//qDebug()<<" abort";
-			return;
-		}
+		if(m_abort) break;
 		
-		if(m_interface->isResidualLowEnough() ) {
-			return;
-		}
+		if(m_interface->isResidualLowEnough() ) break;
 
 		interface::GlobalFence &fence = interface::GlobalFence::instance();
 		boost::lock_guard<interface::GlobalFence> guard(fence);
@@ -121,6 +110,8 @@ void RenderThread::run()
         
         BufferBlock* packets[8];
         m_interface->selectBlocks(packets, 8);
+
+        if(m_abort) break;
         
 		Renderer* tracer = m_interface->getRenderer();
 		RenderContext* ctx = m_interface->getContext();
@@ -141,12 +132,6 @@ void RenderThread::run()
         
 		emit renderedImage();
 
-        //mutex.lock();
-       // if (!restart)
-		//condition.wait(&mutex);
-			
-        //restart = false;
-        //mutex.unlock();
     }
 }
 

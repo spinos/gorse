@@ -107,8 +107,8 @@ void LocalGridBuilder<T>::detach()
 		for (int i=0;i<block->count();++i) { 
 			const sdb::Coord2 &ci = block->key(i);
 
-			if(ci.y > m_grid->numCells() ) {
-				std::cout << "\n ERROR cell ind " << ci.y << " > " << m_grid->numCells();
+			if(ci.y >= m_grid->numCells() ) {
+				std::cout << "\n ERROR oor cell ind " << ci.y;
 			}
 
 			inds[offset] = ci.x;
@@ -166,8 +166,8 @@ void LocalGridBuilder<T>::measure(const Ts &samples, int objI, Tr &rule)
 
 			const int celli = rule.computeCellInd(si._key, rule.P());
 
-			if(celli > m_grid->numCells() ) {
-				std::cout << "\n ERROR cell ind " << celli << " > " << m_grid->numCells();
+			if(celli >= m_grid->numCells() ) {
+				std::cout << "\n ERROR oor cell ind " << celli;
 				rule.printCoord(si._key);
 			}
 

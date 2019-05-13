@@ -110,8 +110,8 @@ void CylinderOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples)
     const float bodyArea = m_height * m_radius * TWOPIF;
     const float bodyRatio = bodyArea / (bodyArea + m_radius * m_radius * TWOPIF);
     grd::PointSample ap;
-    for(int i=0;i<2000;++i) {
-        randomPointOnCylinder((float *)&ap._pos, m_radius, m_height, bodyRatio);
+    for(int i=0;i<5000;++i) {
+        randomPointOnCylinder((float *)&ap._pos, m_radius, m_height, bodyRatio, .1f);
         samples << ap;
     }
 }

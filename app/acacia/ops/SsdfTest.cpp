@@ -131,7 +131,7 @@ void SsdfTest::saveToFile(const std::string &filename)
 	LocBuildTyp locRule(m_sfc);
 	locRule.setBBox(grdBox);
 	locRule.setBoxRelativeBoundary(2.f);
-    //locRule.setP(5);
+    locRule.setP(5);
 
 	grd::LocalGrid<float> locG;
 	locG.create(1<<locRule.P());

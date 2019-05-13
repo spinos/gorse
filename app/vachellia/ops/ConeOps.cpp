@@ -113,8 +113,8 @@ void ConeOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) con
     const float bodyArea = capArea * m_lcrc / m_radius;
     const float bodyRatio = bodyArea / (bodyArea + capArea);
     grd::PointSample ap;
-    for(int i=0;i<2000;++i) {
-        randomPointOnCone((float *)&ap._pos, m_radius, m_height, bodyRatio);
+    for(int i=0;i<3000;++i) {
+        randomPointOnCone((float *)&ap._pos, m_radius, m_height, bodyRatio, .05f);
         samples << ap;
     }
 }

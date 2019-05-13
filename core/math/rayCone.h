@@ -212,30 +212,6 @@ inline bool rayLocalConeIntersect(float *rayD, const float &height, const float 
     return true;
 }
 
-inline Vector3F normalOnLocalCone(const float *q, 
-	const float &radius, const float &height, const float &lcrc)
-{
-    const float ang = radius/lcrc;
-    const Vector3F p1(0.f, height, 0.f);
-    
-    Vector3F nml = Vector3F(q[0], q[1], q[2]) - p1;
-    nml.normalize();
-    
-    if(nml.y > ang) return nml;
-    
-    Vector3F vp(q[0], 0.f, q[2]);
-	const float &h = q[1];
-	if(h < 1e-3f && vp.length() < radius - 1e-3f)
-        return Vector3F(0.f, -1.f, 0.f);
-    
-    vp.normalize();
-	
-    nml = vp + Vector3F(0.f, ang, 0.f);
-    nml.normalize();
-	return nml;
-
-}
-
 }
 
 #endif

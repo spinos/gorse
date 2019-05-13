@@ -144,6 +144,7 @@ float TransformOps::mapLocalDistance(const float *q) const
 void TransformOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
 {
     grd::PointSample ap;
+/// todo side ratio and fuziness
     for(int i=0;i<6;++i) {
         for(int j=0;j<512;++j) {
             randomPointOnBoxSide((float *)&ap._pos, c_aabb(), i);

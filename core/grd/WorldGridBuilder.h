@@ -90,10 +90,10 @@ template<typename T, typename Tc>
 template<typename Tr, typename Tcr>
 void WorldGridBuilder<T, Tc>::mapCells(const float *b, const int &objI, Tr &rule, Tcr &cellRule)
 {
-	float cellBox[6];
 	rule.calcCellCoords(b);
+	
+    float cellBox[6];
 	const int n = rule.numKeys();
-
 	for(int i=0;i<n;++i) {
 		const T & ki = rule.key(i);
 		Tc *ci = m_grid->findCell(ki);

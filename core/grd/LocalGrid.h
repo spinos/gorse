@@ -224,8 +224,8 @@ void LocalGrid<T>::genSamples(sds::SpaceFillingVector<Ts> &samples) const
         orih[0] -= t;
         orih[1] -= t;
         orih[2] -= t;
-
-        for(int j=0;j<32;++j) {
+/// todo adapt to n cells
+        for(int j=0;j<30;++j) {
 
             randomPointInsideCube((float *)&ap._pos, orih);
             samples << ap;

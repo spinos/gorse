@@ -198,23 +198,6 @@ inline bool rayLocalCylinderIntersect(float *rayD, const float &height, const fl
     return true;
 }
 
-inline Vector3F normalOnLocalCylinder(const float *q, 
-	const float &radius, const float &height)
-{
-	const float &h = q[1];
-	if(h < 1e-3f)
-        return Vector3F(0.f, -1.f, 0.f);
-    
-    if(h > height - 1e-3f)
-        return Vector3F::YAxis;
-    
-    Vector3F n(q[0], 0.f, q[2]);
-    n.normalize();
-
-	return n;
-
-}
-
 }
 
 #endif

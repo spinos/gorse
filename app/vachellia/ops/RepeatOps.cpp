@@ -174,7 +174,7 @@ void RepeatOps::updateInstancer(bool isAppending)
         typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
         CellBuilderTyp cellBuilder;
         
-        int cellSize = spacing * 9.f;
+        int cellSize = spacing * 5.f;
         cellSize = Round64(cellSize);
         std::cout << "\n cell size " << cellSize;
         const int cencz[4] = {0,0,0,cellSize};
