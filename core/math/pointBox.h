@@ -172,32 +172,41 @@ inline void randomPointInsideCube(float *q, const float *orih)
     q[2] = orih[2] + RandomF01() * orih[3];
 }
 
-static const int AabbSideODuDv[6][9] = {
-{0,1,2, 0,1,5, 0,4,2}, /// -x
-{3,1,5, 3,1,2, 3,4,5}, /// +x
-{0,1,2, 3,1,2, 0,1,5}, /// -y
-{0,4,5, 3,4,5, 0,4,2}, /// +y
-{3,1,2, 0,1,2, 3,4,2}, /// -z
-{0,1,5, 3,1,5, 0,4,5}  /// +z
-};
-
-inline void randomPointOnBoxSide(float *q, const float *b, int s)
+inline void randomPointOnAabb(float *q, const float *b, 
+                const float &dx, const float &dy, const float &dz,
+                const float &xRatio, const float &zRatio,
+                const float &fuzziness)
 {
-    float odudv[9];
-    for(int i=0;i<9;++i) odudv[i] = b[AabbSideODuDv[s][i]];
-
-    odudv[3] -= odudv[0];
-    odudv[4] -= odudv[1];
-    odudv[5] -= odudv[2];
-    odudv[6] -= odudv[0];
-    odudv[7] -= odudv[1];
-    odudv[8] -= odudv[2];
-
+    const float s = RandomF01();
     const float u = RandomF01();
     const float v = RandomF01();
-    q[0] = odudv[0] + odudv[3] * u + odudv[6] * v;
-    q[1] = odudv[1] + odudv[4] * u + odudv[7] * v;
-    q[2] = odudv[2] + odudv[5] * u + odudv[8] * v; 
+    const float w = RandomF01();
+    const float h = fuzziness * RandomF01();
+    if(s < xRatio) {
+        if(w < .5f) q[0] = b[0] + h * dx;
+        else q[0] = b[3] - h * dx;
+        
+        q[1] = b[1] + dy * u;
+        q[2] = b[2] + dz * v;
+        
+    } else if(s > zRatio) {
+        
+        q[0] = b[0] + dx * u;
+        q[1] = b[1] + dy * v;
+        
+        if(w < .5f) q[2] = b[2] + h * dz;
+        else q[2] = b[5] - h * dz;
+        
+    } else {
+        
+        q[0] = b[0] + dx * u;
+        
+        if(w < .5f) q[1] = b[1] + h * dy;
+        else q[1] = b[4] - h * dy;
+        
+        q[2] = b[2] + dz * v;
+        
+    }
 }
 
 }

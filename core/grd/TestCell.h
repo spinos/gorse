@@ -14,59 +14,6 @@ namespace alo {
 
 namespace grd {
 
-struct BoxObject {
-
-	BoundingBox _bbox;
-
-	const BoundingBox &aabb() const 
-	{ return _bbox; }
-
-	void getAabb(float *b) const
-	{ memcpy(b, _bbox.data(), 24); }
-
-	void expandAabb(float *b) const
-	{
-		b[0] -= .5f;
-		b[1] -= .5f;
-		b[2] -= .5f;
-		b[3] += .5f;
-		b[4] += .5f;
-		b[5] += .5f;
-	}
-    
-    float mapDistance(const float *p) const 
-    {
-        if(isPointOutsideBox(p, _bbox.data()))
-            return distanceOutsidePointToBox(p, _bbox.data());
-
-        return -distanceInsidePointToBox(p, _bbox.data());
-    }
-
-    void mapNormal(float *nml, const float *p) const 
-    {
-    	normalOnBox(nml, p, _bbox.data());
-    }
-
-    void limitStepSize(float &x) const
-    {
-    	//if(x > 1e-3f && x < .1f) x = .1f;
-		//if(x > 2.f) x = 2.f;
-    }
-/// cover the faces
-    template<typename T>
-	void genSamples(sds::SpaceFillingVector<T> &samples) const
-	{
-		T ap;
-		for(int i=0;i<6;++i) {
-			for(int j=0;j<512;++j) {
-				randomPointOnBoxSide((float *)&ap._pos, _bbox.data(), i);
-				samples << ap;
-			}
-		}
-	}
-
-};
-
 struct TestInstance {
 
     Matrix44F _tm;

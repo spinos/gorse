@@ -22,13 +22,73 @@
 
 using namespace alo;
 
+struct BoxObject {
+
+	BoundingBox _bbox;
+
+	const BoundingBox &aabb() const 
+	{ return _bbox; }
+
+	void getAabb(float *b) const
+	{ memcpy(b, _bbox.data(), 24); }
+
+	void expandAabb(float *b) const
+	{
+		b[0] -= .5f;
+		b[1] -= .5f;
+		b[2] -= .5f;
+		b[3] += .5f;
+		b[4] += .5f;
+		b[5] += .5f;
+	}
+    
+    float mapDistance(const float *p) const 
+    {
+        if(isPointOutsideBox(p, _bbox.data()))
+            return distanceOutsidePointToBox(p, _bbox.data());
+
+        return -distanceInsidePointToBox(p, _bbox.data());
+    }
+
+    void mapNormal(float *nml, const float *p) const 
+    {
+    	normalOnBox(nml, p, _bbox.data());
+    }
+
+    void limitStepSize(float &x) const
+    {
+    	//if(x > 1e-3f && x < .1f) x = .1f;
+		//if(x > 2.f) x = 2.f;
+    }
+/// cover the faces
+    template<typename T>
+	void genSamples(sds::SpaceFillingVector<T> &samples) const
+	{
+	    const float *b = _bbox.data();
+        const float dx = b[3] - b[0];
+        const float dy = b[4] - b[1];
+        const float dz = b[5] - b[2];
+        const float xArea = dy * dz;
+        const float yArea = dx * dz;
+        const float totalArea = (b[4] - b[1]) * (b[3] - b[0]) + xArea + yArea;
+        const float xRatio = xArea / totalArea;
+        const float zRatio = (xArea + yArea) / totalArea;
+		T ap;
+		for(int i=0;i<4000;++i) {
+			randomPointOnAabb((float *)&ap._pos, b, dx, dy, dz, xRatio, zRatio, .05f);
+			samples << ap;
+		}
+	}
+
+};
+
 void testBvh()
 {
-    grd::BoxObject *bo = new grd::BoxObject;
+    BoxObject *bo = new BoxObject;
     bo->_bbox.setMin(-3.f, 0.f, -4.f);
     bo->_bbox.setMax( 3.f, 25.f,  4.f);
 	
-	typedef grd::ObjectInstancer<grd::TestInstance, grd::BoxObject> InstancerTyp;
+	typedef grd::ObjectInstancer<grd::TestInstance, BoxObject> InstancerTyp;
     InstancerTyp *m_instancer = new InstancerTyp;
 	
     m_instancer->addObject(bo);

@@ -85,9 +85,8 @@ void SsdField::genSamples(sds::SpaceFillingVector<T> &samples) const
 {
 	T ap;
 	BoundingBox b;
-	const float t = cellSize() * 0.01f;
 	float orih[4];
-	orih[3] = cellSize() * 1.01f;
+	orih[3] = cellSize();
 	const int n = numCells();
 	for(int i=0;i<n;++i) {
 		const int offset = c_cell()[i];
@@ -95,11 +94,8 @@ void SsdField::genSamples(sds::SpaceFillingVector<T> &samples) const
 
 		getCellBox(b, i);
 		memcpy(orih, b.data(), 12);
-		orih[0] -= t;
-		orih[1] -= t;
-		orih[2] -= t;
 
-		for(int j=0;j<64;++j) {
+		for(int j=0;j<100;++j) {
 
 			randomPointInsideCube((float *)&ap._pos, orih);
 			samples.push_back(ap);

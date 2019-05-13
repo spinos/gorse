@@ -143,13 +143,19 @@ float TransformOps::mapLocalDistance(const float *q) const
 
 void TransformOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
 {
+    const float *b = c_aabb();
+    const float dx = b[3] - b[0];
+    const float dy = b[4] - b[1];
+    const float dz = b[5] - b[2];
+    const float xArea = dy * dz;
+    const float yArea = dx * dz;
+    const float totalArea = (b[4] - b[1]) * (b[3] - b[0]) + xArea + yArea;
+    const float xRatio = xArea / totalArea;
+    const float zRatio = (xArea + yArea) / totalArea;
     grd::PointSample ap;
-/// todo side ratio and fuziness
-    for(int i=0;i<6;++i) {
-        for(int j=0;j<512;++j) {
-            randomPointOnBoxSide((float *)&ap._pos, c_aabb(), i);
-            samples << ap;
-        }
+    for(int i=0;i<5000;++i) {
+        randomPointOnAabb((float *)&ap._pos, b, dx, dy, dz, xRatio, zRatio, .05f);
+        samples << ap;
     }
 }
 
