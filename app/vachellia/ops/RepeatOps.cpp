@@ -16,7 +16,7 @@
 #include <grd/WorldGridBuilder.h>
 #include <grd/WorldGridBuildRule.h>
 #include <grd/WorldGridLookupRule.h>
-#include <grd/TestCell.h>
+#include <grd/ObjectInstancer.h>
 #include <grd/GridInCell.h>
 #include <sds/FZOrder.h>
 #include <QProgressDialog>
@@ -57,6 +57,10 @@ void RepeatOps::addRenderableTo(RenderableScene *scene)
 void RepeatOps::update()
 {
     TransformOps::update();
+
+    int mns;
+    getIntAttribValue(mns, "amaxnstep");
+    m_worldLookupRule->setMaxNumStep(mns);
 
     if(m_inOps.isDirty()) {
         std::cout << "\n in ops dirty ";
@@ -111,7 +115,7 @@ bool RepeatOps::canConnectTo(GlyphOps *another, const std::string &portName) con
 void RepeatOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     RenderableOps *r = static_cast<RenderableOps *>(another);
-    std::cout << "\n RepeatOps " << this << " connectTo renderable " << r;
+    //std::cout << "\n RepeatOps " << this << " connectTo renderable " << r;
     m_inOps.append(r);
     updateInstancer(true);
 }
@@ -121,7 +125,7 @@ void RepeatOps::disconnectFrom(GlyphOps *another, const std::string &portName, G
     RenderableOps *r = static_cast<RenderableOps *>(another);
     m_inOps.remove(r);
     updateInstancer(false);
-    std::cout << "\n RepeatOps " << this << " disconnectFrom renderable " << r;
+    //std::cout << "\n RepeatOps " << this << " disconnectFrom renderable " << r;
 }
 
 bool RepeatOps::hasInstance() const
@@ -132,6 +136,9 @@ void RepeatOps::updateInstancer(bool isAppending)
     QProgressDialog progress("Processing...", QString(), 0, 2, QApplication::activeWindow() );
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
+
+    m_worldLookupRule->detach();
+    RenderableOps::resetAabb();
     
     if(isAppending) {
        m_instancer->addObject(m_inOps.back());
@@ -187,14 +194,11 @@ void RepeatOps::updateInstancer(bool isAppending)
        
         m_worldBuilder->detach();
 
+        memcpy(RenderableObject::aabb(), &m_worldGrid->aabb(), 24);
+
         m_worldLookupRule->attach(m_worldGrid);
         m_worldLookupRule->setPrimitiveRule<InstancerTyp>(m_instancer);
-
-        memcpy(RenderableObject::aabb(), &m_worldGrid->aabb(), 24);
         
-    } else {
-        m_worldLookupRule->detach();
-        RenderableOps::resetAabb();
     }
 
     progress.setValue(2);

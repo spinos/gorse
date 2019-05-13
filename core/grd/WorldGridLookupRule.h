@@ -7,6 +7,8 @@
  *  middle bvh intersect within a local cell
  *  low map distance and normal to instanced object
  *
+ *  T is grid Tc is local cell Tp is local lookup rule
+ *
  *  2019/5/4
  */
 
@@ -51,6 +53,8 @@ public:
 
 	bool lookup(LookupResultTyp &result, const float *rayData) const;
 
+	void setMaxNumStep(const int &x);
+
 protected:
 
 private:
@@ -73,16 +77,15 @@ WorldGridLookupRule<T, Tc, Tp>::WorldGridLookupRule() : m_grid(nullptr)
 template<typename T, typename Tc, typename Tp>
 void WorldGridLookupRule<T, Tc, Tp>::attach(const T *grid)
 {
-	m_grid = grid;
 	m_rayBvhRule.attach(grid->boundingVolumeHierarchy());
 
 	const int n = grid->numCells();
 	m_cellRules.resetBuffer(n);
 	for(int i=0;i<n;++i) {
-		const Tc *ci = m_grid->c_cellPtr(i);
+		const Tc *ci = grid->c_cellPtr(i);
 		m_cellRules[i].attach(ci->_grid);
 	}
-
+	m_grid = grid;
 }
 
 template<typename T, typename Tc, typename Tp>
@@ -191,9 +194,19 @@ bool WorldGridLookupRule<T, Tc, Tp>::intersectPrimitive(LookupResultTyp &result,
 	Tp::LookupResultTyp &param = result._localParam;
 	if(!rule.lookup(param, rayData)) return false;
 
-	result._nml = param._nml;
-	result._t0 = param._t0;
+	Tp::PrimitiveResultTyp &prim = param._primitive;
+	result._nml = prim._nml;
+	result._t0 = prim._t0;
 	return true;
+}
+
+template<typename T, typename Tc, typename Tp>
+void WorldGridLookupRule<T, Tc, Tp>::setMaxNumStep(const int &x)
+{
+	const int n = m_cellRules.count();
+	for(int i=0;i<n;++i)
+		m_cellRules[i].setMaxNumStep(x);
+	
 }
 
 } /// end of namepsace grd

@@ -149,7 +149,7 @@ void LocalGridBuilder<T>::measure(const Ts &samples, int objI, Tr &rule)
 
 		ap._key = rule.computeKeyAtLevel(q, rule.P());
 
-		destSamples.push_back(ap);
+		destSamples << ap;
 	}
 
 	n = destSamples.size();

@@ -6,6 +6,7 @@
  */
 
 #include "VoxelOps.h"
+#include <qt_graph/GlyphConnection.h>
 #include <interface/RenderableScene.h>
 #include <math/raySphere.h>
 #include <interface/IntersectResult.h>
@@ -76,6 +77,7 @@ void VoxelOps::update()
 
     m_primitiveLookup->setAllRelativeBoundaryOffset(boundary);
 
+    m_outOps.sendImpulse();
 }
 
 AFileDlgProfile *VoxelOps::readFileProfileR () const
@@ -157,16 +159,12 @@ bool VoxelOps::loadCache(const std::string &fileName)
 
 void VoxelOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
-    RenderableOps *r = static_cast<RenderableOps *>(another);
-    std::cout << "\n VoxelOps " << this << " connectTo renderable " << r;
-    m_outOps.append(r);
+    m_outOps.append(line);
 }
 
 void VoxelOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
-    RenderableOps *r = static_cast<RenderableOps *>(another);
-    m_outOps.remove(r);
-    std::cout << "\n VoxelOps " << this << " disconnectFrom renderable " << r;
+    m_outOps.remove(line);
 }
 
 bool VoxelOps::intersectRay(IntersectResult& result) const
@@ -183,12 +181,14 @@ bool VoxelOps::intersectRay(IntersectResult& result) const
 
     if(!m_gridRule->lookup(param, rayData)) return false;
 
-    rayData[6] = param._t0;
+    GridLookupRuleTyp::PrimitiveResultTyp &primitiveResult = param._primitive;
+
+    rayData[6] = primitiveResult._t0;
 
     rayToWorld(rayData);
-    normalToWorld((float *)&param._nml);
+    normalToWorld((float *)&primitiveResult._nml);
 
-    return result.updateRayDistance(rayData[6], param._nml);
+    return result.updateRayDistance(rayData[6], primitiveResult._nml);
 }
 
 float VoxelOps::mapDistance(const float *q) const
@@ -200,7 +200,7 @@ float VoxelOps::mapDistance(const float *q) const
     memcpy(a, q, 12);
     pointToLocal(a);
 
-    GridLookupRuleTyp::LookupResultTyp param;
+    GridLookupRuleTyp::PrimitiveResultTyp param;
     float d = m_gridRule->mapDistance(param, a);
     distanceToWorld(d);
     return d;
@@ -215,7 +215,7 @@ Vector3F VoxelOps::mapNormal(const float *q) const
     memcpy(a, q, 12);
     pointToLocal(a);
 
-    GridLookupRuleTyp::LookupResultTyp param;
+    GridLookupRuleTyp::PrimitiveResultTyp param;
     m_gridRule->mapNormal(param, a);
     
     Vector3F &tn = param._nml;
@@ -231,7 +231,7 @@ float VoxelOps::mapLocalDistance(const float *q) const
     float a[3];
     memcpy(a, q, 12);
 
-    GridLookupRuleTyp::LookupResultTyp param;
+    GridLookupRuleTyp::PrimitiveResultTyp param;
     return m_gridRule->mapDistance(param, a);
 }
 

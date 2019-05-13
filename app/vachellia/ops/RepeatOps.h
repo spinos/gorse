@@ -39,8 +39,6 @@ class ObjectInstancer;
 
 struct TestInstance;
 
-//struct BoxObject;
-
 template<typename T, typename Tp>
 class LocalGridLookupRule;
 

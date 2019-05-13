@@ -1,5 +1,15 @@
-#ifndef ALO_GRD_TEST_CELL_H
-#define ALO_GRD_TEST_CELL_H
+/*
+ *  ObjectInstancer.h
+ *  gorse
+ *
+ *  multiple instances of object T2
+ *  transform is carried by T1 
+ *
+ *  2019/5/14
+ */
+
+#ifndef ALO_GRD_OBJECT_INSTANCER_H
+#define ALO_GRD_OBJECT_INSTANCER_H
 
 #include <math/BoundingBox.h>
 #include <math/Matrix44F.h>
@@ -62,9 +72,6 @@ struct TestInstance {
 
 };
 
-
-// T1 is instance type
-// T2 is object type
 template<typename T1, typename T2>
 class ObjectInstancer {
 
@@ -100,7 +107,7 @@ public:
 	void mapNormal(Vector3F &nml, const float *p, int ii) const;
 	void limitStepSize(float &d, int ii) const;
 
-	void genInstanceSamples(OutSampleTyp &dest, int ii) const;
+	void genInstanceSamples(OutSampleTyp *dest, int ii) const;
     
     void createPhalanx(const int &udim, const int &vdim, 
                     const float &spacing, const float &xzSpan, const float &ySpan, 
@@ -232,7 +239,7 @@ void ObjectInstancer<T1, T2>::limitStepSize(float &d, int ii) const
 }
 
 template<typename T1, typename T2>
-void ObjectInstancer<T1, T2>::genInstanceSamples(OutSampleTyp &dest, int ii) const
+void ObjectInstancer<T1, T2>::genInstanceSamples(OutSampleTyp *dest, int ii) const
 {
 	const T1 &inst = m_instances[ii];
 	const PointGridSamplesTyp *shapeSamps = m_samps.element(inst.objectId());
@@ -246,7 +253,7 @@ void ObjectInstancer<T1, T2>::genInstanceSamples(OutSampleTyp &dest, int ii) con
 
 		inst.pointToWorld((float *)&ap._pos);
 
-		dest.push_back(ap);
+		(*dest) << ap;
 	}
 }
 

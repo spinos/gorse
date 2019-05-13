@@ -48,7 +48,7 @@ class VoxelOps : public TransformOps {
     static AFileDlgProfile SReadProfile;
     
     std::string m_cachePath;
-    ElementVector<RenderableOps> m_outOps;
+    ElementVector<GlyphConnection> m_outOps;
 
 public:
 	enum { Type = 703427 };

@@ -15,7 +15,7 @@
 #include <grd/WorldGridBuilder.h>
 #include <grd/WorldGridBuildRule.h>
 #include <grd/WorldGridLookupRule.h>
-#include <grd/TestCell.h>
+#include <grd/ObjectInstancer.h>
 #include <grd/GridInCell.h>
 #include <sds/FZOrder.h>
 #include <ctime>

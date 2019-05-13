@@ -10,6 +10,7 @@
 #define ALO_GRD_WORLD_GRID_BUILDER_H
 
 #include "WorldGrid.h"
+#include <boost/thread.hpp>
 
 namespace alo {
 
@@ -123,6 +124,18 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 	int nmc = 0;
 	int preInd = -1;
 
+#define TEST_MT_SAMPLE
+
+#ifdef TEST_MT_SAMPLE
+#define NUM_SAMPLE_THREAD 4
+    Ti::OutSampleTyp sampleData[NUM_SAMPLE_THREAD];
+    boost::thread sampleThread[NUM_SAMPLE_THREAD];
+    int objectInd[NUM_SAMPLE_THREAD];
+    int threadCount = 0;
+#else
+    Ti::OutSampleTyp sampleData;
+#endif
+    
 	sdb::L3Node<sdb::Coord2, int, 1024> *block = m_objectCellMap.begin();
 	while(block) {
 		for (int i=0;i<block->count();++i) { 
@@ -133,7 +146,19 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 
 				if(preInd > -1) {
 					nmc++;
-                    
+#ifdef TEST_MT_SAMPLE
+                    if(threadCount > 0) {
+                        for(int t=0;t<threadCount;++t) {
+                            sampleThread[t].join();
+                        }
+                        
+                        for(int t=0;t<threadCount;++t) {
+                            cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(sampleData[t], objectInd[t], cellRule);
+                        }
+                        
+                        threadCount = 0;
+                    }
+#endif
 					cellBuilder.detach();
 				}
                 
@@ -150,11 +175,31 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 				
 				cellBuilder.attach(cell->_grid);
 			}
+#ifdef TEST_MT_SAMPLE            
+            objectInd[threadCount] = ci.x;
+            sampleData[threadCount].clear();
+            sampleThread[threadCount] = boost::thread( 
+            boost::bind(&Ti::genInstanceSamples, &instancer, &sampleData[threadCount], ci.x ) );
+            
+            threadCount++;
+            
+            if(threadCount == NUM_SAMPLE_THREAD) {
+                for(int t=0;t<threadCount;++t) {
+                    sampleThread[t].join();
+                }
+                
+                for(int t=0;t<threadCount;++t) {
+                    cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(sampleData[t], objectInd[t], cellRule);
+                }
+                
+                threadCount = 0;
+            }
+#else
+			sampleData.clear();
+			instancer.genInstanceSamples(&sampleData, ci.x);
 
-			Ti::OutSampleTyp samples;
-			instancer.genInstanceSamples(samples, ci.x);
-
-			cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(samples, ci.x, cellRule);
+			cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(sampleData, ci.x, cellRule);
+#endif
 		}
 
 		block = m_objectCellMap.next(block);
@@ -162,6 +207,19 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 
 	if(preInd > -1) {
 		nmc++;
+#ifdef TEST_MT_SAMPLE
+        if(threadCount > 0) {
+            for(int t=0;t<threadCount;++t) {
+                sampleThread[t].join();
+            }
+            
+            for(int t=0;t<threadCount;++t) {
+                cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(sampleData[t], objectInd[t], cellRule);
+            }
+            
+            threadCount = 0;
+        }
+#endif           
 		cellBuilder.detach();
 	}
 

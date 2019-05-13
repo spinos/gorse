@@ -204,7 +204,7 @@ const int &LocalGrid<T>::primitiveIndex(int i) const
 
 template<typename T>
 bool LocalGrid<T>::isEmpty() const
-{ return m_numIndices < 1; }
+{ return m_numObjects < 1; }
 
 template<typename T>
 template<typename Ts>
