@@ -84,6 +84,7 @@ struct BoxObject {
 
 void testBvh()
 {
+    std::cout<<"\n test bvh ";
     BoxObject *bo = new BoxObject;
     bo->_bbox.setMin(-3.f, 0.f, -4.f);
     bo->_bbox.setMax( 3.f, 25.f,  4.f);
@@ -142,10 +143,37 @@ void testBvh()
     
 }
 
+void testBits()
+{
+    std::cout<<"\n test bits ";
+    int bitmap = 0;
+    for(int i=0;i<30;++i) {
+        if(i&1) {
+            bitmap = bitmap ^ (1<<i);
+        }
+    }
+    std::cout << "\n map " << bitmap
+        << " 1 at level ";
+    for(int i=0;i<30;++i) {
+        if(bitmap & (1<<i) ) {
+            std::cout << " " << i;
+        } 
+
+        bitmap = bitmap ^ (1<<i);
+    }
+    std::cout << "\n map " << bitmap
+        << " 1 at level ";
+    for(int i=0;i<30;++i) {
+        if(bitmap & (1<<i) ) {
+            std::cout << " " << i;
+        } 
+    }
+}
+
 int main(int argc, char *argv[])
 {
-    std::cout<<"\n test bvh ";
-    testBvh();
+    //testBvh();
+    testBits();
     std::cout<<"\n passed test ";
       
     return 0;

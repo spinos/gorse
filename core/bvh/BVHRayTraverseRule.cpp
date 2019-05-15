@@ -35,6 +35,8 @@ bool RayTraverseRule::isEmpty() const
 void RayTraverseRule::begin(RayTraverseResult &result) const
 {
 	result._state = tFromParent;
+	result._level = 0;
+	result._bitmap = 0;
 	result._current = 0;
 	result._primBegin = -1;
 }
@@ -46,9 +48,10 @@ void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) 
 	for(;;) {
 /// until reaching a leaf node, or finished	
 
-		int &state = result._state;
+		short &state = result._state;
+		int &current = result._current;
 
-		if(result._current < 0) {
+		if(current < 0) {
 /// up from or sibling of root, finished
 			state = tNone;
 			return;
@@ -59,7 +62,6 @@ void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) 
 #ifdef RAY_BVH_DGB
 			result.printLeafOut();
 #endif
-
 			result._primBegin = -1;
 
 			if(state == tFromParent) {
@@ -67,44 +69,38 @@ void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) 
 #ifdef RAY_BVH_DGB
 				result.printHorizontal();
 #endif
-
-				state = tFromSibling;
-				result._current = findSibling(result._current);
+				result.goHorizontal(tFromSibling, findSibling(current));
 			} else {
 /// visited far child, going up
 #ifdef RAY_BVH_DGB
 				result.printUp();
 #endif
-
-				state = tFromChild;
-				result._child = result._current;
-				result._current = findParent(result._current);
+				result.goUp(tFromChild, findParent(current));
 			} 
 
 			continue;
 		}
 
-		const BVHNode &n = m_nodes[result._current];
+		const BVHNode &n = m_nodes[current];
 
 		if(state == tFromChild) {
 
-			if(result._child != findNearChild(rayData, n) ) {
+			int visitedNear = n.leftChild();
+			if(!result.isDirectionLeft()) visitedNear++;
+
+			if(result._child != visitedNear ) {
 /// visited far child, going up
 #ifdef RAY_BVH_DGB
 				result.printUp();
 #endif
+				result.goUp(tFromChild, findParent(current));
 
-				state = tFromChild;
-				result._child = result._current;
-				result._current = findParent(result._current);
 			} else {
 /// visited near child, going to far child
 #ifdef RAY_BVH_DGB
 				result.printHorizontal();
 #endif
-
-				state = tFromSibling;
-				result._current = findSibling(result._child);
+				result.goDown(tFromSibling, findSibling(result._child));
 			}
 
 			continue;
@@ -127,23 +123,20 @@ void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) 
 				return;
 			}
 
-			int hitChild = findNearChild(rayData, n);
+			const int hitChild = findNearChild(rayData, n);
 
 			if(hitChild < 0) {
 
-				state = tFromChild;
-				result._child = result._current;
-				result._current = findParent(result._current);
+				result.goUp(tFromChild, findParent(current));
 
 			} else {
 
 /// inner node, going down to near child
 #ifdef RAY_BVH_DGB
-			result.printDown();
+				result.printDown();
 #endif
-
-				state = tFromParent;
-				result._current = hitChild;
+				result.recordDirection(hitChild == n.leftChild() );
+				result.goDown(tFromParent, hitChild);
 
 			}
 
@@ -156,18 +149,14 @@ void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) 
 #ifdef RAY_BVH_DGB
 			result.printHorizontal();
 #endif
+			result.goHorizontal(tFromSibling, findSibling(current));
 
-			state = tFromSibling;
-			result._current = findSibling(result._current);
 		} else {
 /// missed far child, going up
 #ifdef RAY_BVH_DGB
 			result.printUp();
 #endif
-
-			state = tFromChild;
-			result._child = result._current;
-			result._current = findParent(result._current);
+			result.goUp(tFromChild, findParent(current));
 		}
 
 	}

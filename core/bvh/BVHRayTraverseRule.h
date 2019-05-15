@@ -8,6 +8,8 @@
  *  horizontal from near child to far sibling
  *  up from child to parent
  *  exit when hit a leaf or back to root
+ *  bitmap record if down to left child on each level
+ *  30 levels max
  *
  *  2019/5/7
  */
@@ -25,7 +27,9 @@ class BVHNode;
 namespace bvh {
 
 struct RayTraverseResult {
-	int _state;
+	short _state;
+	short _level;
+	int _bitmap;
 	int _current;
 	int _child;
 	int _primBegin;
@@ -33,6 +37,48 @@ struct RayTraverseResult {
 	float _rayD[8];
 	float _t0;
 	float _t1;
+
+	void goDown(short state, int child) 
+	{
+		_state = state;
+		_current = child;
+		_level++;
+	}
+
+	void goHorizontal(short state, int sibling)
+	{
+		_state = state;
+		_current = sibling;
+	}
+
+	void goUp(short state, int parent) 
+	{
+		_state = state;
+		_child = _current;
+		_current = parent;
+		_level--;
+	}
+
+	bool isDirectionLeft() const
+	{
+		const int mask = 1<<_level;
+		return (_bitmap & mask) > 0;
+	}
+
+/// record left-or-right at current level
+	void recordDirection(bool isLeft) 
+	{
+		const int mask = 1<<_level;
+		if(isLeft) {
+/// set to one
+			_bitmap = _bitmap | mask;
+		} else {
+			if(_bitmap & mask) {
+/// set to zero
+				_bitmap = _bitmap ^ mask;
+			}
+		}
+	}
 
 	void printDown() const {
 		std::cout << "\n "<<_current<< " down ";
