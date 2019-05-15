@@ -27,7 +27,7 @@ public:
 	AcaciaScene(QObject *parent = 0);
 	virtual ~AcaciaScene();
 	
-	virtual void onItemVisibilityChanged() override;
+	virtual void onItemStateChanged() override;
     virtual void createConnection(alo::GlyphConnection *conn, alo::GlyphPort *port) override;
     virtual void removeConnection(alo::GlyphConnection *conn) override;
     

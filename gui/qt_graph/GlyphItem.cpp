@@ -10,8 +10,9 @@
 #include "GlyphPort.h"
 #include "GlyphHalo.h"
 #include "GlyphOps.h"
-#include "VisibilityControlItem.h"
 #include "Attrib.h"
+#include <qt_base/ActivationControlItem.h>
+#include <qt_base/VisibilityControlItem.h>
 #include <qt_base/AFileDlg.h>
 #include <math/BaseCamera.h>
 #include <boost/format.hpp>
@@ -21,7 +22,7 @@ namespace alo {
 GlyphItem::GlyphItem(const QPixmap & iconPix, int gtyp,
 			QGraphicsItem * parent) : QGraphicsPathItem(parent)
 {
-	resizeBlock(120, 40);
+	resizeBlock(140, 40);
 	setPen(QPen(Qt::darkGray));
 	setBrush(Qt::lightGray);
 	setZValue(1);
@@ -30,11 +31,13 @@ GlyphItem::GlyphItem(const QPixmap & iconPix, int gtyp,
 	m_glyphType = gtyp;
 	m_ops = 0;
 	m_halo = 0;
-	m_visibility = 0;
+	m_visibility = nullptr;
+    m_activation = nullptr;
 }
 
 GlyphItem::~GlyphItem()
 {
+    if(m_activation) delete m_activation;
 	if(m_visibility) delete m_visibility;
 }
 
@@ -207,16 +210,24 @@ void GlyphItem::processFileContextMenu(int k)
     m_ops->recvAction(k);
 }
 
+void GlyphItem::addEnableControl()
+{
+    m_activation = new ActivationControlItem(this);
+    m_activation->setPos(m_blockWidth - 42 - 8, 4);
+}
+
 void GlyphItem::addVisibilityControl()
 {
 	m_visibility = new VisibilityControlItem(this);
-	m_visibility->setPos(m_blockWidth - 24 - 8, 8);
+	m_visibility->setPos(m_blockWidth - 22 - 8, 8);
 }
 
 void GlyphItem::beginEditState(QGraphicsItem *item)
 {
 	if(item == m_visibility)
 		m_visibility->beginEditState();
+    if(item == m_activation)
+		m_activation->beginEditState();
 }
 
 void GlyphItem::endEditState(QGraphicsItem *item)
@@ -224,6 +235,10 @@ void GlyphItem::endEditState(QGraphicsItem *item)
 	if(item == m_visibility) {
 		m_visibility->endEditState();
 		m_ops->setDrawableVisible(m_visibility->isStateVisible());
+	}
+    if(item == m_activation) {
+		m_activation->endEditState();
+		m_ops->setActivated(m_activation->isStateEnabled());
 	}
 }
 

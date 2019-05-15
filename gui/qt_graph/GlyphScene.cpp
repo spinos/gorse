@@ -13,7 +13,8 @@
 #include "GlyphConnection.h"
 #include "GlyphItem.h"
 #include "GlyphOps.h"
-#include "VisibilityControlItem.h"
+#include <qt_base/ActivationControlItem.h>
+#include <qt_base/VisibilityControlItem.h>
 #include <math/GroupCollection.h>
 #include <QDebug>
 #include <ctime>
@@ -41,6 +42,7 @@ void GlyphScene::setAssetCollection(GroupCollection<QJsonObject> *x)
 void GlyphScene::initializeGraphics()
 {
 	VisibilityControlItem::InitializeStates();
+    ActivationControlItem::InitializeStates();
 }
 
 void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
@@ -65,7 +67,10 @@ void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
 	ops->setGlyphScene(this);
 	ops->addAttributes(content);
 	g->setOps(ops);
-	if(ops->hasDrawable() || ops->hasRenderable()) g->addVisibilityControl();
+	if(ops->hasDrawable() || ops->hasRenderable()) 
+        g->addVisibilityControl();
+    if(ops->hasEnable()) 
+        g->addEnableControl();
 	postCreation(g);
 }
 

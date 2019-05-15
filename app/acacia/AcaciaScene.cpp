@@ -97,7 +97,7 @@ void AcaciaScene::recvRequestBound()
     emit sendBound(b);
 }
 
-void AcaciaScene::onItemVisibilityChanged()
+void AcaciaScene::onItemStateChanged()
 { emit sendUpdateDrawable(); }
 
 void AcaciaScene::createConnection(GlyphConnection *conn, GlyphPort *port)

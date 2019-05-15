@@ -38,8 +38,13 @@ struct RayTraverseResult {
 	float _t0;
 	float _t1;
 
+//#define RAY_BVH_DGB
+
 	void goDown(short state, int child) 
 	{
+#ifdef RAY_BVH_DGB
+		printDown();
+#endif
 		_state = state;
 		_current = child;
 		_level++;
@@ -47,12 +52,18 @@ struct RayTraverseResult {
 
 	void goHorizontal(short state, int sibling)
 	{
+#ifdef RAY_BVH_DGB
+		printHorizontal();
+#endif
 		_state = state;
 		_current = sibling;
 	}
 
 	void goUp(short state, int parent) 
 	{
+#ifdef RAY_BVH_DGB
+		printUp();
+#endif
 		_state = state;
 		_child = _current;
 		_current = parent;

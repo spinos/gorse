@@ -71,6 +71,8 @@ class RepeatOps : public TransformOps {
     typedef grd::WorldGridLookupRule<WorldTyp, WorldCellTyp, LocalLookupRuleTyp > WorldLookupRuleTyp;
     WorldLookupRuleTyp *m_worldLookupRule;
 
+    bool m_isActive;
+
 public:
 	enum { Type = 800002 };
 
@@ -82,8 +84,9 @@ public:
     virtual void addRenderableTo(RenderableScene *scene) override;
 
     virtual bool hasInstance() const override;
-
+    virtual bool hasEnable() const override;
     virtual void update() override;
+    virtual void setActivated(bool x) override;
     
     virtual bool intersectRay(IntersectResult& result) const override;
 
@@ -91,9 +94,6 @@ public:
     virtual void connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
     virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
 
-    virtual float mapDistance(const float *q) const override;
-    virtual Vector3F mapNormal(const float *q) const override;
-    
 protected:
     
 private:

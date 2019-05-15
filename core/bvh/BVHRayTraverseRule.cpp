@@ -15,8 +15,6 @@ namespace alo {
 
 namespace bvh {
 
-//#define RAY_BVH_DGB
-
 RayTraverseRule::RayTraverseRule() : m_bvh(nullptr)
 {}
 
@@ -59,22 +57,13 @@ void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) 
 
 		if(result._primBegin > -1) {
 /// end process leaf
-#ifdef RAY_BVH_DGB
-			result.printLeafOut();
-#endif
 			result._primBegin = -1;
 
 			if(state == tFromParent) {
 /// visited near child, going to far child
-#ifdef RAY_BVH_DGB
-				result.printHorizontal();
-#endif
 				result.goHorizontal(tFromSibling, findSibling(current));
 			} else {
 /// visited far child, going up
-#ifdef RAY_BVH_DGB
-				result.printUp();
-#endif
 				result.goUp(tFromChild, findParent(current));
 			} 
 
@@ -90,16 +79,10 @@ void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) 
 
 			if(result._child != visitedNear ) {
 /// visited far child, going up
-#ifdef RAY_BVH_DGB
-				result.printUp();
-#endif
 				result.goUp(tFromChild, findParent(current));
 
 			} else {
 /// visited near child, going to far child
-#ifdef RAY_BVH_DGB
-				result.printHorizontal();
-#endif
 				result.goDown(tFromSibling, findSibling(result._child));
 			}
 
@@ -114,10 +97,6 @@ void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) 
 				result._t0 = result._rayD[6];
 				result._t1 = result._rayD[7];
 /// begin process leaf
-#ifdef RAY_BVH_DGB
-				result.printLeafIn();
-#endif
-
 				result._primBegin = n.leafBegin();
 				result._primEnd = n.leafEnd();
 				return;
@@ -130,11 +109,7 @@ void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) 
 				result.goUp(tFromChild, findParent(current));
 
 			} else {
-
 /// inner node, going down to near child
-#ifdef RAY_BVH_DGB
-				result.printDown();
-#endif
 				result.recordDirection(hitChild == n.leftChild() );
 				result.goDown(tFromParent, hitChild);
 
@@ -146,16 +121,10 @@ void RayTraverseRule::traverse(RayTraverseResult &result, const float *rayData) 
 /// missed
 		if(state == tFromParent) {
 /// missed near child, going to far child
-#ifdef RAY_BVH_DGB
-			result.printHorizontal();
-#endif
 			result.goHorizontal(tFromSibling, findSibling(current));
 
 		} else {
 /// missed far child, going up
-#ifdef RAY_BVH_DGB
-			result.printUp();
-#endif
 			result.goUp(tFromChild, findParent(current));
 		}
 

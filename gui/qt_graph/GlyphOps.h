@@ -48,8 +48,11 @@ public:
 	virtual std::string opsName() const;
 	
 	virtual void update();
+    virtual bool hasEnable() const;
     virtual bool hasRenderable() const;
 	virtual bool hasDrawable() const;
+    
+    virtual void setActivated(bool x);
 	virtual void setDrawableVisible(bool x);
 	virtual void getDrawableBound(Hexahedron &b) const;
 	virtual void onSelection();

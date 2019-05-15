@@ -31,11 +31,17 @@ std::string GlyphOps::opsName() const
 void GlyphOps::update()
 { qDebug()<<"GlyphOps::update"; }
 
+bool GlyphOps::hasEnable() const
+{ return false; }
+
 bool GlyphOps::hasRenderable() const
 { return false; }
 
 bool GlyphOps::hasDrawable() const
 { return false; }
+
+void GlyphOps::setActivated(bool x)
+{}
 
 void GlyphOps::getDrawableBound(Hexahedron &b) const 
 {}

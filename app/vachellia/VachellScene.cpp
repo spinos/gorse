@@ -115,7 +115,7 @@ void VachellScene::recvRequestBound()
     emit sendBound(b);
 }
 
-void VachellScene::onItemVisibilityChanged()
+void VachellScene::onItemStateChanged()
 {
     interface::GlobalFence &fence = interface::GlobalFence::instance();
     boost::lock_guard<interface::GlobalFence> guard(fence);

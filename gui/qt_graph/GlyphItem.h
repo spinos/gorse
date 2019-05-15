@@ -23,6 +23,7 @@ class GlyphPort;
 class GlyphHalo;
 class GlyphOps;
 struct Connectable;
+class ActivationControlItem;
 class VisibilityControlItem;
 class GlyphConnection;
 
@@ -67,6 +68,7 @@ public:
 	void postDisconnection(GlyphPort* viaPort);
 	void postSelection();
 
+    void addEnableControl();
 	void addVisibilityControl();
 
 	void beginEditState(QGraphicsItem *item);
@@ -92,6 +94,7 @@ private:
 	QGraphicsPixmapItem *m_icon;
 	GlyphOps *m_ops;
 	GlyphHalo *m_halo;
+    ActivationControlItem *m_activation;
 	VisibilityControlItem *m_visibility;
 	int m_blockWidth, m_blockHeight;
 

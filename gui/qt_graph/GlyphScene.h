@@ -52,7 +52,7 @@ public:
 	GlyphItem *getActiveGlyph() const;
 	GlyphOps *getActiveOps() const;
 	
-	virtual void onItemVisibilityChanged() = 0;
+	virtual void onItemStateChanged() = 0;
 	virtual void onFocusIn3D(const Float4 &centerRadius);
 	virtual void createConnection(GlyphConnection *conn, GlyphPort *port) = 0;
 	virtual void removeConnection(GlyphConnection *conn) = 0;

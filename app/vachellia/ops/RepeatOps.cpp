@@ -27,7 +27,8 @@
 
 namespace alo {
     
-RepeatOps::RepeatOps()
+RepeatOps::RepeatOps() :
+m_isActive(false)
 {
     m_instancer = new InstancerTyp;
     m_worldGrid = new WorldTyp;
@@ -63,7 +64,6 @@ void RepeatOps::update()
     m_worldLookupRule->setMaxNumStep(mns);
 
     if(m_inOps.isDirty()) {
-        std::cout << "\n in ops dirty ";
 //todo build instancer
     }
 }
@@ -91,18 +91,6 @@ bool RepeatOps::intersectRay(IntersectResult& result) const
 
 }
 
-float RepeatOps::mapDistance(const float *q) const
-{
-    return TransformOps::mapDistance(q);
-//todo
-}
-
-Vector3F RepeatOps::mapNormal(const float *q) const
-{
-    return TransformOps::mapNormal(q);
-//todo
-}
-
 bool RepeatOps::canConnectTo(GlyphOps *another, const std::string &portName) const
 { 
     if(!another->hasRenderable()) return false;
@@ -117,14 +105,14 @@ void RepeatOps::connectTo(GlyphOps *another, const std::string &portName, GlyphC
     RenderableOps *r = static_cast<RenderableOps *>(another);
     //std::cout << "\n RepeatOps " << this << " connectTo renderable " << r;
     m_inOps.append(r);
-    updateInstancer(true);
+    if(m_isActive) updateInstancer(true);
 }
 
 void RepeatOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     RenderableOps *r = static_cast<RenderableOps *>(another);
     m_inOps.remove(r);
-    updateInstancer(false);
+    if(m_isActive) updateInstancer(false);
     //std::cout << "\n RepeatOps " << this << " disconnectFrom renderable " << r;
 }
 
@@ -203,6 +191,15 @@ void RepeatOps::updateInstancer(bool isAppending)
 
     progress.setValue(2);
 
+}
+
+bool RepeatOps::hasEnable() const
+{ return true; }
+
+void RepeatOps::setActivated(bool x)
+{ 
+    m_isActive =x; 
+    if(m_isActive) updateInstancer(false);
 }
 
 } /// end of alo

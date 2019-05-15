@@ -14,9 +14,10 @@ namespace alo {
 class VisibilityControlItem : public StateControlItem {
 
 public:
+    
 	VisibilityControlItem(QGraphicsItem * parent = 0);
 	virtual ~VisibilityControlItem();
-
+    
 	static void InitializeStates();
 
 	void beginEditState();

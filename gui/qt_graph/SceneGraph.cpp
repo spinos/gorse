@@ -12,7 +12,7 @@
 #include "GlyphHalo.h"
 #include "GlyphPort.h"
 #include "GlyphItem.h"
-#include "StateControlItem.h"
+#include <qt_base/StateControlItem.h>
 
 namespace alo {
 
@@ -278,7 +278,7 @@ void SceneGraph::endProcessItem(QGraphicsItem *item)
 		
 	if (item->type() == StateControlItem::Type) {
 		selectedItem->endEditState(item);
-		asGlyphScene()->onItemVisibilityChanged();
+		asGlyphScene()->onItemStateChanged();
 	}
 
 }

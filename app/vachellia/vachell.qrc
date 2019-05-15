@@ -38,6 +38,9 @@
 	<file>images/voxel.png</file>
     <file>images/union.png</file>
     <file>images/repeat.png</file>
+    <file>images/redlight.png</file>
+    <file>images/greenlight.png</file>
+    <file>images/orangelight.png</file>
     <file>mimes/assettree.json</file>
     <file>mimes/attribpreset.json</file>
 </qresource>
