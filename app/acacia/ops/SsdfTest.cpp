@@ -8,7 +8,9 @@
 #include "SsdfTest.h"
 #include <qt_base/AFileDlg.h>
 #include <qt_ogl/DrawableResource.h>
-#include <ssdf/SparseSignedDistanceField.h>
+#include <ssdf/SsdField.h>
+#include <ssdf/SsdfBuilder.h>
+#include <ssdf/SsdfBuildRule.h>
 #include <sds/FZOrder.h>
 #include <math/BoundingBox.h>
 #include <ogl/ShapeDrawer.h>

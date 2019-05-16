@@ -15,6 +15,7 @@
 QT_BEGIN_NAMESPACE
 class QPixmap;
 class QGraphicsPixmapItem;
+class QGraphicsSimpleTextItem;
 QT_END_NAMESPACE
 
 namespace alo {
@@ -56,6 +57,7 @@ public:
 	GlyphHalo *halo();
 	GlyphOps *getOps() const;
 	GlyphOps *ops();
+	const QPixmap &iconPix() const;
 	
 	QPointF localCenter() const;
 	std::string glyphName() const;
@@ -91,11 +93,13 @@ private:
 	void processFileContextMenu(int k);
 
 private:
+	QPixmap *m_iconPix;
 	QGraphicsPixmapItem *m_icon;
 	GlyphOps *m_ops;
 	GlyphHalo *m_halo;
     ActivationControlItem *m_activation;
 	VisibilityControlItem *m_visibility;
+	QGraphicsSimpleTextItem *m_opsLabel;
 	int m_blockWidth, m_blockHeight;
 
 };

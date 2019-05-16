@@ -26,6 +26,6 @@ void RenderableOps::setRenderableScene(RenderableScene *x)
 { m_scene = x; }
 
 void RenderableOps::removeRenderableFromScene()
-{ m_scene->removeRenderable(objectId(), opsId() ); }
-
+{ 
+	m_scene->removeRenderable(objectId(), opsTypeId() ); }
 }

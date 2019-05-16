@@ -28,7 +28,7 @@ std::string SphereOps::opsName() const
 void SphereOps::addRenderableTo(RenderableScene *scene)
 {
     setRenderableScene(scene);
-    scene->createRenderable(this, opsId());
+    scene->createRenderable(this, opsTypeId());
 }
   
 void SphereOps::update()

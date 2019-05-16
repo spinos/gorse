@@ -54,6 +54,7 @@ public:
 	
 protected:
     void setSceneChanged();
+    int countTypedObjects(const int groupId) const;
 
 private:
     void setToRemoveGroup(int groupId);

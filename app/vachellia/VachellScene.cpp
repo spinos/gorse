@@ -56,6 +56,12 @@ GlyphOps *VachellScene::createOps(const QJsonObject &content)
     return new GlyphOps; 
 }
 
+int VachellScene::getUid(const int typeId) 
+{
+    int low = alo::RenderableScene::countTypedObjects(typeId);
+    return ((typeId<<10) | low);
+}
+
 void VachellScene::postCreation(GlyphItem *item)
 {
     interface::GlobalFence &fence = interface::GlobalFence::instance();

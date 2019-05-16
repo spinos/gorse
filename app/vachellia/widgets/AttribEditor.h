@@ -6,9 +6,12 @@
 #include <string>
 
 QT_BEGIN_NAMESPACE
+class QLabel;
+class QHBoxLayout;
 class QVBoxLayout;
 class QSpacerItem;
 class QListWidgetItem;
+class QPixmap;
 QT_END_NAMESPACE
 
 namespace alo {
@@ -30,6 +33,7 @@ signals:
 	void sendAttribChanged();
 
 public slots:
+	void recvGlyphIcon(const QPixmap &pix);
 	void recvSelectGlyph(bool isSelecting);
 	
 private slots:
@@ -58,6 +62,9 @@ private:
 	alo::GlyphScene *m_scene;
 	QQueue<QWidget *> m_leftCollWigs;
 	QQueue<QWidget *> m_rightCollWigs;
+	QLabel *m_icon;
+	QLabel *m_label;
+	QHBoxLayout *m_iconLabelBox;
 	QVBoxLayout *leftBox;
 	QVBoxLayout *rightBox;
 	QSpacerItem *m_leftSpace;

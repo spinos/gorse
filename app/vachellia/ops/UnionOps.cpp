@@ -27,7 +27,7 @@ std::string UnionOps::opsName() const
 void UnionOps::addRenderableTo(RenderableScene *scene)
 {
     setRenderableScene(scene);
-    scene->createRenderable(this, opsId());
+    scene->createRenderable(this, opsTypeId());
 }
   
 void UnionOps::update()

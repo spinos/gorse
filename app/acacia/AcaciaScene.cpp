@@ -53,6 +53,16 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
     return new GlyphOps; 
 }
 
+int AcaciaScene::getUid(const int typeId) 
+{
+    int mask = (1<<25) - 1;
+    int r = rand() & mask; 
+    while(glyphExists(r))
+        r = rand() & mask; 
+    
+    return r;
+}
+
 void AcaciaScene::postCreation(GlyphItem *item)
 {
 	GlyphOps *op = item->ops();

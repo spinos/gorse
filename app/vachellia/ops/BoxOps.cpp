@@ -25,7 +25,7 @@ std::string BoxOps::opsName() const
 void BoxOps::addRenderableTo(RenderableScene *scene)
 {
     setRenderableScene(scene);
-    scene->createRenderable(this, opsId());
+    scene->createRenderable(this, opsTypeId());
 }
   
 void BoxOps::update()

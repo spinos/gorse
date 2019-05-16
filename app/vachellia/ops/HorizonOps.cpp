@@ -25,7 +25,7 @@ std::string HorizonOps::opsName() const
 void HorizonOps::addRenderableTo(RenderableScene *scene)
 {
     setRenderableScene(scene);
-    scene->createRenderable(this, opsId());
+    scene->createRenderable(this, opsTypeId());
 }
   
 void HorizonOps::update()

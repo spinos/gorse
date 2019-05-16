@@ -49,6 +49,9 @@ MainWindow::MainWindow()
 	connect(m_editor, &AttribEditor::sendAttribChanged, 
 			m_scene, &VachellScene::recvAttribChanged );
 
+    connect(m_scene, &VachellScene::sendGlyphIcon, 
+            m_editor, &AttribEditor::recvGlyphIcon );
+
 	connect(m_scene, &VachellScene::sendSelectGlyph, 
 			m_editor, &AttribEditor::recvSelectGlyph );
 

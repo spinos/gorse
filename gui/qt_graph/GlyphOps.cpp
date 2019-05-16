@@ -3,6 +3,7 @@
 #include <QJsonDocument>
 #include <QFile>
 #include <QDebug>
+#include <boost/format.hpp>
 
 namespace alo {
 
@@ -25,8 +26,17 @@ void GlyphOps::setOpsId(int x)
 const int &GlyphOps::opsId() const
 { return m_opsId; }
 
+int GlyphOps::opsObjectId() const
+{ return m_opsId & 1023; }
+
+int GlyphOps::opsTypeId() const
+{ return m_opsId >> 10; }
+
 std::string GlyphOps::opsName() const
 { return "ops"; }
+
+std::string GlyphOps::displayName() const
+{ return boost::str(boost::format("%1%_%2%") % opsName() % opsObjectId() ); }
 
 void GlyphOps::update()
 { qDebug()<<"GlyphOps::update"; }
@@ -471,7 +481,7 @@ void GlyphOps::postConnectionChange(const std::string &portName)
 
 void GlyphOps::preDestruction()
 {
-	std::cout << "\n GlyphOps::preDestruction "; 
+	std::cout << "\n GlyphOps::preDestruction " << opsId(); 
 }
 
 void GlyphOps::receiveImpulse(GlyphOps *another, const std::string &portName)

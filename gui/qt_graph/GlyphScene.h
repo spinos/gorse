@@ -58,6 +58,7 @@ public:
 	virtual void removeConnection(GlyphConnection *conn) = 0;
 	
 signals:
+	void sendGlyphIcon(const QPixmap &pix);
 	void sendSelectGlyph(bool x);
 	void sendFocusCameraOn(const Float4 &centerRadius);
 	
@@ -70,9 +71,12 @@ protected:
 	typedef sdb::L3Node<int, GlyphItem *, 128> GlyphDataType;
 	GlyphDataType *firstGlyph();
 	GlyphDataType *nextGlyph(const GlyphDataType *x);
+/// generate a unique id for ops of type
+	virtual int getUid(const int typeId) = 0;
 	
+	bool glyphExists(const int i);
+
 private:
-	int getUid();
 	
 private:
 /// only one can be active

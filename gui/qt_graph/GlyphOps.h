@@ -42,10 +42,15 @@ public:
 	bool setListAttrValue(const std::string &attrName, const std::string &itemName);
 	bool setStringAttrValue(const std::string &attrName, const std::string &x);
 
+/// group << 10 | object
+/// non more than 1023 objects in one group
 	void setOpsId(int x);
 	const int &opsId() const;
+	int opsObjectId() const;
+	int opsTypeId() const;
 
 	virtual std::string opsName() const;
+	std::string displayName() const;
 	
 	virtual void update();
     virtual bool hasEnable() const;

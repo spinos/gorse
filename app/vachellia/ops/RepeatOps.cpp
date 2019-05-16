@@ -52,7 +52,7 @@ std::string RepeatOps::opsName() const
 void RepeatOps::addRenderableTo(RenderableScene *scene)
 {
     setRenderableScene(scene);
-    scene->createRenderable(this, opsId());
+    scene->createRenderable(this, opsTypeId());
 }
   
 void RepeatOps::update()

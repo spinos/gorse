@@ -17,7 +17,7 @@ class HorizonOps : public RenderableOps {
     float m_planetRadius;
 
 public:
-	enum { Type = 299105 };
+	enum { Type = 298999 };
 
     HorizonOps();
     virtual ~HorizonOps();

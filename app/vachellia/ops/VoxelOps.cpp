@@ -11,7 +11,7 @@
 #include <math/raySphere.h>
 #include <interface/IntersectResult.h>
 #include <qt_base/AFileDlg.h>
-#include <ssdf/SparseSignedDistanceField.h>
+#include <ssdf/SsdField.h>
 #include <ssdf/MultiLookupRule.h>
 #include <grd/LocalGrid.h>
 #include <grd/LocalGridLookupRule.h>
@@ -55,7 +55,7 @@ std::string VoxelOps::opsName() const
 void VoxelOps::addRenderableTo(RenderableScene *scene)
 {
     setRenderableScene(scene);
-    scene->createRenderable(this, opsId());
+    scene->createRenderable(this, opsTypeId());
 }
   
 void VoxelOps::update()

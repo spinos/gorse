@@ -4,13 +4,18 @@
  *
  */
 
-#include <QtWidgets>
-#include <QGraphicsSceneMouseEvent>
 #include "GlyphItem.h"
+#include <QGraphicsSceneMouseEvent>
+#include <QPen>
+#include <QMenu>
+#include <QAction>
+#include <QApplication>
+#include <QDebug>
 #include "GlyphPort.h"
 #include "GlyphHalo.h"
 #include "GlyphOps.h"
 #include "Attrib.h"
+#include <QGraphicsSimpleTextItem>
 #include <qt_base/ActivationControlItem.h>
 #include <qt_base/VisibilityControlItem.h>
 #include <qt_base/AFileDlg.h>
@@ -22,6 +27,7 @@ namespace alo {
 GlyphItem::GlyphItem(const QPixmap & iconPix, int gtyp,
 			QGraphicsItem * parent) : QGraphicsPathItem(parent)
 {
+	m_iconPix = new QPixmap(iconPix);
 	resizeBlock(140, 40);
 	setPen(QPen(Qt::darkGray));
 	setBrush(Qt::lightGray);
@@ -33,10 +39,14 @@ GlyphItem::GlyphItem(const QPixmap & iconPix, int gtyp,
 	m_halo = 0;
 	m_visibility = nullptr;
     m_activation = nullptr;
+    m_opsLabel = new QGraphicsSimpleTextItem(this);
+    m_opsLabel->setText(QString("unknown"));
+    m_opsLabel->setPos(0, -18);
 }
 
 GlyphItem::~GlyphItem()
 {
+	delete m_opsLabel;
     if(m_activation) delete m_activation;
 	if(m_visibility) delete m_visibility;
 }
@@ -139,6 +149,9 @@ GlyphOps *GlyphItem::getOps() const
 GlyphOps *GlyphItem::ops()
 { return m_ops; }
 
+const QPixmap &GlyphItem::iconPix() const
+{ return *m_iconPix; }
+
 QPointF GlyphItem::localCenter() const
 { return QPointF(m_blockWidth >> 1, m_blockHeight >> 1); }
 
@@ -154,6 +167,7 @@ void GlyphItem::setOps(GlyphOps *ops)
 		}
 	}
 	ops->setOpsId(glyphId());
+	m_opsLabel->setText(QString::fromStdString(glyphName() ) );
 }
 
 void GlyphItem::movePort(GlyphPort *pt, const Connectable *c)
@@ -244,7 +258,7 @@ void GlyphItem::endEditState(QGraphicsItem *item)
 
 std::string GlyphItem::glyphName() const
 { 
-    return boost::str(boost::format("%1%_%2%") % m_ops->opsName() % m_glyphId );
+    return m_ops->displayName();
 }
 
 bool GlyphItem::canConnectTo(GlyphItem* another, GlyphPort* viaPort)

@@ -31,7 +31,7 @@ std::string ConeOps::opsName() const
 void ConeOps::addRenderableTo(RenderableScene *scene)
 {
     setRenderableScene(scene);
-    scene->createRenderable(this, opsId());
+    scene->createRenderable(this, opsTypeId());
 }
   
 void ConeOps::update()

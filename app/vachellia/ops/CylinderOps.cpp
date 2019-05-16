@@ -30,7 +30,7 @@ std::string CylinderOps::opsName() const
 void CylinderOps::addRenderableTo(RenderableScene *scene)
 {
     setRenderableScene(scene);
-    scene->createRenderable(this, opsId());
+    scene->createRenderable(this, opsTypeId());
 }
   
 void CylinderOps::update()

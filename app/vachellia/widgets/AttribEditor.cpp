@@ -1,5 +1,6 @@
 #include "AttribEditor.h"
 #include <qt_graph/GlyphScene.h>
+#include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QDebug>
 #include <QSplitter>
@@ -43,15 +44,28 @@ AttribEditor::AttribEditor(alo::GlyphScene *scene, QWidget *parent) : QWidget(pa
 	
 	scroll->setWidget(splt);
 
+	m_iconLabelBox = new QHBoxLayout;
+	m_icon = new QLabel();
+	m_icon->setFixedWidth(64);
+	m_label = new QLabel("unknown");
+	m_label->setMinimumWidth(90);
+	m_iconLabelBox->addWidget(m_icon);
+	m_iconLabelBox->addWidget(m_label);
+
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->setSpacing(2);
     mainLayout->setContentsMargins(2,2,2,2);
+    mainLayout->addLayout(m_iconLabelBox);
     mainLayout->addWidget(scroll);
 	setLayout(mainLayout);
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)    
     connect(splt, &QSplitter::splitterMoved,
             this, &AttribEditor::recvSplitMove );
 #endif
+}
+
+void AttribEditor::recvGlyphIcon(const QPixmap &pix)
+{ m_icon->setPixmap(pix); 
 }
 
 void AttribEditor::recvSelectGlyph(bool isSelecting)
@@ -61,10 +75,12 @@ void AttribEditor::recvSelectGlyph(bool isSelecting)
 		if(!ops)
 			return;
 
+		m_label->setText(QString::fromStdString(ops->displayName() ) );
 		clearAttribs();
 		lsAttribs(ops);
 			
 	} else {
+		m_label->setText("unknown");
 		clearAttribs();
 	}
 }

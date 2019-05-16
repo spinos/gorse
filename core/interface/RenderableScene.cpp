@@ -141,4 +141,16 @@ void RenderableScene::updateScene()
 void RenderableScene::setSceneChanged()
 { m_changed = true; }
 
+int RenderableScene::countTypedObjects(const int groupId) const
+{
+    int res = 0;
+    ObjectIteratorType it = m_drawQueue.begin(sdb::Coord2(-1, groupId));
+    for(;!it.done();it.next()) {
+        if(it.first.y > groupId) break;
+        if(it.first.y < groupId) continue;
+        res++;
+    }
+    return res;
+}
+
 }

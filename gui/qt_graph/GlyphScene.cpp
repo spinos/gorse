@@ -50,7 +50,7 @@ void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
 	GlyphItem *g = new GlyphItem(pix, typ);
 	addItem(g);
 
-	const int gid = getUid();
+	const int gid = getUid(typ);
 	g->setGlyphId(gid);
 	m_glyphMap.insert(gid, g);
 
@@ -90,6 +90,7 @@ void GlyphScene::selectGlyph(GlyphItem *item)
 	if(m_activeGlyph != item) {
 		m_activeGlyph = item;
 		item->postSelection();
+		emit sendGlyphIcon(item->iconPix());
 		emit sendSelectGlyph(true);
 	}
 }
@@ -156,14 +157,8 @@ void GlyphScene::removeActiveGlyph()
 	emit sendSelectGlyph(false);
 }
 
-int GlyphScene::getUid()
-{ 
-	int r = m_rng->rand(1<<26); 
-	while(m_glyphMap.find(r))
-		r = m_rng->rand(1<<26); 
-	
-	return r;
-}
+bool GlyphScene::glyphExists(const int i)
+{ return m_glyphMap.find(i) != nullptr; }
 
 GlyphScene::GlyphDataType *GlyphScene::firstGlyph()
 { return m_glyphMap.begin(); }
