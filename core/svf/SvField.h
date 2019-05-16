@@ -32,6 +32,14 @@ class SvField {
 	
 public:
 
+	struct LookupCoord {
+/// trilinear
+		int _ind[8];
+        float _wei[3];
+/// to data
+        int _offset;
+    };
+
 	SvField();
 	~SvField();
 	
@@ -70,6 +78,12 @@ public:
 	template<typename T>
 	T lookup(const float* p) const;
 	
+/// via coord
+	template<typename T>
+	T lookup(const LookupCoord& c) const;
+	
+	void computeLookupCoord(LookupCoord& dst, const float* p ) const;
+	
 protected:
 	
 	void computeCellCoord(int* u, const float* p) const;
@@ -85,6 +99,11 @@ private:
 						int& i, int& j, int& k,
 						const float* p, const int* u) const;
 	int cellValueInd(int i, int j, int k) const;
+	
+/// around p
+ 	void searchNonEmptyCell(LookupCoord& dst, const float* p) const;
+/// in cell u
+ 	void computeLookupCoordU(LookupCoord& dst, const float* p, const int* u) const;
 
 };
 
@@ -126,6 +145,31 @@ void SvField::lookupInCell(T& dst, const float* p, const int* u,
 	c = c * (1.f - wy) + d * wy;
 	
 	dst = a * (1.f - wz) + c * wz;
+}
+
+template<typename T>
+T SvField::lookup(const LookupCoord& coord) const
+{
+    T res;
+    if(coord._offset < 0)
+        return res;
+    
+    const T* fv = (const T*)&c_value()[coord._offset];
+    
+    T a = fv[coord._ind[0]] * (1.f - coord._wei[0])
+		+ fv[coord._ind[1]] * coord._wei[0];
+	T b = fv[coord._ind[2]] * (1.f - coord._wei[0])
+		+ fv[coord._ind[3]] * coord._wei[0];
+	T c = fv[coord._ind[4]] * (1.f - coord._wei[0])
+		+ fv[coord._ind[5]] * coord._wei[0];
+	T d = fv[coord._ind[6]] * (1.f - coord._wei[0])
+		+ fv[coord._ind[7]] * coord._wei[0];
+	
+	a = a * (1.f - coord._wei[1]) + b * coord._wei[1];
+	c = c * (1.f - coord._wei[1]) + d * coord._wei[1];
+	
+	res = a * (1.f - coord._wei[2]) + c * coord._wei[2];
+	return res;
 }
 
 }

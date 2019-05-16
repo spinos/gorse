@@ -223,11 +223,11 @@ bool SvfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int ind,
 	rule.computePosition(corih, coord);
 	corih[3] = rule.deltaAtLevel(P);
 	
+	cellFld->create(1);
 	cellFld->setOriginCellSize(corih);
-	cellFld->setResolution(1);
 	
 /// P
-	cellFld->setAllValues(src[ind]._col);
+	cellFld->setAllValues(src[ind]._val);
 	
 	cellFld->upSample();
 	
@@ -255,7 +255,7 @@ bool SvfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int ind,
 		memset(weight, 0, Tr::GetGridNumValues(l-P)<<2);
 		
 		for(int i=lRange[0];i<=lRange[1];++i) {
-			cellFld->addValueAt(weight, lSrc[i]._col, (const float*)&lSrc[i]._pos);
+			cellFld->addValueAt(weight, lSrc[i]._val, (const float*)&lSrc[i]._pos);
 		}
 		
 		cellFld->divide(weight);
@@ -270,7 +270,7 @@ bool SvfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int ind,
 	memset(weight, 0, Tr::GetGridNumValues(Q-P)<<2);
 	
 	for(int i=lRange[0];i<=lRange[1];++i) {
-		cellFld->addValueAt(weight, qSrc[i]._col, (const float*)&qSrc[i]._pos);
+		cellFld->addValueAt(weight, qSrc[i]._val, (const float*)&qSrc[i]._pos);
 	}
 	
 	cellFld->divide(weight);
@@ -281,7 +281,7 @@ bool SvfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int ind,
 	const int iCell = rule.computeCellInd(coord, P);
 	m_fieldInd[iCell] = cellCount;
 	m_fieldOffset[iCell] = m_currentFieldOffset;
-	m_currentFieldOffset += cellFld->storageSize();
+	m_currentFieldOffset += cellFld->numValues();
 	
 	m_fields.push_back(cellFld);
 	
@@ -309,7 +309,7 @@ void SvfBuilder<T, Tv, P, Q, Tr>::save(Tf& field, Tr& rule)
 		const VFieldTyp* cellField = m_fields[j];
 		const int offset = m_fieldOffset[i];
 		
-		field.copyCellValue(offset, (const char*)cellField->c_value(), cellField->dataSize() );
+		field.copyCellValue(offset, (const char*)cellField->c_value(), cellField->numValues() * sizeof(Tv) );
 	}
 	
 }

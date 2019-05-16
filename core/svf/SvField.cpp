@@ -188,6 +188,68 @@ void SvField::getCellValue(char* b, int size, int i, int j, int k) const
 	memcpy(b, a, size); 
 }
 
+void SvField::computeLookupCoord(LookupCoord& dst, const float* p) const
+{
+    int u[3];
+	computeCellCoord(u, p);
+	const int c = computeCellInd(u);
+	const int offset = c_cellIndValue()[c];
+	if(offset > -1) {
+		computeLookupCoordU(dst, p, u);
+		dst._offset = offset;
+	} else
+		searchNonEmptyCell(dst, p);
+}
+
+void SvField::computeLookupCoordU(LookupCoord& dst, const float* p, const int* u) const
+{
+    float wx, wy, wz;
+	int i, j, k;
+	computeCellWeight(wx, wy, wz, i, j, k, p, u);
+    dst._ind[0] = cellValueInd(i  ,j  ,k);
+    dst._ind[1] = cellValueInd(i+1,j  ,k);
+    dst._ind[2] = cellValueInd(i  ,j+1,k);
+    dst._ind[3] = cellValueInd(i+1,j+1,k);
+    dst._ind[4] = cellValueInd(i  ,j  ,k+1);
+    dst._ind[5] = cellValueInd(i+1,j  ,k+1);
+    dst._ind[6] = cellValueInd(i  ,j+1,k+1);
+    dst._ind[7] = cellValueInd(i+1,j+1,k+1);
+    dst._wei[0] = wx;
+    dst._wei[1] = wy;
+    dst._wei[2] = wz;
+}
+
+void SvField::searchNonEmptyCell(LookupCoord& dst, const float* p) const
+{
+	float q[3];
+	int u[3];
+	float minD = 1e8f;
+    const float delta = m_coord[3] * .5f;
+    for(int i=0; i<512;++i) {
+        q[0] = p[0] + RandomFn11() * delta;
+        q[1] = p[1] + RandomFn11() * delta;
+        q[2] = p[2] + RandomFn11() * delta;
+        
+        computeCellCoord(u, q);
+        const int c = computeCellInd(u);
+        const int offset = c_cellIndValue()[c];
+        if(offset < 0) continue;
+        
+        float d = (q[0] - p[0]) * (q[0] - p[0])
+                + (q[1] - p[1]) * (q[1] - p[1])
+                + (q[2] - p[2]) * (q[2] - p[2]);
+        if(minD > d) {
+            minD = d;
+        } else
+            continue;
+        
+        computeLookupCoordU(dst, q, u);
+		dst._offset = offset;
+    }
+/// not found any
+    if(minD > 1e7f) dst._offset = -1;
+}
+
 }
 
 }
