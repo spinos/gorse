@@ -44,10 +44,9 @@ public:
 
 	WorldGridLookupRule();
 
-	void attach(const T *grid);
-/// after attach
 	template<typename Ti>
-	void setPrimitiveRule(const Ti *x);
+	void attach(const T *grid, const Ti *prim);
+
     void detach();
     bool isEmpty() const;
 
@@ -75,7 +74,8 @@ WorldGridLookupRule<T, Tc, Tp>::WorldGridLookupRule() : m_grid(nullptr)
 {}
 
 template<typename T, typename Tc, typename Tp>
-void WorldGridLookupRule<T, Tc, Tp>::attach(const T *grid)
+template<typename Ti>
+void WorldGridLookupRule<T, Tc, Tp>::attach(const T *grid, const Ti *prim)
 {
 	m_rayBvhRule.attach(grid->boundingVolumeHierarchy());
 
@@ -83,25 +83,18 @@ void WorldGridLookupRule<T, Tc, Tp>::attach(const T *grid)
 	m_cellRules.resetBuffer(n);
 	for(int i=0;i<n;++i) {
 		const Tc *ci = grid->c_cellPtr(i);
-		m_cellRules[i].attach(ci->_grid);
+		Tp &ri = m_cellRules[i];
+		ri.attach(ci->_grid);
+		ri.setPrimitiveRule(prim);
 	}
 	m_grid = grid;
-}
-
-template<typename T, typename Tc, typename Tp>
-template<typename Ti>
-void WorldGridLookupRule<T, Tc, Tp>::setPrimitiveRule(const Ti *x)
-{
-	const int n = m_grid->numCells();
-	for(int i=0;i<n;++i) {
-		m_cellRules[i].setPrimitiveRule(x);
-	}
 }
 
 template<typename T, typename Tc, typename Tp>
 void WorldGridLookupRule<T, Tc, Tp>::detach()
 {
 	m_grid = nullptr;
+	m_cellRules.purgeBuffer();
 }
 
 template<typename T, typename Tc, typename Tp>

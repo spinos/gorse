@@ -46,6 +46,7 @@ GlyphItem::GlyphItem(const QPixmap & iconPix, int gtyp,
 
 GlyphItem::~GlyphItem()
 {
+	delete m_iconPix;
 	delete m_opsLabel;
     if(m_activation) delete m_activation;
 	if(m_visibility) delete m_visibility;

@@ -26,6 +26,17 @@ inline void randomPointOnSphere(float *q, const float &radius, const float &fuzz
 	q[2] = u * r;
 }
 
+inline void randomPointInSphere(float *q, const float &radius) 
+{
+	const float theta = TWOPIF * RandomF01();
+	const float u = RandomFn11();
+	const float mu = sqrt(1.f - u * u);
+    const float r = radius * sqrt(RandomF01());
+	q[0] = cos(theta) * mu * r;
+	q[1] = sin(theta) * mu * r;
+	q[2] = u * r;
+}
+
 } /// end of alo
 
 #endif

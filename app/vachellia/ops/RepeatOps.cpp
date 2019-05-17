@@ -17,18 +17,22 @@
 #include <grd/WorldGridBuildRule.h>
 #include <grd/WorldGridLookupRule.h>
 #include <grd/ObjectInstancer.h>
+#include <grd/InstanceRecord.h>
 #include <grd/GridInCell.h>
+#include <h5/V1H5IO.h>
+#include <h5_grd/HInstanceRecord.h>
 #include <sds/FZOrder.h>
 #include <QProgressDialog>
 #include <QApplication>
 #include <interface/GlobalFence.h>
 #include <boost/thread/lock_guard.hpp>
-#include <ctime>
+#include <qt_base/AFileDlg.h>
 
 namespace alo {
     
 RepeatOps::RepeatOps() :
-m_isActive(false)
+m_isActive(false),
+m_instanceFilePath("unknown")
 {
     m_instancer = new InstancerTyp;
     m_worldGrid = new WorldTyp;
@@ -62,6 +66,14 @@ void RepeatOps::update()
     int mns;
     getIntAttribValue(mns, "amaxnstep");
     m_worldLookupRule->setMaxNumStep(mns);
+    
+    QAttrib * acp = findAttrib("ainstfile");
+    StringAttrib *fcp = static_cast<StringAttrib *>(acp);
+    std::string scachePath;
+    fcp->getValue(scachePath);
+    
+    if(m_instanceFilePath != scachePath && scachePath.size() > 3)
+        loadInstanceFile(scachePath);
 
     if(m_inOps.isDirty()) {
 //todo build instancer
@@ -70,7 +82,7 @@ void RepeatOps::update()
 
 bool RepeatOps::intersectRay(IntersectResult& result) const
 {
-    if(m_worldLookupRule->isEmpty() ) 
+    if(m_worldLookupRule->isEmpty()) 
         return TransformOps::intersectRay(result);
 
     float rayData[8];
@@ -103,17 +115,13 @@ bool RepeatOps::canConnectTo(GlyphOps *another, const std::string &portName) con
 void RepeatOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     RenderableOps *r = static_cast<RenderableOps *>(another);
-    //std::cout << "\n RepeatOps " << this << " connectTo renderable " << r;
     m_inOps.append(r);
-    if(m_isActive) updateInstancer(true);
 }
 
 void RepeatOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     RenderableOps *r = static_cast<RenderableOps *>(another);
     m_inOps.remove(r);
-    if(m_isActive) updateInstancer(false);
-    //std::cout << "\n RepeatOps " << this << " disconnectFrom renderable " << r;
 }
 
 bool RepeatOps::hasInstance() const
@@ -121,7 +129,7 @@ bool RepeatOps::hasInstance() const
 
 void RepeatOps::updateInstancer(bool isAppending)
 {
-    QProgressDialog progress("Processing...", QString(), 0, 2, QApplication::activeWindow() );
+    QProgressDialog progress("Processing...", QString(), 0, 1, QApplication::activeWindow() );
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
 
@@ -129,36 +137,19 @@ void RepeatOps::updateInstancer(bool isAppending)
     RenderableOps::resetAabb();
     
     if(isAppending) {
-       m_instancer->addObject(m_inOps.back());
+        m_instancer->addObject(m_inOps.back());
     } else {
-/// order changed
-       m_instancer->clear();
-       const int n = m_inOps.numElements();
-       for(int i=0;i<n;++i) {
-           m_instancer->addObject(m_inOps.element(i));
-       }
+        m_instancer->clearObjects();
+        const int n = m_inOps.numElements();
+        for(int i=0;i<n;++i) {
+            m_instancer->addObject(m_inOps.element(i));
+        }
     }
-    
-    progress.setValue(1);
     
     m_instancer->verbose();
     
-    if(m_instancer->numObjects() > 0) {
+    if(m_instancer->validateNumObjects() ) {
         
-        const float spacing = m_instancer->getMediumObjectSize();
-        std::cout << "\n spacing " << spacing;
-        const float xzSpan = spacing * .33f;
-        
-        static const int udim = 100;
-        static const int vdim = 100;
-            
-        static const float ySpan = 0.3f;
-        static const float coverOrigin = 0;
-        static const float scaleSpan = .5f;
-
-        std::time_t secs = std::time(0);
-        m_instancer->createPhalanx(udim, vdim, spacing, xzSpan, ySpan, coverOrigin, scaleSpan, secs);
-
         sds::FZOrderCurve sfc;
         sfc.setCoord(32.f, 32.f, 32.f, 16.f);
         
@@ -169,7 +160,9 @@ void RepeatOps::updateInstancer(bool isAppending)
         typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
         CellBuilderTyp cellBuilder;
         
-        int cellSize = spacing * 5.f;
+        float fcellSize = m_instancer->getMediumObjectSize() * 5.7f;
+        m_instancer->limitCellSize(fcellSize);
+        int cellSize = fcellSize;
         cellSize = Round64(cellSize);
         std::cout << "\n cell size " << cellSize;
         const int cencz[4] = {0,0,0,cellSize};
@@ -182,24 +175,77 @@ void RepeatOps::updateInstancer(bool isAppending)
        
         m_worldBuilder->detach();
 
+        m_worldLookupRule->attach<InstancerTyp>(m_worldGrid, m_instancer);
+        
         memcpy(RenderableObject::aabb(), &m_worldGrid->aabb(), 24);
 
-        m_worldLookupRule->attach(m_worldGrid);
-        m_worldLookupRule->setPrimitiveRule<InstancerTyp>(m_instancer);
-        
+        std::cout << "\n end building instancer ";
     }
 
-    progress.setValue(2);
+    progress.setValue(1);
 
+}
+
+bool RepeatOps::loadInstanceFile(const std::string &fileName)
+{
+    grd::InstanceRecord rec;
+    ver1::H5IO hio;
+    hio.begin(fileName);
+    
+    std::string instName;
+    
+    ver1::HBase ga("/");
+    bool stat = ga.lsFirstTypedChild<HInstanceRecord>(instName);
+    ga.close();
+    
+    if(stat) {
+        HInstanceRecord w(instName);
+        stat = w.load(rec);
+        w.close();
+    }
+
+    hio.end();
+    
+    if(!stat || rec.isEmpty()) return false;
+    
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+	boost::lock_guard<interface::GlobalFence> guard(fence);
+    
+    const int &n = rec.numInstances();
+    m_instancer->createInstances(n);
+    
+    for(int i=0;i<n;++i) {
+        grd::TestInstance &ti = m_instancer->instance(i);
+        ti.setObjectId(rec.inds()[i]);
+        ti.setSpace(rec.tms()[i]);
+    }
+
+    m_instancer->setNumInstancedObjects(rec.numObjects());
+    m_instancer->setMinimumCellSize(rec.getMinimumCellSize());
+    
+    m_instanceFilePath = fileName;
+    return true;
 }
 
 bool RepeatOps::hasEnable() const
 { return true; }
 
 void RepeatOps::setActivated(bool x)
-{ 
+{    
     m_isActive =x; 
     if(m_isActive) updateInstancer(false);
 }
+
+AFileDlgProfile RepeatOps::SReadProfile(AFileDlgProfile::FRead,
+        "Choose File To Open",
+        ":images/open_big.png",
+        "Open Instance Cache File",
+        "Open .hes",
+        ".hes",
+        "./",
+        "");
+
+AFileDlgProfile *RepeatOps::readFileProfileR () const
+{ return &SReadProfile; }
 
 } /// end of alo

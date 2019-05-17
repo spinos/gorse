@@ -257,6 +257,12 @@
                             "is_element": true,
                             "attribs" : [
                                 {
+                                    "name": "ainstfile",
+                                    "label": "Instance File Path",
+                                    "typ": 9,
+                                    "strtyp": 513
+                                },
+                                {
                                 "name": "amaxnstep",
                                 "label": "Max Step",
                                 "typ": 2,

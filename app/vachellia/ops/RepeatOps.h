@@ -71,7 +71,10 @@ class RepeatOps : public TransformOps {
     typedef grd::WorldGridLookupRule<WorldTyp, WorldCellTyp, LocalLookupRuleTyp > WorldLookupRuleTyp;
     WorldLookupRuleTyp *m_worldLookupRule;
 
+    std::string m_instanceFilePath;
     bool m_isActive;
+
+    static AFileDlgProfile SReadProfile;
 
 public:
 	enum { Type = 800002 };
@@ -94,10 +97,13 @@ public:
     virtual void connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
     virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
 
+    virtual AFileDlgProfile *readFileProfileR() const override;
+
 protected:
     
 private:
     void updateInstancer(bool isAppending);
+    bool loadInstanceFile(const std::string &fileName);
     
 };
 

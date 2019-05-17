@@ -3,11 +3,8 @@
  *  2019/5/8
  */
 
-#include <cstring>
-#include <cstdlib>
 #include <iostream>
 #include <string>
-#include <sstream>
 #include <grd/LocalGrid.h>
 #include <grd/LocalGridBuilder.h>
 #include <grd/LocalGridBuildRule.h>
@@ -17,7 +14,11 @@
 #include <grd/WorldGridLookupRule.h>
 #include <grd/ObjectInstancer.h>
 #include <grd/GridInCell.h>
+#include <grd/InstanceRecord.h>
 #include <sds/FZOrder.h>
+#include <h5/V1H5IO.h>
+#include <h5_grd/HInstanceRecord.h>
+#include <math/pointSphere.h>
 #include <ctime>
 
 using namespace alo;
@@ -138,8 +139,7 @@ void testBvh()
     
     typedef grd::WorldGridLookupRule<WorldTyp, WorldCellTyp, LocalLookupRuleTyp > WorldLookupRuleTyp;
     WorldLookupRuleTyp *m_worldLookupRule = new WorldLookupRuleTyp;
-    m_worldLookupRule->attach(m_worldGrid);
-    m_worldLookupRule->setPrimitiveRule<InstancerTyp>(m_instancer);
+    m_worldLookupRule->attach<InstancerTyp>(m_worldGrid, m_instancer);
     
 }
 
@@ -170,10 +170,52 @@ void testBits()
     }
 }
 
+void testPlacement()
+{
+    std::cout<<"\n test placement ";
+    int numObjects = 2;
+    int numInstances = 5000;
+
+    grd::InstanceRecord rec;
+    rec.create(numObjects, numInstances);
+    
+    int *inds = rec.inds();
+    
+    for(int i=0;i<numInstances;++i) {
+        inds[i] = rand() & 1;
+    }
+
+    Matrix44F *tms = rec.tms();
+
+    Vector3F ti;
+    for(int i=0;i<numInstances;++i) {
+        tms[i].setIdentity();
+
+        randomPointInSphere((float *)&ti, 800.f);
+
+        tms[i].setTranslation(ti);
+
+        Quaternion roty((RandomF01() - .5f) * 3.14f, Vector3F::ZAxis);
+        tms[i].setRotation(roty);
+    }
+    rec.calcAabb();
+
+    ver1::H5IO hio;
+    hio.begin("./foo.instance.hes", HDocument::oCreate);
+
+    HInstanceRecord w("/instances");
+    w.save(rec);
+    w.close();
+
+    hio.end();
+
+}
+
 int main(int argc, char *argv[])
 {
     //testBvh();
-    testBits();
+    //testBits();
+    testPlacement();
     std::cout<<"\n passed test ";
       
     return 0;

@@ -121,10 +121,12 @@ void VachellScene::recvRequestBound()
     emit sendBound(b);
 }
 
-void VachellScene::onItemStateChanged()
+void VachellScene::onItemStateChanged(GlyphItem *item, QGraphicsItem *stateControlItem)
 {
     interface::GlobalFence &fence = interface::GlobalFence::instance();
     boost::lock_guard<interface::GlobalFence> guard(fence);
+
+    item->endEditState(stateControlItem);
 
 	RenderableScene::setSceneChanged();
 	emit sendUpdateScene();

@@ -54,6 +54,11 @@ struct TestInstance {
     	_invTm = _tm;
     	_invTm.inverse();
     }
+    
+    void setSpace(const Matrix44F &tm) {
+        _tm = tm;
+        calcSpace();
+    }
 
     const int &objectId() const
     { return _objId; }
@@ -78,6 +83,8 @@ class ObjectInstancer {
 	SimpleBuffer<T1> m_instances;
 	ElementVector<T2> m_objs;
 	ElementVector<PointGridSamplesTyp> m_samps;
+    float m_minimumCellSize;
+    int m_numInstancedObjects;
 
 public:
 
@@ -86,6 +93,7 @@ public:
 
 	ObjectInstancer();
     
+    void clearObjects();
     void clear();
 
 	void addObject(T2 *x);
@@ -98,6 +106,8 @@ public:
     
     int numObjects() const;
 	const int &numInstances() const;
+/// n instanced obj > 0 and n obj >= n instanced obj 
+    bool validateNumObjects() const;
 
 	void getAabb(float *b, int ii) const;
 	float mapDistance(const float *q, 
@@ -116,24 +126,36 @@ public:
                     
     float getMediumObjectSize() const;
 
+    void setMinimumCellSize(float x);
+    void setNumInstancedObjects(int x);
+/// y no smaller than min_cell_size
+    void limitCellSize(float &y) const;
+
     void verbose() const;
     
 };
 
 template<typename T1, typename T2>
-ObjectInstancer<T1, T2>::ObjectInstancer()
+ObjectInstancer<T1, T2>::ObjectInstancer() : m_numInstancedObjects(0),
+m_minimumCellSize(32.f)
 {}
 
 template<typename T1, typename T2>
-void ObjectInstancer<T1, T2>::clear()
+void ObjectInstancer<T1, T2>::clearObjects()
 {
-    m_instances.purgeBuffer();
     m_objs.clear();
     const int n = m_samps.numElements();
     for(int i=0;i<n;++i) {
         delete m_samps.element(i);
     }
     m_samps.clear();
+}
+
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::clear()
+{
+    m_instances.purgeBuffer();
+    clearObjects();
 }
 
 template<typename T1, typename T2>
@@ -323,7 +345,9 @@ template<typename T1, typename T2>
 void ObjectInstancer<T1, T2>::verbose() const
 {
     std::cout << "\n ObjectInstancer n obj "<< m_objs.numElements()
-            << " n instance " << m_instances.count();
+            << " n instance " << m_instances.count()
+            << "\n min cell size " << m_minimumCellSize
+            << "\n n instanced obj " << m_numInstancedObjects;
             
     const int nobj = m_objs.numElements();
     for(int i=0;i<nobj;++i) {
@@ -339,6 +363,26 @@ void ObjectInstancer<T1, T2>::verbose() const
         const OutSampleTyp &s = shapeSamps->samples();
         std::cout << "\n object["<<i<<"] n sample " << s.size();
     }
+}
+
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::setMinimumCellSize(float x)
+{ m_minimumCellSize = x; }
+
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::setNumInstancedObjects(int x)
+{ m_numInstancedObjects = x; }
+
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::limitCellSize(float &y) const
+{ if(y < m_minimumCellSize) y = m_minimumCellSize; }
+
+template<typename T1, typename T2>
+bool ObjectInstancer<T1, T2>::validateNumObjects() const
+{
+    if(m_numInstancedObjects < 1) return false;
+    const int nobj = m_objs.numElements();
+    return nobj >= m_numInstancedObjects;
 }
 
 }

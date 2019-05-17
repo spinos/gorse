@@ -8,8 +8,7 @@
 
 namespace alo {
 
-HLocalGrid::HLocalGrid(const std::string &name) :
-HBase(name)
+HLocalGrid::HLocalGrid(const std::string &name) : ver1::HBase(name)
 {}
 
 bool HLocalGrid::verifyType()

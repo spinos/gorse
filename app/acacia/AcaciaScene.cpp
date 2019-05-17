@@ -107,8 +107,11 @@ void AcaciaScene::recvRequestBound()
     emit sendBound(b);
 }
 
-void AcaciaScene::onItemStateChanged()
-{ emit sendUpdateDrawable(); }
+void AcaciaScene::onItemStateChanged(GlyphItem *item, QGraphicsItem *stateControlItem)
+{ 
+    item->endEditState(stateControlItem);
+    emit sendUpdateDrawable(); 
+}
 
 void AcaciaScene::createConnection(GlyphConnection *conn, GlyphPort *port)
 {

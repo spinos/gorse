@@ -26,6 +26,7 @@ class AttribEditor : public QWidget
 
 public:
 	AttribEditor(alo::GlyphScene *scene, QWidget *parent = 0);
+	virtual ~AttribEditor();
 	
 protected:
 
@@ -69,6 +70,7 @@ private:
 	QVBoxLayout *rightBox;
 	QSpacerItem *m_leftSpace;
 	QSpacerItem *m_rightSpace;
+	QPixmap *m_defaultPix;
 
 };
 

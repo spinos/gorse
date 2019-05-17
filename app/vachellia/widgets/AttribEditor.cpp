@@ -44,9 +44,12 @@ AttribEditor::AttribEditor(alo::GlyphScene *scene, QWidget *parent) : QWidget(pa
 	
 	scroll->setWidget(splt);
 
+	m_defaultPix = new QPixmap(":/images/unknown.png");
+
 	m_iconLabelBox = new QHBoxLayout;
 	m_icon = new QLabel();
 	m_icon->setFixedWidth(64);
+	m_icon->setPixmap(*m_defaultPix);
 	m_label = new QLabel("unknown");
 	m_label->setMinimumWidth(90);
 	m_iconLabelBox->addWidget(m_icon);
@@ -64,9 +67,11 @@ AttribEditor::AttribEditor(alo::GlyphScene *scene, QWidget *parent) : QWidget(pa
 #endif
 }
 
+AttribEditor::~AttribEditor()
+{ delete m_defaultPix; }
+
 void AttribEditor::recvGlyphIcon(const QPixmap &pix)
-{ m_icon->setPixmap(pix); 
-}
+{ m_icon->setPixmap(pix); }
 
 void AttribEditor::recvSelectGlyph(bool isSelecting)
 {
@@ -80,6 +85,7 @@ void AttribEditor::recvSelectGlyph(bool isSelecting)
 		lsAttribs(ops);
 			
 	} else {
+		m_icon->setPixmap(*m_defaultPix);
 		m_label->setText("unknown");
 		clearAttribs();
 	}

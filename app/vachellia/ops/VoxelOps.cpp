@@ -17,7 +17,7 @@
 #include <grd/LocalGridLookupRule.h>
 #include <h5/V1H5IO.h>
 #include <h5_ssdf/HSsdf.h>
-#include <h5_ssdf/HLocalGrid.h>
+#include <h5_grd/HLocalGrid.h>
 #include <QProgressDialog>
 #include <QApplication>
 #include <interface/GlobalFence.h>

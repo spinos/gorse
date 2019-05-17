@@ -29,7 +29,7 @@
 #include <grd/LocalGridBuilder.h>
 #include <grd/LocalGridBuildRule.h>
 #include <grd/GridSamples.h>
-#include <h5_ssdf/HLocalGrid.h>
+#include <h5_grd/HLocalGrid.h>
 #include <QProgressDialog>
 #include <QApplication>
 

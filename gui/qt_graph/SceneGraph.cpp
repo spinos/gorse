@@ -277,8 +277,7 @@ void SceneGraph::endProcessItem(QGraphicsItem *item)
 	GlyphItem *selectedItem = static_cast<GlyphItem *>(ti);
 		
 	if (item->type() == StateControlItem::Type) {
-		selectedItem->endEditState(item);
-		asGlyphScene()->onItemStateChanged();
+		asGlyphScene()->onItemStateChanged(selectedItem, item);
 	}
 
 }

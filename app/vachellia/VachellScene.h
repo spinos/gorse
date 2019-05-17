@@ -25,7 +25,7 @@ public:
 	VachellScene(QObject *parent = 0);
 	virtual ~VachellScene();
 	
-	virtual void onItemStateChanged() override;
+	virtual void onItemStateChanged(alo::GlyphItem *item, QGraphicsItem *stateControlItem) override;
     virtual void createConnection(alo::GlyphConnection *conn, alo::GlyphPort *port) override;
     virtual void removeConnection(alo::GlyphConnection *conn) override;
 	
