@@ -34,7 +34,7 @@ public:
     //void setDisplayWire();
 
 public slots:
-    //void cleanup();
+    void recvStopRender();
     void recvUpdateScene();
     void recvRerender();
     void recvBound(const alo::Hexahedron &x);

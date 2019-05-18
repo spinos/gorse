@@ -55,6 +55,8 @@ public:
 	const BoundingBox &aabb() const;
 
 	int numCells() const;
+/// bvh num primitive
+	int numNonEmptyCells() const;
 
 protected:
 
@@ -200,6 +202,13 @@ const BoundingBox &WorldGrid<T, Tc>::aabb() const
 template<typename T, typename Tc>
 int WorldGrid<T, Tc>::numCells() const
 { return m_cells.size(); }
+
+template<typename T, typename Tc>
+int WorldGrid<T, Tc>::numNonEmptyCells() const
+{ 
+	if(!m_bvh) return 0;
+	return m_bvh->numPrimitives(); 
+}
 
 } /// end of namespace grd
 

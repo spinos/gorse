@@ -37,9 +37,9 @@ public:
     RenderThread(RenderInterface* interf, QObject *parent = 0);
     ~RenderThread();
 
-/// fenced after scene changed
     void rerender();
     void render();
+    void stopRender();
 	
 signals:
     void renderedImage();
@@ -59,10 +59,11 @@ private:
 	//bool m_restart;
 /// end before loop
     bool m_abort;
+    float m_thre;
 	
 	RenderInterface* m_interface;
     
-    void renderWork(BufferBlock* packet, RenderBuffer *buf);
+    int renderWork(BufferBlock* packet, RenderBuffer *buf);
     
 };
 

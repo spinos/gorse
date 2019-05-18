@@ -76,8 +76,7 @@ typedef unsigned char uchar;
 	
 	RenderContext* getContext();
 	
-/// quality threshold
-	bool isResidualLowEnough() const;
+	float residual() const;
 	
 };
 

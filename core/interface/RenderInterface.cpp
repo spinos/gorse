@@ -133,8 +133,8 @@ Renderer* RenderInterface::getRenderer()
 RenderContext* RenderInterface::getContext()
 { return m_context; }
 
-bool RenderInterface::isResidualLowEnough() const
-{ return m_buffer->maxResidual() < 1e-9f; }
+float RenderInterface::residual() const
+{ return m_buffer->maxResidual(); }
 
 void RenderInterface::updateScene()
 { m_context->updateScene(); }

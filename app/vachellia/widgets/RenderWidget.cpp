@@ -158,3 +158,8 @@ void RenderWidget::recvFocusCameraOn(const alo::Float4 &centerRadius)
     m_interface->setChangedCamera();
     m_thread->render();
 }
+
+void RenderWidget::recvStopRender()
+{
+    m_thread->stopRender();
+}

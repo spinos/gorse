@@ -77,10 +77,11 @@ template<typename T, typename Tc, typename Tp>
 template<typename Ti>
 void WorldGridLookupRule<T, Tc, Tp>::attach(const T *grid, const Ti *prim)
 {
+	std::cout << " WorldGridLookupRule attach ";
 	m_rayBvhRule.attach(grid->boundingVolumeHierarchy());
 
-	const int n = grid->numCells();
-	m_cellRules.resetBuffer(n);
+	const int n = grid->numNonEmptyCells();
+	m_cellRules.createBuffer(n);
 	for(int i=0;i<n;++i) {
 		const Tc *ci = grid->c_cellPtr(i);
 		Tp &ri = m_cellRules[i];
@@ -93,6 +94,7 @@ void WorldGridLookupRule<T, Tc, Tp>::attach(const T *grid, const Ti *prim)
 template<typename T, typename Tc, typename Tp>
 void WorldGridLookupRule<T, Tc, Tp>::detach()
 {
+	std::cout << " WorldGridLookupRule detach ";
 	m_grid = nullptr;
 	m_cellRules.purgeBuffer();
 }

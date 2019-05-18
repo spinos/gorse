@@ -30,6 +30,7 @@ public:
     virtual void removeConnection(alo::GlyphConnection *conn) override;
 	
 signals:
+	void sendStopRender();
 	void sendUpdateScene();
 	void sendBound(const alo::Hexahedron &x);
 
