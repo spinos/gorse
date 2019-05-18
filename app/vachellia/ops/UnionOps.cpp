@@ -168,4 +168,9 @@ void UnionOps::combineInputs()
 bool UnionOps::hasInstance() const
 { return false; }
 
+QString UnionOps::getShortDescription() const
+{
+    return QString("union of %1").arg(m_inOps.numElements());  
 }
+
+} /// end of alo

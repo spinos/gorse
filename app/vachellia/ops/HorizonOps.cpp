@@ -75,4 +75,9 @@ float HorizonOps::mapLocalDistance(const float *q) const
 void HorizonOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
 {}
 
+QString HorizonOps::getShortDescription() const
+{
+    return QString("planet radius %1 km").arg(m_planetRadius); 
+}
+
 }

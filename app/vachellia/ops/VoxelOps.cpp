@@ -246,4 +246,9 @@ void VoxelOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) co
     m_grid->genSamples<grd::PointSample>(samples);
 }
 
+QString VoxelOps::getShortDescription() const
+{
+    return QString("voxle file %1").arg(QString::fromStdString(m_cachePath)); 
+}
+
 } /// end of namespace alo

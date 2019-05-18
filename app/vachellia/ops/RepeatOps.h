@@ -96,7 +96,7 @@ public:
     virtual bool canConnectTo(GlyphOps *another, const std::string &portName) const override;
     virtual void connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
     virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
-
+    virtual QString getShortDescription() const override;
     virtual AFileDlgProfile *readFileProfileR() const override;
 
 protected:

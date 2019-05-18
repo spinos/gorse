@@ -113,4 +113,9 @@ void SphereOps::disconnectFrom(GlyphOps *another, const std::string &portName, G
     m_outOps.remove(line);
 }
 
+QString SphereOps::getShortDescription() const
+{
+    return QString("radius %1").arg(QString::number(m_radius)); 
+}
+
 }

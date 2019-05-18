@@ -116,4 +116,9 @@ void CylinderOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples)
     }
 }
 
+QString CylinderOps::getShortDescription() const
+{
+    return QString("height %1\nradius %2").arg(QString::number(m_height), QString::number(m_radius)); 
+}
+
 }

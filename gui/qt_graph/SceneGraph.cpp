@@ -5,8 +5,8 @@
  *  2019/5/10
  */
 
-#include <QtGui>
 #include "SceneGraph.h"
+#include <QtWidgets>
 #include "GlyphScene.h"
 #include "GlyphConnection.h"
 #include "GlyphHalo.h"
@@ -234,7 +234,9 @@ void SceneGraph::doConnectItem(QGraphicsItem* item)
 		asGlyphScene()->createConnection(m_selectedConnection, p1);
 	}
 	
-	if(!m_selectedConnection->isComplete() ) {
+	if(m_selectedConnection->isComplete() ) {
+		m_selectedConnection->genToolTip();
+	} else {
 		scene()->removeItem( m_selectedConnection );
 /// graphic scene stops responding if destroy the connection
 /// send to garbage?
@@ -286,6 +288,24 @@ void SceneGraph::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Delete) 
     	asGlyphScene()->removeActiveGlyph();
+}
+
+bool SceneGraph::event(QEvent *event)
+{
+    if (event->type() == QEvent::ToolTip) {
+        QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+        
+        QGraphicsItem *item = itemAt(helpEvent->pos());
+        if (item) {
+            QToolTip::showText(helpEvent->globalPos(), item->toolTip() );
+        } else {
+            QToolTip::hideText();
+            event->ignore();
+        }
+
+        return true;
+    }
+    return QGraphicsView::event(event);
 }
 
 } /// end of namespace alo

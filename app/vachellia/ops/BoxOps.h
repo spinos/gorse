@@ -33,7 +33,8 @@ public:
     
     virtual void connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
     virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
-
+    virtual QString getShortDescription() const override;
+    
 protected:
     
 private:

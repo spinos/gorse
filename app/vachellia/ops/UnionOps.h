@@ -39,6 +39,7 @@ public:
     virtual void receiveImpulse(GlyphOps *another, const std::string &portName) override;
     virtual float mapDistance(const float *q) const override;
     virtual Vector3F mapNormal(const float *q) const override;
+    virtual QString getShortDescription() const override;
     
 protected:
     

@@ -41,6 +41,8 @@ public:
 	void sendImpulse();
 	
 	int type() const { return Type; }
+
+	void genToolTip();
 	
 	static bool IsItemConnection(const QGraphicsItem *item);
 	

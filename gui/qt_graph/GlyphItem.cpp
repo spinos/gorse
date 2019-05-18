@@ -64,12 +64,13 @@ void GlyphItem::resizeBlock(int bx, int by)
 	m_blockHeight = by;
 }	
 
-GlyphPort * GlyphItem::addPort(const QString & name, 
+GlyphPort *GlyphItem::addPort(const QString & name, 
 							bool isOutgoing)
 {
 	GlyphPort * pt = new GlyphPort(this);
 	pt->setPortName(name);
     pt->setIsOutgoing(isOutgoing);
+    pt->genToolTip();
 	return pt;
 }
 
@@ -318,6 +319,12 @@ void GlyphItem::onInputChange(GlyphItem* another, GlyphPort* viaPort)
 {
 	m_ops->receiveImpulse(another->ops(), 
 				viaPort->portName().toStdString() ); 
+}
+
+void GlyphItem::genToolTip()
+{
+	QString stip = m_ops->getShortDescription();
+	setToolTip(stip);
 }
 
 } /// end of namespace alo

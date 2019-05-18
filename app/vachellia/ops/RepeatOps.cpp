@@ -248,4 +248,9 @@ AFileDlgProfile RepeatOps::SReadProfile(AFileDlgProfile::FRead,
 AFileDlgProfile *RepeatOps::readFileProfileR () const
 { return &SReadProfile; }
 
+QString RepeatOps::getShortDescription() const
+{
+    return QString("instance file %1").arg(QString::fromStdString(m_instanceFilePath)); 
+}
+
 } /// end of alo

@@ -39,7 +39,8 @@ public:
     virtual float mapLocalDistance(const float *q) const override;
 /// no samples generated
     virtual void genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const override;
-
+    virtual QString getShortDescription() const override;
+    
 protected:
     
 private:

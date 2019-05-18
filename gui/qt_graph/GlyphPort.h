@@ -42,6 +42,8 @@ public:
     void getConnections(std::vector<GlyphConnection *> &conns) const;
 	
 	int type() const { return Type; }
+
+	void genToolTip();
 	
 	static bool IsItemPort(const QGraphicsItem *item);
 	static bool IsItemOutgoingPort(const QGraphicsItem *item);

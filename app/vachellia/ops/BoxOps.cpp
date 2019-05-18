@@ -59,4 +59,13 @@ void BoxOps::disconnectFrom(GlyphOps *another, const std::string &portName, Glyp
     m_outOps.remove(line);
 }
 
+QString BoxOps::getShortDescription() const
+{
+    const float *b = c_aabb();
+    float bx = b[3] - b[0];
+    float by = b[4] - b[1];
+    float bz = b[5] - b[2];
+    return QString("width %1\nheight %2\ndepth %3").arg(QString::number(bx), QString::number(by), QString::number(bz)); 
 }
+
+} /// end of alo

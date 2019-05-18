@@ -23,9 +23,6 @@ GlyphPort::GlyphPort(QGraphicsItem * parent) : QGraphicsEllipseItem(parent)
 
 GlyphPort::~GlyphPort()
 {
-	//foreach(GlyphConnection *conn, m_connections) {
-	//	conn->disconnectPort(this);
-	//}
 }
 
 void GlyphPort::setPortName(const QString & name)
@@ -105,6 +102,13 @@ bool GlyphPort::IsItemIncomingPort(const QGraphicsItem *item)
 	}
 	const GlyphPort * pt = (const GlyphPort *)item;
 	return !pt->isOutgoing();
+}
+
+void GlyphPort::genToolTip()
+{
+	QString sdir = m_isOutgoing ? "outgoing" : "incoming";
+	QString stip = QString("%1 port: %2").arg(sdir, m_portName);
+	setToolTip(stip);
 }
 
 }

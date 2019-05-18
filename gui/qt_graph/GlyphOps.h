@@ -76,8 +76,8 @@ public:
 	virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line);
 	virtual void postConnectionChange(const std::string &portName);
 	virtual void receiveImpulse(GlyphOps *another, const std::string &portName);
-
 	virtual void preDestruction();
+	virtual QString getShortDescription() const;
 
 	void setGlyphScene(GlyphScene *x);
 	GlyphScene *glyphScene();

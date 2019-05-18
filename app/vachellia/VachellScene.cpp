@@ -73,6 +73,8 @@ void VachellScene::postCreation(GlyphItem *item)
 		dop->addRenderableTo(this);
 	}
 
+    item->genToolTip();
+
     RenderableScene::setSceneChanged();
     emit sendUpdateScene();
 }
@@ -128,6 +130,8 @@ void VachellScene::onItemStateChanged(GlyphItem *item, QGraphicsItem *stateContr
 
     item->endEditState(stateControlItem);
 
+    item->genToolTip();
+
 	RenderableScene::setSceneChanged();
 	emit sendUpdateScene();
 }
@@ -136,6 +140,9 @@ void VachellScene::recvAttribChanged()
 {
     interface::GlobalFence &fence = interface::GlobalFence::instance();
     boost::lock_guard<interface::GlobalFence> guard(fence);
+
+    GlyphItem *item = getActiveGlyph();
+    if(item) item->genToolTip();
 
     RenderableScene::setSceneChanged();
 	emit sendUpdateScene();

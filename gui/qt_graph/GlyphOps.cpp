@@ -489,4 +489,7 @@ void GlyphOps::receiveImpulse(GlyphOps *another, const std::string &portName)
 	std::cout << "\n GlyphOps::receiveImpulse from " << another << " via " << portName;
 }
 
+QString GlyphOps::getShortDescription() const
+{ return QString::fromStdString(opsName()); }
+
 } /// end of namespace alo

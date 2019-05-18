@@ -172,4 +172,14 @@ void GlyphConnection::sendImpulse()
 	n1->onInputChange(n0, port1());
 }
 
+void GlyphConnection::genToolTip()
+{
+	GlyphItem * n0 = node0();
+	QString name0 = QString::fromStdString(n0->glyphName());
+	GlyphItem * n1 = node1();
+	QString name1 = QString::fromStdString(n1->glyphName());
+	QString stip = QString("%1.%2 -> %3.%4").arg(name0, m_port0->portName(), name1, m_port1->portName() );
+	setToolTip(stip);
+}
+
 }
