@@ -152,6 +152,7 @@ bool VoxelOps::loadCache(const std::string &fileName)
     else {
         m_cachePath = "unknown";
     }
+
     progress.setValue(1);
     return stat;
 

@@ -174,7 +174,7 @@ void testPlacement()
 {
     std::cout<<"\n test placement ";
     int numObjects = 2;
-    int numInstances = 5000;
+    int numInstances = 7000;
 
     grd::InstanceRecord rec;
     rec.create(numObjects, numInstances);
@@ -191,12 +191,13 @@ void testPlacement()
     for(int i=0;i<numInstances;++i) {
         tms[i].setIdentity();
 
-        randomPointInSphere((float *)&ti, 800.f);
+        randomPointInSphere((float *)&ti, 900.f);
 
         tms[i].setTranslation(ti);
 
-        Quaternion roty((RandomF01() - .5f) * 3.14f, Vector3F::ZAxis);
-        tms[i].setRotation(roty);
+        Quaternion rotz((RandomF01() - .5f) * 3.14f, Vector3F::ZAxis);
+        Quaternion roty((RandomF01() - .5f) * 3.14f, Vector3F::YAxis);
+        tms[i].setRotation(roty * rotz);
     }
     rec.calcAabb();
 

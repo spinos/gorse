@@ -65,7 +65,6 @@ template<typename T>
 void LocalGridBuilder<T>::attach(T *grid)
 {
 	m_grid = grid;
-	if(grid->numIndices() > 0) recordIndices(grid);
 }
 
 template<typename T>
@@ -88,6 +87,8 @@ void LocalGridBuilder<T>::detach()
 	const int numInstances = m_objectCellMap.size();
 	int *inds = m_grid->createIndices(nObjs + numInstances);
 
+	m_grid->reset();
+
 	int offset = 0;
 
 	sdb::L3Node<int, int, 1024> *oblock = allObjs.begin();
@@ -101,6 +102,7 @@ void LocalGridBuilder<T>::detach()
 	
 	int countNonEmptyCells = 0;
 	int preCell = -1;
+	int valueInd;
 	
 	block = m_objectCellMap.begin();
 	while(block) {
@@ -113,24 +115,27 @@ void LocalGridBuilder<T>::detach()
 
 			inds[offset] = ci.x;
 
-			Int2 &cellRange = m_grid->cell()[ci.y];
-
 			if(preCell != ci.y) {
 				preCell = ci.y;
 				countNonEmptyCells++;
 
-				cellRange.x = offset;
+				Int2 &cellBegin = m_grid->addCell(Int2(0,0), ci.y);
+
+				cellBegin.x = offset;
+
+				valueInd = m_grid->hasCell(ci.y);
 			}
 
 			offset++;
-			cellRange.y = offset;
+
+			Int2 &cellEnd = m_grid->mappedCell(valueInd);
+			cellEnd.y = offset;
+
 		}
 		block = m_objectCellMap.next(block);
 	}
 
 	m_objectCellMap.clear();
-    
-    //m_grid->verbose();
     
 }
 

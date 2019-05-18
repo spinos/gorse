@@ -112,8 +112,8 @@ void DeepBuffer::highResidualBlocks(BufferBlock **blocks, int n) const
 	int offset = 0;
 	for(int i=0;i<n;++i) {
 		
-		if(i>0) offset += rand() % (nblk>>3);
-		if(offset > (nblk>>1)) offset = offset - (nblk>>1);
+		if(i>0) offset += rand() % (nblk>>5);
+		if(offset > (nblk>>1)) offset -= (nblk>>1);
 
 		bool stat = true;
 		for(int j=0;j<i;++j) {

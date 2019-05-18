@@ -160,7 +160,7 @@ void RepeatOps::updateInstancer(bool isAppending)
         typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
         CellBuilderTyp cellBuilder;
         
-        float fcellSize = m_instancer->getMediumObjectSize() * 5.7f;
+        float fcellSize = m_instancer->getMediumObjectSize() * 6.f;
         m_instancer->limitCellSize(fcellSize);
         int cellSize = fcellSize;
         cellSize = Round64(cellSize);

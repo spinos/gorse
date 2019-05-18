@@ -51,6 +51,7 @@ public:
 	const BVHPrimitive *c_primitives() const;
 	const BoundingBox &primitiveBox(int i) const;
 	const int &primitiveIndex(int i) const;
+	const int &primitiveIndirection(int i) const;
 
 	friend std::ostream& operator<<(std::ostream &output, const BVH & p);
 

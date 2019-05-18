@@ -31,7 +31,7 @@ inline void randomPointInSphere(float *q, const float &radius)
 	const float theta = TWOPIF * RandomF01();
 	const float u = RandomFn11();
 	const float mu = sqrt(1.f - u * u);
-    const float r = radius * sqrt(RandomF01());
+    const float r = radius * pow(RandomF01(), .333333);
 	q[0] = cos(theta) * mu * r;
 	q[1] = sin(theta) * mu * r;
 	q[2] = u * r;

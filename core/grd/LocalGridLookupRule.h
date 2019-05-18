@@ -164,9 +164,12 @@ bool LocalGridLookupRule<T, Tp>::processLeaf(LocalGridLookupResult &result, cons
 		t[0] += 1e-3f;
 
 		const int &celli = m_grid->primitiveIndex(firstHit);
-		primitiveResult._instanceRange = m_grid->c_cell()[celli];
-		if(primitiveResult.isEmptySpace())
+
+		const int vi = m_grid->hasCell(celli);
+		if(vi < 0)
 			primitiveResult._instanceRange.set(0, m_grid->numObjects());
+		else
+			primitiveResult._instanceRange = m_grid->c_mappedCell(vi);
 
 		if(intersectPrimitive(primitiveResult, t, rayData)) return true;
 
@@ -266,9 +269,12 @@ float LocalGridLookupRule<T, Tp>::mapDistance(LocalGridPrimitveLookupResult &res
 
 	computeCellCoord(result._u, result._q);
 	const int celli = computeCellInd(result._u);
-	result._instanceRange = m_grid->c_cell()[celli];
-	if(result.isEmptySpace())
+
+	const int vi = m_grid->hasCell(celli);
+	if(vi < 0)
 		result._instanceRange.set(0, m_grid->numObjects());
+	else
+		result._instanceRange = m_grid->c_mappedCell(vi);
 
 	return m_primitiveRule->mapDistance(q, 
         	m_grid->c_indices(), result._instanceRange, 

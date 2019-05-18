@@ -60,7 +60,7 @@ void InstanceRecord::calcAabb()
 }
 
 float InstanceRecord::getMinimumCellSize() const
-{ return sqrt(m_bbox.area() * .0017f); }
+{ return sqrt(m_bbox.area() * .002f); }
 
 void InstanceRecord::getAabb(float *b) const
 { memcpy(b, m_bbox.data(), 24); }

@@ -113,6 +113,9 @@ const BoundingBox &BVH::primitiveBox(int i) const
 const int &BVH::primitiveIndex(int i) const
 { return m_primitives[i].index(); }
 
+const int &BVH::primitiveIndirection(int i) const
+{ return m_indirections[i]; }
+
 BVHNode &BVH::node(int i)
 { return m_nodes[i]; }
 

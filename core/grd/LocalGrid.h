@@ -2,18 +2,17 @@
  *  LocalGrid.h
  *  gorse
  *
- *  cubic grid stores index range to object inside as cell values
+ *  sparse cubic grid stores index range to object
  *  first n_obj indices are object ids
  *  ray-intersect nonempty cells using bvh
  *
- *  2019/5/12
+ *  2019/5/19
  */
 
 #ifndef ALO_GRD_LOCAL_GRID_H
 #define ALO_GRD_LOCAL_GRID_H
 
-#include <sds/CubicGrid.h>
-#include <math/Int2.h>
+#include <sds/SparseCubicGrid.h>
 #include <bvh/BVH.h>
 #include <bvh/BVHBuilder.h>
 #include <bvh/BVHSplit.h>
@@ -26,9 +25,9 @@ namespace alo {
 namespace grd {
 
 template<typename T>
-class LocalGrid : public sds::CubicGrid<T, Int2> {
+class LocalGrid : public sds::SparseCubicGrid<Int2> {
 
-typedef sds::CubicGrid<T, Int2> PGridTyp;
+typedef sds::SparseCubicGrid<Int2> PGridTyp;
 
 	SimpleBuffer<int> m_indices;
 	int m_numIndices;
@@ -39,9 +38,6 @@ public:
 
 	LocalGrid();
 	virtual ~LocalGrid();
-/// create grid by resolution x, initial distance to very large
-/// indices range to [0,0]
-	void create(const int& x);
     
     void setAabb(const float *b);
 /// unique object id count
@@ -57,8 +53,7 @@ public:
 
     const int &numIndices() const;
     const int &numObjects() const;
-/// i-th cell range y > x
-    bool isCellEmpty(int i) const;
+    int numInstances() const;
 
     const BVH *boundingVolumeHierarchy() const;
     const BoundingBox &primitiveBox(int i) const;
@@ -88,15 +83,6 @@ template<typename T>
 LocalGrid<T>::~LocalGrid()
 {
     if(m_bvh) delete m_bvh;
-}
-
-template<typename T>
-void LocalGrid<T>::create(const int& x)
-{
-    PGridTyp::create(x);
-
-    const int nc = numCells();
-    for(int i=0;i<nc;++i) cell()[i] = Int2(0,0);
 }
 
 template<typename T>
@@ -148,7 +134,6 @@ void LocalGrid<T>::buildBvh()
 /// cell ind as primitive ind
         ap.setIndex(i);
 
-
         m_bvh->addPrimitive(ap);
     }
 
@@ -159,8 +144,6 @@ void LocalGrid<T>::buildBvh()
 
     BVHBuilder::Build(m_bvh);
     
-    //std::cout << *m_bvh;
-
 }
 
 template<typename T>
@@ -184,11 +167,8 @@ const int &LocalGrid<T>::numObjects() const
 { return m_numObjects; }
 
 template<typename T>
-bool LocalGrid<T>::isCellEmpty(int i) const
-{
-    const Int2 &r = c_cell()[i];
-    return r.x >= r.y;
-}
+int LocalGrid<T>::numInstances() const
+{ return numIndices() - numObjects(); }
 
 template<typename T>
 const BVH *LocalGrid<T>::boundingVolumeHierarchy() const
@@ -233,15 +213,11 @@ void LocalGrid<T>::genSamples(sds::SpaceFillingVector<Ts> &samples) const
 template<typename T>
 void LocalGrid<T>::verbose() const
 {
-    int nne = 0;
-    const int nc = numCells();
-    for(int i=0;i<nc;++i) {
-        if( c_cell()[i].x < c_cell()[i].y) nne++;
-    }
     std::cout << "\n LocalGrid rez "<<resolution()
     <<" origin ("<<originCellSize()[0]<<", "<<originCellSize()[1]<<", "<<originCellSize()[2]
     <<") cell_size "<<originCellSize()[3]
-    <<"\n "<< numObjects() << " object " <<numIndices() - numObjects() << " instance in "<<nne<<" cell ";
+    <<"\n "<< numObjects() << " object " <<numInstances() << " instance in "<<numNonemptyCells()<<" cell "
+    << 100.f - 100.f * numNonemptyCells() / numCells() << " percent empty ";
 
 }
 

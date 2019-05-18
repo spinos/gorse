@@ -26,8 +26,6 @@ namespace grd {
 template<typename T, typename Tc>
 class WorldGrid {
 
-/// indirection
-	SimpleBuffer<int> m_cellInd;
 /// in serial
 	SimpleBuffer<const Tc *> m_cellPtr;
 /// mapped
@@ -77,7 +75,6 @@ WorldGrid<T, Tc>::~WorldGrid()
 template<typename T, typename Tc>
 void WorldGrid<T, Tc>::clear()
 {
-	m_cellInd.purgeBuffer();
 	m_cellPtr.purgeBuffer();
 
 	sdb::L3Node<T, Tc, 1024> *block = m_cells.begin();
@@ -145,27 +142,11 @@ void WorldGrid<T, Tc>::buildBvh()
 
     BVHBuilder::Build(m_bvh);
 
-    m_cellInd.resetBuffer(m_cells.size());
-
-    const BVHPrimitive *prims = m_bvh->c_primitives();
-    const BVHNode *ns = m_bvh->c_nodes();
-    const int &nn = m_bvh->numNodes();
-
-	for(int i=0;i<nn;++i) {
-		const BVHNode &ni = ns[i];
-		if(ni.isLeaf()) {
-
-			int b = ni.leafBegin();
-			int e = ni.leafEnd();
-			
-			for(int j=b;j<e;++j) {
-				m_cellInd[j] = prims[j].index();
-			}
-			
-		}
-	}
-
     std::cout << *m_bvh;
+
+    int totalNCell = 0;
+    int totalNNECell = 0;
+    int totalNInd = 0;
     
     block = m_cells.begin();
 	while(block) {
@@ -176,10 +157,17 @@ void WorldGrid<T, Tc>::buildBvh()
         	if(ci.isEmpty()) continue;
 
 			ci._grid->buildBvh();
+
+			totalNCell += ci._grid->numCells();
+			totalNNECell += ci._grid->numNonemptyCells();
+			totalNInd += ci._grid->numInstances();
             
 		}
 		block = m_cells.next(block);
 	}
+
+	std::cout << " " << totalNInd << " instance in " << totalNNECell << " local cell "
+		 << 100.f - (float)totalNNECell / (float) totalNCell * 100.f << " percent empty ";
     
 }
 
@@ -193,7 +181,10 @@ const BoundingBox &WorldGrid<T, Tc>::primitiveBox(int i) const
 
 template<typename T, typename Tc>
 const Tc *WorldGrid<T, Tc>::c_cellPtr(int i) const
-{ return m_cellPtr[m_cellInd[i]]; }
+{ 
+	const int &j = m_bvh->primitiveIndirection(i);
+	return m_cellPtr[j]; 
+}
 
 template<typename T, typename Tc>
 const BoundingBox &WorldGrid<T, Tc>::aabb() const

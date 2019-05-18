@@ -81,7 +81,7 @@ void WorldGridLookupRule<T, Tc, Tp>::attach(const T *grid, const Ti *prim)
 	m_rayBvhRule.attach(grid->boundingVolumeHierarchy());
 
 	const int n = grid->numNonEmptyCells();
-	m_cellRules.createBuffer(n);
+	m_cellRules.resetBuffer(n);
 	for(int i=0;i<n;++i) {
 		const Tc *ci = grid->c_cellPtr(i);
 		Tp &ri = m_cellRules[i];
