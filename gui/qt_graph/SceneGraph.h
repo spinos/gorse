@@ -59,6 +59,7 @@ private:
 	void doMoveConnection(const QPoint& mousePos);
 	void doConnectItem(QGraphicsItem* item);
 	void doRemoveConnection(QGraphicsItem* item);
+    void modifyDv(QPointF &dv, const GlyphItem *focused) const;
 	
 	enum Mode {
 		mNone = 0,

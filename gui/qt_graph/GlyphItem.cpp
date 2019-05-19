@@ -155,7 +155,7 @@ const QPixmap &GlyphItem::iconPix() const
 { return *m_iconPix; }
 
 QPointF GlyphItem::localCenter() const
-{ return QPointF(m_blockWidth >> 1, m_blockHeight >> 1); }
+{ return QPointF(m_blockWidth / 2, m_blockHeight / 2); }
 
 void GlyphItem::setOps(GlyphOps *ops)
 { 
@@ -326,5 +326,27 @@ void GlyphItem::genToolTip()
 	QString stip = m_ops->getShortDescription();
 	setToolTip(stip);
 }
+
+QPolygonF GlyphItem::getCollisionPolygon(const QPointF &dv) const
+{ 
+	QPolygonF poly;
+	makeCollisionPolygon(poly, dv);
+	return poly; 
+}
+
+void GlyphItem::makeCollisionPolygon(QPolygonF &poly, const QPointF &dv) const
+{
+	const QPointF left(-8, m_blockHeight / 2);
+	poly<<mapToScene(left) + dv;
+	const QPointF bottom(m_blockWidth / 2, m_blockHeight / 2 + 70);
+	poly<<mapToScene(bottom) + dv;
+	const QPointF right(m_blockWidth + 8, m_blockHeight / 2);
+	poly<<mapToScene(right) + dv;
+	const QPointF top(m_blockWidth / 2, m_blockHeight / 2 - 70);
+	poly<<mapToScene(top) + dv;
+}
+
+QPointF GlyphItem::getCollisionCenter() const
+{ return mapToScene(localCenter()); }
 
 } /// end of namespace alo

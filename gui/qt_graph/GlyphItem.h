@@ -16,6 +16,7 @@ QT_BEGIN_NAMESPACE
 class QPixmap;
 class QGraphicsPixmapItem;
 class QGraphicsSimpleTextItem;
+class QPolygonF;
 QT_END_NAMESPACE
 
 namespace alo {
@@ -58,6 +59,8 @@ public:
 	GlyphOps *getOps() const;
 	GlyphOps *ops();
 	const QPixmap &iconPix() const;
+	QPolygonF getCollisionPolygon(const QPointF &dv) const;
+	QPointF getCollisionCenter() const;
 	
 	QPointF localCenter() const;
 	std::string glyphName() const;
@@ -88,7 +91,8 @@ protected:
 	virtual void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
 	virtual void mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event );
 	virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent * event);
-	
+	virtual void makeCollisionPolygon(QPolygonF &poly, const QPointF &dv) const;
+
 private:
 	void movePort(GlyphPort *pt, const Connectable *c);
 	void processContextMenu(int k);

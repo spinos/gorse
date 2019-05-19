@@ -212,7 +212,10 @@ void SceneGraph::doMoveItem(const QPoint& mousePos)
 	QPointF dv(mousePos.x() - m_lastMosePos.x(),
 					mousePos.y() - m_lastMosePos.y() );
 	GlyphItem *g = asGlyphScene()->getActiveGlyph();
-	if(g) g->moveBlockBy(dv);
+	if(g) {
+        modifyDv(dv, g);
+        g->moveBlockBy(dv);
+    }
 }
 
 void SceneGraph::doMoveConnection(const QPoint& mousePos)
@@ -306,6 +309,33 @@ bool SceneGraph::event(QEvent *event)
         return true;
     }
     return QGraphicsView::event(event);
+}
+
+void SceneGraph::modifyDv(QPointF &dv, const GlyphItem *focused) const
+{
+    const QPolygonF poly = focused->getCollisionPolygon(dv);
+    const QPointF center = focused->getCollisionCenter();
+        
+    QList<QGraphicsItem *> dangers = scene()->items(poly);
+    foreach (QGraphicsItem *item, dangers) {
+        if (item == focused)
+            continue;
+        
+        if(item->type() == GlyphItem::Type) {
+            GlyphItem *dangerItem = static_cast<GlyphItem *>(item);
+            
+            QPointF toItem = dangerItem->getCollisionCenter() - center;
+            float dl = sqrt(toItem.x() * toItem.x() + toItem.y() * toItem.y());
+            if(dl > 0.f) toItem *= 1.f / dl;
+            const float dt = toItem.x() * dv.x() + toItem.y() * dv.y();
+            
+            if(dt > 0.f) {
+/// deflect
+                dv -= toItem * dt;
+            }
+        }  
+    }
+    
 }
 
 } /// end of namespace alo
