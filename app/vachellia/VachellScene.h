@@ -29,6 +29,8 @@ public:
     virtual void createConnection(alo::GlyphConnection *conn, alo::GlyphPort *port) override;
     virtual void removeConnection(alo::GlyphConnection *conn) override;
 	
+    bool save();
+    
 signals:
 	void sendStopRender();
 	void sendUpdateScene();

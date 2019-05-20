@@ -1,10 +1,8 @@
 /*
  *  GlyphScene.cpp
+ *  gorse
  *
- *
- *  Created by jian zhang on 3/30/17.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
- *
+ *  2019/5/20
  */
 
 #include "GlyphScene.h"
@@ -17,7 +15,6 @@
 #include <qt_base/VisibilityControlItem.h>
 #include <math/GroupCollection.h>
 #include <QDebug>
-#include <ctime>
 
 namespace alo {
 
@@ -26,14 +23,10 @@ GlyphScene::GlyphScene(QObject *parent) :
 	m_collector(nullptr),
 	m_activeGlyph(nullptr)
 {
-	time_t now;
-	time(&now);
-	m_rng = new Uniform<Lehmer>((unsigned)now);
 }
 
 GlyphScene::~GlyphScene()
 {
-	delete m_rng;
 }
 
 void GlyphScene::setAssetCollection(GroupCollection<QJsonObject> *x)
@@ -169,4 +162,4 @@ GlyphScene::GlyphDataType *GlyphScene::nextGlyph(const GlyphDataType *x)
 void GlyphScene::onFocusIn3D(const Float4 &centerRadius)
 { emit sendFocusCameraOn(centerRadius); }
 
-}
+} /// end of alo

@@ -6,6 +6,7 @@
  *  create/remove item
  *  visibility/attribute changed
  *  create/remove connection
+ *  save/load
  *  
  *  2019/5/11
  */
@@ -168,4 +169,9 @@ void VachellScene::removeConnection(GlyphConnection *conn)
 	conn->breakUp();
     RenderableScene::setSceneChanged();
 	emit sendUpdateScene();
+}
+
+bool VachellScene::save()
+{
+    return true;
 }

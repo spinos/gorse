@@ -1,4 +1,10 @@
-
+/*
+ *  MainWindow.cpp
+ *  gorse vachellia
+ *
+ *  2019/5/20
+ */
+ 
 #include <QtWidgets>
 
 #include "MainWindow.h"
@@ -88,7 +94,7 @@ MainWindow::MainWindow()
 void MainWindow::save()
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
-/// save 
+    m_scene->save();
     QApplication::restoreOverrideCursor();
 
     //statusBar()->showMessage(tr("Saved '%1'").arg(fileName), 2000);
@@ -96,24 +102,26 @@ void MainWindow::save()
 
 void MainWindow::about()
 {
-   QMessageBox::about(this, tr("About Acacia"),
+   QMessageBox::about(this, tr("About Vachellia"),
             tr("Some <b>Doc</b> here "));
 }
 
 void MainWindow::createActions()
 {
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    /*QToolBar *fileToolBar = addToolBar(tr("File"));
+    /*QToolBar *fileToolBar = addToolBar(tr("File"));*/
 
+    QIcon saveIcon(":/images/save_big.png");
     QAction *saveAct = new QAction(saveIcon, tr("&Save..."), this);
     saveAct->setShortcuts(QKeySequence::Save);
-    saveAct->setStatusTip(tr("Save the current form letter"));
+    saveAct->setStatusTip(tr("Save the current scene"));
     connect(saveAct, &QAction::triggered, this, &MainWindow::save);
     fileMenu->addAction(saveAct);
     
-    fileMenu->addSeparator();*/
+    fileMenu->addSeparator();
 
-    QAction *quitAct = fileMenu->addAction(tr("&Quit"), this, &QWidget::close);
+    QIcon quitIcon(":/images/quit.png");
+    QAction *quitAct = fileMenu->addAction(quitIcon, tr("&Quit"), this, &QWidget::close);
     quitAct->setShortcuts(QKeySequence::Quit);
     quitAct->setStatusTip(tr("Quit the application"));
 
