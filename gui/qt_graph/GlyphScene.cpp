@@ -153,10 +153,10 @@ void GlyphScene::removeActiveGlyph()
 bool GlyphScene::glyphExists(const int i)
 { return m_glyphMap.find(i) != nullptr; }
 
-GlyphScene::GlyphDataType *GlyphScene::firstGlyph()
+GlyphScene::GlyphDataType *GlyphScene::firstGlyph() const
 { return m_glyphMap.begin(); }
 
-GlyphScene::GlyphDataType *GlyphScene::nextGlyph(const GlyphDataType *x)
+GlyphScene::GlyphDataType *GlyphScene::nextGlyph(const GlyphDataType *x) const
 { return m_glyphMap.next(x); }
 
 void GlyphScene::onFocusIn3D(const Float4 &centerRadius)

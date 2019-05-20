@@ -2,7 +2,7 @@
  *  VachellScene.h
  *  vachellia
  *
- *  2019/5/11
+ *  2019/5/20
  */
 
 #ifndef VCHL_VACHELL_SCENE_H
@@ -10,6 +10,7 @@
 
 #include <qt_graph/GlyphScene.h>
 #include <interface/RenderableScene.h>
+#include <qt_base/AFileDlg.h>
 
 namespace alo {
 class GlyphOps;
@@ -30,6 +31,7 @@ public:
     virtual void removeConnection(alo::GlyphConnection *conn) override;
 	
     bool save();
+    bool load();
     
 signals:
 	void sendStopRender();
@@ -48,7 +50,9 @@ protected:
 	virtual int getUid(const int typeId) override;
 	
 private:
-
+    static alo::AFileDlgProfile SReadProfile;
+    static alo::AFileDlgProfile SWriteProfile;
+    
 };
 
 #endif

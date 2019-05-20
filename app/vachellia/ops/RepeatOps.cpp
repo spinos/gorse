@@ -183,7 +183,7 @@ void RepeatOps::updateInstancer(bool isAppending)
     }
 
     progress.setValue(1);
-
+    
 }
 
 bool RepeatOps::loadInstanceFile(const std::string &fileName)

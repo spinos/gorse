@@ -93,10 +93,8 @@ MainWindow::MainWindow()
 
 void MainWindow::save()
 {
-    QApplication::setOverrideCursor(Qt::WaitCursor);
+/// todo should save check
     m_scene->save();
-    QApplication::restoreOverrideCursor();
-
     //statusBar()->showMessage(tr("Saved '%1'").arg(fileName), 2000);
 }
 

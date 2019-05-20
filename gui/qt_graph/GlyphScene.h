@@ -64,8 +64,8 @@ protected:
 	virtual void preDestruction(GlyphItem *item, const std::vector<GlyphConnection *> &connectionsToBreak) = 0;
 
 	typedef sdb::L3Node<int, GlyphItem *, 128> GlyphDataType;
-	GlyphDataType *firstGlyph();
-	GlyphDataType *nextGlyph(const GlyphDataType *x);
+	GlyphDataType *firstGlyph() const;
+	GlyphDataType *nextGlyph(const GlyphDataType *x) const;
 /// generate a unique id for ops of type
 	virtual int getUid(const int typeId) = 0;
 	

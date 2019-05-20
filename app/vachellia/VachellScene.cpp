@@ -21,6 +21,10 @@
 #include <math/Hexahedron.h>
 #include <interface/GlobalFence.h>
 #include <boost/thread/lock_guard.hpp>
+#include "io/NodeWriter.h"
+#include <QApplication>
+#include <QMessageBox>
+#include <QProgressDialog>
 #include <QDebug>
 
 using namespace alo;
@@ -171,7 +175,102 @@ void VachellScene::removeConnection(GlyphConnection *conn)
 	emit sendUpdateScene();
 }
 
+AFileDlgProfile VachellScene::SWriteProfile(AFileDlgProfile::FWrite,
+        "Choose File To Save",
+        ":images/save_big.png",
+        "Save Vachillia Scene",
+        "Save .hes",
+        ".hes",
+        "./",
+        "untitled");
+
 bool VachellScene::save()
 {
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+    boost::lock_guard<interface::GlobalFence> guard(fence);
+
+    AFileDlg d(SWriteProfile, QApplication::activeWindow() );
+    int res = d.exec();
+    if(res == QDialog::Rejected) {
+        qDebug()<<" abort ";
+        return false;
+    }
+    
+    const std::string saveFileName = SWriteProfile.getFilePath();
+    H5GraphIO hio;
+	bool stat = hio.begin(saveFileName, HDocument::oCreate );
+	if(!stat) {
+        QMessageBox msgBox;
+        msgBox.setText(QString("Cannot save to file %1").arg(QString::fromStdString(saveFileName)));
+        msgBox.exec();
+        return false;
+    }
+    
+    //QApplication::setOverrideCursor(Qt::WaitCursor);
+    
+    QProgressDialog progress("Saving...", QString(), 0, 1, QApplication::activeWindow() );
+    progress.setWindowModality(Qt::ApplicationModal);
+    progress.show();
+    
+    hio.sceneBegin();
+
+    vchl::NodeWriter nodeWriter;
+    
+    GlyphDataType *block = firstGlyph();
+    while(block) {
+        for (int i=0;i<block->count();++i) { 
+            const GlyphItem *ci = block->value(i);
+            hio.nodeBegin(ci->glyphName());
+
+            QPointF pos = ci->mapToScene(QPointF());
+            hio.writeNodePosition(pos.x(), pos.y());
+
+            const GlyphOps *ops = ci->getOps();
+            
+            nodeWriter.write(hio, ops);
+
+            hio.nodeEnd();
+        }
+        
+        block = nextGlyph(block);
+    }
+	
+    hio.sceneEnd();
+    
+    progress.setValue(1);
+    
+    hio.end();
+    
+    //QApplication::restoreOverrideCursor();
+    return true;
+}
+
+AFileDlgProfile VachellScene::SReadProfile(AFileDlgProfile::FRead,
+        "Choose File To Open",
+        ":images/open_big.png",
+        "Open Vachillia Scene",
+        "Open .hes",
+        ".hes",
+        "./",
+        "");
+
+bool VachellScene::load()
+{
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+    boost::lock_guard<interface::GlobalFence> guard(fence);
+
+/// todo loss of data confirmation
+    AFileDlg d(SReadProfile, QApplication::activeWindow() );
+    int res = d.exec();
+    if(res == QDialog::Rejected) {
+        qDebug()<<" abort ";
+        return false;
+    }
+    
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    
+    qDebug() << " todo load from file " << QString::fromStdString(SReadProfile.getFilePath());
+    
+    QApplication::restoreOverrideCursor();
     return true;
 }

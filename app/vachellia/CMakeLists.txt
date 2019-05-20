@@ -1,3 +1,7 @@
+file (GLOB VCHL_IO_SRC
+io/*.h
+io/*.cpp)
+
 file (GLOB VCHL_OPS_SRC
 ops/*.h
 ops/*.cpp)
@@ -9,6 +13,7 @@ widgets/*.cpp)
 set (VCHL_SOURCE_FILES main.cpp 
 ${VCHL_OPS_SRC}
 ${VCHL_WIDGETS_SRC}
+${VCHL_IO_SRC}
 VachellScene.cpp 
 MainWindow.cpp
 ${ALOE_BRDF_SRC}
@@ -32,6 +37,7 @@ ${GORS_H5_SRC}
 ${GORS_H5_MESH_SRC}
 ${GORS_H5_SSDF_SRC}
 ${GORS_H5_GRD_SRC}
+${GORS_H5_GRAPH_SRC}
 ${GORS_JSN_SOURCE}
 ${GORS_IPC_SOURCE})
 
