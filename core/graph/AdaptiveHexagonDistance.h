@@ -26,6 +26,8 @@ namespace sdf {
 template<typename T>
 class AdaptiveHexagonDistance : public BaseDistanceField<T> {
 
+    typedef BaseDistanceField<T> DFTyp;
+
 	struct CellCorners {
 		int _key[8];
 	};
@@ -153,11 +155,11 @@ int AdaptiveHexagonDistance<T>::findNode(int k) const
 
 template<typename T>
 float AdaptiveHexagonDistance<T>::getNodeDistance(int i) const
-{ return nodes()[i].val; }
+{ return DFTyp::nodes()[i].val; }
 
 template<typename T>
 Vector3F AdaptiveHexagonDistance<T>::getNodePosition(int i) const
-{ return nodes()[i].pos; }
+{ return DFTyp::nodes()[i].pos; }
 
 template<typename T>
 template<typename Tr>
@@ -302,7 +304,7 @@ void AdaptiveHexagonDistance<T>::buildGraph(const int& nv,
 	for(;it!=vvemap.end();++it) {
 		edgeBegins.push_back(nvve);
 		
-		pushIndices(it->second, edgeInds);
+		DFTyp::pushIndices(it->second, edgeInds);
 		nvve += (it->second).size();
 		
 		it->second.clear();
@@ -313,7 +315,7 @@ void AdaptiveHexagonDistance<T>::buildGraph(const int& nv,
 	std::cout<<"\n n edge "<<ne;
 	BaseDistanceField<T>::create(nv, ne, ni);
 	
-	NodeType *dst = nodes();
+	DistanceNode<T> *dst = DFTyp::nodes();
 	
 	const int* tableKs = m_nodeHash.table();
 	const int* tableIs = m_nodeHash.index();
@@ -326,15 +328,15 @@ void AdaptiveHexagonDistance<T>::buildGraph(const int& nv,
 		}
 	}
 	
-	extractEdges(&edgeMap);
-	extractEdgeBegins(edgeBegins);
-	extractEdgeIndices(edgeInds);
+	DFTyp::extractEdges(&edgeMap);
+	DFTyp::extractEdgeBegins(edgeBegins);
+	DFTyp::extractEdgeIndices(edgeInds);
     
     vvemap.clear();
 	edgeBegins.clear();
 	edgeInds.clear();
 	
-	calculateEdgeLength();
+	DFTyp::calculateEdgeLength();
 	std::cout.flush();
 }
 
@@ -344,8 +346,8 @@ void AdaptiveHexagonDistance<T>::computeDistance(const sds::SpaceFillingVector<T
 								const int level,
 								Tr& rule)
 {
-	resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
-	resetEdges(sdf::StBackGround);
+	DFTyp::resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
+	DFTyp::resetEdges(sdf::StBackGround);
 	
 	int closestV, touchE[3];
 	float minD;
@@ -379,28 +381,28 @@ void AdaptiveHexagonDistance<T>::computeDistance(const sds::SpaceFillingVector<T
 		}
 		
 		if(closestV > -1) {
-			setNodeDistanceTValue(ac._key[closestV], sp);
+			DFTyp::setNodeDistanceTValue(ac._key[closestV], sp);
 /// block 3 wdges connected to the closest node
 			rule.GetCellCornersConnectedToCorner(touchE, closestV);
-			setEdgeFront(ac._key[closestV], ac._key[touchE[0]]);
-			setEdgeFront(ac._key[closestV], ac._key[touchE[1]]);
-			setEdgeFront(ac._key[closestV], ac._key[touchE[2]]);
+			DFTyp::setEdgeFront(ac._key[closestV], ac._key[touchE[0]]);
+			DFTyp::setEdgeFront(ac._key[closestV], ac._key[touchE[1]]);
+			DFTyp::setEdgeFront(ac._key[closestV], ac._key[touchE[2]]);
 		}
 
 		for(int j=0;j<8;++j) {
 			if(j == closestV) continue;
 
-			setNodeDistanceTValue(ac._key[j], sp, false);
+			DFTyp::setNodeDistanceTValue(ac._key[j], sp, false);
 		}
 	}
 
 	const int iFar = firstEmptyCellInd(rule);
 
-	fastMarchingMethod();
-	marchOutside(iFar);
-	setFarNodeInside();
-	computeAccurateDistance();
-	fixThinSheet(rule.deltaAtLevel(level));
+	DFTyp::fastMarchingMethod();
+	DFTyp::marchOutside(iFar);
+	DFTyp::setFarNodeInside();
+	DFTyp::computeAccurateDistance();
+	DFTyp::fixThinSheet(rule.deltaAtLevel(level));
 	
 }
 
@@ -414,7 +416,7 @@ int AdaptiveHexagonDistance<T>::firstEmptyCellInd(Tr& rule)
 		
 		int k = findNode(coord);
 		if(k>-1) {
-			if(nodes()[k].stat == sdf::StUnknown)
+			if(DFTyp::nodes()[k].stat == sdf::StUnknown)
 				return k;
 				
 		} else {
@@ -495,7 +497,7 @@ float AdaptiveHexagonDistance<T>::resampleDistance(const int& ind,
 				const int* range,
 				const sds::SpaceFillingVector<T1>& src)
 {
-	NodeType& nj = nodes()[ind];
+	DistanceNode<T>& nj = DFTyp::nodes()[ind];
 	for(int i=range[0];i<range[1];++i) {
 	
 		Vector3F dv = nj.pos - src[i]._pos;

@@ -19,6 +19,8 @@ namespace sdb {
 template <typename KeyType, typename DataType, int Dim>
 class L3Node : public KeyDataArray<KeyType, DataType, Dim> {
 
+    typedef KeyDataArray<KeyType, DataType, Dim> KDATyp;
+    
 	L3Node *m_leftSibling;
 	L3Node *m_rightSibling;
 
@@ -70,28 +72,28 @@ template <typename KeyType, typename DataType, int Dim>
 L3Node<KeyType, DataType, Dim> *L3Node<KeyType, DataType, Dim>::spawn()
 {
 	L3Node *right = new L3Node;
-	int loc = count()>>1; 
+	int loc = KDATyp::count()>>1; 
 
-	right->copyFrom(&keys()[loc], &values()[loc], count() - loc);
-	setCount(loc);
+	right->copyFrom(&KDATyp::keys()[loc], &KDATyp::values()[loc], KDATyp::count() - loc);
+	KDATyp::setCount(loc);
 	return right;
 }
 
 template <typename KeyType, typename DataType, int Dim>
 void L3Node<KeyType, DataType, Dim>::printDetail() const
 {
-	std::cout << " n " << count() << " [";
-	for(int i=0;i<count();++i)
-    	std::cout << key(i) << ",";
+	std::cout << " n " << KDATyp::count() << " [";
+	for(int i=0;i<KDATyp::count();++i)
+    	std::cout << KDATyp::key(i) << ",";
     std::cout << "]";
 }
 
 template <typename KeyType, typename DataType, int Dim>
 void L3Node<KeyType, DataType, Dim>::printKeyRange() const
 {
-	std::cout << " n " << count() << " [";
-	if(!isEmpty())
-		std::cout << key(0) << ":" << key(count() - 1);
+	std::cout << " n " << KDATyp::count() << " [";
+	if(!KDATyp::isEmpty())
+		std::cout << KDATyp::key(0) << ":" << KDATyp::key(KDATyp::count() - 1);
     std::cout << "]";
 }
 

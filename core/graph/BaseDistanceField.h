@@ -57,6 +57,8 @@ struct IDistanceEdge {
 template<typename T>
 class BaseDistanceField : public AGraph<DistanceNode<T>, IDistanceEdge > {
 
+    typedef AGraph<DistanceNode<T>, IDistanceEdge > GraphTyp;
+    
 public:
     BaseDistanceField();
     virtual ~BaseDistanceField();
@@ -112,9 +114,9 @@ BaseDistanceField<T>::~BaseDistanceField()
 template<typename T>
 void BaseDistanceField<T>::resetNodes(float val, sdf::NodeState lab, sdf::NodeState stat)
 {
-    const int & n = numNodes();
+    const int & n = GraphTyp::numNodes();
 	for(int i = 0;i<n;++i) {
-		NodeType &d = nodes()[i];
+		DistanceNode<T> &d = GraphTyp::nodes()[i];
         d.val = val;
 		d._origin = -1;
 		d.label = lab;
@@ -125,8 +127,8 @@ void BaseDistanceField<T>::resetNodes(float val, sdf::NodeState lab, sdf::NodeSt
 template<typename T>
 void BaseDistanceField<T>::resetEdges(sdf::NodeState lab)
 {
-    IDistanceEdge* egs = edges();
-    const int& ne = numEdges();
+    IDistanceEdge* egs = GraphTyp::edges();
+    const int& ne = GraphTyp::numEdges();
     for(int i=0;i<ne;++i) {
         IDistanceEdge& e = egs[i];
         e.lab = lab;
@@ -136,9 +138,9 @@ void BaseDistanceField<T>::resetEdges(sdf::NodeState lab)
 template<typename T>
 void BaseDistanceField<T>::unvisitAllNodes()
 {
-    const int & n = numNodes();
+    const int & n = GraphTyp::numNodes();
 	for(int i = 0;i<n;++i) {
-		NodeType & d = nodes()[i];
+		DistanceNode<T> & d = GraphTyp::nodes()[i];
         d.stat = sdf::StFar;
 	}
 }
@@ -148,10 +150,10 @@ void BaseDistanceField<T>::fastMarchingMethod()
 {
 /// heap of trial
 	std::deque<int> trials;
-	const int n = numNodes();
+	const int n = GraphTyp::numNodes();
 	int i = 0;
 	for(;i<n;++i) {
-		NodeType &d = nodes()[i];
+		DistanceNode<T> &d = GraphTyp::nodes()[i];
 		if(d.stat == sdf::StKnown) {
 /// marching start
 			d._origin = i;
@@ -168,7 +170,7 @@ void BaseDistanceField<T>::fastMarchingMethod()
 		propagate(trials, i);
 		
 /// distance is known after propagation
-		nodes()[i].stat = sdf::StKnown;
+		GraphTyp::nodes()[i].stat = sdf::StKnown;
 
 /// remove A from trial
 		trials.erase(trials.begin() );	
@@ -180,23 +182,23 @@ void BaseDistanceField<T>::fastMarchingMethod()
 template<typename T>
 void BaseDistanceField<T>::propagate(std::deque<int >& heap, const int& i)
 {
-	const NodeType & A = nodes()[i];
+	const DistanceNode<T> & A = GraphTyp::nodes()[i];
 	
 /// for each neighbor of A
-	const int& endj = edgeBegins()[i+1];
-	int vj, j = edgeBegins()[i];
+	const int& endj = GraphTyp::edgeBegins()[i+1];
+	int vj, j = GraphTyp::edgeBegins()[i];
 	for(;j<endj;++j) {
 		
-		int k = edgeIndices()[j];
+		int k = GraphTyp::edgeIndices()[j];
 
-		const IDistanceEdge & eg = edges()[k];
+		const IDistanceEdge & eg = GraphTyp::edges()[k];
 		
 		vj = eg.vi.x;
 		if(vj == i) {
 			vj = eg.vi.y;
         }
             
-		NodeType &B = nodes()[vj];
+		DistanceNode<T> &B = GraphTyp::nodes()[vj];
 /// min distance to B via A
 /// need eikonal approximation here		
 		if(B.val > A.val + eg.len) {
@@ -218,9 +220,9 @@ void BaseDistanceField<T>::propagate(std::deque<int >& heap, const int& i)
 template<typename T>
 void BaseDistanceField<T>::computeAccurateDistance()
 {
-	const int& n = numNodes();
+	const int& n = GraphTyp::numNodes();
 	for(int i = 0;i<n;++i) {
-		NodeType &d = nodes()[i];
+		DistanceNode<T> &d = GraphTyp::nodes()[i];
 		d.val = GetSign(d.val) * d.pos.distanceTo(d._tval._pos);
 	}
 }
@@ -238,9 +240,9 @@ void BaseDistanceField<T>::addNodeToHeap(std::deque<int>& heap, const int&x) con
 template<typename T>
 void BaseDistanceField<T>::setFarNodeInside()
 {
-	const int n = numNodes();
+	const int n = GraphTyp::numNodes();
 	for(int i = 0;i<n;++i) {
-		NodeType & d = nodes()[i];
+		DistanceNode<T> & d = GraphTyp::nodes()[i];
 		if(d.stat == sdf::StFar) {
 /// inside distance is negative
 			if(d.val > 0.f)
@@ -266,7 +268,7 @@ void BaseDistanceField<T>::marchOutside(const int& originNodeInd)
 /// A is first in trial		
 		i = trials.begin()->first;
 
-		nodes()[i].stat = sdf::StVisited;
+		GraphTyp::nodes()[i].stat = sdf::StVisited;
 /// remove A from trial
 		trials.erase(trials.begin() );
 		
@@ -282,16 +284,16 @@ void BaseDistanceField<T>::marchOutside(const int& originNodeInd)
 template<typename T>
 void BaseDistanceField<T>::propagateVisit(std::map<int, int > & heap, const int & i)
 {
-	const NodeType &A = nodes()[i];
+	const DistanceNode<T> &A = GraphTyp::nodes()[i];
 	
 /// for each neighbor of A
-	const int endj = edgeBegins()[i+1];
-	int vj, j = edgeBegins()[i];
+	const int endj = GraphTyp::edgeBegins()[i+1];
+	int vj, j = GraphTyp::edgeBegins()[i];
 	for(;j<endj;++j) {
 		
-		int k = edgeIndices()[j];
+		int k = GraphTyp::edgeIndices()[j];
 
-		const IDistanceEdge& eg = edges()[k];
+		const IDistanceEdge& eg = GraphTyp::edges()[k];
 /// do not cross front edge
 		if(eg.lab > sdf::StFront3)
 			continue;
@@ -300,7 +302,7 @@ void BaseDistanceField<T>::propagateVisit(std::map<int, int > & heap, const int 
 		if(vj == i)
 			vj = eg.vi.y;
 			
-		NodeType &B = nodes()[vj];
+		DistanceNode<T> &B = GraphTyp::nodes()[vj];
 		
 		if(B.label > sdf::StFront3) {
 /// stop
@@ -321,7 +323,7 @@ bool BaseDistanceField<T>::setNodeDistance(const int & idx,
                         bool toAccumulateFront) 
 {
 	bool changed = false;
-    NodeType &d = nodes()[idx];
+    DistanceNode<T> &d = GraphTyp::nodes()[idx];
     if(d.stat != sdf::StKnown) {
         d.val = v;
         d.stat = sdf::StKnown;
@@ -355,7 +357,7 @@ void BaseDistanceField<T>::setEdgeFront(int va, int vb)
 		return;
 	}
 		
-	EdgeType* eg = edge(va, vb);
+	IDistanceEdge* eg = GraphTyp::edge(va, vb);
 	if(!eg) {
 		std::cout << "\n cannot find edge (" << va << "," << vb << ")";
 		return;
@@ -381,17 +383,17 @@ template<typename T>
 void BaseDistanceField<T>::setNodeDistanceTValue(const int& i, const T &ref,
 							bool toAccumulateFront)
 {
-	float d = nodes()[i].pos.distanceTo(ref._pos);		
-	if(setNodeDistance(i, d, toAccumulateFront)) nodes()[i]._tval = ref;
+	float d = GraphTyp::nodes()[i].pos.distanceTo(ref._pos);		
+	if(setNodeDistance(i, d, toAccumulateFront)) GraphTyp::nodes()[i]._tval = ref;
 }
 
 template<typename T>
 void BaseDistanceField<T>::setNodeTValue(const int& i, const T &x)
-{ nodes()[i]._tval = x; }
+{ GraphTyp::nodes()[i]._tval = x; }
 
 template<typename T>
 const T &BaseDistanceField<T>::nodeValue(const int &i) const
-{ return nodes()[i]._tval; }
+{ return GraphTyp::nodes()[i]._tval; }
 
 template<typename T>
 void BaseDistanceField<T>::fixThinSheet(const float &maxDistance)
