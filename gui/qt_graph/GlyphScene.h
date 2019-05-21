@@ -67,7 +67,7 @@ protected:
 	GlyphDataType *firstGlyph() const;
 	GlyphDataType *nextGlyph(const GlyphDataType *x) const;
 /// generate a unique id for ops of type
-	virtual int getUid(const int typeId) = 0;
+	int getUid(const int typeId);
 	
 	bool glyphExists(const int i);
 
@@ -78,6 +78,7 @@ private:
 	GlyphItem *m_activeGlyph;
 	QList<GlyphItem *> m_selectedGlyph;;
 	GroupCollection<QJsonObject> *m_collector;
+	sdb::L2Tree<int, int, 64, 64> m_typeCounter;
 	sdb::L2Tree<int, GlyphItem *, 128, 128> m_glyphMap;
 	
 };

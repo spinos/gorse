@@ -162,4 +162,13 @@ GlyphScene::GlyphDataType *GlyphScene::nextGlyph(const GlyphDataType *x) const
 void GlyphScene::onFocusIn3D(const Float4 &centerRadius)
 { emit sendFocusCameraOn(centerRadius); }
 
+int GlyphScene::getUid(const int typeId)
+{
+	int *c = m_typeCounter.find(typeId);
+	if(!c) c = m_typeCounter.insert(typeId, 0);
+
+	*c += 1;
+	return ((typeId<<10) | *c);
+}
+
 } /// end of alo

@@ -7,6 +7,7 @@
 
 #include "H5GraphIO.h"
 #include <h5/V1HBase.h>
+#include <boost/format.hpp>
 #include <ctime>
 
 namespace alo {
@@ -35,12 +36,13 @@ void H5GraphIO::sceneEnd()
 	delete m_head;
 }
 
-void H5GraphIO::nodeBegin(const std::string &nodeName)
+void H5GraphIO::nodeBegin(const int &nodeId)
 {
+	const std::string nodeName = boost::str(boost::format("node_%1%") % nodeId );
 	std::cout << "\n node begin " <<m_head->childPath(nodeName);
 	m_current = new ver1::HBase(m_head->childPath(nodeName));
 	m_current->addIntAttr(".is_graph_node");
-	int one = 1;
+	int one = nodeId;
 	m_current->writeIntAttr(".is_graph_node", &one);
 }
 
@@ -63,6 +65,12 @@ void H5GraphIO::writeNodeType(int x)
 {
 	m_current->addIntAttr(".typ");
 	m_current->writeIntAttr(".typ", &x);
+}
+
+void H5GraphIO::writeNodeDisplayName(const std::string &x)
+{
+	m_current->addVLStringAttr(".dspnm");
+	m_current->writeVLStringAttr(".dspnm", x);
 }
 
 } /// end of alo

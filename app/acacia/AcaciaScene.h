@@ -43,7 +43,6 @@ protected:
     virtual alo::GlyphOps *createOps(const QJsonObject &content) override;
     virtual void postCreation(alo::GlyphItem *item) override;
     virtual void preDestruction(alo::GlyphItem *item, const std::vector<alo::GlyphConnection *> &connectionsToBreak) override;
-	virtual int getUid(const int typeId) override;
 	
 private:
 

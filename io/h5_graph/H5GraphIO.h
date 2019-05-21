@@ -32,11 +32,12 @@ public:
 
 	void sceneBegin();
 	void sceneEnd();
-	void nodeBegin(const std::string &nodeName);
+	void nodeBegin(const int &nodeId);
 	void nodeEnd();
 
 	void writeNodePosition(float x, float y);
 	void writeNodeType(int x);
+	void writeNodeDisplayName(const std::string &x);
 
 protected:
 	

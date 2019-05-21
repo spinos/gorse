@@ -61,12 +61,6 @@ GlyphOps *VachellScene::createOps(const QJsonObject &content)
     return new GlyphOps; 
 }
 
-int VachellScene::getUid(const int typeId) 
-{
-    int low = alo::RenderableScene::countTypedObjects(typeId);
-    return ((typeId<<10) | low);
-}
-
 void VachellScene::postCreation(GlyphItem *item)
 {
     interface::GlobalFence &fence = interface::GlobalFence::instance();
@@ -220,7 +214,7 @@ bool VachellScene::save()
     while(block) {
         for (int i=0;i<block->count();++i) { 
             const GlyphItem *ci = block->value(i);
-            hio.nodeBegin(ci->glyphName());
+            hio.nodeBegin(ci->glyphId());
 
             QPointF pos = ci->mapToScene(QPointF());
             hio.writeNodePosition(pos.x(), pos.y());
