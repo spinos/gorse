@@ -38,6 +38,10 @@ public:
 	void writeNodePosition(float x, float y);
 	void writeNodeType(int x);
 	void writeNodeDisplayName(const std::string &x);
+	void writeNodeIntAttr(const std::string &name, int dim, const int *x);
+	void writeNodeFloatAttr(const std::string &name, int dim, const float *x);
+	void writeNodeBoolAttr(const std::string &name, const bool &x);
+	void writeNodeStringAttr(const std::string &name, const std::string &x);
 
 protected:
 	

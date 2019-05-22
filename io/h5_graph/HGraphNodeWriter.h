@@ -22,6 +22,8 @@ public:
 
 	virtual void writeNodeOps(H5GraphIO &hio, const GlyphOps *ops);
 	
+protected:
+
 };
 
 } /// end of alo

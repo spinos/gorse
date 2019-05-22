@@ -25,6 +25,7 @@ class IntersectResult;
 class RenderableScene {
 
 	int m_objectCount;
+    int m_changeCount;
 	bool m_changed;
 
 	struct RenderableObjectState {
@@ -49,12 +50,15 @@ public:
 /// remove entire group when objectId = -1
     void removeRenderable(int objectId, int groupId);
 
-    bool sceneChanged() const;
+    const bool &sceneChanged() const;
     void updateScene();
 	
 protected:
     void setSceneChanged();
     int countTypedObjects(const int groupId) const;
+    const int &numChanges() const;
+    void resetChangeCount();
+    void resetRenderableScene();
 
 private:
     void setToRemoveGroup(int groupId);

@@ -21,16 +21,17 @@
 namespace alo {
 
 RenderableScene::RenderableScene() : m_objectCount(0),
+m_changeCount(0),
 m_changed(false)
 {
 	RenderableCoordinateSystem *b = new RenderableCoordinateSystem;
     b->setOverlay(true);
 	createRenderable(b, 0);
     
-    TranslateController *t = new TranslateController;
-    t->setOverlay(true);
-    t->setVisible(false);
-    createRenderable(t, 1);
+    //TranslateController *t = new TranslateController;
+    //t->setOverlay(true);
+    //t->setVisible(false);
+    //createRenderable(t, 1);
     
 }
 
@@ -128,18 +129,17 @@ void RenderableScene::compressQueue()
     } 
 }
 
-bool RenderableScene::sceneChanged() const
-{
-    return m_changed;
-}
+const bool &RenderableScene::sceneChanged() const
+{ return m_changed; }
 
 void RenderableScene::updateScene()
-{
-    m_changed = false;
-}
+{ m_changed = false; }
 
 void RenderableScene::setSceneChanged()
-{ m_changed = true; }
+{ 
+    m_changeCount++;
+    m_changed = true; 
+}
 
 int RenderableScene::countTypedObjects(const int groupId) const
 {
@@ -153,4 +153,31 @@ int RenderableScene::countTypedObjects(const int groupId) const
     return res;
 }
 
+const int &RenderableScene::numChanges() const
+{ return m_changeCount; }
+
+void RenderableScene::resetChangeCount()
+{ m_changeCount = 0; }
+
+void RenderableScene::resetRenderableScene()
+{
+    ObjectDataType *block = m_drawQueue.begin();
+    while(block) {
+        for (int i=0;i<block->count();++i) { 
+            RenderableObjectState &it = block->value(i);
+            delete it._object;
+
+        }
+        block = m_drawQueue.next(block);
+    } 
+
+    m_drawQueue.clear();
+
+    RenderableCoordinateSystem *b = new RenderableCoordinateSystem;
+    b->setOverlay(true);
+    createRenderable(b, 0);
+    
+    resetChangeCount();
 }
+
+} /// end of alo

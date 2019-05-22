@@ -14,6 +14,7 @@
 #include "widgets/RenderWidget.h"
 #include <qt_graph/SceneGraph.h>
 #include <qt_graph/GlyphOps.h>
+#include <qt_graph/AttribCreator.h>
 
 MainWindow::MainWindow()
 {
@@ -32,7 +33,7 @@ MainWindow::MainWindow()
     m_renderView = new RenderWidget(m_scene, this);
     setCentralWidget(m_renderView);
 
-    alo::GlyphOps::loadAttributePreset(":/mimes/attribpreset.json");
+    alo::AttribCreator::loadAttributePreset(":/mimes/attribpreset.json");
 
     QDockWidget *attrDock = new QDockWidget(tr("Attributes"), this);
     attrDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -91,9 +92,14 @@ MainWindow::MainWindow()
     setUnifiedTitleAndToolBarOnMac(true);
 }
 
+void MainWindow::open()
+{
+    m_scene->open();
+    //statusBar()->showMessage(tr("Saved '%1'").arg(fileName), 2000);
+}
+
 void MainWindow::save()
 {
-/// todo should save check
     m_scene->save();
     //statusBar()->showMessage(tr("Saved '%1'").arg(fileName), 2000);
 }
@@ -109,8 +115,15 @@ void MainWindow::createActions()
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     /*QToolBar *fileToolBar = addToolBar(tr("File"));*/
 
+    QIcon openIcon(":/images/open_big.png");
+    QAction *openAct = new QAction(openIcon, tr("&Open"), this);
+    openAct->setShortcuts(QKeySequence::Open);
+    openAct->setStatusTip(tr("Open a scene"));
+    connect(openAct, &QAction::triggered, this, &MainWindow::open);
+    fileMenu->addAction(openAct);
+
     QIcon saveIcon(":/images/save_big.png");
-    QAction *saveAct = new QAction(saveIcon, tr("&Save..."), this);
+    QAction *saveAct = new QAction(saveIcon, tr("&Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
     saveAct->setStatusTip(tr("Save the current scene"));
     connect(saveAct, &QAction::triggered, this, &MainWindow::save);

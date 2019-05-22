@@ -1,9 +1,9 @@
 /*
  *  GlyphOps.h
  *
- *  attribute, update, scene
+ *  base ops id, attribute, scene, update, etc
  *  
- *  2019/4/22
+ *  2019/5/22
  */
 
 #ifndef GORS_GLYPH_OPS_H
@@ -11,7 +11,6 @@
 
 #include "Attrib.h"
 #include <map>
-#include <QJsonObject>
 
 namespace alo {
 
@@ -26,13 +25,12 @@ class GlyphOps
 	int m_opsId;
 	std::map<std::string, QAttrib * > m_attribs;
 	GlyphScene *m_gscene;
-	static QJsonObject attributePresetObj;
 
 public:
 	GlyphOps();
 	virtual ~GlyphOps();
 
-	void addAttributes(const QJsonObject &content);
+	void addAttribute(QAttrib *b);
 	std::map<std::string, QAttrib * >::iterator attribBegin();
 	std::map<std::string, QAttrib * >::iterator attribEnd();
 	QAttrib *findAttrib(const std::string &attrName);
@@ -82,32 +80,20 @@ public:
 	void setGlyphScene(GlyphScene *x);
 	GlyphScene *glyphScene();
 
-	static void loadAttributePreset(const QString &fileName);
-
-protected:
-	void addAttribute(const QJsonObject &content);
-	QAttrib *addBoolAttribute(const QJsonObject &content);
-	QAttrib *addIntAttribute(const QJsonObject &content);
-	QAttrib *addFloatAttribute(const QJsonObject &content);
-	QAttrib *addFloat2Attribute(const QJsonObject &content);
-	QAttrib *addFloat3Attribute(const QJsonObject &content);
-	QAttrib *addMeshAttribute(const QJsonObject &content);
-	QAttrib *addListAttribute(const QJsonObject &content);
-	QAttrib *addStringAttribute(const QJsonObject &content);
-
 	bool getIntAttribValue(int &val, const std::string &attrName);
 	bool getFloatAttribValue(float &val, const std::string &attrName);
 	bool getFloat2AttribValue(float *val, const std::string &attrName);
 	bool getFloat3AttribValue(float *val, const std::string &attrName);
 	bool getBoolAttribValue(bool &val, const std::string &attrName);
+	bool getStringAttribValue(std::string &val, const std::string &attrName);
 	bool getListAttribValue(std::string &val, const std::string &attrName);
 
-private:
-	void addConnection(QAttrib *b, const QJsonObject &content);
-	void setFloatComponentAttrValue(QAttrib *attr, const int &component, const float &x);
-	void addTransformAttributes();
-	QJsonObject getTransformPresetObj(bool &found);
+protected:
 
+private:
+	
+	void setFloatComponentAttrValue(QAttrib *attr, const int &component, const float &x);
+	
 };
 
 }

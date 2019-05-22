@@ -200,8 +200,6 @@ bool VachellScene::save()
         return false;
     }
     
-    //QApplication::setOverrideCursor(Qt::WaitCursor);
-    
     QProgressDialog progress("Saving...", QString(), 0, 1, QApplication::activeWindow() );
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
@@ -213,15 +211,17 @@ bool VachellScene::save()
     GlyphDataType *block = firstGlyph();
     while(block) {
         for (int i=0;i<block->count();++i) { 
-            const GlyphItem *ci = block->value(i);
+            GlyphItem *ci = block->value(i);
+            QJsonObject content = getGlyphProfile(ci->glyphId());
+
             hio.nodeBegin(ci->glyphId());
 
             QPointF pos = ci->mapToScene(QPointF());
             hio.writeNodePosition(pos.x(), pos.y());
 
-            const GlyphOps *ops = ci->getOps();
+            GlyphOps *ops = ci->ops();
             
-            nodeWriter.write(hio, ops);
+            nodeWriter.write(hio, ops, content);
 
             hio.nodeEnd();
         }
@@ -235,7 +235,7 @@ bool VachellScene::save()
     
     hio.end();
     
-    //QApplication::restoreOverrideCursor();
+    resetChangeCount();
     return true;
 }
 
@@ -248,23 +248,37 @@ AFileDlgProfile VachellScene::SReadProfile(AFileDlgProfile::FRead,
         "./",
         "");
 
-bool VachellScene::load()
+bool VachellScene::open()
 {
     interface::GlobalFence &fence = interface::GlobalFence::instance();
     boost::lock_guard<interface::GlobalFence> guard(fence);
 
-/// todo loss of data confirmation
+    if(numChanges() > 1) {
+        QMessageBox msgBox;
+        msgBox.setText("The current scene has been modified.");
+        msgBox.setInformativeText("Do you want to open another one thus discard all changes?");
+        msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Open);
+        int ret = msgBox.exec();
+        if(ret == QMessageBox::Cancel) {
+            return false;
+        }
+    }
+
     AFileDlg d(SReadProfile, QApplication::activeWindow() );
     int res = d.exec();
     if(res == QDialog::Rejected) {
-        qDebug()<<" abort ";
         return false;
     }
     
-    QApplication::setOverrideCursor(Qt::WaitCursor);
+    //QApplication::setOverrideCursor(Qt::WaitCursor);
     
+    resetGlyphScene();
+    resetRenderableScene();
     qDebug() << " todo load from file " << QString::fromStdString(SReadProfile.getFilePath());
     
-    QApplication::restoreOverrideCursor();
+    //QApplication::restoreOverrideCursor();
+    RenderableScene::setSceneChanged();
+    emit sendUpdateScene();
     return true;
 }

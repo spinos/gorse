@@ -14,7 +14,11 @@
 namespace alo {
    
 BoxOps::BoxOps()
-{}
+{
+    m_boxSize[0] = 10.f;
+    m_boxSize[1] = 10.f;
+    m_boxSize[2] = 10.f;
+}
 
 BoxOps::~BoxOps()
 {}
@@ -32,14 +36,13 @@ void BoxOps::update()
 {
     TransformOps::update();
     
-    float bx, by, bz;
-    getFloatAttribValue(bx, "bx");
-    getFloatAttribValue(by, "by");
-    getFloatAttribValue(bz, "bz");
+    getFloatAttribValue(m_boxSize[0], "bx");
+    getFloatAttribValue(m_boxSize[1], "by");
+    getFloatAttribValue(m_boxSize[2], "bz");
 
-    bx *= .5f;
-    by *= .5f;
-    bz *= .5f;
+    const float bx = m_boxSize[0] * .5f;
+    const float by = m_boxSize[1] * .5f;
+    const float bz = m_boxSize[2] * .5f;
 
     setAabb(-bx, -by, -bz, bx, by, bz);
 
@@ -61,11 +64,8 @@ void BoxOps::disconnectFrom(GlyphOps *another, const std::string &portName, Glyp
 
 QString BoxOps::getShortDescription() const
 {
-    const float *b = c_aabb();
-    float bx = b[3] - b[0];
-    float by = b[4] - b[1];
-    float bz = b[5] - b[2];
-    return QString("width %1\nheight %2\ndepth %3").arg(QString::number(bx), QString::number(by), QString::number(bz)); 
+    return QString("width %1\nheight %2\ndepth %3").arg(QString::number(m_boxSize[0]), 
+        QString::number(m_boxSize[1]), QString::number(m_boxSize[2])); 
 }
 
 } /// end of alo
