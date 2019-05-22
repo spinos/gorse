@@ -22,6 +22,7 @@
 #include <interface/GlobalFence.h>
 #include <boost/thread/lock_guard.hpp>
 #include "io/NodeWriter.h"
+#include "io/NodeReader.h"
 #include <QApplication>
 #include <QMessageBox>
 #include <QProgressDialog>
@@ -66,16 +67,21 @@ void VachellScene::postCreation(GlyphItem *item)
     interface::GlobalFence &fence = interface::GlobalFence::instance();
     boost::lock_guard<interface::GlobalFence> guard(fence);
 
-	GlyphOps *op = item->ops();
-	if(op->hasRenderable()) { 
-		RenderableOps *dop = static_cast<RenderableOps *>(op);
-		dop->addRenderableTo(this);
-	}
-
-    item->genToolTip();
+	postCreationBlocked(item);
 
     RenderableScene::setSceneChanged();
     emit sendUpdateScene();
+}
+
+void VachellScene::postCreationBlocked(GlyphItem *item)
+{
+    GlyphOps *op = item->ops();
+    if(op->hasRenderable()) { 
+        RenderableOps *dop = static_cast<RenderableOps *>(op);
+        dop->addRenderableTo(this);
+    }
+
+    item->genToolTip();
 }
 
 void VachellScene::preDestruction(GlyphItem *item, const std::vector<GlyphConnection *> &connectionsToBreak)
@@ -206,22 +212,22 @@ bool VachellScene::save()
     
     hio.sceneBegin();
 
-    vchl::NodeWriter nodeWriter;
+    vchl::NodeWriter writer;
     
     GlyphDataType *block = firstGlyph();
     while(block) {
         for (int i=0;i<block->count();++i) { 
             GlyphItem *ci = block->value(i);
-            QJsonObject content = getGlyphProfile(ci->glyphId());
+            GlyphOps *ops = ci->ops();
+
+            QJsonObject content = getGlyphProfile(ops->opsTypeId());
 
             hio.nodeBegin(ci->glyphId());
 
             QPointF pos = ci->mapToScene(QPointF());
             hio.writeNodePosition(pos.x(), pos.y());
 
-            GlyphOps *ops = ci->ops();
-            
-            nodeWriter.write(hio, ops, content);
+            writer.write(hio, ops, content);
 
             hio.nodeEnd();
         }
@@ -231,9 +237,9 @@ bool VachellScene::save()
 	
     hio.sceneEnd();
     
-    progress.setValue(1);
-    
     hio.end();
+
+    progress.setValue(1);
     
     resetChangeCount();
     return true;
@@ -271,13 +277,66 @@ bool VachellScene::open()
         return false;
     }
     
-    //QApplication::setOverrideCursor(Qt::WaitCursor);
-    
-    resetGlyphScene();
-    resetRenderableScene();
-    qDebug() << " todo load from file " << QString::fromStdString(SReadProfile.getFilePath());
-    
-    //QApplication::restoreOverrideCursor();
+    const std::string openFileName = SReadProfile.getFilePath();
+    H5GraphIO hio;
+    bool stat = hio.begin(openFileName, HDocument::oReadOnly );
+    if(!stat) {
+        QMessageBox msgBox;
+        msgBox.setText(QString("Cannot open file %1").arg(QString::fromStdString(openFileName)));
+        msgBox.exec();
+        return false;
+    }
+
+    QProgressDialog progress("Opening...", QString(), 0, 3, QApplication::activeWindow() );
+    progress.setWindowModality(Qt::ApplicationModal);
+    progress.show();
+
+    GlyphScene::preLoad();
+    RenderableScene::resetRenderableScene();
+
+    progress.setValue(1);
+
+    stat = hio.openScene();
+
+    if(stat) {
+
+        std::vector<std::string> nodeNames;
+        hio.lsNodes(nodeNames);
+
+        vchl::NodeReader reader;
+
+        std::vector<std::string>::const_iterator it = nodeNames.begin();
+        for(;it!=nodeNames.end();++it) {
+            hio.openNode(*it);
+
+            reader.readNode(hio);
+
+            GlyphScene::GlyphProfile prof;
+            prof._type = reader.nodeTypeId();
+            prof._id = reader.nodeUid();
+            const float *pos = reader.nodePosition();
+            prof._pos = QPointF(pos[0], pos[1]);
+            prof._isLoading = true;
+        
+            GlyphScene::createGlyph(prof);
+
+            hio.closeNode();
+        }
+
+        hio.closeScene();
+
+    } else {
+        QMessageBox msgBox;
+        msgBox.setText(QString("Not a vachelloa scene file %1").arg(QString::fromStdString(openFileName)));
+        msgBox.exec();
+    }
+
+    hio.end();
+
+    progress.setValue(3);
+
+    GlyphScene::postLoad();
+
     RenderableScene::setSceneChanged();
     emit sendUpdateScene();
     return true;

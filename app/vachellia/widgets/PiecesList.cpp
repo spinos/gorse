@@ -85,7 +85,7 @@ void PiecesList::selectItem(int id)
 
 		int pieceId = elemObj["id"].toInt(); ;
 		QString pieceLabel = elemObj["label"].toString();
-        QJsonValue iconNameVal = elemObj["icon"];
+        
         QString iconName;
         if(elemObj.find("icon") == elemObj.end()) 
             iconName = ":/images/unknown.png";

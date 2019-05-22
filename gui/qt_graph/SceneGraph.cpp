@@ -134,7 +134,14 @@ void SceneGraph::dropEvent(QDropEvent *event)
 		dataStream >> pixmap >> pieceTyp;
 		
 		QPointF posmts = mapToScene(event->pos() );
-		asGlyphScene()->createGlyph(pixmap, pieceTyp, posmts );
+
+		GlyphScene::GlyphProfile prof;
+		prof._type = pieceTyp;
+		prof._id = -1;
+		prof._pos = posmts;
+		prof._isLoading = false;
+
+		asGlyphScene()->createGlyph(prof);
 
 		event->setDropAction(Qt::MoveAction);
 		event->accept();

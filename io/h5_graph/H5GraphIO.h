@@ -11,6 +11,7 @@
 #define ALO_H5_GRAPH_IO_H
 
 #include <h5/V1H5IO.h>
+#include <vector>
 
 namespace alo {
     
@@ -36,12 +37,23 @@ public:
 	void nodeEnd();
 
 	void writeNodePosition(float x, float y);
-	void writeNodeType(int x);
+	void writeNodeId(int x);
 	void writeNodeDisplayName(const std::string &x);
 	void writeNodeIntAttr(const std::string &name, int dim, const int *x);
 	void writeNodeFloatAttr(const std::string &name, int dim, const float *x);
 	void writeNodeBoolAttr(const std::string &name, const bool &x);
 	void writeNodeStringAttr(const std::string &name, const std::string &x);
+
+	bool openScene();
+	void closeScene();
+
+	void lsNodes(std::vector<std::string> &names);
+	void openNode(const std::string &name);
+	void closeNode();
+
+	void readNodeId(int &y);
+	void readNodeDisplayName(std::string &y);
+	void readNodePosition(float *y);
 
 protected:
 	

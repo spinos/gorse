@@ -14,6 +14,7 @@
 #include "AttribCreator.h"
 #include <qt_base/ActivationControlItem.h>
 #include <qt_base/VisibilityControlItem.h>
+#include <qt_base/ImageCollector.h>
 #include <math/GroupCollection.h>
 #include <QDebug>
 
@@ -22,7 +23,8 @@ namespace alo {
 GlyphScene::GlyphScene(QObject *parent) :
 	QGraphicsScene(parent), 
 	m_collector(nullptr),
-	m_activeGlyph(nullptr)
+	m_activeGlyph(nullptr),
+	m_isLoading(false)
 {
 }
 
@@ -39,24 +41,31 @@ void GlyphScene::initializeGraphics()
     ActivationControlItem::InitializeStates();
 }
 
-void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
+void GlyphScene::createGlyph(const GlyphProfile &param)
 {
-	GlyphItem *g = new GlyphItem(pix, typ);
+	QJsonObject content = m_collector->element(param._type);
+	QString iconName;
+    if(content.find("icon") == content.end()) 
+        iconName = ":/images/unknown.png";
+    else 
+        iconName = content["icon"].toString();
+    QPixmap pix = ImageCollector::CollectPixmap(iconName);
+
+	GlyphItem *g = new GlyphItem(pix, param._type);
 	addItem(g);
 
-	const int gid = getUid(typ);
+	const int gid = param._id < 1 ? getUid(param._type) : param._id;
 	g->setGlyphId(gid);
 	m_glyphMap.insert(gid, g);
 
-	g->setPos(pos);
+	g->setPos(param._pos);
 
 	GlyphHalo* hal = new GlyphHalo;
-	QPointF posmts = pos + g->localCenter();
+	QPointF posmts = param._pos + g->localCenter();
 	hal->setPos(posmts.x() - 50, posmts.y() - 50 );
 	addItem(hal);
 	g->setHalo(hal);
 
-	QJsonObject content = m_collector->element(typ);
 	GlyphOps *ops = createOps(content);
 	ops->setGlyphScene(this);
 
@@ -68,11 +77,12 @@ void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
         g->addVisibilityControl();
     if(ops->hasEnable()) 
         g->addEnableControl();
-	postCreation(g);
-}
 
-GlyphOps *GlyphScene::createOps(const QJsonObject &content)
-{ return new GlyphOps; }
+    if(param._isLoading)
+    	postCreationBlocked(g);
+	else 
+		postCreation(g);
+}
 
 void GlyphScene::selectGlyph(GlyphItem *item)
 {
@@ -177,7 +187,7 @@ int GlyphScene::getUid(const int typeId)
 
 void GlyphScene::resetGlyphScene()
 {
-	clear();
+	QGraphicsScene::clear();
 	m_activeGlyph = nullptr;
 	m_selectedGlyph.clear();
 	m_typeCounter.clear();
@@ -186,5 +196,13 @@ void GlyphScene::resetGlyphScene()
 
 QJsonObject GlyphScene::getGlyphProfile(int typeId)
 { return m_collector->element(typeId); }
+
+void GlyphScene::preLoad()
+{
+	resetGlyphScene();
+}
+
+void GlyphScene::postLoad()
+{}
 
 } /// end of alo

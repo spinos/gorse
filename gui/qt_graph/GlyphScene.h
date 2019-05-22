@@ -38,7 +38,14 @@ public:
 	void setAssetCollection(GroupCollection<QJsonObject> *x);
 	void initializeGraphics();
 
-	void createGlyph(const QPixmap &pix, int typ, const QPointF & pos);
+	struct GlyphProfile {
+		int _type;
+		int _id;
+		QPointF _pos;
+		bool _isLoading;
+	};
+
+	void createGlyph(const GlyphProfile &param);
 	void selectGlyph(GlyphItem *item);
 	void deselectGlyph(GlyphItem *item);
 	void deselectAllGlyph();
@@ -58,9 +65,10 @@ signals:
 	void sendFocusCameraOn(const Float4 &centerRadius);
 	
 protected:
-	virtual GlyphOps *createOps(const QJsonObject &content);
+	virtual GlyphOps *createOps(const QJsonObject &content) = 0;
 	
 	virtual void postCreation(GlyphItem *item) = 0;
+	virtual void postCreationBlocked(GlyphItem *item) = 0;
 	virtual void preDestruction(GlyphItem *item, const std::vector<GlyphConnection *> &connectionsToBreak) = 0;
 
 	typedef sdb::L3Node<int, GlyphItem *, 128> GlyphDataType;
@@ -70,11 +78,15 @@ protected:
 	int getUid(const int typeId);
 	
 	bool glyphExists(const int i);
-	void resetGlyphScene();
-
+	
 	QJsonObject getGlyphProfile(int typeId);
 
+	void preLoad();
+	void postLoad();
+
 private:
+
+	void resetGlyphScene();
 	
 private:
 /// only one can be active
@@ -84,7 +96,8 @@ private:
 	GroupCollection<QJsonObject> *m_collector;
 	sdb::L2Tree<int, int, 64, 64> m_typeCounter;
 	sdb::L2Tree<int, GlyphItem *, 128, 128> m_glyphMap;
-	
+	bool m_isLoading;
+
 };
 
 } /// end of alo

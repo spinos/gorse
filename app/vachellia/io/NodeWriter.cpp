@@ -7,8 +7,6 @@
 
 #include "NodeWriter.h"
 #include "../ops/allOps.h"
-#include <qt_graph/GlyphOps.h>
-#include <h5_graph/HGraphNodeWriter.h>
 #include <QJsonArray>
 
 namespace alo {
