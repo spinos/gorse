@@ -15,6 +15,7 @@ namespace alo {
 
 class BoxOps : public TransformOps {
     
+    float m_boxSize[3];
     ElementVector<GlyphConnection> m_outOps;
 
 public:
@@ -34,7 +35,7 @@ public:
     virtual void connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
     virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
     virtual QString getShortDescription() const override;
-    
+
 protected:
     
 private:

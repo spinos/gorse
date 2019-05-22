@@ -30,8 +30,8 @@ public:
     virtual void createConnection(alo::GlyphConnection *conn, alo::GlyphPort *port) override;
     virtual void removeConnection(alo::GlyphConnection *conn) override;
 	
+    bool open();
     bool save();
-    bool load();
     
 signals:
 	void sendStopRender();

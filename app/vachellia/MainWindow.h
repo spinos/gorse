@@ -27,6 +27,7 @@ public:
     MainWindow();
 
 private slots:
+    void open();
     void save();
     void about();
 

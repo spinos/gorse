@@ -11,6 +11,7 @@
 #include "GlyphConnection.h"
 #include "GlyphItem.h"
 #include "GlyphOps.h"
+#include "AttribCreator.h"
 #include <qt_base/ActivationControlItem.h>
 #include <qt_base/VisibilityControlItem.h>
 #include <math/GroupCollection.h>
@@ -58,7 +59,10 @@ void GlyphScene::createGlyph(const QPixmap &pix, int typ, const QPointF & pos)
 	QJsonObject content = m_collector->element(typ);
 	GlyphOps *ops = createOps(content);
 	ops->setGlyphScene(this);
-	ops->addAttributes(content);
+
+	AttribCreator acr;
+	acr.addAttributes(ops, content);
+
 	g->setOps(ops);
 	if(ops->hasDrawable() || ops->hasRenderable()) 
         g->addVisibilityControl();
@@ -170,5 +174,17 @@ int GlyphScene::getUid(const int typeId)
 	*c += 1;
 	return ((typeId<<10) | *c);
 }
+
+void GlyphScene::resetGlyphScene()
+{
+	clear();
+	m_activeGlyph = nullptr;
+	m_selectedGlyph.clear();
+	m_typeCounter.clear();
+	m_glyphMap.clear();
+}
+
+QJsonObject GlyphScene::getGlyphProfile(int typeId)
+{ return m_collector->element(typeId); }
 
 } /// end of alo

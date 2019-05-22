@@ -70,13 +70,17 @@ protected:
 	int getUid(const int typeId);
 	
 	bool glyphExists(const int i);
+	void resetGlyphScene();
+
+	QJsonObject getGlyphProfile(int typeId);
 
 private:
 	
 private:
 /// only one can be active
 	GlyphItem *m_activeGlyph;
-	QList<GlyphItem *> m_selectedGlyph;;
+	QList<GlyphItem *> m_selectedGlyph;
+/// glyph properties
 	GroupCollection<QJsonObject> *m_collector;
 	sdb::L2Tree<int, int, 64, 64> m_typeCounter;
 	sdb::L2Tree<int, GlyphItem *, 128, 128> m_glyphMap;

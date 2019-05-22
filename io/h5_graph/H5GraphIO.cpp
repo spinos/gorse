@@ -73,4 +73,29 @@ void H5GraphIO::writeNodeDisplayName(const std::string &x)
 	m_current->writeVLStringAttr(".dspnm", x);
 }
 
+void H5GraphIO::writeNodeIntAttr(const std::string &name, int dim, const int *x)
+{
+	m_current->addIntAttr(name.c_str(), dim);
+	m_current->writeIntAttr(name.c_str(), (int *)x);
+}
+
+void H5GraphIO::writeNodeFloatAttr(const std::string &name, int dim, const float *x)
+{
+	m_current->addFloatAttr(name.c_str(), dim);
+	m_current->writeFloatAttr(name.c_str(), (float *)x);
+}
+
+void H5GraphIO::writeNodeBoolAttr(const std::string &name, const bool &x)
+{
+	int ix = x ? 1 : 0;
+	m_current->addIntAttr(name.c_str());
+	m_current->writeIntAttr(name.c_str(), &ix);
+}
+
+void H5GraphIO::writeNodeStringAttr(const std::string &name, const std::string &x)
+{
+	m_current->addVLStringAttr(name.c_str());
+	m_current->writeVLStringAttr(name.c_str(), x);
+}
+
 } /// end of alo

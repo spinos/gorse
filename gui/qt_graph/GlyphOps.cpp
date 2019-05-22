@@ -1,13 +1,14 @@
+/*
+ *  GlyphOps.cpp
+ *
+ *  2019/5/22
+ */
+ 
 #include "GlyphOps.h"
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QFile>
 #include <QDebug>
 #include <boost/format.hpp>
 
 namespace alo {
-
-QJsonObject GlyphOps::attributePresetObj;
 
 GlyphOps::GlyphOps()
 {}
@@ -59,162 +60,8 @@ void GlyphOps::getDrawableBound(Hexahedron &b) const
 void GlyphOps::setDrawableVisible(bool x)
 {}
 
-void GlyphOps::addAttributes(const QJsonObject &content)
-{
-	QJsonArray attrArray = content["attribs"].toArray();
-    for(int i=0; i< attrArray.size();++i) {
-    	QJsonObject attrObject = attrArray[i].toObject();
-		addAttribute(attrObject);
-	}
-}
-
-void GlyphOps::addAttribute(const QJsonObject &content)
-{
-	int typ = content["typ"].toInt();
-	QAttrib *b = 0;
-	switch(typ) {
-		case QAttrib::AtBool :
-			b = addBoolAttribute(content);
-			break;
-		case QAttrib::AtInt :
-			b = addIntAttribute(content);
-			break;
-		case QAttrib::AtFloat :
-			b = addFloatAttribute(content);
-			break;
-		case QAttrib::AtFloat2 :
-			b = addFloat2Attribute(content);
-			break;
-        case QAttrib::AtFloat3 :
-			b = addFloat3Attribute(content);
-			break;
-		case QAttrib::AtMesh :
-			b = addMeshAttribute(content);
-			break;
-		case QAttrib::AtList :
-			b = addListAttribute(content);
-			break;
-		case QAttrib::AtString :
-			b = addStringAttribute(content);
-			break;
-		case QAttrib::AtTransformSet :
-			addTransformAttributes();
-			break;
-		default:
-			break;
-	}
-
-	if(b) {
-		b->setLabel(content["label"].toString().toStdString());
-		addConnection(b, content);
-	}
-}
-
-QAttrib *GlyphOps::addBoolAttribute(const QJsonObject &content)
-{
-	QString name = content["name"].toString();
-	std::string snm = name.toStdString();
-	BoolAttrib *b = new BoolAttrib(snm);
-	b->setValue(content["value"].toBool());
-	m_attribs[snm] = b;
-	return b;
-}
-
-QAttrib *GlyphOps::addIntAttribute(const QJsonObject &content)
-{
-	QString name = content["name"].toString();
-	std::string snm = name.toStdString();
-	IntAttrib *b = new IntAttrib(snm);
-	b->setValue(content["value"].toInt());
-	b->setMin(content["min"].toInt());
-	b->setMax(content["max"].toInt());
-	m_attribs[snm] = b;
-	return b;
-}
-
-QAttrib *GlyphOps::addFloatAttribute(const QJsonObject &content)
-{
-	QString name = content["name"].toString();
-	std::string snm = name.toStdString();
-	FloatAttrib *b = new FloatAttrib(snm);
-	float fv = content["value"].toDouble();
-	b->setValue(fv);
-	float fm = content["min"].toDouble();
-	b->setMin(fm);
-	float fx = content["max"].toDouble();
-	b->setMax(fx);
-	m_attribs[snm] = b;
-	return b;
-}
-
-QAttrib *GlyphOps::addFloat2Attribute(const QJsonObject &content)
-{
-	QString name = content["name"].toString();
-	std::string snm = name.toStdString();
-	Float2Attrib *b = new Float2Attrib(snm);
-	float tmp[2];
-	QJsonArray &fv = content["value"].toArray();
-	tmp[0] = fv[0].toDouble();
-	tmp[1] = fv[1].toDouble();
-	b->setValue(tmp);
-	QJsonArray &fm = content["min"].toArray();
-	tmp[0] = fm[0].toDouble();
-	tmp[1] = fm[1].toDouble();
-	b->setMin(tmp);
-	QJsonArray &fx = content["max"].toArray();
-	tmp[0] = fx[0].toDouble();
-	tmp[1] = fx[1].toDouble();
-	b->setMax(tmp);
-	m_attribs[snm] = b;
-	return b;
-}
-
-QAttrib *GlyphOps::addFloat3Attribute(const QJsonObject &content)
-{
-	QString name = content["name"].toString();
-	std::string snm = name.toStdString();
-	Float3Attrib *b = new Float3Attrib(snm);
-	float tmp[3];
-	QJsonArray &fv = content["value"].toArray();
-	tmp[0] = fv[0].toDouble();
-	tmp[1] = fv[1].toDouble();
-    tmp[2] = fv[2].toDouble();
-	b->setValue(tmp);
-	QJsonArray &fm = content["min"].toArray();
-	tmp[0] = fm[0].toDouble();
-	tmp[1] = fm[1].toDouble();
-    tmp[2] = fm[2].toDouble();
-	b->setMin(tmp);
-	QJsonArray &fx = content["max"].toArray();
-	tmp[0] = fx[0].toDouble();
-	tmp[1] = fx[1].toDouble();
-    tmp[2] = fx[2].toDouble();
-	b->setMax(tmp);
-	m_attribs[snm] = b;
-	return b;
-}
-
-QAttrib *GlyphOps::addMeshAttribute(const QJsonObject &content)
-{
-	QString name = content["name"].toString();
-	std::string snm = name.toStdString();
-	MeshAttrib *b = new MeshAttrib(snm);
-	m_attribs[snm] = b;
-	return b;
-}
-
-void GlyphOps::addConnection(QAttrib *b, const QJsonObject &content)
-{
-	if(!content.contains("port")) return;
-
-	QJsonObject portObj = content["port"].toObject();
-	Connectable *c = new Connectable;
-	c->_isOutgoing = portObj["outgoing"].toBool();
-	c->_side = portObj["side"].toInt();
-	c->_px = portObj["px"].toInt();
-	c->_py = portObj["py"].toInt();
-	b->setConnectable(c);
-}
+void GlyphOps::addAttribute(QAttrib *b)
+{ m_attribs[b->attrName()] = b; }
 
 std::map<std::string, QAttrib * >::iterator GlyphOps::attribBegin()
 { return m_attribs.begin(); }
@@ -286,26 +133,6 @@ bool GlyphOps::setBoolAttrValue(const std::string &attrName, const bool &x)
 	
 	update();
 	return true;
-}
-
-QAttrib *GlyphOps::addListAttribute(const QJsonObject &content)
-{
-	QString name = content["name"].toString();
-	std::string snm = name.toStdString();
-	ListAttrib *b = new ListAttrib(snm);
-	m_attribs[snm] = b;
-	return b;
-}
-
-QAttrib *GlyphOps::addStringAttribute(const QJsonObject &content)
-{
-	QString name = content["name"].toString();
-	int sat = content["strtyp"].toInt();
-	std::string snm = name.toStdString();
-	StringAttrib *b = new StringAttrib(snm);
-	b->setStrAttrTyp(sat);
-	m_attribs[snm] = b;
-	return b;
 }
 
 bool GlyphOps::setListAttrValue(const std::string &attrName, const std::string &itemName)
@@ -401,6 +228,17 @@ bool GlyphOps::getBoolAttribValue(bool &val, const std::string &attrName)
     return true;
 }
 
+bool GlyphOps::getStringAttribValue(std::string &val, const std::string &attrName)
+{
+	QAttrib * attr = findAttrib(attrName);
+	if(!attr) return false;
+
+	StringAttrib *sattr = static_cast<StringAttrib *>(attr);
+	sattr->getValue(val);
+	
+    return true;
+}
+
 bool GlyphOps::getListAttribValue(std::string &val, const std::string &attrName)
 {
 	QAttrib * attr = findAttrib(attrName);
@@ -409,45 +247,6 @@ bool GlyphOps::getListAttribValue(std::string &val, const std::string &attrName)
     ListAttrib *fattr = static_cast<ListAttrib *>(attr);
     fattr->getValue(val);
     return true;
-}
-
-void GlyphOps::addTransformAttributes()
-{
-	bool stat;
-	QJsonObject content = getTransformPresetObj(stat);
-	if(!stat) return;
-
-	addAttributes(content);
-}
-
-void GlyphOps::loadAttributePreset(const QString &fileName)
-{
-	QFile loadFile(fileName);
-	if (!loadFile.open(QIODevice::ReadOnly) ) {
-		qWarning("Couldn't open file for attribute preset");
-		return;
-	}
-
-	QByteArray loadData = loadFile.readAll();
-	QJsonDocument loadDoc(QJsonDocument::fromJson(loadData));
-	
-	attributePresetObj = loadDoc.object();
-}
-
-QJsonObject GlyphOps::getTransformPresetObj(bool &found)
-{
-	found = false;
-	QJsonArray attrArray = attributePresetObj["children"].toArray();
-	QJsonObject res;
-	for(int i=0;i<attrArray.size();++i) {
-		res = attrArray[i].toObject();
-		if(res["name"].toString() == "transform") {
-			found = true;
-			break;
-		}
-	}
-	
-	return res;
 }
 
 void GlyphOps::setGlyphScene(GlyphScene *x)

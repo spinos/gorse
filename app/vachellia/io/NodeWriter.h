@@ -8,7 +8,8 @@
 #ifndef VCHL_NODE_WRITER_H
 #define VCHL_NODE_WRITER_H
 
-#include <h5_graph/H5GraphIO.h>
+#include <h5_graph/HGraphNodeWriter.h>
+#include <QJsonObject>
 
 namespace alo {
 
@@ -16,11 +17,23 @@ class GlyphOps;
 
 namespace vchl {
 	
-class NodeWriter  {
+class NodeWriter : public HGraphNodeWriter {
 
 public:
 
-	void write(H5GraphIO &hio, const GlyphOps *ops);
+	void write(H5GraphIO &hio, GlyphOps *ops, const QJsonObject &content);
+
+private:
+	
+	void writeAttribute(H5GraphIO &hio, GlyphOps *ops, const QJsonObject &content);
+	void writeBoolAttribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name);
+	void writeIntAttribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name);
+	void writeFloatAttribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name);
+	void writeFloat2Attribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name);
+	void writeFloat3Attribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name);
+	void writeMeshAttribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name);
+	void writeListAttribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name);
+	void writeStringAttribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name);
 
 };
 
