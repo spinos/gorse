@@ -15,6 +15,7 @@
 namespace alo {
 
 class GlyphOps;
+class GlyphConnection;
 
 namespace vchl {
 	
@@ -26,7 +27,7 @@ class NodeWriter : public HGraphNodeWriter, public AttribPreset
 public:
 
 	void write(H5GraphIO &hio, GlyphOps *ops, const QJsonObject &content);
-
+    
 private:
 	
 	void writeAttributes(const QJsonArray &content);

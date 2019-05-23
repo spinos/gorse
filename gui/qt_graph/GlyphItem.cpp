@@ -2,6 +2,7 @@
  *  GlyphItem.cpp
  *  aloe
  *
+ *  2019/5/25
  */
 
 #include "GlyphItem.h"
@@ -67,7 +68,7 @@ void GlyphItem::resizeBlock(int bx, int by)
 GlyphPort *GlyphItem::addPort(const QString & name, 
 							bool isOutgoing)
 {
-	GlyphPort * pt = new GlyphPort(this);
+	GlyphPort *pt = new GlyphPort(this);
 	pt->setPortName(name);
     pt->setIsOutgoing(isOutgoing);
     pt->genToolTip();
@@ -304,12 +305,14 @@ void GlyphItem::postDisconnection(GlyphPort* viaPort)
 	m_ops->postConnectionChange(viaPort->portName().toStdString() );
 }
 
-void GlyphItem::getConnections(std::vector<GlyphConnection *> &conns)
+void GlyphItem::getConnections(std::vector<GlyphConnection *> &conns,
+                bool incomingOnly)
 {
     foreach(QGraphicsItem *port_, childItems()) {
 		if (port_->type() != GlyphPort::Type) continue;
 
-		GlyphPort *port = (GlyphPort*) port_;
+		GlyphPort *port = static_cast<GlyphPort *>(port_);
+        if(incomingOnly && port->isOutgoing()) continue;
 		port->getConnections(conns);
 		
 	}
@@ -348,6 +351,22 @@ void GlyphItem::makeCollisionPolygon(QPolygonF &poly, const QPointF &dv) const
 
 QPointF GlyphItem::getCollisionCenter() const
 { return mapToScene(localCenter()); }
+
+GlyphPort *GlyphItem::findPort(const std::string &name) const
+{
+	foreach(QGraphicsItem *port_, childItems()) {
+		if (port_->type() != GlyphPort::Type) {
+			continue;
+		}
+
+		GlyphPort *port = static_cast<GlyphPort*>(port_);
+		if(port->portNameStr() == name)
+			return port;
+		
+	}
+
+	return nullptr;
+}
 
 void GlyphItem::updateOps()
 { m_ops->update(); }

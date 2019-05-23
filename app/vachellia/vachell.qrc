@@ -45,5 +45,6 @@
     <file>images/quit.png</file>
     <file>mimes/assettree.json</file>
     <file>mimes/attribpreset.json</file>
+    <file>mimes/linktimestamp.txt</file>
 </qresource>
 </RCC>

@@ -1,15 +1,14 @@
 /*
  *  GlyphPort.cpp
- *  
+ *  gorse
  *
- *  Created by jian zhang on 4/1/17.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
- *
+ *  2019/5/25
  */
 
-#include <QtGui>
 #include "GlyphPort.h"
 #include "GlyphConnection.h"
+#include <QPen>
+#include <QBrush>
 
 namespace alo {
 
@@ -33,6 +32,9 @@ void GlyphPort::setIsOutgoing(bool x)
 
 const QString & GlyphPort::portName() const
 { return m_portName; }
+
+std::string GlyphPort::portNameStr() const
+{ return m_portName.toStdString(); }
 
 const bool & GlyphPort::isOutgoing() const
 { return m_isOutgoing; }
@@ -79,10 +81,16 @@ void GlyphPort::getConnections(std::vector<GlyphConnection *> &conns) const
 	}
 }
 
+int GlyphPort::getLastConnectionId() const
+{
+	if(numConnections() < 1) return -1;
+	int y = m_connections.last()->connectionId();
+	return y;
+}
+
 bool GlyphPort::IsItemPort(const QGraphicsItem *item)
 {
-	if(!item)
-		return false;
+	if(!item) return false;
 	
 	return (item->type() == GlyphPort::Type);
 }
@@ -97,9 +105,8 @@ bool GlyphPort::IsItemOutgoingPort(const QGraphicsItem *item)
 
 bool GlyphPort::IsItemIncomingPort(const QGraphicsItem *item)
 {
-	if(!IsItemPort(item) ) {
-		return false;
-	}
+	if(!IsItemPort(item) ) return false;
+	
 	const GlyphPort * pt = (const GlyphPort *)item;
 	return !pt->isOutgoing();
 }

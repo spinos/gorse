@@ -1,3 +1,6 @@
+string(TIMESTAMP LINK_DATE_TIME "%Y-%m-%d %H:%M:%S")
+file(WRITE "mimes/linktimestamp.txt" ${LINK_DATE_TIME})
+
 file (GLOB VCHL_IO_SRC
 io/*.h
 io/*.cpp)

@@ -2,7 +2,7 @@
  *  GlyphScene.cpp
  *  gorse
  *
- *  2019/5/20
+ *  2019/5/25
  */
 
 #include "GlyphScene.h"
@@ -147,13 +147,13 @@ void GlyphScene::removeActiveGlyph()
 	delete h;
 
 	std::vector<GlyphConnection *> conns;
-	m_activeGlyph->getConnections(conns);
+	m_activeGlyph->getConnections(conns, false);
 
 	preDestruction(m_activeGlyph, conns);
 
 	foreach(GlyphConnection *conn, conns) {
 		QGraphicsScene::removeItem(conn);
-		//delete conn;
+		unmapConnection(conn);
 	}
 
 	QGraphicsScene::removeItem(m_activeGlyph);
@@ -166,13 +166,7 @@ void GlyphScene::removeActiveGlyph()
 }
 
 bool GlyphScene::glyphExists(const int i)
-{ return m_glyphMap.find(i) != nullptr; }
-
-GlyphScene::GlyphDataType *GlyphScene::firstGlyph() const
-{ return m_glyphMap.begin(); }
-
-GlyphScene::GlyphDataType *GlyphScene::nextGlyph(const GlyphDataType *x) const
-{ return m_glyphMap.next(x); }
+{ return !(m_glyphMap.find(i) == nullptr); }
 
 void GlyphScene::onFocusIn3D(const Float4 &centerRadius)
 { emit sendFocusCameraOn(centerRadius); }
@@ -193,10 +187,81 @@ void GlyphScene::resetGlyphScene()
 	m_selectedGlyph.clear();
 	m_typeCounter.clear();
 	m_glyphMap.clear();
+    m_connectionMap.clear();
 }
 
 QJsonObject GlyphScene::getGlyphProfile(int typeId)
 { return m_collector->element(typeId); }
+
+void GlyphScene::mapConnection(GlyphConnection *x)
+{
+    const int &idx = x->connectionId();
+    const int i = idx > -1 ? idx : getConnectionUid(x->hintId());
+    m_connectionMap.insert(i, x);
+    if(i != idx) x->setConnectionId(i);
+}
+
+void GlyphScene::unmapConnection(GlyphConnection *x)
+{
+    const int &idx = x->connectionId();
+    GlyphConnectionPtr *y = m_connectionMap.find(idx);
+    if(y) (*y)->setConnectionId(-1);
+}
+
+int GlyphScene::getConnectionUid(const int &base)
+{
+    int r = base + rand() & 127;
+    bool vac = (m_connectionMap.find(r) == nullptr);
+    while(!vac) {
+        r += rand() & 127;
+        vac = (m_connectionMap.find(r) == nullptr); 
+    }
+    return r;
+}
+
+sdb::L3DataIterator<int, GlyphConnection *, 128> GlyphScene::connectionsBegin() const
+{ return m_connectionMap.begin(-1); }
+
+sdb::L3DataIterator<int, GlyphItem *, 128> GlyphScene::glyphsBegin() const
+{ return m_glyphMap.begin(-1); }
+
+bool GlyphScene::connectNodes(const int &node0Id, const std::string &port0Name,
+					const int &node1Id, const std::string &port1Name,
+					const int &uid)
+{
+	GlyphItemPtr *n0 = m_glyphMap.find(node0Id);
+	if(n0 == nullptr) {
+		std::cout << "\n ERROR GlyphScene::connectNodes cannot find node0 " << node0Id;
+		return false;
+	}
+
+	GlyphPort *pt0 = (*n0)->findPort(port0Name);
+	if(pt0 == nullptr) {
+		std::cout << "\n ERROR GlyphScene::connectNodes cannot find port0 " << port0Name;
+		return false;
+	}
+
+	GlyphItemPtr *n1 = m_glyphMap.find(node1Id);
+	if(n1 == nullptr) {
+		std::cout << "\n ERROR GlyphScene::connectNodes cannot find node1 " << node1Id;
+		return false;
+	}
+
+	GlyphPort *pt1 = (*n1)->findPort(port1Name);
+	if(pt1 == nullptr) {
+		std::cout << "\n ERROR GlyphScene::connectNodes cannot find port1 " << port1Name;
+		return false;
+	}
+        
+    GlyphConnection *conn = new GlyphConnection;
+    conn->setConnectionId(uid);
+	conn->originFrom(pt0);
+    conn->destinationTo(pt1);
+    addItem(conn);
+    mapConnection(conn);
+
+	return true;
+}
 
 void GlyphScene::preLoad()
 {

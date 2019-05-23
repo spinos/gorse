@@ -28,7 +28,7 @@ public:
 	virtual ~AcaciaScene();
 	
 	virtual void onItemStateChanged(alo::GlyphItem *item, QGraphicsItem *stateControlItem) override;
-    virtual void createConnection(alo::GlyphConnection *conn, alo::GlyphPort *port) override;
+    virtual bool makeConnection(alo::GlyphConnection *conn, alo::GlyphPort *port) override;
     virtual void removeConnection(alo::GlyphConnection *conn) override;
     
 signals:

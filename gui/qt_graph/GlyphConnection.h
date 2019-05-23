@@ -1,9 +1,10 @@
 /*
  *  GlyphConnection.h
+ *  gorse
  *
- *  from port0 to port1
+ *  from node0.port0 to nod1.port1
  *
- *  2019/5/10
+ *  2019/5/25
  */
 
 #ifndef ALO_GLYPH_CONNECTION_H
@@ -23,18 +24,25 @@ public:
 	
 	GlyphConnection(QGraphicsItem * parent = 0);
 	virtual ~GlyphConnection();
+    
+    void setConnectionId(const int &x);
 	
 	void updatePath();
     void updatePathTo(const QPointF & pos);
 	void updatePathByPort(GlyphPort * p);
 	bool isComplete() const;
 	
+    const int &connectionId() const;
+/// suggestion of the minimal
+    const int &hintId() const;
 	const GlyphPort * port0() const;
 	const GlyphPort * port1() const;
 	GlyphItem *node0() const;
 	GlyphItem *node1() const;
+	void getNodeIds(int *y) const;
+	void getPortNames(std::string &y0, std::string &y1) const;
 	
-    void originFrom(GlyphPort* p, const QPointF & pos);
+    void originFrom(GlyphPort* p);
 	bool canConnectTo(GlyphPort* p1) const;
     void destinationTo(GlyphPort* p1);
 	void breakUp();
@@ -57,6 +65,9 @@ protected:
 	static GlyphItem *PortToNode(const GlyphPort *pt);
 	
 private:
+
+    int m_cid;
+    int m_hintId;
 	QPointF m_pos0;
 	QPointF m_pos1;
 	GlyphPort * m_port0;

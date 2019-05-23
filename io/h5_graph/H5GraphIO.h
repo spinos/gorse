@@ -37,7 +37,6 @@ public:
 	void nodeEnd();
 
 	void writeNodePosition(float x, float y);
-	void writeNodeId(int x);
 	void writeNodeDisplayName(const std::string &x);
 	void writeNodeIntAttr(const std::string &name, int dim, const int *x);
 	void writeNodeFloatAttr(const std::string &name, int dim, const float *x);
@@ -57,6 +56,20 @@ public:
     void readNodeBoolAttr(const std::string &name, bool &y);
     void readNodeIntAttr(const std::string &name, int *y);
     void readNodeFloatAttr(const std::string &name, float *y);
+
+    void connectionBegin(const int &connectionId);
+    void connectionEnd();
+
+    void writeConnectionNodeIds(const int *x);
+    void writeConnectionPortNames(const std::string &x0, const std::string &x1);
+
+    void lsConnections(std::vector<std::string> &names);
+	void openConnection(const std::string &name);
+	void closeConnection();
+
+	void readConnectionId(int &y);
+	void readConnectionNodeIds(int *y);
+    void readConnectionPortNames(std::string &y0, std::string &y1);
     
 protected:
 	

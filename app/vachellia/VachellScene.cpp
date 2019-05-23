@@ -1,14 +1,8 @@
 /*
  *  VachellScene.cpp
  *  vachellia
- *
- *  interrupt render condition
- *  create/remove item
- *  visibility/attribute changed
- *  create/remove connection
- *  save/load
  *  
- *  2019/5/11
+ *  2019/5/24
  */
 
 #include "VachellScene.h"
@@ -16,13 +10,13 @@
 #include <qt_graph/GlyphOps.h>
 #include <qt_graph/GlyphItem.h>
 #include <qt_graph/GlyphConnection.h>
-#include <math/CameraEvent.h>
-#include <math/AFrustum.h>
 #include <math/Hexahedron.h>
 #include <interface/GlobalFence.h>
 #include <boost/thread/lock_guard.hpp>
 #include "io/NodeWriter.h"
 #include "io/NodeReader.h"
+#include "h5_graph/HGraphConnectionWriter.h"
+#include "h5_graph/HGraphConnectionReader.h"
 #include <QApplication>
 #include <QMessageBox>
 #include <QProgressDialog>
@@ -107,14 +101,13 @@ void VachellScene::preDestruction(GlyphItem *item, const std::vector<GlyphConnec
 
 void VachellScene::recvCameraChanged(const CameraEvent &x)
 {
-    GlyphDataType *block = firstGlyph();
-    while(block) {
-        for(int i=0;i<block->count();++i) {
-            GlyphItem *g = block->value(i);
+    sdb::L3DataIterator<int, GlyphItem *, 128> iter = glyphsBegin();
+    for(;!iter.done();iter.next()) {
+
+        GlyphItem *g = *iter.second;
             GlyphOps *op = g->ops();
             op->recvCameraChanged(x);
-        }
-        block = nextGlyph(block);
+
     }
 }
 
@@ -156,16 +149,19 @@ void VachellScene::recvAttribChanged()
 	emit sendUpdateScene();
 }
 
-void VachellScene::createConnection(GlyphConnection *conn, GlyphPort *port)
+bool VachellScene::makeConnection(GlyphConnection *conn, GlyphPort *port)
 {
-    if(!conn->canConnectTo(port) ) return;
+    if(!conn->canConnectTo(port) ) return false;
 
     interface::GlobalFence &fence = interface::GlobalFence::instance();
     boost::lock_guard<interface::GlobalFence> guard(fence);
 	
 	conn->destinationTo(port);
+    GlyphScene::mapConnection(conn);
+    
     RenderableScene::setSceneChanged();
 	emit sendUpdateScene();
+    return true;
 }
 
 void VachellScene::removeConnection(GlyphConnection *conn)
@@ -174,6 +170,8 @@ void VachellScene::removeConnection(GlyphConnection *conn)
     boost::lock_guard<interface::GlobalFence> guard(fence);
 
 	conn->breakUp();
+    GlyphScene::unmapConnection(conn);
+    
     RenderableScene::setSceneChanged();
 	emit sendUpdateScene();
 }
@@ -246,12 +244,12 @@ bool VachellScene::save(bool doChooseFile)
     
     hio.sceneBegin();
 
-    vchl::NodeWriter writer;
+    vchl::NodeWriter nWriter;
     
-    GlyphDataType *block = firstGlyph();
-    while(block) {
-        for (int i=0;i<block->count();++i) { 
-            GlyphItem *ci = block->value(i);
+    sdb::L3DataIterator<int, GlyphItem *, 128> glyphIter = glyphsBegin();
+    for(;!glyphIter.done();glyphIter.next()) {
+
+        GlyphItem *ci = *glyphIter.second;
             GlyphOps *ops = ci->ops();
             ops->preSave();
 
@@ -261,14 +259,14 @@ bool VachellScene::save(bool doChooseFile)
 
             QPointF pos = ci->mapToScene(QPointF());
             hio.writeNodePosition(pos.x(), pos.y());
-
-            writer.write(hio, ops, content);
+           
+            nWriter.write(hio, ops, content);
 
             hio.nodeEnd();
-        }
-        
-        block = nextGlyph(block);
     }
+
+    HGraphConnectionWriter cWriter;
+    cWriter.writeConnections(hio, connectionsBegin());
 	
     hio.sceneEnd();
     
@@ -359,13 +357,38 @@ bool VachellScene::open()
             QJsonObject content = getGlyphProfile(prof._type);
             GlyphOps *ops = prof._ops;
             reader.read(hio, ops, content);
-/// should post load after connections
-            ops->postLoad();
             
             hio.closeNode();
         }
 
+        std::vector<std::string> connectionNames;
+        hio.lsConnections(connectionNames);
+
+        HGraphConnectionReader cReader;
+
+        it = connectionNames.begin();
+        for(;it!=connectionNames.end();++it) {
+            hio.openConnection(*it);
+
+            cReader.readConnection(hio);
+
+            connectNodes(cReader.node0Id(), cReader.port0Name(), 
+                        cReader.node1Id(), cReader.port1Name(),
+                        cReader.connectionId());
+
+            hio.closeConnection();
+        }
+
         hio.closeScene();
+
+        progress.setValue(2);
+
+        sdb::L3DataIterator<int, GlyphItem *, 128> glyphIter = glyphsBegin();
+        for(;!glyphIter.done();glyphIter.next()) {
+            GlyphItem *gi = *glyphIter.second;
+            GlyphOps *ops = gi->ops();
+            ops->postLoad();
+        }
 
     } else {
         QMessageBox msgBox;

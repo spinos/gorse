@@ -255,32 +255,32 @@ bool GlyphOps::canConnectTo(GlyphOps *another, const std::string &portName) cons
 
 void GlyphOps::preConnectTo(GlyphOps *another, const std::string &portName)
 {
-	std::cout << "\n GlyphOps::preConnectTo " << another << " via " << portName;
+	std::cout << "\n GlyphOps " << displayName() << " preConnectTo " << another->displayName() << " via " << portName;
 }
 
 void GlyphOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
-	std::cout << "\n GlyphOps::connectTo " << another << " via " << portName;
+	std::cout << "\n GlyphOps " << displayName() << " connectTo " << another->displayName() << " via " << portName;
 }
 
 void GlyphOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
-	std::cout << "\n GlyphOps::disconnectFrom " << another << " via " << portName;
+	std::cout << "\n GlyphOps " << displayName() << " disconnectFrom " << another->displayName() << " via " << portName;
 }
 
 void GlyphOps::postConnectionChange(const std::string &portName)
 {
-	std::cout << "\n GlyphOps::postConnectionChange port " << portName; 
+	std::cout << "\n GlyphOps " << displayName() << " postConnectionChange port " << portName; 
 }
 
 void GlyphOps::preDestruction()
 {
-	std::cout << "\n GlyphOps::preDestruction " << opsId(); 
+	std::cout << "\n GlyphOps " << displayName() << " preDestruction " << opsId(); 
 }
 
 void GlyphOps::receiveImpulse(GlyphOps *another, const std::string &portName)
 {
-	std::cout << "\n GlyphOps::receiveImpulse from " << another << " via " << portName;
+	std::cout << "\n GlyphOps " << displayName() << " receiveImpulse from " << another->displayName() << " via " << portName;
 }
 
 QString GlyphOps::getShortDescription() const

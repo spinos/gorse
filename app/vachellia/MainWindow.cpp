@@ -5,8 +5,6 @@
  *  2019/5/20
  */
  
-#include <QtWidgets>
-
 #include "MainWindow.h"
 #include "widgets/AssetPalette.h"
 #include "VachellScene.h"
@@ -15,6 +13,12 @@
 #include <qt_graph/SceneGraph.h>
 #include <qt_graph/GlyphOps.h>
 #include <qt_graph/AttribCreator.h>
+#include <QDockWidget>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QAction>
+#include <QFile>
 
 MainWindow::MainWindow()
 {
@@ -125,8 +129,12 @@ void MainWindow::updateTitle()
 
 void MainWindow::about()
 {
+    QFile timeFile(":/mimes/linktimestamp.txt");
+    timeFile.open(QIODevice::ReadOnly);
+    QByteArray timeData = timeFile.readAll();
+    QString timestamp = QString::fromUtf8(timeData);
    QMessageBox::about(this, tr("About Vachellia"),
-            tr("Some <b>Doc</b> here "));
+            QString("<b>Build</b> %1").arg(timestamp));
 }
 
 void MainWindow::createActions()
@@ -201,7 +209,7 @@ void MainWindow::createActions()
 
 void MainWindow::createStatusBar()
 {
-    statusBar()->showMessage(tr("Ready"));
+    //statusBar()->showMessage(tr("Ready"));
 }
 
 void MainWindow::recvDisplaySolidChanged(bool checked)

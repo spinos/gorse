@@ -6,6 +6,7 @@
  */
 
 #include "NodeWriter.h"
+#include <qt_graph/GlyphConnection.h>
 #include "../ops/allOps.h"
 
 namespace alo {

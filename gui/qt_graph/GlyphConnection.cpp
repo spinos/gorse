@@ -1,22 +1,22 @@
 /*
  *  GlyphConnection.cpp
- *  
+ *  gorse
  *
- *  Created by jian zhang on 4/1/17.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
- *
+ *  2019/5/25
  */
-
-#include <QtGui>
 
 #include "GlyphConnection.h"
 #include "GlyphPort.h"
 #include "GlyphItem.h"
+#include <QPen>
+#include <QBrush>
 #include <iostream>
 
 namespace alo {
 
 GlyphConnection::GlyphConnection(QGraphicsItem * parent) : QGraphicsPathItem(parent),
+m_cid(-1),
+m_hintId(0),
 m_port0(NULL),
 m_port1(NULL)
 {
@@ -28,6 +28,9 @@ m_port1(NULL)
 GlyphConnection::~GlyphConnection()
 {
 }
+
+void GlyphConnection::setConnectionId(const int &x)
+{ m_cid = x; }
 
 void GlyphConnection::setPos0(const QPointF & p)
 { m_pos0 = p; }
@@ -86,6 +89,12 @@ void GlyphConnection::updatePathByPort(GlyphPort * p)
 	updatePath();
 }
 
+const int &GlyphConnection::connectionId() const
+{ return m_cid; }
+
+const int &GlyphConnection::hintId() const
+{ return m_hintId; }
+
 const GlyphPort * GlyphConnection::port0() const
 { return m_port0; }
 
@@ -107,20 +116,22 @@ bool GlyphConnection::canConnectTo(GlyphPort* p1) const
 
 bool GlyphConnection::IsItemConnection(const QGraphicsItem *item)
 {
-	if(!item)
-		return false;
+	if(!item) return false;
 		
 	return (item->type() == GlyphConnection::Type);
 }
 
-void GlyphConnection::originFrom(GlyphPort* p, const QPointF & pos)
+void GlyphConnection::originFrom(GlyphPort* p)
 {
     setPort0(p);
+    const QPointF pos = p->scenePos();
     setPos0(pos);
 }
 
 void GlyphConnection::destinationTo(GlyphPort* p1)
 {
+	m_hintId = p1->getLastConnectionId() + 1;
+
     GlyphItem * srcNode = node0();
     GlyphItem * destNode = PortToNode(p1);
     
@@ -128,10 +139,14 @@ void GlyphConnection::destinationTo(GlyphPort* p1)
 	destNode->preConnection(srcNode, p1);
     
     setPort1(p1);
+    const QPointF pos = p1->scenePos();
+    setPos1(pos);
 	updatePath();
 			
 	destNode->postConnection(srcNode, p1, this);
     srcNode->postConnection(destNode, port0(), this);
+
+    genToolTip();
 }
 
 void GlyphConnection::breakUp()
@@ -180,6 +195,20 @@ void GlyphConnection::genToolTip()
 	QString name1 = QString::fromStdString(n1->glyphName());
 	QString stip = QString("%1.%2 -> %3.%4").arg(name0, m_port0->portName(), name1, m_port1->portName() );
 	setToolTip(stip);
+}
+
+void GlyphConnection::getNodeIds(int *y) const
+{
+	const GlyphItem * n0 = node0();
+	y[0] = n0->glyphId();
+	const GlyphItem * n1 = node1();
+	y[1] = n1->glyphId();
+}
+
+void GlyphConnection::getPortNames(std::string &y0, std::string &y1) const
+{
+	y0 = m_port0->portNameStr();
+	y1 = m_port1->portNameStr();
 }
 
 }
