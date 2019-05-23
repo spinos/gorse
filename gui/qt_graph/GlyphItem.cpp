@@ -349,4 +349,7 @@ void GlyphItem::makeCollisionPolygon(QPolygonF &poly, const QPointF &dv) const
 QPointF GlyphItem::getCollisionCenter() const
 { return mapToScene(localCenter()); }
 
+void GlyphItem::updateOps()
+{ m_ops->update(); }
+
 } /// end of namespace alo

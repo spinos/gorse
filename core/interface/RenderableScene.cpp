@@ -22,7 +22,8 @@ namespace alo {
 
 RenderableScene::RenderableScene() : m_objectCount(0),
 m_changeCount(0),
-m_changed(false)
+m_changed(false),
+m_name("unknown")
 {
 	RenderableCoordinateSystem *b = new RenderableCoordinateSystem;
     b->setOverlay(true);
@@ -178,6 +179,13 @@ void RenderableScene::resetRenderableScene()
     createRenderable(b, 0);
     
     resetChangeCount();
+    setName("unknown");
 }
+
+void RenderableScene::setName(const std::string &x)
+{ m_name = x; }
+
+const std::string &RenderableScene::renderableSceneName() const
+{ return m_name; }
 
 } /// end of alo

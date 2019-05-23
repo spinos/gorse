@@ -38,14 +38,15 @@ public:
 	void setAssetCollection(GroupCollection<QJsonObject> *x);
 	void initializeGraphics();
 
-	struct GlyphProfile {
+	struct CreateGlyphParameter {
 		int _type;
 		int _id;
 		QPointF _pos;
 		bool _isLoading;
+        GlyphOps *_ops;
 	};
 
-	void createGlyph(const GlyphProfile &param);
+	void createGlyph(CreateGlyphParameter &param);
 	void selectGlyph(GlyphItem *item);
 	void deselectGlyph(GlyphItem *item);
 	void deselectAllGlyph();

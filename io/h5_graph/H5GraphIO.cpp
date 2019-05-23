@@ -183,4 +183,17 @@ void H5GraphIO::readNodePosition(float *y)
 	m_current->readFloatAttr(".pos", y);
 }
 
+void H5GraphIO::readNodeBoolAttr(const std::string &name, bool &y)
+{
+    int iy;
+	m_current->readIntAttr(name.c_str(), &iy);
+    y = (iy > 0);
+}
+
+void H5GraphIO::readNodeIntAttr(const std::string &name, int *y)
+{ m_current->readIntAttr(name.c_str(), y); }
+
+void H5GraphIO::readNodeFloatAttr(const std::string &name, float *y)
+{ m_current->readFloatAttr(name.c_str(), y); }
+
 } /// end of alo

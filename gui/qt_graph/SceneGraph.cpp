@@ -135,7 +135,7 @@ void SceneGraph::dropEvent(QDropEvent *event)
 		
 		QPointF posmts = mapToScene(event->pos() );
 
-		GlyphScene::GlyphProfile prof;
+		GlyphScene::CreateGlyphParameter prof;
 		prof._type = pieceTyp;
 		prof._id = -1;
 		prof._pos = posmts;

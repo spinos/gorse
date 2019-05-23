@@ -87,7 +87,6 @@ bool GlyphOps::setIntAttrValue(const std::string &attrName, const int &x)
 	IntAttrib *fattr = static_cast<IntAttrib *>(attr);
 	fattr->setValue(x);
 	
-	update();
 	return true;
 }
 
@@ -107,7 +106,6 @@ bool GlyphOps::setFloatAttrValue(const std::string &attrName, const float &x)
 	} else
 		setFloatComponentAttrValue(attr, attrComponent, x);
 
-	update();
 	return true;
 }
 
@@ -131,7 +129,6 @@ bool GlyphOps::setBoolAttrValue(const std::string &attrName, const bool &x)
 	BoolAttrib *fattr = static_cast<BoolAttrib *>(attr);
 	fattr->setValue(x);
 	
-	update();
 	return true;
 }
 
@@ -143,7 +140,6 @@ bool GlyphOps::setListAttrValue(const std::string &attrName, const std::string &
 	ListAttrib *fattr = static_cast<ListAttrib *>(attr);
 	fattr->setValue(itemName);
 	
-	update();
     return true; 
 }
 
@@ -155,7 +151,6 @@ bool GlyphOps::setStringAttrValue(const std::string &attrName, const std::string
 	StringAttrib *fattr = static_cast<StringAttrib *>(attr);
 	fattr->setValue(x);
 	
-	update();
     return true; 
 }
 
@@ -290,5 +285,11 @@ void GlyphOps::receiveImpulse(GlyphOps *another, const std::string &portName)
 
 QString GlyphOps::getShortDescription() const
 { return QString::fromStdString(opsName()); }
+
+void GlyphOps::preSave()
+{}
+
+void GlyphOps::postLoad()
+{ update(); }
 
 } /// end of namespace alo

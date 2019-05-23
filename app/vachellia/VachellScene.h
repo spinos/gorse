@@ -30,8 +30,9 @@ public:
     virtual void createConnection(alo::GlyphConnection *conn, alo::GlyphPort *port) override;
     virtual void removeConnection(alo::GlyphConnection *conn) override;
 	
+    bool cleanSlate();
     bool open();
-    bool save();
+    bool save(bool doChooseFile);
     
 signals:
 	void sendStopRender();

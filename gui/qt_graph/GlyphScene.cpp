@@ -41,7 +41,7 @@ void GlyphScene::initializeGraphics()
     ActivationControlItem::InitializeStates();
 }
 
-void GlyphScene::createGlyph(const GlyphProfile &param)
+void GlyphScene::createGlyph(CreateGlyphParameter &param)
 {
 	QJsonObject content = m_collector->element(param._type);
 	QString iconName;
@@ -68,6 +68,7 @@ void GlyphScene::createGlyph(const GlyphProfile &param)
 
 	GlyphOps *ops = createOps(content);
 	ops->setGlyphScene(this);
+    param._ops = ops;
 
 	AttribCreator acr;
 	acr.addAttributes(ops, content);

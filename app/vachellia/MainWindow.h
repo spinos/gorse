@@ -27,8 +27,10 @@ public:
     MainWindow();
 
 private slots:
+    void clear();
     void open();
     void save();
+    void saveAs();
     void about();
 
 private slots:
@@ -38,6 +40,7 @@ private slots:
 private:
     void createActions();
     void createStatusBar();
+    void updateTitle();
 
     QMenu *viewMenu;
     QMenu *displayMenu;

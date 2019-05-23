@@ -10,22 +10,18 @@
 #ifndef GORS_ATTRIB_CREATOR_H
 #define GORS_ATTRIB_CREATOR_H
 
-#include <QJsonObject>
+#include "AttribPreset.h"
 
 namespace alo {
 
 class QAttrib;
 class GlyphOps;
 
-class AttribCreator {
-
-	static QJsonObject attributePresetObj;
+class AttribCreator : public AttribPreset {
 
 public:
 
 	void addAttributes(GlyphOps *ops, const QJsonObject &content);
-	
-	static void loadAttributePreset(const QString &fileName);
 
 private:
 	void addAttribute(GlyphOps *ops, const QJsonObject &content);
@@ -38,7 +34,6 @@ private:
 	QAttrib *createListAttribute(const QJsonObject &content);
 	QAttrib *createStringAttribute(const QJsonObject &content);
 	void addTransformAttributes(GlyphOps *ops);
-	QJsonObject getTransformPresetObj(bool &found);
 	void addConnection(QAttrib *b, const QJsonObject &content);
 
 };

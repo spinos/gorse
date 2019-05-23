@@ -82,6 +82,7 @@ public:
     void getConnections(std::vector<GlyphConnection *> &conns);
 
     void genToolTip();
+    void updateOps();
 
 protected:
 	GlyphPort *addPort(const QString & name, 

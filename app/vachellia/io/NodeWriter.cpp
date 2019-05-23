@@ -7,7 +7,6 @@
 
 #include "NodeWriter.h"
 #include "../ops/allOps.h"
-#include <QJsonArray>
 
 namespace alo {
 
@@ -17,15 +16,23 @@ void NodeWriter::write(H5GraphIO &hio, GlyphOps *ops, const QJsonObject &content
 {
     writeNodeOps(hio, ops);
 
+    m_ops = ops;
+    m_hio = &hio;
+
     QJsonArray attrArray = content["attribs"].toArray();
-    for(int i=0; i< attrArray.size();++i) {
-        QJsonObject attrObject = attrArray[i].toObject();
-        writeAttribute(hio, ops, attrObject);
+    writeAttributes(attrArray);
+}
+
+void NodeWriter::writeAttributes(const QJsonArray &content)
+{
+    for(int i=0; i< content.size();++i) {
+        QJsonObject attrObject = content[i].toObject();
+        writeAttribute(attrObject);
     }
 
 }
 
-void NodeWriter::writeAttribute(H5GraphIO &hio, GlyphOps *ops, const QJsonObject &content)
+void NodeWriter::writeAttribute(const QJsonObject &content)
 {
     QString name = content["name"].toString();
     std::string snm = name.toStdString();
@@ -33,90 +40,94 @@ void NodeWriter::writeAttribute(H5GraphIO &hio, GlyphOps *ops, const QJsonObject
     const int typ = content["typ"].toInt();
     switch(typ) {
         case QAttrib::AtBool :
-            writeBoolAttribute(hio, ops, snm);
+            writeBoolAttribute(snm);
             break;
         case QAttrib::AtInt :
-            writeIntAttribute(hio, ops, snm);
+            writeIntAttribute(snm);
             break;
         case QAttrib::AtFloat :
-            writeFloatAttribute(hio, ops, snm);
+            writeFloatAttribute(snm);
             break;
         case QAttrib::AtFloat2 :
-            writeFloat2Attribute(hio, ops, snm);
+            writeFloat2Attribute(snm);
             break;
         case QAttrib::AtFloat3 :
-            writeFloat3Attribute(hio, ops, snm);
+            writeFloat3Attribute(snm);
             break;
         case QAttrib::AtMesh :
-            //writeMeshAttribute(hio, ops, snm);
             break;
         case QAttrib::AtList :
-            writeListAttribute(hio, ops, snm);
+            writeListAttribute(snm);
             break;
         case QAttrib::AtString :
-            writeStringAttribute(hio, ops, snm);
+            writeStringAttribute(snm);
             break;
         case QAttrib::AtTransformSet :
-            //writeTransformAttributes(ops);
+            writeTransformAttributes();
             break;
         default:
             break;
     }
 }
 
-void NodeWriter::writeBoolAttribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name)
+void NodeWriter::writeBoolAttribute(const std::string &name)
 {
     bool x;
-    ops->getBoolAttribValue(x, name);
-    hio.writeNodeBoolAttr(name, x);
+    m_ops->getBoolAttribValue(x, name);
+    m_hio->writeNodeBoolAttr(name, x);
 }
 
-void NodeWriter::writeIntAttribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name)
+void NodeWriter::writeIntAttribute(const std::string &name)
 {
     int x;
-    ops->getIntAttribValue(x, name);
-    hio.writeNodeIntAttr(name, 1, &x);
+    m_ops->getIntAttribValue(x, name);
+    m_hio->writeNodeIntAttr(name, 1, &x);
 }
 
-void NodeWriter::writeFloatAttribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name)
+void NodeWriter::writeFloatAttribute(const std::string &name)
 {
     float x;
-    ops->getFloatAttribValue(x, name);
-    hio.writeNodeFloatAttr(name, 1, &x);
+    m_ops->getFloatAttribValue(x, name);
+    m_hio->writeNodeFloatAttr(name, 1, &x);
 }
 
-void NodeWriter::writeFloat2Attribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name)
+void NodeWriter::writeFloat2Attribute(const std::string &name)
 {
     float x[2];
-    ops->getFloat2AttribValue(x, name);
-    hio.writeNodeFloatAttr(name, 2, x);
+    m_ops->getFloat2AttribValue(x, name);
+    m_hio->writeNodeFloatAttr(name, 2, x);
 }
 
-void NodeWriter::writeFloat3Attribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name)
+void NodeWriter::writeFloat3Attribute(const std::string &name)
 {
     float x[3];
-    ops->getFloat3AttribValue(x, name);
-    hio.writeNodeFloatAttr(name, 3, x);
+    m_ops->getFloat3AttribValue(x, name);
+    m_hio->writeNodeFloatAttr(name, 3, x);
 }
 
-void NodeWriter::writeMeshAttribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name)
-{
-}
-
-void NodeWriter::writeListAttribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name)
+void NodeWriter::writeListAttribute(const std::string &name)
 {
     std::string x;
-    ops->getListAttribValue(x, name);
-    hio.writeNodeStringAttr(name, x);
+    m_ops->getListAttribValue(x, name);
+    m_hio->writeNodeStringAttr(name, x);
 }
 
-void NodeWriter::writeStringAttribute(H5GraphIO &hio, GlyphOps *ops, const std::string &name)
+void NodeWriter::writeStringAttribute(const std::string &name)
 {
     std::string x;
-    ops->getStringAttribValue(x, name);
-    hio.writeNodeStringAttr(name, x);
+    m_ops->getStringAttribValue(x, name);
+    m_hio->writeNodeStringAttr(name, x);
 }
 
+void NodeWriter::writeTransformAttributes()
+{
+    bool stat;
+    QJsonObject content = getTransformPresetObj(stat);
+    if(!stat) return;
+
+    QJsonArray attrArray = content["attribs"].toArray();
+    writeAttributes(attrArray);
+}
 
 } /// end of vchl
 

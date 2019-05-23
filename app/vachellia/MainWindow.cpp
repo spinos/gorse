@@ -33,7 +33,7 @@ MainWindow::MainWindow()
     m_renderView = new RenderWidget(m_scene, this);
     setCentralWidget(m_renderView);
 
-    alo::AttribCreator::loadAttributePreset(":/mimes/attribpreset.json");
+    alo::AttribPreset::loadAttributePreset(":/mimes/attribpreset.json");
 
     QDockWidget *attrDock = new QDockWidget(tr("Attributes"), this);
     attrDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -92,15 +92,34 @@ MainWindow::MainWindow()
     setUnifiedTitleAndToolBarOnMac(true);
 }
 
+void MainWindow::clear()
+{
+    m_scene->cleanSlate();
+    updateTitle();
+}
+
 void MainWindow::open()
 {
     m_scene->open();
-    //statusBar()->showMessage(tr("Saved '%1'").arg(fileName), 2000);
+    updateTitle();
 }
 
 void MainWindow::save()
 {
-    m_scene->save();
+    m_scene->save(false);
+    updateTitle();
+}
+
+void MainWindow::saveAs()
+{
+    m_scene->save(true);
+    updateTitle();
+}
+
+void MainWindow::updateTitle()
+{
+    const std::string &rsn = m_scene->renderableSceneName();
+    setWindowTitle(QString("Vachellia %1").arg(QString::fromStdString(rsn)));
     //statusBar()->showMessage(tr("Saved '%1'").arg(fileName), 2000);
 }
 
@@ -115,19 +134,32 @@ void MainWindow::createActions()
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     /*QToolBar *fileToolBar = addToolBar(tr("File"));*/
 
-    QIcon openIcon(":/images/open_big.png");
+    QIcon clearIcon(":/images/new.png");
+    QAction *clearAct = new QAction(clearIcon, tr("&New"), this);
+    clearAct->setShortcuts(QKeySequence::New);
+    clearAct->setStatusTip(tr("Clear scene"));
+    connect(clearAct, &QAction::triggered, this, &MainWindow::clear);
+    fileMenu->addAction(clearAct);
+
+    QIcon openIcon(":/images/open.png");
     QAction *openAct = new QAction(openIcon, tr("&Open"), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Open a scene"));
     connect(openAct, &QAction::triggered, this, &MainWindow::open);
     fileMenu->addAction(openAct);
 
-    QIcon saveIcon(":/images/save_big.png");
+    QIcon saveIcon(":/images/save.png");
     QAction *saveAct = new QAction(saveIcon, tr("&Save"), this);
     saveAct->setShortcuts(QKeySequence::Save);
-    saveAct->setStatusTip(tr("Save the current scene"));
+    saveAct->setStatusTip(tr("Save the current scene file"));
     connect(saveAct, &QAction::triggered, this, &MainWindow::save);
     fileMenu->addAction(saveAct);
+
+    QAction *saveAsAct = new QAction(tr("&Save As"), this);
+    saveAsAct->setShortcuts(QKeySequence::SaveAs);
+    saveAsAct->setStatusTip(tr("Save the current scene as a different file"));
+    connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAs);
+    fileMenu->addAction(saveAsAct);
     
     fileMenu->addSeparator();
 

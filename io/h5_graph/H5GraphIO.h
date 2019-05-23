@@ -54,7 +54,10 @@ public:
 	void readNodeId(int &y);
 	void readNodeDisplayName(std::string &y);
 	void readNodePosition(float *y);
-
+    void readNodeBoolAttr(const std::string &name, bool &y);
+    void readNodeIntAttr(const std::string &name, int *y);
+    void readNodeFloatAttr(const std::string &name, float *y);
+    
 protected:
 	
 private:
