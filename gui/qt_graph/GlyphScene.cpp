@@ -23,8 +23,7 @@ namespace alo {
 GlyphScene::GlyphScene(QObject *parent) :
 	QGraphicsScene(parent), 
 	m_collector(nullptr),
-	m_activeGlyph(nullptr),
-	m_isLoading(false)
+	m_activeGlyph(nullptr)
 {
 }
 
@@ -41,7 +40,7 @@ void GlyphScene::initializeGraphics()
     ActivationControlItem::InitializeStates();
 }
 
-void GlyphScene::createGlyph(CreateGlyphParameter &param)
+GlyphItem *GlyphScene::createGlyph(CreateGlyphParameter &param)
 {
 	QJsonObject content = m_collector->element(param._type);
 	QString iconName;
@@ -83,6 +82,7 @@ void GlyphScene::createGlyph(CreateGlyphParameter &param)
     	postCreationBlocked(g);
 	else 
 		postCreation(g);
+	return g;
 }
 
 void GlyphScene::selectGlyph(GlyphItem *item)

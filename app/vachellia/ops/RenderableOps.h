@@ -2,7 +2,7 @@
  *  RenderableOps.h
  *  vachellia
  *
- *  2019/4/25
+ *  2019/4/26
  */
 
 #ifndef RENDERABLE_GLYPH_OPS_H
@@ -39,8 +39,11 @@ public:
 
 	virtual void genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const = 0;
     
+    virtual bool getVisibleState() const override;
+
 protected:
     void setRenderableScene(RenderableScene *x);
+    RenderableScene *renderableScene();
 	
 private:
     

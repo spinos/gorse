@@ -244,6 +244,12 @@ bool GlyphOps::getListAttribValue(std::string &val, const std::string &attrName)
     return true;
 }
 
+bool GlyphOps::getVisibleState() const
+{ return true; }
+
+bool GlyphOps::getActivatedState() const
+{ return false; }
+
 void GlyphOps::setGlyphScene(GlyphScene *x)
 { m_gscene = x; }
 

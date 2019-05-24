@@ -98,11 +98,13 @@ public:
     virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
     virtual QString getShortDescription() const override;
     virtual AFileDlgProfile *readFileProfileR() const override;
+    virtual bool getActivatedState() const override;
 
 protected:
     
 private:
     void updateInstancer(bool isAppending);
+    void updateInstancerInProgress(bool isAppending);
     bool loadInstanceFile(const std::string &fileName);
     
 };

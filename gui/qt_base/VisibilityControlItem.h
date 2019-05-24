@@ -20,6 +20,7 @@ public:
     
 	static void InitializeStates();
 
+	void setStateVisible(const bool &x);
 	void beginEditState();
 	void endEditState();
 

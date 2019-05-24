@@ -128,8 +128,6 @@ void VachellScene::onItemStateChanged(GlyphItem *item, QGraphicsItem *stateContr
 
     item->endEditState(stateControlItem);
 
-    item->genToolTip();
-
 	RenderableScene::setSceneChanged();
 	emit sendUpdateScene();
 }
@@ -140,10 +138,7 @@ void VachellScene::recvAttribChanged()
     boost::lock_guard<interface::GlobalFence> guard(fence);
 
     GlyphItem *item = getActiveGlyph();
-    if(item) {
-        item->updateOps();
-        item->genToolTip();
-    }
+    if(item) item->updateOps();
 
     RenderableScene::setSceneChanged();
 	emit sendUpdateScene();
@@ -215,6 +210,14 @@ bool VachellScene::save(bool doChooseFile)
 {
     interface::GlobalFence &fence = interface::GlobalFence::instance();
     boost::lock_guard<interface::GlobalFence> guard(fence);
+
+    if(!doChooseFile && numChanges() < 2) {
+        QMessageBox msgBox;
+        msgBox.setText("The current scene has not been modified.");
+        msgBox.setInformativeText("No need to save.");
+        msgBox.exec();
+        return false;
+    }
 
     std::string saveFileName = renderableSceneName();
     if(saveFileName == "unknown" || doChooseFile) {
@@ -321,12 +324,13 @@ bool VachellScene::open()
         return false;
     }
 
-    QProgressDialog progress("Opening...", QString(), 0, 3, QApplication::activeWindow() );
+    QProgressDialog progress("Opening...", QString(), 0, 4, QApplication::activeWindow() );
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
 
     GlyphScene::preLoad();
     RenderableScene::resetRenderableScene();
+    RenderableScene::beginProgress();
 
     progress.setValue(1);
 
@@ -352,14 +356,19 @@ bool VachellScene::open()
             prof._pos = QPointF(pos[0], pos[1]);
             prof._isLoading = true;
         
-            GlyphScene::createGlyph(prof);
+            GlyphItem *g = GlyphScene::createGlyph(prof);
 
             QJsonObject content = getGlyphProfile(prof._type);
             GlyphOps *ops = prof._ops;
             reader.read(hio, ops, content);
-            
+
+            g->setPostLoadVisibleState(reader.isVisible());
+            g->setPostLoadActivatedState(reader.isActivated());
+
             hio.closeNode();
         }
+
+        progress.setValue(2);
 
         std::vector<std::string> connectionNames;
         hio.lsConnections(connectionNames);
@@ -381,24 +390,27 @@ bool VachellScene::open()
 
         hio.closeScene();
 
-        progress.setValue(2);
+        progress.setValue(3);
 
         sdb::L3DataIterator<int, GlyphItem *, 128> glyphIter = glyphsBegin();
         for(;!glyphIter.done();glyphIter.next()) {
             GlyphItem *gi = *glyphIter.second;
-            GlyphOps *ops = gi->ops();
-            ops->postLoad();
+            gi->postLoad();
         }
 
-    } else {
-        QMessageBox msgBox;
-        msgBox.setText(QString("Not a vachelloa scene file %1").arg(QString::fromStdString(openFileName)));
-        msgBox.exec();
     }
 
     hio.end();
 
-    progress.setValue(3);
+    progress.setValue(4);
+    RenderableScene::endProgress();
+
+    if(!stat) {
+        QMessageBox msgBox;
+        msgBox.setText(QString("Not a vachelloa scene file %1").arg(QString::fromStdString(openFileName)));
+        msgBox.exec();
+        return false;
+    }
 
     GlyphScene::postLoad();
     RenderableScene::setName(openFileName);

@@ -2,7 +2,7 @@
  *  RenderableScene.h
  *  aloe
  *
- *  2019/5/24
+ *  2019/5/26
  */
 
 #ifndef ALO_RENDERABLE_SCENE_H
@@ -27,6 +27,7 @@ class RenderableScene {
 	int m_objectCount;
     int m_changeCount;
 	bool m_changed;
+    bool m_inProgress;
 
 	struct RenderableObjectState {
         RenderableObject* _object;
@@ -39,6 +40,7 @@ class RenderableScene {
 public:
 
     RenderableScene();
+    virtual ~RenderableScene();
     
     virtual bool intersectRay(const Ray& aray, IntersectResult& result) const;
     
@@ -54,6 +56,10 @@ public:
     void updateScene();
 
     const std::string &renderableSceneName() const;
+
+    void beginProgress();
+    void endProgress();
+    const bool &isInProgress() const;
 	
 protected:
     void setSceneChanged();

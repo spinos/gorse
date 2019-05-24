@@ -2,7 +2,7 @@
  *  MainWindow.cpp
  *  gorse vachellia
  *
- *  2019/5/20
+ *  2019/5/25
  */
  
 #include "MainWindow.h"
@@ -19,6 +19,7 @@
 #include <QMessageBox>
 #include <QAction>
 #include <QFile>
+#include <QFileDialog>
 
 MainWindow::MainWindow()
 {
@@ -96,6 +97,15 @@ MainWindow::MainWindow()
     setUnifiedTitleAndToolBarOnMac(true);
 }
 
+void MainWindow::setProject()
+{
+    QString chosenDir = QFileDialog::getExistingDirectory(this,
+            tr("Select Project Root Directory"), QDir::currentPath());
+    if(chosenDir.length() < 3) return;
+   
+    QDir::setCurrent(chosenDir);
+}
+
 void MainWindow::clear()
 {
     m_scene->cleanSlate();
@@ -141,6 +151,12 @@ void MainWindow::createActions()
 {
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     /*QToolBar *fileToolBar = addToolBar(tr("File"));*/
+
+    QIcon projectIcon(":/images/project.png");
+    QAction *projectAct = new QAction(projectIcon, tr("&Project"), this);
+    projectAct->setStatusTip(tr("Set project dir"));
+    connect(projectAct, &QAction::triggered, this, &MainWindow::setProject);
+    fileMenu->addAction(projectAct);
 
     QIcon clearIcon(":/images/new.png");
     QAction *clearAct = new QAction(clearIcon, tr("&New"), this);

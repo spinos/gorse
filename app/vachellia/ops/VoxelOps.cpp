@@ -20,8 +20,8 @@
 #include <h5_grd/HLocalGrid.h>
 #include <QProgressDialog>
 #include <QApplication>
-#include <interface/GlobalFence.h>
-#include <boost/thread/lock_guard.hpp>
+#include <QMessageBox>
+#include <QDebug>
 
 namespace alo {
     
@@ -84,24 +84,25 @@ AFileDlgProfile *VoxelOps::readFileProfileR () const
 { return &SReadProfile; }
 
 bool VoxelOps::loadCache(const std::string &fileName)
-{
-    interface::GlobalFence &fence = interface::GlobalFence::instance();
-	boost::lock_guard<interface::GlobalFence> guard(fence);
-        
+{    
+    qDebug()<< " load cache "<<QString::fromStdString(fileName);
     m_primitiveLookup->clear();
     m_gridRule->detach();
-
-    QProgressDialog progress("Processing...", QString(), 0, 1, QApplication::activeWindow() );
-    progress.setWindowModality(Qt::ApplicationModal);
-    progress.show();
 
     ver1::H5IO hio;
     bool stat = hio.begin(fileName);
     if(!stat) {
         m_cachePath = "unknown";
-        progress.setValue(1);
+        QMessageBox msgBox;
+        msgBox.setText(QString("Cannot open file %1").arg(QString::fromStdString(fileName)));
+        msgBox.setInformativeText("The file does not exist or it is not a HDF5 file.");
+        msgBox.exec();
         return stat;
     }
+
+    QProgressDialog progress("Processing...", QString(), 0, 1, QApplication::activeWindow() );
+    progress.setWindowModality(Qt::ApplicationModal);
+    progress.show();
 
     stat = hio.ObjectExists("/asset");
     int nfld = 0;
@@ -151,6 +152,10 @@ bool VoxelOps::loadCache(const std::string &fileName)
     }
     else {
         m_cachePath = "unknown";
+        QMessageBox msgBox;
+        msgBox.setText(QString("Cannot load voxel from file %1").arg(QString::fromStdString(fileName)));
+        msgBox.setInformativeText("The file contains no voxel asset.");
+        msgBox.exec();
     }
 
     progress.setValue(1);

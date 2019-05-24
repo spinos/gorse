@@ -38,6 +38,8 @@ public:
 
 	void writeNodePosition(float x, float y);
 	void writeNodeDisplayName(const std::string &x);
+    void writeNodeVisibleState(const bool &x);
+    void writeNodeActivatedState(const bool &x);
 	void writeNodeIntAttr(const std::string &name, int dim, const int *x);
 	void writeNodeFloatAttr(const std::string &name, int dim, const float *x);
 	void writeNodeBoolAttr(const std::string &name, const bool &x);
@@ -53,9 +55,12 @@ public:
 	void readNodeId(int &y);
 	void readNodeDisplayName(std::string &y);
 	void readNodePosition(float *y);
+    void readNodeVisibleState(bool &y);
+    void readNodeActivatedState(bool &y);
     void readNodeBoolAttr(const std::string &name, bool &y);
     void readNodeIntAttr(const std::string &name, int *y);
     void readNodeFloatAttr(const std::string &name, float *y);
+    void readNodeStringAttr(const std::string &name, std::string &y);
 
     void connectionBegin(const int &connectionId);
     void connectionEnd();

@@ -2,6 +2,7 @@
  *  ActivationControlItem.cpp
  *  aloe
  *
+ *  2019/5/26
  */
 
 #include "ActivationControlItem.h"
@@ -9,7 +10,7 @@
 namespace alo {
 
 ActivationControlItem::ActivationControlItem(QGraphicsItem * parent) : StateControlItem(parent)
-{ setState(Disabled); }
+{ setState(SwitchOff); }
 
 ActivationControlItem::~ActivationControlItem()
 {}
@@ -17,8 +18,14 @@ ActivationControlItem::~ActivationControlItem()
 void ActivationControlItem::InitializeStates()
 {
 	AddStatePixmap(UnknownActivation, ":images/orangelight.png");
-	AddStatePixmap(Disabled, ":images/redlight.png");
-	AddStatePixmap(Enabled, ":images/greenlight.png");
+	AddStatePixmap(SwitchOff, ":images/redlight.png");
+	AddStatePixmap(Activated, ":images/greenlight.png");
+}
+
+void ActivationControlItem::setStateActivated(const bool &x)
+{
+	if(x) setState(Activated);
+	else setState(SwitchOff);
 }
 
 void ActivationControlItem::beginEditState()
@@ -29,11 +36,11 @@ void ActivationControlItem::beginEditState()
 	
 void ActivationControlItem::endEditState()
 {
-	if(m_state0 == Enabled) setState(Disabled);
-	else setState(Enabled);
+	if(m_state0 == Activated) setState(SwitchOff);
+	else setState(Activated);
 }
 
 bool ActivationControlItem::isStateEnabled() const
-{ return state() == Enabled; }
+{ return state() == Activated; }
 
-}
+} /// end of alo
