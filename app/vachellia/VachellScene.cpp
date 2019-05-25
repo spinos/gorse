@@ -1,14 +1,8 @@
 /*
  *  VachellScene.cpp
  *  vachellia
- *
- *  interrupt render condition
- *  create/remove item
- *  visibility/attribute changed
- *  create/remove connection
- *  save/load
  *  
- *  2019/5/11
+ *  2019/5/24
  */
 
 #include "VachellScene.h"
@@ -16,12 +10,13 @@
 #include <qt_graph/GlyphOps.h>
 #include <qt_graph/GlyphItem.h>
 #include <qt_graph/GlyphConnection.h>
-#include <math/CameraEvent.h>
-#include <math/AFrustum.h>
 #include <math/Hexahedron.h>
 #include <interface/GlobalFence.h>
 #include <boost/thread/lock_guard.hpp>
 #include "io/NodeWriter.h"
+#include "io/NodeReader.h"
+#include "h5_graph/HGraphConnectionWriter.h"
+#include "h5_graph/HGraphConnectionReader.h"
 #include <QApplication>
 #include <QMessageBox>
 #include <QProgressDialog>
@@ -66,16 +61,21 @@ void VachellScene::postCreation(GlyphItem *item)
     interface::GlobalFence &fence = interface::GlobalFence::instance();
     boost::lock_guard<interface::GlobalFence> guard(fence);
 
-	GlyphOps *op = item->ops();
-	if(op->hasRenderable()) { 
-		RenderableOps *dop = static_cast<RenderableOps *>(op);
-		dop->addRenderableTo(this);
-	}
-
-    item->genToolTip();
+	postCreationBlocked(item);
 
     RenderableScene::setSceneChanged();
     emit sendUpdateScene();
+}
+
+void VachellScene::postCreationBlocked(GlyphItem *item)
+{
+    GlyphOps *op = item->ops();
+    if(op->hasRenderable()) { 
+        RenderableOps *dop = static_cast<RenderableOps *>(op);
+        dop->addRenderableTo(this);
+    }
+
+    item->genToolTip();
 }
 
 void VachellScene::preDestruction(GlyphItem *item, const std::vector<GlyphConnection *> &connectionsToBreak)
@@ -101,14 +101,13 @@ void VachellScene::preDestruction(GlyphItem *item, const std::vector<GlyphConnec
 
 void VachellScene::recvCameraChanged(const CameraEvent &x)
 {
-    GlyphDataType *block = firstGlyph();
-    while(block) {
-        for(int i=0;i<block->count();++i) {
-            GlyphItem *g = block->value(i);
+    sdb::L3DataIterator<int, GlyphItem *, 128> iter = glyphsBegin();
+    for(;!iter.done();iter.next()) {
+
+        GlyphItem *g = *iter.second;
             GlyphOps *op = g->ops();
             op->recvCameraChanged(x);
-        }
-        block = nextGlyph(block);
+
     }
 }
 
@@ -141,22 +140,28 @@ void VachellScene::recvAttribChanged()
     boost::lock_guard<interface::GlobalFence> guard(fence);
 
     GlyphItem *item = getActiveGlyph();
-    if(item) item->genToolTip();
+    if(item) {
+        item->updateOps();
+        item->genToolTip();
+    }
 
     RenderableScene::setSceneChanged();
 	emit sendUpdateScene();
 }
 
-void VachellScene::createConnection(GlyphConnection *conn, GlyphPort *port)
+bool VachellScene::makeConnection(GlyphConnection *conn, GlyphPort *port)
 {
-    if(!conn->canConnectTo(port) ) return;
+    if(!conn->canConnectTo(port) ) return false;
 
     interface::GlobalFence &fence = interface::GlobalFence::instance();
     boost::lock_guard<interface::GlobalFence> guard(fence);
 	
 	conn->destinationTo(port);
+    GlyphScene::mapConnection(conn);
+    
     RenderableScene::setSceneChanged();
 	emit sendUpdateScene();
+    return true;
 }
 
 void VachellScene::removeConnection(GlyphConnection *conn)
@@ -165,8 +170,36 @@ void VachellScene::removeConnection(GlyphConnection *conn)
     boost::lock_guard<interface::GlobalFence> guard(fence);
 
 	conn->breakUp();
+    GlyphScene::unmapConnection(conn);
+    
     RenderableScene::setSceneChanged();
 	emit sendUpdateScene();
+}
+
+bool VachellScene::cleanSlate()
+{
+    interface::GlobalFence &fence = interface::GlobalFence::instance();
+    boost::lock_guard<interface::GlobalFence> guard(fence);
+
+    if(numChanges() > 1) {
+        QMessageBox msgBox;
+        msgBox.setText("The current scene has been modified.");
+        msgBox.setInformativeText("Do you want to create a new one thus discard all changes?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Cancel);
+        int ret = msgBox.exec();
+        if(ret == QMessageBox::Cancel) {
+            return false;
+        }
+    }
+    
+    GlyphScene::preLoad();
+    RenderableScene::resetRenderableScene();
+
+    GlyphScene::postLoad();
+    RenderableScene::setSceneChanged();
+    emit sendUpdateScene();
+    return true;
 }
 
 AFileDlgProfile VachellScene::SWriteProfile(AFileDlgProfile::FWrite,
@@ -178,19 +211,24 @@ AFileDlgProfile VachellScene::SWriteProfile(AFileDlgProfile::FWrite,
         "./",
         "untitled");
 
-bool VachellScene::save()
+bool VachellScene::save(bool doChooseFile)
 {
     interface::GlobalFence &fence = interface::GlobalFence::instance();
     boost::lock_guard<interface::GlobalFence> guard(fence);
 
-    AFileDlg d(SWriteProfile, QApplication::activeWindow() );
-    int res = d.exec();
-    if(res == QDialog::Rejected) {
-        qDebug()<<" abort ";
-        return false;
+    std::string saveFileName = renderableSceneName();
+    if(saveFileName == "unknown" || doChooseFile) {
+        AFileDlg d(SWriteProfile, QApplication::activeWindow() );
+        int res = d.exec();
+        if(res == QDialog::Rejected) {
+            qDebug()<<" abort ";
+        } else {
+            saveFileName = SWriteProfile.getFilePath();
+        }
     }
+
+    if(saveFileName == "unknown") return false;
     
-    const std::string saveFileName = SWriteProfile.getFilePath();
     H5GraphIO hio;
 	bool stat = hio.begin(saveFileName, HDocument::oCreate );
 	if(!stat) {
@@ -206,36 +244,38 @@ bool VachellScene::save()
     
     hio.sceneBegin();
 
-    vchl::NodeWriter nodeWriter;
+    vchl::NodeWriter nWriter;
     
-    GlyphDataType *block = firstGlyph();
-    while(block) {
-        for (int i=0;i<block->count();++i) { 
-            GlyphItem *ci = block->value(i);
-            QJsonObject content = getGlyphProfile(ci->glyphId());
+    sdb::L3DataIterator<int, GlyphItem *, 128> glyphIter = glyphsBegin();
+    for(;!glyphIter.done();glyphIter.next()) {
+
+        GlyphItem *ci = *glyphIter.second;
+            GlyphOps *ops = ci->ops();
+            ops->preSave();
+
+            QJsonObject content = getGlyphProfile(ops->opsTypeId());
 
             hio.nodeBegin(ci->glyphId());
 
             QPointF pos = ci->mapToScene(QPointF());
             hio.writeNodePosition(pos.x(), pos.y());
-
-            GlyphOps *ops = ci->ops();
-            
-            nodeWriter.write(hio, ops, content);
+           
+            nWriter.write(hio, ops, content);
 
             hio.nodeEnd();
-        }
-        
-        block = nextGlyph(block);
     }
+
+    HGraphConnectionWriter cWriter;
+    cWriter.writeConnections(hio, connectionsBegin());
 	
     hio.sceneEnd();
     
+    hio.end();
+
     progress.setValue(1);
     
-    hio.end();
-    
     resetChangeCount();
+    RenderableScene::setName(saveFileName);
     return true;
 }
 
@@ -258,7 +298,7 @@ bool VachellScene::open()
         msgBox.setText("The current scene has been modified.");
         msgBox.setInformativeText("Do you want to open another one thus discard all changes?");
         msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Open);
+        msgBox.setDefaultButton(QMessageBox::Cancel);
         int ret = msgBox.exec();
         if(ret == QMessageBox::Cancel) {
             return false;
@@ -271,13 +311,97 @@ bool VachellScene::open()
         return false;
     }
     
-    //QApplication::setOverrideCursor(Qt::WaitCursor);
-    
-    resetGlyphScene();
-    resetRenderableScene();
-    qDebug() << " todo load from file " << QString::fromStdString(SReadProfile.getFilePath());
-    
-    //QApplication::restoreOverrideCursor();
+    const std::string openFileName = SReadProfile.getFilePath();
+    H5GraphIO hio;
+    bool stat = hio.begin(openFileName, HDocument::oReadOnly );
+    if(!stat) {
+        QMessageBox msgBox;
+        msgBox.setText(QString("Cannot open file %1").arg(QString::fromStdString(openFileName)));
+        msgBox.exec();
+        return false;
+    }
+
+    QProgressDialog progress("Opening...", QString(), 0, 3, QApplication::activeWindow() );
+    progress.setWindowModality(Qt::ApplicationModal);
+    progress.show();
+
+    GlyphScene::preLoad();
+    RenderableScene::resetRenderableScene();
+
+    progress.setValue(1);
+
+    stat = hio.openScene();
+
+    if(stat) {
+
+        std::vector<std::string> nodeNames;
+        hio.lsNodes(nodeNames);
+
+        vchl::NodeReader reader;
+
+        std::vector<std::string>::const_iterator it = nodeNames.begin();
+        for(;it!=nodeNames.end();++it) {
+            hio.openNode(*it);
+
+            reader.readNode(hio);
+
+            GlyphScene::CreateGlyphParameter prof;
+            prof._type = reader.nodeTypeId();
+            prof._id = reader.nodeUid();
+            const float *pos = reader.nodePosition();
+            prof._pos = QPointF(pos[0], pos[1]);
+            prof._isLoading = true;
+        
+            GlyphScene::createGlyph(prof);
+
+            QJsonObject content = getGlyphProfile(prof._type);
+            GlyphOps *ops = prof._ops;
+            reader.read(hio, ops, content);
+            
+            hio.closeNode();
+        }
+
+        std::vector<std::string> connectionNames;
+        hio.lsConnections(connectionNames);
+
+        HGraphConnectionReader cReader;
+
+        it = connectionNames.begin();
+        for(;it!=connectionNames.end();++it) {
+            hio.openConnection(*it);
+
+            cReader.readConnection(hio);
+
+            connectNodes(cReader.node0Id(), cReader.port0Name(), 
+                        cReader.node1Id(), cReader.port1Name(),
+                        cReader.connectionId());
+
+            hio.closeConnection();
+        }
+
+        hio.closeScene();
+
+        progress.setValue(2);
+
+        sdb::L3DataIterator<int, GlyphItem *, 128> glyphIter = glyphsBegin();
+        for(;!glyphIter.done();glyphIter.next()) {
+            GlyphItem *gi = *glyphIter.second;
+            GlyphOps *ops = gi->ops();
+            ops->postLoad();
+        }
+
+    } else {
+        QMessageBox msgBox;
+        msgBox.setText(QString("Not a vachelloa scene file %1").arg(QString::fromStdString(openFileName)));
+        msgBox.exec();
+    }
+
+    hio.end();
+
+    progress.setValue(3);
+
+    GlyphScene::postLoad();
+    RenderableScene::setName(openFileName);
     RenderableScene::setSceneChanged();
     emit sendUpdateScene();
     return true;

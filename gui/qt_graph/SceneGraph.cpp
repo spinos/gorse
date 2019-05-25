@@ -2,7 +2,7 @@
  *  SceneGraph.cpp
  *  gorse
  *
- *  2019/5/10
+ *  2019/5/24
  */
 
 #include "SceneGraph.h"
@@ -134,7 +134,14 @@ void SceneGraph::dropEvent(QDropEvent *event)
 		dataStream >> pixmap >> pieceTyp;
 		
 		QPointF posmts = mapToScene(event->pos() );
-		asGlyphScene()->createGlyph(pixmap, pieceTyp, posmts );
+
+		GlyphScene::CreateGlyphParameter prof;
+		prof._type = pieceTyp;
+		prof._id = -1;
+		prof._pos = posmts;
+		prof._isLoading = false;
+
+		asGlyphScene()->createGlyph(prof);
 
 		event->setDropAction(Qt::MoveAction);
 		event->accept();
@@ -158,11 +165,11 @@ void SceneGraph::processSelect(const QPoint & pos)
          if(GlyphPort::IsItemOutgoingPort(item) ) {
 			m_mode = mConnectItems;
 
-/// todo different connections
+/// different connections?
 			m_selectedConnection = new GlyphConnection;
 
-			GlyphPort * pt = static_cast<GlyphPort *>(item);
-			m_selectedConnection->originFrom(pt, item->scenePos() );
+			GlyphPort *pt = static_cast<GlyphPort *>(item);
+			m_selectedConnection->originFrom(pt);
 			
 			scene()->addItem(m_selectedConnection);
 
@@ -234,12 +241,10 @@ void SceneGraph::doConnectItem(QGraphicsItem* item)
 		
 	if(GlyphPort::IsItemIncomingPort(item)) {
 		GlyphPort * p1 = static_cast<GlyphPort *>(item);
-		asGlyphScene()->createConnection(m_selectedConnection, p1);
+		asGlyphScene()->makeConnection(m_selectedConnection, p1);
 	}
 	
-	if(m_selectedConnection->isComplete() ) {
-		m_selectedConnection->genToolTip();
-	} else {
+	if(!m_selectedConnection->isComplete() ) {
 		scene()->removeItem( m_selectedConnection );
 /// graphic scene stops responding if destroy the connection
 /// send to garbage?
@@ -254,7 +259,6 @@ void SceneGraph::doRemoveConnection(QGraphicsItem* item)
 	GlyphConnection *conn = static_cast<GlyphConnection *>(item);
 	asGlyphScene()->removeConnection(conn);
 	scene()->removeItem( item );
-	delete item;
 }
 
 void SceneGraph::beginProcessItem(QMouseEvent *event) 

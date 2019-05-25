@@ -28,7 +28,7 @@ public:
 	virtual ~AcaciaScene();
 	
 	virtual void onItemStateChanged(alo::GlyphItem *item, QGraphicsItem *stateControlItem) override;
-    virtual void createConnection(alo::GlyphConnection *conn, alo::GlyphPort *port) override;
+    virtual bool makeConnection(alo::GlyphConnection *conn, alo::GlyphPort *port) override;
     virtual void removeConnection(alo::GlyphConnection *conn) override;
     
 signals:
@@ -42,6 +42,7 @@ public slots:
 protected:
     virtual alo::GlyphOps *createOps(const QJsonObject &content) override;
     virtual void postCreation(alo::GlyphItem *item) override;
+    virtual void postCreationBlocked(alo::GlyphItem *item) override;
     virtual void preDestruction(alo::GlyphItem *item, const std::vector<alo::GlyphConnection *> &connectionsToBreak) override;
 	
 private:

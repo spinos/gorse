@@ -8,28 +8,9 @@
 #include "AttribCreator.h"
 #include "Attrib.h"
 #include "GlyphOps.h"
-#include <QFile>
-#include <QDebug>
-#include <QJsonDocument>
 #include <QJsonArray>
 
 namespace alo {
-
-QJsonObject AttribCreator::attributePresetObj;
-
-void AttribCreator::loadAttributePreset(const QString &fileName)
-{
-	QFile loadFile(fileName);
-	if (!loadFile.open(QIODevice::ReadOnly) ) {
-		qWarning("Couldn't open file for attribute preset");
-		return;
-	}
-
-	QByteArray loadData = loadFile.readAll();
-	QJsonDocument loadDoc(QJsonDocument::fromJson(loadData));
-	
-	attributePresetObj = loadDoc.object();
-}
 
 void AttribCreator::addAttributes(GlyphOps *ops, const QJsonObject &content)
 {
@@ -196,22 +177,6 @@ void AttribCreator::addTransformAttributes(GlyphOps *ops)
 	if(!stat) return;
 
 	addAttributes(ops, content);
-}
-
-QJsonObject AttribCreator::getTransformPresetObj(bool &found)
-{
-	found = false;
-	QJsonArray attrArray = attributePresetObj["children"].toArray();
-	QJsonObject res;
-	for(int i=0;i<attrArray.size();++i) {
-		res = attrArray[i].toObject();
-		if(res["name"].toString() == "transform") {
-			found = true;
-			break;
-		}
-	}
-	
-	return res;
 }
 
 void AttribCreator::addConnection(QAttrib *b, const QJsonObject &content)

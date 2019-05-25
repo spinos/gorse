@@ -63,6 +63,9 @@ void AcaciaScene::postCreation(GlyphItem *item)
     emit sendUpdateDrawable();
 }
 
+void AcaciaScene::postCreationBlocked(GlyphItem *item)
+{}
+
 void AcaciaScene::preDestruction(GlyphItem *item, const std::vector<GlyphConnection *> &connectionsToBreak)
 {
     GlyphOps *op = item->ops();
@@ -76,14 +79,12 @@ void AcaciaScene::preDestruction(GlyphItem *item, const std::vector<GlyphConnect
 
 void AcaciaScene::recvCameraChanged(const CameraEvent &x)
 {
-    GlyphDataType *block = firstGlyph();
-    while(block) {
-        for(int i=0;i<block->count();++i) {
-            GlyphItem *g = block->value(i);
+    sdb::L3DataIterator<int, GlyphItem *, 128> iter = glyphsBegin();
+    for(;!iter.done();iter.next()) {
+
+        GlyphItem *g = *iter.second;
             GlyphOps *op = g->ops();
             op->recvCameraChanged(x);
-        }
-        block = nextGlyph(block);
     }
 }
 
@@ -103,17 +104,22 @@ void AcaciaScene::onItemStateChanged(GlyphItem *item, QGraphicsItem *stateContro
     emit sendUpdateDrawable(); 
 }
 
-void AcaciaScene::createConnection(GlyphConnection *conn, GlyphPort *port)
+bool AcaciaScene::makeConnection(GlyphConnection *conn, GlyphPort *port)
 {
-    if(!conn->canConnectTo(port) ) return;
+    if(!conn->canConnectTo(port) ) return false;
 	
 	conn->destinationTo(port);
+    GlyphScene::mapConnection(conn);
+
     emit sendUpdateDrawable();
+    return true;
 }
 
 void AcaciaScene::removeConnection(GlyphConnection *conn)
 {
 	conn->breakUp();
+    GlyphScene::unmapConnection(conn);
+    
     emit sendUpdateDrawable();
 }
 

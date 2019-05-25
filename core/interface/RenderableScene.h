@@ -2,14 +2,13 @@
  *  RenderableScene.h
  *  aloe
  *
- *  Created by zhang on 19-4-11.
- *  Copyright 2018 __MyCompanyName__. All rights reserved.
- *
+ *  2019/5/24
  */
 
 #ifndef ALO_RENDERABLE_SCENE_H
 #define ALO_RENDERABLE_SCENE_H
 
+#include <string>
 #include <vector>
 #include "light.h"
 #include <sdb/Types.h>
@@ -24,6 +23,7 @@ class IntersectResult;
 
 class RenderableScene {
 
+    std::string m_name;
 	int m_objectCount;
     int m_changeCount;
 	bool m_changed;
@@ -52,6 +52,8 @@ public:
 
     const bool &sceneChanged() const;
     void updateScene();
+
+    const std::string &renderableSceneName() const;
 	
 protected:
     void setSceneChanged();
@@ -59,6 +61,7 @@ protected:
     const int &numChanges() const;
     void resetChangeCount();
     void resetRenderableScene();
+    void setName(const std::string &x);
 
 private:
     void setToRemoveGroup(int groupId);

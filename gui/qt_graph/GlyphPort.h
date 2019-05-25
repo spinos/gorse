@@ -1,11 +1,10 @@
 /*
  *  GlyphPort.h
+ *  gorse
  *
- *  source of destination of glyph connections
+ *  origin/destination of glyph connections
  *
- *  Created by jian zhang on 4/1/17.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
- *
+ *  2019/5/25
  */
 
 #ifndef ALO_GLYPH_PORT_H
@@ -13,6 +12,7 @@
 
 #include <QGraphicsEllipseItem>
 #include <vector>
+#include <string>
 
 namespace alo {
 
@@ -35,11 +35,13 @@ public:
 	void setIsOutgoing(bool x);
 	
 	const QString & portName() const;
+	std::string portNameStr() const;
 	const bool & isOutgoing() const;
 	
 	int numConnections() const;
 	const GlyphConnection * connection(const int & i) const;
     void getConnections(std::vector<GlyphConnection *> &conns) const;
+    int getLastConnectionId() const;
 	
 	int type() const { return Type; }
 

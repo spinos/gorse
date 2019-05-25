@@ -1,9 +1,10 @@
 /*
  *  GlyphItem.h
+ *  gorse
  *
- *  top level item holds instance of attribs
- *  type, id, and ops
+ *  top level item holds instance of ops
  *
+ *  2019/5/25
  */
 
 #ifndef GAR_GLYPH_ITEM_H
@@ -61,6 +62,8 @@ public:
 	const QPixmap &iconPix() const;
 	QPolygonF getCollisionPolygon(const QPointF &dv) const;
 	QPointF getCollisionCenter() const;
+/// by name
+	GlyphPort *findPort(const std::string &name) const;
 	
 	QPointF localCenter() const;
 	std::string glyphName() const;
@@ -79,9 +82,11 @@ public:
 	void beginEditState(QGraphicsItem *item);
 	void endEditState(QGraphicsItem *item);
     
-    void getConnections(std::vector<GlyphConnection *> &conns);
+    void getConnections(std::vector<GlyphConnection *> &conns,
+            bool incomingOnly);
 
     void genToolTip();
+    void updateOps();
 
 protected:
 	GlyphPort *addPort(const QString & name, 

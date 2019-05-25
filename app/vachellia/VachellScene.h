@@ -2,7 +2,13 @@
  *  VachellScene.h
  *  vachellia
  *
- *  2019/5/20
+ *  confluence of q graphics scene and interface renderable scene
+ *  new/save/load
+ *  block condition
+ *  create/remove graph item/connection
+ *  ops state/attribute changed
+ *
+ *  2019/5/24
  */
 
 #ifndef VCHL_VACHELL_SCENE_H
@@ -27,11 +33,12 @@ public:
 	virtual ~VachellScene();
 	
 	virtual void onItemStateChanged(alo::GlyphItem *item, QGraphicsItem *stateControlItem) override;
-    virtual void createConnection(alo::GlyphConnection *conn, alo::GlyphPort *port) override;
+    virtual bool makeConnection(alo::GlyphConnection *conn, alo::GlyphPort *port) override;
     virtual void removeConnection(alo::GlyphConnection *conn) override;
 	
+    bool cleanSlate();
     bool open();
-    bool save();
+    bool save(bool doChooseFile);
     
 signals:
 	void sendStopRender();
@@ -46,6 +53,7 @@ public slots:
 protected:
     virtual alo::GlyphOps *createOps(const QJsonObject &content) override;
     virtual void postCreation(alo::GlyphItem *item) override;
+    virtual void postCreationBlocked(alo::GlyphItem *item) override;
     virtual void preDestruction(alo::GlyphItem *item, const std::vector<alo::GlyphConnection *> &connectionsToBreak) override;
 	
 private:
