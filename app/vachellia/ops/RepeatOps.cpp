@@ -254,7 +254,19 @@ AFileDlgProfile *RepeatOps::readFileProfileR () const
 
 QString RepeatOps::getShortDescription() const
 {
-    return QString("instance file %1").arg(QString::fromStdString(m_instanceFilePath)); 
+    QString r = QString("repeat of %1 objs").arg(m_inOps.numElements());
+    for(int i=0;i<m_inOps.numElements();++i) {
+        const RenderableOps *e = m_inOps.element(i);
+        QString dspn = QString::fromStdString(e->displayName());
+        r = r + QString("\n obj[%1]: %2").arg(QString::number(i), dspn);
+    }
+    r = r + QString("\n instance file: %1").arg(QString::fromStdString(m_instanceFilePath));
+    const int &ninst = m_instancer->numInstancedObjects();
+    if(ninst > 0 && m_inOps.numElements() >= ninst) 
+        r = r + QString("\n Ready");
+    else
+        r = r + QString("\n Not Ready");
+    return r;
 }
 
 bool RepeatOps::getActivatedState() const

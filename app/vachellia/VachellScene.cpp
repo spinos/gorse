@@ -10,6 +10,7 @@
 #include <qt_graph/GlyphOps.h>
 #include <qt_graph/GlyphItem.h>
 #include <qt_graph/GlyphConnection.h>
+#include <qt_graph/GlyphPort.h>
 #include <math/Hexahedron.h>
 #include <interface/GlobalFence.h>
 #include <boost/thread/lock_guard.hpp>

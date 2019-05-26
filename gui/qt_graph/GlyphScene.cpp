@@ -108,7 +108,7 @@ void GlyphScene::deselectAllGlyph()
 	foreach(GlyphItem * glh, m_selectedGlyph) {
 		glh->hideHalo();
 	}
-	m_activeGlyph = 0;
+	m_activeGlyph = nullptr;
 	m_selectedGlyph.clear();
 	emit sendSelectGlyph(false);
 }
@@ -182,9 +182,8 @@ int GlyphScene::getUid(const int typeId)
 
 void GlyphScene::resetGlyphScene()
 {
+	deselectAllGlyph();
 	QGraphicsScene::clear();
-	m_activeGlyph = nullptr;
-	m_selectedGlyph.clear();
 	m_typeCounter.clear();
 	m_glyphMap.clear();
     m_connectionMap.clear();
@@ -195,10 +194,11 @@ QJsonObject GlyphScene::getGlyphProfile(int typeId)
 
 void GlyphScene::mapConnection(GlyphConnection *x)
 {
-    const int &idx = x->connectionId();
+    const int &idx = x->connectionId(); 
     const int i = idx > -1 ? idx : getConnectionUid(x->hintId());
     m_connectionMap.insert(i, x);
     if(i != idx) x->setConnectionId(i);
+    x->genToolTip();
 }
 
 void GlyphScene::unmapConnection(GlyphConnection *x)
@@ -210,10 +210,10 @@ void GlyphScene::unmapConnection(GlyphConnection *x)
 
 int GlyphScene::getConnectionUid(const int &base)
 {
-    int r = base + rand() & 127;
+    int r = base + (rand() & 31);
     bool vac = (m_connectionMap.find(r) == nullptr);
     while(!vac) {
-        r += rand() & 127;
+        r += rand() & 31;
         vac = (m_connectionMap.find(r) == nullptr); 
     }
     return r;

@@ -241,7 +241,11 @@ void SceneGraph::doConnectItem(QGraphicsItem* item)
 		
 	if(GlyphPort::IsItemIncomingPort(item)) {
 		GlyphPort * p1 = static_cast<GlyphPort *>(item);
-		asGlyphScene()->makeConnection(m_selectedConnection, p1);
+		bool connected = asGlyphScene()->makeConnection(m_selectedConnection, p1);
+		if(connected) {
+			QGraphicsItem *ti = p1->topLevelItem();
+    		updateItemToolTip(ti);
+		}
 	}
 	
 	if(!m_selectedConnection->isComplete() ) {
@@ -257,8 +261,10 @@ void SceneGraph::doConnectItem(QGraphicsItem* item)
 void SceneGraph::doRemoveConnection(QGraphicsItem* item)
 {
 	GlyphConnection *conn = static_cast<GlyphConnection *>(item);
+	GlyphItem * dsi = conn->node1();
 	asGlyphScene()->removeConnection(conn);
 	scene()->removeItem( item );
+	updateItemToolTip(dsi);
 }
 
 void SceneGraph::beginProcessItem(QMouseEvent *event) 
@@ -340,6 +346,14 @@ void SceneGraph::modifyDv(QPointF &dv, const GlyphItem *focused) const
         }  
     }
     
+}
+
+void SceneGraph::updateItemToolTip(QGraphicsItem *item)
+{
+	if(item->type() == GlyphItem::Type ) {  
+        GlyphItem *g = static_cast<GlyphItem *>(item);
+        g->genToolTip();      
+    }
 }
 
 } /// end of namespace alo

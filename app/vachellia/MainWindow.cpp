@@ -153,7 +153,7 @@ void MainWindow::createActions()
     /*QToolBar *fileToolBar = addToolBar(tr("File"));*/
 
     QIcon projectIcon(":/images/project.png");
-    QAction *projectAct = new QAction(projectIcon, tr("&Project"), this);
+    QAction *projectAct = new QAction(projectIcon, tr("&Set Project"), this);
     projectAct->setStatusTip(tr("Set project dir"));
     connect(projectAct, &QAction::triggered, this, &MainWindow::setProject);
     fileMenu->addAction(projectAct);

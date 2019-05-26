@@ -146,7 +146,6 @@ void GlyphConnection::destinationTo(GlyphPort* p1)
 	destNode->postConnection(srcNode, p1, this);
     srcNode->postConnection(destNode, port0(), this);
 
-    genToolTip();
 }
 
 void GlyphConnection::breakUp()
@@ -193,7 +192,7 @@ void GlyphConnection::genToolTip()
 	QString name0 = QString::fromStdString(n0->glyphName());
 	GlyphItem * n1 = node1();
 	QString name1 = QString::fromStdString(n1->glyphName());
-	QString stip = QString("%1.%2 -> %3.%4").arg(name0, m_port0->portName(), name1, m_port1->portName() );
+	QString stip = QString("%1.%2 -%3- %4.%5").arg(name0, m_port0->portName(), QString::number(m_cid), name1, m_port1->portName() );
 	setToolTip(stip);
 }
 
