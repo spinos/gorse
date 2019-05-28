@@ -88,6 +88,9 @@ public:
 	bool getStringAttribValue(std::string &val, const std::string &attrName);
 	bool getListAttribValue(std::string &val, const std::string &attrName);
 
+	virtual bool getVisibleState() const;
+	virtual bool getActivatedState() const;
+
 	virtual void preSave();
 	virtual void postLoad();
 

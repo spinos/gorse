@@ -23,6 +23,7 @@ namespace alo {
 RenderableScene::RenderableScene() : m_objectCount(0),
 m_changeCount(0),
 m_changed(false),
+m_inProgress(false),
 m_name("unknown")
 {
 	RenderableCoordinateSystem *b = new RenderableCoordinateSystem;
@@ -33,8 +34,10 @@ m_name("unknown")
     //t->setOverlay(true);
     //t->setVisible(false);
     //createRenderable(t, 1);
-    
 }
+
+RenderableScene::~RenderableScene()
+{}
 
 bool RenderableScene::intersectRay(const Ray& aray, IntersectResult& result) const
 { 
@@ -187,5 +190,14 @@ void RenderableScene::setName(const std::string &x)
 
 const std::string &RenderableScene::renderableSceneName() const
 { return m_name; }
+
+void RenderableScene::beginProgress()
+{ m_inProgress = true; }
+
+void RenderableScene::endProgress()
+{ m_inProgress = false; }
+
+const bool &RenderableScene::isInProgress() const
+{ return m_inProgress; }
 
 } /// end of alo

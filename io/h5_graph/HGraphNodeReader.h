@@ -4,7 +4,7 @@
  *
  *  base node reader 
  *
- *  2019/5/23
+ *  2019/5/26
  */
 
 #ifndef ALO_GRAPH_NODE_READER_H
@@ -21,6 +21,8 @@ class HGraphNodeReader {
 	std::string m_dspName;
 	int m_nodeUid;
 	float m_pos[2];
+    bool m_isVisible;
+    bool m_isActivated;
 
 public:
 
@@ -33,6 +35,8 @@ public:
 	int nodeTypeId() const;
 	const std::string &nodeDisplayName() const;
 	const float *nodePosition() const;
+    const bool &isVisible() const;
+    const bool &isActivated() const;
 	
 protected:
 

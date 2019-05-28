@@ -34,6 +34,10 @@ class GlyphItem : public QGraphicsPathItem
 {
 	int m_glyphType;
 	int m_glyphId;
+	int m_blockWidth;
+	int m_blockHeight;
+	bool m_postLoadVisible;
+	bool m_postLoadActivated;
 	
 public:
 	enum { Type = UserType + 1 };
@@ -87,6 +91,9 @@ public:
 
     void genToolTip();
     void updateOps();
+    void setPostLoadVisibleState(const bool &x);
+    void setPostLoadActivatedState(const bool &x);
+    void postLoad();
 
 protected:
 	GlyphPort *addPort(const QString & name, 
@@ -111,7 +118,6 @@ private:
     ActivationControlItem *m_activation;
 	VisibilityControlItem *m_visibility;
 	QGraphicsSimpleTextItem *m_opsLabel;
-	int m_blockWidth, m_blockHeight;
 
 };
 

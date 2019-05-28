@@ -170,7 +170,13 @@ bool UnionOps::hasInstance() const
 
 QString UnionOps::getShortDescription() const
 {
-    return QString("union of %1").arg(m_inOps.numElements());  
+    QString r = QString("union of %1 objs").arg(m_inOps.numElements());
+    for(int i=0;i<m_inOps.numElements();++i) {
+        const RenderableOps *e = m_inOps.element(i);
+        QString dspn = QString::fromStdString(e->displayName());
+        r = r + QString("\n obj[%1]: %2").arg(QString::number(i), dspn);
+    }
+    return r;
 }
 
 } /// end of alo

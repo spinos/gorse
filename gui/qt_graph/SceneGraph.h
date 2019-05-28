@@ -60,6 +60,7 @@ private:
 	void doConnectItem(QGraphicsItem* item);
 	void doRemoveConnection(QGraphicsItem* item);
     void modifyDv(QPointF &dv, const GlyphItem *focused) const;
+    void updateItemToolTip(QGraphicsItem *item);
 	
 	enum Mode {
 		mNone = 0,

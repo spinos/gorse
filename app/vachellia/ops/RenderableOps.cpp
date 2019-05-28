@@ -2,7 +2,7 @@
  *  RenderableOps.cpp
  *  vachellia
  *
- *  2019/5/11
+ *  2019/5/26
  */
 
 #include "RenderableOps.h"
@@ -27,5 +27,15 @@ void RenderableOps::setRenderableScene(RenderableScene *x)
 
 void RenderableOps::removeRenderableFromScene()
 { 
-	m_scene->removeRenderable(objectId(), opsTypeId() ); }
+	m_scene->removeRenderable(objectId(), opsTypeId() );
 }
+
+bool RenderableOps::getVisibleState() const
+{
+	return !RenderableObject::isHidden();
+}
+
+RenderableScene *RenderableOps::renderableScene()
+{ return m_scene; }
+
+} /// end of alo

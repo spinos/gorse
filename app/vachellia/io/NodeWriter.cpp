@@ -22,6 +22,7 @@ void NodeWriter::write(H5GraphIO &hio, GlyphOps *ops, const QJsonObject &content
 
     QJsonArray attrArray = content["attribs"].toArray();
     writeAttributes(attrArray);
+    
 }
 
 void NodeWriter::writeAttributes(const QJsonArray &content)

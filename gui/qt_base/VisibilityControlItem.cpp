@@ -21,6 +21,12 @@ void VisibilityControlItem::InitializeStates()
 	AddStatePixmap(Visible, ":images/eyeOpen.png");
 }
 
+void VisibilityControlItem::setStateVisible(const bool &x)
+{
+	if(x) setState(Visible);
+	else setState(Hidden);
+}
+
 void VisibilityControlItem::beginEditState()
 { 
 	m_state0 = state();
@@ -36,4 +42,4 @@ void VisibilityControlItem::endEditState()
 bool VisibilityControlItem::isStateVisible() const
 { return state() == Visible; }
 
-}
+} /// end of alo

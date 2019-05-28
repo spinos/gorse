@@ -110,6 +110,9 @@ void NodeReader::readListAttribute(const std::string &name)
 
 void NodeReader::readStringAttribute(const std::string &name)
 {
+    std::string y;
+    m_hio->readNodeStringAttr(name, y);
+    m_ops->setStringAttrValue(name, y);
 }
 
 void NodeReader::readTransformAttributes()

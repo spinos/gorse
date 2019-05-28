@@ -46,7 +46,7 @@ public:
         GlyphOps *_ops;
 	};
 
-	void createGlyph(CreateGlyphParameter &param);
+	GlyphItem *createGlyph(CreateGlyphParameter &param);
 	void selectGlyph(GlyphItem *item);
 	void deselectGlyph(GlyphItem *item);
 	void deselectAllGlyph();
@@ -113,7 +113,6 @@ private:
     sdb::L2Tree<int, GlyphConnection *, 128, 128> m_connectionMap;
     typedef GlyphConnection* GlyphConnectionPtr;
     typedef GlyphItem* GlyphItemPtr;
-	bool m_isLoading;
 
 };
 

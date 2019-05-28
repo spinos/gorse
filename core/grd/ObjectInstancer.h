@@ -106,6 +106,7 @@ public:
     
     int numObjects() const;
 	const int &numInstances() const;
+    const int &numInstancedObjects() const;
 /// n instanced obj > 0 and n obj >= n instanced obj 
     bool validateNumObjects() const;
 
@@ -384,6 +385,10 @@ bool ObjectInstancer<T1, T2>::validateNumObjects() const
     const int nobj = m_objs.numElements();
     return nobj >= m_numInstancedObjects;
 }
+
+template<typename T1, typename T2>
+const int &ObjectInstancer<T1, T2>::numInstancedObjects() const
+{ return m_numInstancedObjects; }
 
 }
 

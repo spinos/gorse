@@ -43,6 +43,8 @@ GlyphItem::GlyphItem(const QPixmap & iconPix, int gtyp,
     m_opsLabel = new QGraphicsSimpleTextItem(this);
     m_opsLabel->setText(QString("unknown"));
     m_opsLabel->setPos(0, -18);
+    m_postLoadVisible = true;
+    m_postLoadActivated = false;
 }
 
 GlyphItem::~GlyphItem()
@@ -257,6 +259,7 @@ void GlyphItem::endEditState(QGraphicsItem *item)
 		m_activation->endEditState();
 		m_ops->setActivated(m_activation->isStateEnabled());
 	}
+	genToolTip();
 }
 
 std::string GlyphItem::glyphName() const
@@ -369,6 +372,31 @@ GlyphPort *GlyphItem::findPort(const std::string &name) const
 }
 
 void GlyphItem::updateOps()
-{ m_ops->update(); }
+{ 
+	m_ops->update();
+	genToolTip();
+}
+
+void GlyphItem::setPostLoadVisibleState(const bool &x)
+{ m_postLoadVisible = x; }
+
+void GlyphItem::setPostLoadActivatedState(const bool &x)
+{ m_postLoadActivated = x; }
+
+void GlyphItem::postLoad()
+{
+	m_ops->postLoad();
+
+	if(m_visibility) {
+		m_visibility->setStateVisible(m_postLoadVisible);
+		m_ops->setDrawableVisible(m_postLoadVisible);
+	}
+    if(m_activation) {
+    	m_activation->setStateActivated(m_postLoadActivated);
+		m_ops->setActivated(m_postLoadActivated);
+	}
+	
+	genToolTip();
+}
 
 } /// end of namespace alo

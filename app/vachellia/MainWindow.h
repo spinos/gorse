@@ -1,3 +1,9 @@
+/*
+ *  MainWindow.h
+ *  gorse vachellia
+ *
+ *  2019/5/25
+ */
 
 #ifndef VCHL_MAIN_WINDOW_H
 #define VCHL_MAIN_WINDOW_H
@@ -27,6 +33,7 @@ public:
     MainWindow();
 
 private slots:
+    void setProject();
     void clear();
     void open();
     void save();
@@ -54,6 +61,5 @@ private:
     RenderWidget *m_renderView;
     
 };
-//! [0]
 
 #endif

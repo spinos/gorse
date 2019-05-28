@@ -2,6 +2,7 @@
  *  ActivationControlItem.h
  *  aloe
  *
+ *  2019/5/26
  */
 
 #ifndef ALO_ACTIVATION_CONTROL_ITEM_H
@@ -19,6 +20,7 @@ public:
 
 	static void InitializeStates();
 
+	void setStateActivated(const bool &x);
 	void beginEditState();
 	void endEditState();
 
@@ -29,8 +31,8 @@ protected:
 private:
 	enum ActivationState {
 		UnknownActivation = 258,
-		Disabled,
-		Enabled
+		Activated,
+		SwitchOff
 	};
 
 	int m_state0;

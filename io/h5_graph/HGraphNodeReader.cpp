@@ -2,7 +2,7 @@
  *  HGraphNodeReader.cpp
  *  vachellia
  *
- *  2019/5/23
+ *  2019/5/26
  */
 
 #include "HGraphNodeReader.h"
@@ -21,7 +21,8 @@ void HGraphNodeReader::readNode(H5GraphIO &hio)
 	hio.readNodeId(m_nodeUid);
 	hio.readNodeDisplayName(m_dspName);
 	hio.readNodePosition(m_pos);
-	std::cout << "\n read node "<<m_dspName;
+    hio.readNodeVisibleState(m_isVisible);
+    hio.readNodeActivatedState(m_isActivated);
 }
 
 const int &HGraphNodeReader::nodeUid() const
@@ -35,5 +36,11 @@ const std::string &HGraphNodeReader::nodeDisplayName() const
 
 const float *HGraphNodeReader::nodePosition() const
 { return m_pos; }
+
+const bool &HGraphNodeReader::isVisible() const
+{ return m_isVisible; }
+
+const bool &HGraphNodeReader::isActivated() const
+{ return m_isActivated; }
 
 } /// end of alo

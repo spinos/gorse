@@ -72,6 +72,12 @@ void H5GraphIO::writeNodeDisplayName(const std::string &x)
 	m_current->writeVLStringAttr(".dspnm", x);
 }
 
+void H5GraphIO::writeNodeVisibleState(const bool &x)
+{ writeNodeBoolAttr(".is_visible", x); }
+
+void H5GraphIO::writeNodeActivatedState(const bool &x)
+{ writeNodeBoolAttr(".is_active", x); }
+
 void H5GraphIO::writeNodeIntAttr(const std::string &name, int dim, const int *x)
 {
 	m_current->addIntAttr(name.c_str(), dim);
@@ -178,6 +184,24 @@ void H5GraphIO::readNodePosition(float *y)
 	m_current->readFloatAttr(".pos", y);
 }
 
+void H5GraphIO::readNodeVisibleState(bool &y)
+{
+    if(!m_current->hasNamedAttr(".is_visible")) {
+        y = true;
+        return;
+    }
+    readNodeBoolAttr(".is_visible", y);
+}
+
+void H5GraphIO::readNodeActivatedState(bool &y)
+{
+    if(!m_current->hasNamedAttr(".is_active")) {
+        y = false;
+        return;
+    }
+    readNodeBoolAttr(".is_active", y);
+}
+
 void H5GraphIO::readNodeBoolAttr(const std::string &name, bool &y)
 {
     int iy;
@@ -190,6 +214,9 @@ void H5GraphIO::readNodeIntAttr(const std::string &name, int *y)
 
 void H5GraphIO::readNodeFloatAttr(const std::string &name, float *y)
 { m_current->readFloatAttr(name.c_str(), y); }
+
+void H5GraphIO::readNodeStringAttr(const std::string &name, std::string &y)
+{ m_current->readVLStringAttr(name.c_str(), y); }
 
 void H5GraphIO::connectionBegin(const int &connectionId)
 {

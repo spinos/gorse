@@ -24,8 +24,6 @@
 #include <sds/FZOrder.h>
 #include <QProgressDialog>
 #include <QApplication>
-#include <interface/GlobalFence.h>
-#include <boost/thread/lock_guard.hpp>
 #include <qt_base/AFileDlg.h>
 
 namespace alo {
@@ -76,7 +74,7 @@ void RepeatOps::update()
         loadInstanceFile(scachePath);
 
     if(m_inOps.isDirty()) {
-//todo build instancer
+// rebuild instancer?
     }
 }
 
@@ -129,10 +127,22 @@ bool RepeatOps::hasInstance() const
 
 void RepeatOps::updateInstancer(bool isAppending)
 {
+    if(renderableScene()->isInProgress()) {
+        return updateInstancerInProgress(isAppending);
+    }
+
     QProgressDialog progress("Processing...", QString(), 0, 1, QApplication::activeWindow() );
     progress.setWindowModality(Qt::ApplicationModal);
     progress.show();
 
+    updateInstancerInProgress(isAppending);
+
+    progress.setValue(1);
+    
+}
+
+void RepeatOps::updateInstancerInProgress(bool isAppending)
+{
     m_worldLookupRule->detach();
     RenderableOps::resetAabb();
     
@@ -181,9 +191,6 @@ void RepeatOps::updateInstancer(bool isAppending)
 
         std::cout << "\n end building instancer ";
     }
-
-    progress.setValue(1);
-    
 }
 
 bool RepeatOps::loadInstanceFile(const std::string &fileName)
@@ -207,9 +214,6 @@ bool RepeatOps::loadInstanceFile(const std::string &fileName)
     hio.end();
     
     if(!stat || rec.isEmpty()) return false;
-    
-    interface::GlobalFence &fence = interface::GlobalFence::instance();
-	boost::lock_guard<interface::GlobalFence> guard(fence);
     
     const int &n = rec.numInstances();
     m_instancer->createInstances(n);
@@ -250,7 +254,22 @@ AFileDlgProfile *RepeatOps::readFileProfileR () const
 
 QString RepeatOps::getShortDescription() const
 {
-    return QString("instance file %1").arg(QString::fromStdString(m_instanceFilePath)); 
+    QString r = QString("repeat of %1 objs").arg(m_inOps.numElements());
+    for(int i=0;i<m_inOps.numElements();++i) {
+        const RenderableOps *e = m_inOps.element(i);
+        QString dspn = QString::fromStdString(e->displayName());
+        r = r + QString("\n obj[%1]: %2").arg(QString::number(i), dspn);
+    }
+    r = r + QString("\n instance file: %1").arg(QString::fromStdString(m_instanceFilePath));
+    const int &ninst = m_instancer->numInstancedObjects();
+    if(ninst > 0 && m_inOps.numElements() >= ninst) 
+        r = r + QString("\n Ready");
+    else
+        r = r + QString("\n Not Ready");
+    return r;
 }
+
+bool RepeatOps::getActivatedState() const
+{ return m_isActive; }
 
 } /// end of alo

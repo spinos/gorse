@@ -1,5 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
+    <file>images/project.png</file>
     <file>images/new.png</file>
     <file>images/open.png</file>
     <file>images/test.png</file>
