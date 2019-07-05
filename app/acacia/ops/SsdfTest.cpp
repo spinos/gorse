@@ -11,7 +11,6 @@
 #include <ssdf/SsdField.h>
 #include <ssdf/SsdfBuilder.h>
 #include <ssdf/SsdfBuildRule.h>
-#include <sds/FZOrder.h>
 #include <math/BoundingBox.h>
 #include <ogl/ShapeDrawer.h>
 #include <h5/V1H5IO.h>

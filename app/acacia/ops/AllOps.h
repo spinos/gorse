@@ -11,6 +11,7 @@
 #include "GeodesicDistanceTest.h"
 #include "InstancedTest.h"
 #include "SsdfTest.h"
+#include "MeshFusionTest.h"
 
 namespace alo {
 

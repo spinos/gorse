@@ -150,7 +150,7 @@ bool MeshListener::loadMesh(AdaptableMesh *transient, bool dataChanged)
     const char *mem = static_cast<const char*>(region.get_address());
     const Vector3F *pos = (const Vector3F *)&mem[msh.getPosLoc()];
     transient->copyPositionsFrom(pos);
-    const unsigned *ind = (const unsigned *)&mem[msh.getIndLoc()];
+    const Int3 *ind = (const Int3 *)&mem[msh.getIndLoc()];
     transient->copyIndicesFrom(ind);
     
     transient->clearUVSets();

@@ -89,8 +89,8 @@ void ATriangleMesh::createTriangleMesh(int vertexCount, int triangleCount)
 void ATriangleMesh::copyPositionsFrom(const Vector3F *x)
 { m_positions.copyFrom(x, m_numVertices); }
 
-void ATriangleMesh::copyIndicesFrom(const unsigned *x)
-{ m_indices.copyFrom((const Int3 *)x, m_numTriangles); }
+void ATriangleMesh::copyIndicesFrom(const Int3 *x)
+{ m_indices.copyFrom(x, m_numTriangles); }
 
 Float2 *ATriangleMesh::addUVSet(const std::string &name)
 {

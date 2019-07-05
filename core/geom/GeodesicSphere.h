@@ -7,11 +7,11 @@
 #ifndef ALO_GEODESIC_SPHERE_H
 #define ALO_GEODESIC_SPHERE_H
 
-#include "V1ATriangleMesh.h"
+#include "AdaptableMesh.h"
 
 namespace alo {
     
-class GeodesicSphere : public ver1::ATriangleMesh {
+class GeodesicSphere : public AdaptableMesh {
      
 public:
     GeodesicSphere(int level = 5);

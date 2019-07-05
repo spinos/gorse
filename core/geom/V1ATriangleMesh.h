@@ -39,7 +39,7 @@ public:
     void purgeMesh();
 
     void copyPositionsFrom(const Vector3F *x);
-    void copyIndicesFrom(const unsigned *x);
+    void copyIndicesFrom(const Int3 *x);
     void createUVSets(int n);
     void setUVSetName(const std::string &name, int i);
     Float2 *addUVSet(const std::string &name);
