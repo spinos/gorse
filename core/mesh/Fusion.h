@@ -12,6 +12,7 @@
 #define ALO_MESH_FUSION_H
 
 #include <vector>
+#include <math/Vector3F.h>
 #include <math/SimpleBuffer.h>
 
 namespace alo {
@@ -25,10 +26,13 @@ class Fusion {
         int _key;
         int _ind;
         int _merged;
-        int _padding;
+        int _padding1;
+        Vector3F _pos;
+        int _padding2;
     };
     
     SimpleBuffer<MergeIndex> m_mergeInds;
+    SimpleBuffer<int> m_mergeMap;
 
 public:
 
@@ -41,10 +45,15 @@ protected:
 
 private:
 /// find overlapping vertices by space filling curve
-    void mapMergeIndices(const std::vector<AdaptableMesh *> &inMeshes,
+    int mapMergeIndices(const std::vector<AdaptableMesh *> &inMeshes,
                         const BoundingBox &bbox);
+/// sorted and merged positions                      
+    void remapPositions(AdaptableMesh *outMesh, const int &nv) const;
+/// connect to mapped vertices
+    void remapFaces(AdaptableMesh *outMesh, const int &faceOffset,
+                    AdaptableMesh *inMesh, const int &vertexOffset) const;
 /// assuming all in meshes has the same uv set
-    void combineMeshUv(AdaptableMesh *outMesh, const std::vector<AdaptableMesh *> &inMeshes);
+    void combineMeshUv(AdaptableMesh *outMesh, const std::vector<AdaptableMesh *> &inMeshes) const;
     
 };
 

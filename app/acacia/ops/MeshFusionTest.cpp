@@ -12,11 +12,12 @@
 #include <mesh/Fissure.h>
 #include <bvh/BVHNodeIterator.h>
 #include <mesh/Fusion.h>
+#include <math/miscfuncs.h>
 
 namespace alo {
    
 MeshFusionTest::MeshFusionTest() :
-m_level(43),
+m_level(49),
 m_radius(10.f),
 m_shoUV(false)
 {
@@ -65,6 +66,14 @@ void MeshFusionTest::computeMesh()
     Fusion fus;
     fus.combine(&combinedMesh, meshParts);
     
+    for(int i=0;i<combinedMesh.numVertices();++i) {
+        Vector3F &vi = combinedMesh.positions()[i];
+        vi.x += RandomF01() * .11f;
+        vi.y += RandomF01() * .11f;
+    }
+    
+    combinedMesh.calculateVertexNormals();
+    
     DrawableResource *rec = resource();
 
     lockScene();
@@ -75,7 +84,7 @@ void MeshFusionTest::computeMesh()
         return;
     }
 
-    UpdateMeshResouce(rec, &transient, m_shoUV);
+    UpdateMeshResouce(rec, &combinedMesh, m_shoUV);
 
     processResourceNoLock(rec);
     unlockScene();
@@ -83,8 +92,7 @@ void MeshFusionTest::computeMesh()
     if(m_shoUV)
         setBound(BoundingBox(-.5f, -.5f, -.5f, 1.5f, 1.5f, 1.f));
     else
-        setBound(&transient);
+        setBound(&combinedMesh);
 }
 
 }
-
