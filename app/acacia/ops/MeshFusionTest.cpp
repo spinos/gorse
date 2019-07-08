@@ -51,7 +51,7 @@ void MeshFusionTest::computeMesh()
     const int npart = fis.granulate(&transient);
     std::cout << " granulate to " << npart << " parts ";
     
-    std::vector<AdaptableMesh *> meshParts;
+    std::vector<const AdaptableMesh *> meshParts;
     BVHNodeIterator it = fis.firstPart();
     while(it._node) {
 

@@ -39,21 +39,21 @@ public:
     Fusion();
 	virtual ~Fusion();
     
-    bool combine(AdaptableMesh *outMesh, const std::vector<AdaptableMesh *> &inMeshes);
+    bool combine(AdaptableMesh *outMesh, const std::vector<const AdaptableMesh *> &inMeshes);
     
 protected:
 
 private:
 /// find overlapping vertices by space filling curve
-    int mapMergeIndices(const std::vector<AdaptableMesh *> &inMeshes,
+    int mapMergeIndices(const std::vector<const AdaptableMesh *> &inMeshes,
                         const BoundingBox &bbox);
 /// sorted and merged positions                      
     void remapPositions(AdaptableMesh *outMesh, const int &nv) const;
 /// connect to mapped vertices
     void remapFaces(AdaptableMesh *outMesh, const int &faceOffset,
-                    AdaptableMesh *inMesh, const int &vertexOffset) const;
+                    const AdaptableMesh *inMesh, const int &vertexOffset) const;
 /// assuming all in meshes has the same uv set
-    void combineMeshUv(AdaptableMesh *outMesh, const std::vector<AdaptableMesh *> &inMeshes) const;
+    void combineMeshUv(AdaptableMesh *outMesh, const std::vector<const AdaptableMesh *> &inMeshes) const;
     
 };
 

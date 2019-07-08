@@ -19,14 +19,14 @@ Fusion::Fusion()
 Fusion::~Fusion()
 {}
 
-bool Fusion::combine(AdaptableMesh *outMesh, const std::vector<AdaptableMesh *> &inMeshes)
+bool Fusion::combine(AdaptableMesh *outMesh, const std::vector<const AdaptableMesh *> &inMeshes)
 {
     BoundingBox mergeBox;
     int nv = 0;
     int nt = 0;
-    std::vector<AdaptableMesh *>::const_iterator it = inMeshes.begin();
+    std::vector<const AdaptableMesh *>::const_iterator it = inMeshes.begin();
     for(;it!=inMeshes.end();++it) {
-        AdaptableMesh *inMesh = *it;
+        const AdaptableMesh *inMesh = *it;
         
         nv += inMesh->numVertices();
         nt += inMesh->numTriangles();
@@ -50,7 +50,7 @@ bool Fusion::combine(AdaptableMesh *outMesh, const std::vector<AdaptableMesh *> 
     int toffset = 0;
     it = inMeshes.begin();
     for(;it!=inMeshes.end();++it) {  
-        AdaptableMesh *inMesh = *it;
+        const AdaptableMesh *inMesh = *it;
         
         remapFaces(outMesh, toffset, inMesh, voffset);
         
@@ -63,7 +63,7 @@ bool Fusion::combine(AdaptableMesh *outMesh, const std::vector<AdaptableMesh *> 
     return true;
 }
 
-void Fusion::combineMeshUv(AdaptableMesh *outMesh, const std::vector<AdaptableMesh *> &inMeshes) const
+void Fusion::combineMeshUv(AdaptableMesh *outMesh, const std::vector<const AdaptableMesh *> &inMeshes) const
 {
     if(inMeshes[0]->numUVSets() < 1) return;
     
@@ -71,9 +71,9 @@ void Fusion::combineMeshUv(AdaptableMesh *outMesh, const std::vector<AdaptableMe
     Float2 *ouv = outMesh->addUVSet(setName);
     
     int uvoffset = 0;
-    std::vector<AdaptableMesh *>::const_iterator it = inMeshes.begin();
+    std::vector<const AdaptableMesh *>::const_iterator it = inMeshes.begin();
     for(;it!=inMeshes.end();++it) {
-        AdaptableMesh *inMesh = *it;
+        const AdaptableMesh *inMesh = *it;
         
         const Float2 *iuv = inMesh->c_uvSet(0);
         
@@ -84,7 +84,7 @@ void Fusion::combineMeshUv(AdaptableMesh *outMesh, const std::vector<AdaptableMe
     }
 }
 
-int Fusion::mapMergeIndices(const std::vector<AdaptableMesh *> &inMeshes,
+int Fusion::mapMergeIndices(const std::vector<const AdaptableMesh *> &inMeshes,
                             const BoundingBox &bbox)
 {
     sds::FZOrderCurve sfc;
@@ -93,9 +93,9 @@ int Fusion::mapMergeIndices(const std::vector<AdaptableMesh *> &inMeshes,
 	sfc.setCoord(midP.x, midP.y, midP.z, spanL * .50045f);
     
     int totalNv = 0;
-    std::vector<AdaptableMesh *>::const_iterator it = inMeshes.begin();
+    std::vector<const AdaptableMesh *>::const_iterator it = inMeshes.begin();
     for(;it!=inMeshes.end();++it) {  
-        AdaptableMesh *inMesh = *it;
+        const AdaptableMesh *inMesh = *it;
         
         const int &nv = inMesh->numVertices();
         for(int i=0;i<nv;++i) {
@@ -160,7 +160,7 @@ void Fusion::remapPositions(AdaptableMesh *outMesh, const int &nv) const
 }
 
 void Fusion::remapFaces(AdaptableMesh *outMesh, const int &faceOffset,
-                    AdaptableMesh *inMesh, const int &vertexOffset) const
+                    const AdaptableMesh *inMesh, const int &vertexOffset) const
 {
     for(int i=0;i<inMesh->numTriangles();++i) {
         Int3 &fi = outMesh->indices()[i + faceOffset];
