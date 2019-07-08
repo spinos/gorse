@@ -30,6 +30,8 @@ public:
 /// remove every element before
 /// cut head from every element after
 	bool behead(const std::string &head);
+	
+	void truncateBy(const PathList &another);
 
 	int length() const;
 	const std::string &elementName(int i) const;
@@ -40,11 +42,12 @@ public:
 
 	std::string lastNameStripNs() const;
 	std::string lastPathStripNs() const;
-
-/// part after '::'
-	static std::string StripNs(const std::string &a);
+	
+	static std::string StripAllNs(const std::string &a);
 
 private:
+/// part after '::'
+	static std::string StripNs(const std::string &a);
 
 };
 
