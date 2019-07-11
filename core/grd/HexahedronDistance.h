@@ -13,14 +13,14 @@
 #ifndef ALO_GRD_HEXAHEDRON_DISTANCE_H
 #define ALO_GRD_HEXAHEDRON_DISTANCE_H
 
-#include <sds/SparseCubicGrid.h>
+#include <sds/SparseCubicField.h>
 
 namespace alo {
     
 namespace grd {
     
 template<typename T>
-class HexahedronDistance : public sds::SparseCubicGrid<Int2> {
+class HexahedronDistance : public sds::SparseCubicField<T> {
   
 public:
 

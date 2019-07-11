@@ -15,6 +15,7 @@
 #include <rng/Uniform.h>
 #include <smp/Triangle.h>
 #include <smp/SurfaceSample.h>
+#include <grd/HexahedronDistance.h>
 #include <ctime>
 
 namespace alo {
