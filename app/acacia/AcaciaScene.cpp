@@ -2,9 +2,7 @@
  *  AcaciaScene.cpp
  *  acacia
  *
- *  Created by jian zhang on 3/30/17.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
- *
+ *  2019/7/11
  */
 
 #include "AcaciaScene.h"
@@ -27,6 +25,8 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
 { 
     int k = content["id"].toInt();
     switch(k) {
+        case BranchTest::Type :
+            return new BranchTest;
         case MeshFusionTest::Type :
             return new MeshFusionTest;
         case SsdfTest::Type :

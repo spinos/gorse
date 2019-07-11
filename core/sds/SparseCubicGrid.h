@@ -2,7 +2,7 @@
  *  SparseCubicGrid.h
  *  gorse sds
  *
- *  cell indices of a dense 64^3 grid requires 1 Mb of storage
+ *  cell indices of a dense 64^3 grid requires memory to store 262144 of T
  *  instead, to lookup sparse value of T
  *  index is mapped to cell by L2 tree
  *  assuming there are no more than half a million nonempty cells

@@ -190,6 +190,14 @@
                     ]
                 },
                 {
+                    "id": 716943,
+                    "name": "branch_test",
+                    "label": "Branch Test",
+                    "icon": ":images/test.png",
+                    "is_element": true,
+                    "attribs" : []
+                },
+                {
                     "id": 716942,
                     "name": "mesh_fusion_test",
                     "label": "Mesh Fusion Test",

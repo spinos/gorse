@@ -12,6 +12,7 @@
 #include "InstancedTest.h"
 #include "SsdfTest.h"
 #include "MeshFusionTest.h"
+#include "BranchTest.h"
 
 namespace alo {
 
