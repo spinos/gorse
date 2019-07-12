@@ -241,7 +241,9 @@ template<typename Tr>
 void AdaptiveHexagonDistance<T>::buildGraph(const int& nv,
 										Tr& rule)
 {
-	sdb::L3Tree<sdb::Coord2, int, 2048, 512, 1024> edgeMap;
+	typedef sdb::L3Tree<sdb::Coord2, int, 2048, 512, 1024> EdgeMapTyp;
+	typedef sdb::L3Node<sdb::Coord2, int, 1024> EdgeMapBlockTyp;
+	EdgeMapTyp edgeMap;
 	
 	sdb::Coord2 ke[12];
 	
@@ -278,41 +280,14 @@ void AdaptiveHexagonDistance<T>::buildGraph(const int& nv,
 	
 	m_obslEdgeVs.clear();
 	
-	std::map<int, std::vector<int> > vvemap;
-	
-	int c = 0;
-	sdb::L3Node<sdb::Coord2, int, 1024> *edgeBlock = edgeMap.begin();
-	while(edgeBlock) {
-		for (int i=0;i<edgeBlock->count();++i) { 
-			const sdb::Coord2 &edgeI = edgeBlock->key(i);
-			int v0 = edgeI.x;
-			vvemap[v0].push_back(c);
-		
-			int v1 = edgeI.y;
-			vvemap[v1].push_back(c);
-		
-			c++;
-		}
-		edgeBlock = edgeMap.next(edgeBlock);
-	}
-	
 	std::vector<int> edgeBegins;
 	std::vector<int> edgeInds;
-	
-	int nvve = 0;
-	std::map<int, std::vector<int> >::iterator it = vvemap.begin();
-	for(;it!=vvemap.end();++it) {
-		edgeBegins.push_back(nvve);
-		
-		DFTyp::pushIndices(it->second, edgeInds);
-		nvve += (it->second).size();
-		
-		it->second.clear();
-	}
+
+	DFTyp::MapVertexEdgeIndex<EdgeMapTyp, EdgeMapBlockTyp >(edgeBegins, edgeInds, edgeMap);
 	
 	int ne = edgeMap.size();
 	int ni = edgeInds.size();
-	std::cout<<"\n n edge "<<ne;
+	std::cout<<"\n n edge "<<ne << " n ind " << ni;
 	BaseDistanceField<T>::create(nv, ne, ni);
 	
 	DistanceNode<T> *dst = DFTyp::nodes();
@@ -332,7 +307,6 @@ void AdaptiveHexagonDistance<T>::buildGraph(const int& nv,
 	DFTyp::extractEdgeBegins(edgeBegins);
 	DFTyp::extractEdgeIndices(edgeInds);
     
-    vvemap.clear();
 	edgeBegins.clear();
 	edgeInds.clear();
 	

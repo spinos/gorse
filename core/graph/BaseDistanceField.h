@@ -63,6 +63,7 @@ public:
     BaseDistanceField();
     virtual ~BaseDistanceField();
 
+    const float &nodeDistance(const int &i) const;
     const T &nodeValue(const int &i) const;
 	
 protected:	
@@ -83,9 +84,6 @@ protected:
                         const float & v,
                         bool toAccumulateFront = true);
 	void setEdgeFront(int va, int vb);
-	
-	void pushIndices(const std::vector<int> & a,
-							std::vector<int> & b) const;
 								
 /// update i-th node by shorten distance to T._pos
 	void setNodeDistanceTValue(const int& i, const T &ref,
@@ -370,16 +368,6 @@ void BaseDistanceField<T>::setEdgeFront(int va, int vb)
 }
 
 template<typename T>
-void BaseDistanceField<T>::pushIndices(const std::vector<int> & a,
-							std::vector<int> & b) const
-{
-	std::vector<int>::const_iterator it = a.begin();
-	for(;it!=a.end();++it) {
-		b.push_back(*it);
-    }
-}
-
-template<typename T>
 void BaseDistanceField<T>::setNodeDistanceTValue(const int& i, const T &ref,
 							bool toAccumulateFront)
 {
@@ -390,6 +378,10 @@ void BaseDistanceField<T>::setNodeDistanceTValue(const int& i, const T &ref,
 template<typename T>
 void BaseDistanceField<T>::setNodeTValue(const int& i, const T &x)
 { GraphTyp::nodes()[i]._tval = x; }
+
+template<typename T>
+const float &BaseDistanceField<T>::nodeDistance(const int &i) const
+{ return GraphTyp::nodes()[i].val; }
 
 template<typename T>
 const T &BaseDistanceField<T>::nodeValue(const int &i) const

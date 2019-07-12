@@ -9,13 +9,20 @@
 #include <qt_ogl/DrawableObject.h>
 #include <qt_ogl/DrawableResource.h>
 #include <sds/SpaceFillingVector.h>
+#include <sds/FZOrder.h>
+#include <sds/SparseFieldBuilder.h>
+#include <sds/SparseFieldBuildRule.h>
 #include <geom/AdaptableMesh.h>
 #include <mesh/randomRibbon.h>
 #include <rng/Lehmer.h>
 #include <rng/Uniform.h>
 #include <smp/Triangle.h>
 #include <smp/SurfaceSample.h>
-#include <grd/HexahedronDistance.h>
+#include <sds/SparseCubicField.h>
+#include <gdf/HexahedronDistanceBuilder.h>
+#include <gdf/HexahedronDistanceBuildRule.h>
+#include <sds/SparseFieldGradientLookup.h>
+#include <sds/SparseFieldGradientLookupRule.h>
 #include <ctime>
 
 namespace alo {
@@ -52,8 +59,44 @@ BranchTest::BranchTest()
         m_mesh->getTriangle<SurfaceSample, SamplerTyp >(sampler, i);
         sampler.addSamples <PntArrTyp, SampleInterp, Uniform<Lehmer> >(pnts, asmp, interp, &lmlcg);
     }
-    std::cout<<"\n n samples "<<pnts.size();
+    const int ns = pnts.size();
+    std::cout<<"\n n samples "<<ns;
     
+    sds::FZOrderCurve sfc;
+    typedef gdf::HexahedronDistanceBuildRule<sds::FZOrderCurve> FieldRuleTyp;
+    FieldRuleTyp rule(&sfc);
+    rule.setP(6);
+    rule.setBBox(shapeBox);
+    
+    typedef sds::SparseCubicField<float> FieldTyp;
+    FieldTyp field;
+    gdf::HexahedronDistanceBuilder<FieldTyp> builder;
+
+    builder.attach<FieldRuleTyp>(&field, rule);
+    builder.measure<PntArrTyp, FieldRuleTyp>(pnts, rule);    
+    builder.detach<FieldRuleTyp>(rule);
+
+    typedef sds::SparseFieldGradientLookupRule<sds::FZOrderCurve> LookupRuleTyp;
+    LookupRuleTyp lookupRule(&sfc);
+    lookupRule.setP(6);
+    lookupRule.setBBox(shapeBox);
+
+    sds::SparseFieldGradientLookup<FieldTyp> reader;
+    reader.attach(&field);
+
+    for(int i=0;i<ns;++i) {
+        const float *p = (const float *)&pnts[i]._pos;
+        reader.lookupGradient<LookupRuleTyp>(p, lookupRule);
+        if(reader.isStatusUnknown()) continue;
+
+        float d = reader.interpolate(p);
+        float g[3];
+        reader.interpolateGradient(g, p);
+        
+    }
+
+    reader.detach();
+
     DrawableResource *rec = createResource();
     setResource(rec);
 }

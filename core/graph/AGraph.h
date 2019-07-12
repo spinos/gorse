@@ -72,6 +72,13 @@ protected:
 	void setAllEdgeLength(const float& x);
 /// ind to edge by vertex i
 	int edgeIndex(const int & v1, const int & v2) const;
+
+	template<typename Tm, typename Tb>
+	static void MapVertexEdgeIndex(std::vector<int> &edgeBegins,
+					std::vector<int> &edgeInds,
+					Tm &edgeMap);
+	static void PushIndices(const std::vector<int> & a,
+					std::vector<int> & b);
 	
 private:
 	void internalClear();
@@ -306,6 +313,52 @@ int AGraph<Tn, Te>::oppositeNodeIndex(const int& v1, const int& ej) const
         v2 = eg.vi.y;
     }
     return v2;
+}
+
+template<typename Tn, typename Te>
+template<typename Tm, typename Tb>
+void AGraph<Tn, Te>::MapVertexEdgeIndex(std::vector<int> &edgeBegins,
+					std::vector<int> &edgeInds,
+					Tm &edgeMap)
+{
+	std::map<int, std::vector<int> > vvemap;
+
+	int c = 0;
+	Tb *block = edgeMap.begin();
+	while(block) {
+		for (int i=0;i<block->count();++i) { 
+			const sdb::Coord2 &edgeI = block->key(i);
+			int v0 = edgeI.x;
+			vvemap[v0].push_back(c);
+		
+			int v1 = edgeI.y;
+			vvemap[v1].push_back(c);
+		
+			c++;
+		}
+		block = edgeMap.next(block);
+	}
+
+	int nvve = 0;
+	std::map<int, std::vector<int> >::iterator it = vvemap.begin();
+	for(;it!=vvemap.end();++it) {
+		edgeBegins.push_back(nvve);
+		
+		PushIndices(it->second, edgeInds);
+		nvve += (it->second).size();
+		
+		it->second.clear();
+	}
+}
+
+template<typename Tn, typename Te>
+void AGraph<Tn, Te>::PushIndices(const std::vector<int> & a,
+							std::vector<int> & b)
+{
+	std::vector<int>::const_iterator it = a.begin();
+	for(;it!=a.end();++it) {
+		b.push_back(*it);
+    }
 }
 
 template<typename Tn, typename Te>
