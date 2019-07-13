@@ -4,9 +4,7 @@
  *
  *  surface position, normal, uv sample
  *
- *  Created by jian zhang on 4/19/19.
- *  Copyright 2018 __MyCompanyName__. All rights reserved.
- *
+ *  2019/7/13
  */
 
 #ifndef ALO_SURFACE_SAMPLE_H
@@ -59,13 +57,14 @@ struct SurfaceSample {
 	
 };
 
+template<typename T>
 struct SampleInterp {
 	
-	bool reject(const SurfaceSample& asmp ) const {
+	bool reject(const T& asmp ) const {
 		return false;
 	}
 	
-	void interpolate(SurfaceSample& asmp,
+	void interpolate(T& asmp,
 				const float* coord,
 				const int* g) const {
 	

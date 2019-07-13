@@ -189,14 +189,14 @@ void SsdfTest::buildField(FieldTyp *field, const AdaptableMesh &transient)
 	sampler.setSampleSize(ssz);
     
     SurfaceSample asmp;
-    SampleInterp interp;
+    SampleInterp<SurfaceSample> interp;
 	std::time_t secs = std::time(0);
 	Uniform<Lehmer> lmlcg(secs);
     
     const int nt = transient.numTriangles();
     for(int i=0;i<nt;++i) {
         transient.getTriangle<SurfaceSample, SamplerTyp >(sampler, i);
-        sampler.addSamples <PntArrTyp, SampleInterp, Uniform<Lehmer> >(pnts, asmp, interp, &lmlcg);
+        sampler.addSamples <PntArrTyp, SampleInterp<SurfaceSample>, Uniform<Lehmer> >(pnts, asmp, interp, &lmlcg);
     }
     
     std::cout<<"\n n samples "<<pnts.size();

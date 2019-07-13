@@ -17,7 +17,7 @@
 #include <rng/Lehmer.h>
 #include <rng/Uniform.h>
 #include <smp/Triangle.h>
-#include <smp/SurfaceSample.h>
+#include <smp/SurfaceGeodesicSample.h>
 #include <sds/SparseCubicField.h>
 #include <gdf/HexahedronDistanceBuilder.h>
 #include <gdf/HexahedronDistanceBuildRule.h>
@@ -45,19 +45,21 @@ BranchTest::BranchTest()
     const float ssz = span * .001f;
 	std::cout << "\n sample size " << ssz;
     
-    typedef smp::Triangle<SurfaceSample > SamplerTyp;
+    typedef SurfaceGeodesicSample SampleTyp;
+    typedef SampleInterp<SurfaceGeodesicSample> SampleInterpTyp;
+    typedef smp::Triangle<SampleTyp > SamplerTyp;
     SamplerTyp sampler;
 	sampler.setSampleSize(ssz);
     
-    typedef sds::SpaceFillingVector<SurfaceSample> PntArrTyp;
+    typedef sds::SpaceFillingVector<SampleTyp> PntArrTyp;
 	PntArrTyp pnts;
     
-    SurfaceSample asmp;
-    SampleInterp interp;
+    SampleTyp asmp;
+    SampleInterpTyp interp;
     const int nt = m_mesh->numTriangles();
     for(int i=0;i<nt;++i) {
-        m_mesh->getTriangle<SurfaceSample, SamplerTyp >(sampler, i);
-        sampler.addSamples <PntArrTyp, SampleInterp, Uniform<Lehmer> >(pnts, asmp, interp, &lmlcg);
+        m_mesh->getTriangle<SampleTyp, SamplerTyp >(sampler, i);
+        sampler.addSamples <PntArrTyp, SampleInterpTyp, Uniform<Lehmer> >(pnts, asmp, interp, &lmlcg);
     }
     const int ns = pnts.size();
     std::cout<<"\n n samples "<<ns;
@@ -84,16 +86,26 @@ BranchTest::BranchTest()
     sds::SparseFieldGradientLookup<FieldTyp> reader;
     reader.attach(&field);
 
+    Vector3F sum(0,0,0);
+    int nupd = 0;
+
     for(int i=0;i<ns;++i) {
         const float *p = (const float *)&pnts[i]._pos;
         reader.lookupGradient<LookupRuleTyp>(p, lookupRule);
         if(reader.isStatusUnknown()) continue;
 
-        float d = reader.interpolate(p);
-        float g[3];
-        reader.interpolateGradient(g, p);
-        
+        if(reader.isStatusUpdate()) nupd++;
+
+        pnts[i]._geod = reader.interpolate(p);
+        reader.interpolateGradient((float *)&pnts[i]._grad, p);
+
+        sum += pnts[i]._grad;
     }
+
+    sum *= 1.f / ns;
+
+    std::cout << "\n avg grad " << sum
+                << "\n n update " << nupd;
 
     reader.detach();
 
