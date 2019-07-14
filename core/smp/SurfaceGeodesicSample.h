@@ -25,6 +25,7 @@ struct SurfaceGeodesicSample {
     Vector3F _grad;
     float _geod;
     float _uv[2];
+    int _padding[2];
 	
 	void operator+=(const SurfaceGeodesicSample& b)
 	{

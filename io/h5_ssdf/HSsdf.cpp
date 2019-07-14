@@ -12,7 +12,7 @@
 namespace alo {
 
 HSsdf::HSsdf(const std::string & name) :
-HBase(name)
+ver1::HBase(name)
 {}
 
 bool HSsdf::verifyType()

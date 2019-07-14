@@ -239,8 +239,53 @@
                                     "py": 20
                                 }
                             }
-                        ]
-                    }
+                            ]
+                        },
+                        {
+                            "id": 703428,
+                            "name": "trunk_svf",
+                            "label": "Tree Trunk",
+                            "icon": ":images/tree_trunk.png",
+                            "is_element": true,
+                            "attribs" : [
+                            {
+                                "name": "bthickness",
+                                "label": "Boundary Thickness",
+                                "typ": 3,
+                                "value": 0.0,
+                                "min": 0.0,
+                                "max": 10.0
+                            },
+                            {
+                                "name": "amaxnstep",
+                                "label": "Max Step",
+                                "typ": 2,
+                                "value": 128,
+                                "min": 1,
+                                "max": 256
+                            },
+                            {
+                                "name": "cache_path",
+                                "label": "Cache File Path",
+                                "typ": 9,
+                                "strtyp": 513
+                            },
+                            {
+                                "name": "transform",
+                                "typ": 16
+                            },
+                            {
+                                "name": "outsdf",
+                                "typ": 3,
+                                "port": {
+                                    "outgoing": true,
+                                    "side": 2,
+                                    "px": 2,
+                                    "py": 20
+                                }
+                            }
+                            ]
+                        }
                     ]
                 },
                 {
