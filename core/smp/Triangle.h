@@ -1,6 +1,6 @@
 /*
  *  Triangle.h
- *  aloe  
+ *  gorse  
  *
  *  randomly sample point on triangle (A,B,C) input (r1,r2) [0,1]
  *  P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C
@@ -41,6 +41,9 @@ public:
     T* vertex();
 	int* index();
 	
+	const int* c_index() const;
+	const float* c_coord() const;
+	
 /// relative to triangle area
 	int getNumSamples() const;
 	
@@ -51,6 +54,11 @@ public:
     template<typename Ta, typename Tf, typename Tr >
 	void addSamples(Ta& arr, T& samp, Tf& finterp, Tr* prng);
     
+protected:
+    
+    template<typename Tr>
+    void setCoord(Tr* prng);
+
 };
 
 template<typename T>
@@ -93,17 +101,7 @@ template<typename T>
 template<typename Tf, typename Tr>
 bool Triangle<T>::sampleTriangle(T& samp, Tf& finterp, Tr* prng)
 {
-	const float* r1r2 = Halton::Rand2(prng);
-
-	float r1 = r1r2[0];
-	float r2 = r1r2[1];
-	
-	r1 = sqrt(r1);
-	
-	m_coord[0] = 1.f - r1;
-	m_coord[1] = r1 * (1.f - r2);
-	m_coord[2] = r1 * r2;
-	
+	setCoord<Tr>(prng);
     samp = m_v[0] * m_coord[0] 
 				+ m_v[1] * m_coord[1] 
 				+ m_v[2] * m_coord[2];
@@ -133,6 +131,30 @@ void Triangle<T>::addSamples(Ta& arr, T& samp, Tf& finterp, Tr* prng)
 		n--;
 	}
 }
+
+template<typename T>
+template<typename Tr>
+void Triangle<T>::setCoord(Tr* prng)
+{
+    const float* r1r2 = Halton::Rand2(prng);
+
+	float r1 = r1r2[0];
+	float r2 = r1r2[1];
+	
+	r1 = sqrt(r1);
+	
+	m_coord[0] = 1.f - r1;
+	m_coord[1] = r1 * (1.f - r2);
+	m_coord[2] = r1 * r2;
+}
+
+template<typename T>
+const int* Triangle<T>::c_index() const
+{ return m_ind; }
+
+template<typename T>
+const float* Triangle<T>::c_coord() const
+{ return m_coord; }
 
 }
 

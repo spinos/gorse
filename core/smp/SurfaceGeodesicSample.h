@@ -1,6 +1,6 @@
 /*
  *  SurfaceGeodesicSample.h
- *  aloe
+ *  gorse
  *
  *  surface position, normal, uv
  *  geodesic_distance and its gradient sample
