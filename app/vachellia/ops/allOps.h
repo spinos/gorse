@@ -8,6 +8,7 @@
 #include "HorizonOps.h"
 #include "VoxelOps.h"
 #include "TrunkOps.h"
+#include "CanopyOps.h"
 #include "UnionOps.h"
 #include "RepeatOps.h"
 
