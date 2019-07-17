@@ -27,8 +27,8 @@ public:
 	template<typename T>
 	bool save(const T& sampleArray);
 	
-	//template<typename T>
-	//bool load(T& field);
+	template<typename T>
+	bool load(T* y);
 	
 protected:
 
@@ -47,7 +47,7 @@ bool HSurfaceGeodesicSample::save(const T& sampleArray)
     bool stat;
     GeodData *smpd = createDataStorage<GeodData>(".smps", true, stat);
     if(!stat) {
-    	std::cout << "\n ERROR HSurfaceGeodesicSample cannot create ooc storage coarse";
+    	std::cout << "\n ERROR HSurfaceGeodesicSample cannot create ooc storage smp";
     	return false;
     }
     
@@ -64,8 +64,28 @@ bool HSurfaceGeodesicSample::save(const T& sampleArray)
     }
     
     delete smpd;
-    
+    std::cout << "\n HSurfaceGeodesicSample saved n sample " << n;
     return true;
+}
+
+template<typename T>
+bool HSurfaceGeodesicSample::load(T* y)
+{
+	int n = 0;
+	readIntAttr(".is_surf_geod_sample", &n );
+	y->create(n);
+	
+	bool stat;
+    GeodData *smpd = openDataStorage<GeodData>(".smps", stat);
+    if(!stat) {
+    	std::cout << "\n ERROR HSurfaceGeodesicSample cannot open ooc storage smp";
+    	return false;
+    }
+	
+	smpd->readColumns((char *)y->samples(), 0, n);
+	delete smpd;
+	std::cout<<"\n HSurfaceGeodesicSample load "<<pathToObject();
+	return true;
 }
    
 }

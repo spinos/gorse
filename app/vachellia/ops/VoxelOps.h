@@ -77,9 +77,11 @@ public:
     virtual void genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const override;
     
 protected:
-    
+
+    virtual bool loadSsdfCache(const std::string &fileName);
+	
 private:
-    bool loadCache(const std::string &fileName);
+    
     
 };
 

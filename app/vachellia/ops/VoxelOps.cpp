@@ -73,7 +73,7 @@ void VoxelOps::update()
     std::string scachePath;
     fcp->getValue(scachePath);
     if(m_cachePath != scachePath && scachePath.size() > 3)
-        loadCache(scachePath);
+        loadSsdfCache(scachePath);
 
     m_primitiveLookup->setAllRelativeBoundaryOffset(boundary);
 
@@ -83,7 +83,7 @@ void VoxelOps::update()
 AFileDlgProfile *VoxelOps::readFileProfileR () const
 { return &SReadProfile; }
 
-bool VoxelOps::loadCache(const std::string &fileName)
+bool VoxelOps::loadSsdfCache(const std::string &fileName)
 {    
     qDebug()<< " load cache "<<QString::fromStdString(fileName);
     m_primitiveLookup->clear();
@@ -105,9 +105,8 @@ bool VoxelOps::loadCache(const std::string &fileName)
     progress.show();
 
     stat = hio.ObjectExists("/asset");
-    int nfld = 0;
     if(stat) {
-
+		int nfld = 0;
         std::vector<std::string> fldNames;
         std::string grdName;
 
