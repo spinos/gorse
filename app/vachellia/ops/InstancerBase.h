@@ -97,12 +97,18 @@ protected:
     void updateInstancer(RenderableScene *scene, bool isAppending);
     void setLookupMaxNumSteps(int x);
     void loadInstanceRecord(grd::InstanceRecord &rec);
-
+/// met the condition to scatter 
+    bool isInstancerReady() const;
+/// scattered
+    bool isInstancerComplete() const;
     bool isInstancerActivated() const;
     const BoundingBox &instancerAabb() const;
     int numInputRenderables() const;
     const int &numInstancedObjects() const;
+    const int &numInstances() const;
     const RenderableOps *inputRenderable(int i) const;
+
+    QString getInputRenderablesDescription() const;
     
 private:
     void updateInstancerInProgress(bool isAppending);

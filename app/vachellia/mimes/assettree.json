@@ -298,7 +298,7 @@
                             "id": 800003,
                             "name": "canopy_sdf",
                             "label": "Canopy",
-                            "icon": ":images/unknown.png",
+                            "icon": ":images/canopy.png",
                             "is_element": true,
                             "attribs" : [
                                 {

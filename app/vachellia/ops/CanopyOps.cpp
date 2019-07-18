@@ -54,7 +54,7 @@ void CanopyOps::setActivated(bool x)
 {
     RenderableOps::resetAabb();
     setInstancerActivated(renderableScene(), x);
-    if(x)
+    if(x && isInstancerComplete())
        memcpy(RenderableObject::aabb(), &instancerAabb(), 24); 
 }
 
@@ -109,11 +109,7 @@ QString CanopyOps::getShortDescription() const
 {
     const int nobjs = numInputRenderables();
     QString r = QString("canopy of %1 objs").arg(nobjs);
-    for(int i=0;i<nobjs;++i) {
-        const RenderableOps *e = inputRenderable(i);
-        QString dspn = QString::fromStdString(e->displayName());
-        r = r + QString("\n obj[%1]: %2").arg(QString::number(i), dspn);
-    }
+    if(nobjs > 0) r = r + getInputRenderablesDescription();
     r = r + QString("\n Not Ready");
     return r;
 }

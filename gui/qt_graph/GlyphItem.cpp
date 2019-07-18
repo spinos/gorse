@@ -258,6 +258,8 @@ void GlyphItem::endEditState(QGraphicsItem *item)
     if(item == m_activation) {
 		m_activation->endEditState();
 		m_ops->setActivated(m_activation->isStateEnabled());
+		const bool stat = m_ops->getActivatedState();
+		m_activation->setStateActivated(stat);
 	}
 	genToolTip();
 }

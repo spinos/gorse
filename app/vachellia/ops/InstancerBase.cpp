@@ -136,10 +136,21 @@ void InstancerBase::updateInstancerInProgress(bool isAppending)
 }
 
 void InstancerBase::setInstancerActivated(RenderableScene *scene, bool x)
-{    
-    m_isActive =x; 
-    if(m_isActive) updateInstancer(scene, false);
+{
+    if(x) updateInstancer(scene, false);
+    if(x) m_isActive = isInstancerComplete(); 
+    else m_isActive = x; 
 }
+
+bool InstancerBase::isInstancerReady() const
+{
+    if(m_instancer->numInstances() < 1) return false;
+    if(m_instancer->numInstancedObjects() < 1) return false;
+    return m_inOps.numElements() >= m_instancer->numInstancedObjects(); 
+}
+
+bool InstancerBase::isInstancerComplete() const
+{ return !m_worldLookupRule->isEmpty(); }
 
 bool InstancerBase::isInstancerActivated() const
 { return m_isActive; }
@@ -155,6 +166,9 @@ int InstancerBase::numInputRenderables() const
 
 const int &InstancerBase::numInstancedObjects() const
 { return m_instancer->numInstancedObjects(); }
+
+const int &InstancerBase::numInstances() const
+{ return m_instancer->numInstances(); }
 
 const RenderableOps *InstancerBase::inputRenderable(int i) const
 { return m_inOps.element(i); }
@@ -172,7 +186,18 @@ void InstancerBase::loadInstanceRecord(grd::InstanceRecord &rec)
 
     m_instancer->setNumInstancedObjects(rec.numObjects());
     m_instancer->setMinimumCellSize(rec.getMinimumCellSize());
-    
+}
+
+QString InstancerBase::getInputRenderablesDescription() const
+{
+    const int nobjs = numInputRenderables();
+    QString r;
+    for(int i=0;i<nobjs;++i) {
+        const RenderableOps *e = inputRenderable(i);
+        QString dspn = QString::fromStdString(e->displayName());
+        r = r + QString("\n obj[%1]: %2").arg(QString::number(i), dspn);
+    }
+    return r;
 }
 
 } /// end of alo

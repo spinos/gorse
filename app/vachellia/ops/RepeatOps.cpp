@@ -140,14 +140,6 @@ bool RepeatOps::loadInstanceFile(const std::string &fileName)
 bool RepeatOps::hasEnable() const
 { return true; }
 
-void RepeatOps::setActivated(bool x)
-{ 
-    RenderableOps::resetAabb();
-    setInstancerActivated(renderableScene(), x);
-    if(x)
-       memcpy(RenderableObject::aabb(), &instancerAabb(), 24); 
-}
-
 AFileDlgProfile RepeatOps::SReadProfile(AFileDlgProfile::FRead,
         "Choose File To Open",
         ":images/open_big.png",
@@ -163,15 +155,11 @@ AFileDlgProfile *RepeatOps::readFileProfileR () const
 QString RepeatOps::getShortDescription() const
 {
     const int nobjs = numInputRenderables();
-    QString r = QString("repeat of %1 objs").arg(nobjs);
-    for(int i=0;i<nobjs;++i) {
-        const RenderableOps *e = inputRenderable(i);
-        QString dspn = QString::fromStdString(e->displayName());
-        r = r + QString("\n obj[%1]: %2").arg(QString::number(i), dspn);
-    }
+    QString r = QString("repeat %1 objs").arg(nobjs);
+    if(nobjs > 0) r = r + getInputRenderablesDescription();
     r = r + QString("\n instance file: %1").arg(QString::fromStdString(m_instanceFilePath));
-    const int ninst = numInstancedObjects();
-    if(ninst > 0 && nobjs >= ninst) 
+    r = r + QString("\n %1 instances").arg(QString::number(numInstances()));
+    if(isInstancerReady()) 
         r = r + QString("\n Ready");
     else
         r = r + QString("\n Not Ready");
@@ -180,5 +168,13 @@ QString RepeatOps::getShortDescription() const
 
 bool RepeatOps::getActivatedState() const
 { return isInstancerActivated(); }
+
+void RepeatOps::setActivated(bool x)
+{
+    RenderableOps::resetAabb();
+    setInstancerActivated(renderableScene(), x);
+    if(x && isInstancerComplete())
+       memcpy(RenderableObject::aabb(), &instancerAabb(), 24); 
+}
 
 } /// end of alo
