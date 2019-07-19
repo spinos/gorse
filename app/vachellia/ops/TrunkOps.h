@@ -11,13 +11,6 @@
 #include "VoxelOps.h"
 
 namespace alo {
-	
-struct SurfaceGeodesicSample;
-	
-namespace smp {
-template<typename T>
-class SampleFilter;
-}
 
 class TrunkOps : public VoxelOps {
 	
@@ -36,7 +29,8 @@ public:
     virtual bool hasGeodesicSamples() const override;
 	virtual AFileDlgProfile *readFileProfileR() const override;
 	virtual QString getShortDescription() const override;
-	
+	virtual const smp::SampleFilter<SurfaceGeodesicSample> *getGeodesicSamples() const override;
+    
 protected:
     
 	virtual bool loadSsdfCache(const std::string &fileName) override;

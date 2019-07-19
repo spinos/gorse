@@ -7,6 +7,11 @@
  
 #include "BranchInstancer.h"
 #include <grd/ObjectInstancer.h>
+#include <smp/SurfaceGeodesicSample.h>
+#include <smp/SampleFilter.h>
+#include <smp/GeodesicSampleRule.h>
+#include <rng/Lehmer.h>
+#include <rng/Uniform.h>
 
 namespace alo {
     
@@ -30,17 +35,41 @@ bool BranchInstancer::isInstancerReady() const
 void BranchInstancer::synthesizeBranchInstances()
 {
     std::cout << "\n BranchInstancer::synthesizeBranchInstances ";
+    
+    int t = selectATrunk();
+    const RenderableOps *top = inputRenderable(t);
+    const smp::SampleFilter<SurfaceGeodesicSample> *filter = top->getGeodesicSamples();
+    if(!filter) {
+        std::cout << "\n ERROR not a trunk ";
+        return;
+    }
+    
+    int nsel = 100;
+    int sd = 7654321;
+    Uniform<Lehmer> lmlcg(sd);
+    
+    typedef GeodesicSampleRule<SurfaceGeodesicSample, Uniform<Lehmer> > GeodRuleTyp;
+    GeodRuleTyp rule;
+    rule.setRng(&lmlcg);
+    rule.setMaxNumSelected(nsel);
+    const int ns = filter->numSamples();
+    rule.setAcceptRatio(filter->c_samples(), ns);
+    
+    SimpleBuffer<SurfaceGeodesicSample> subset;
+    filter->drawSamples<GeodRuleTyp>(subset, rule);
 
-    const int n = 100;
+    const int n = subset.count();
     createInstances(n);
     for(int i=0;i<n;++i) {
         int j = selectABranch();
-        int t = selectATrunk();
         
         grd::TestInstance &inst = instance(i);
         inst.setObjectId(j);
+        
         Matrix44F tm;
-        tm.setTranslation(Vector3F(19.f * i, 0.f, 0.f));
+        
+        const SurfaceGeodesicSample &si = subset[i];
+        tm.setTranslation(si._pos);
         inst.setSpace(tm);
         
     }

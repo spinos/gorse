@@ -30,9 +30,14 @@ public:
 	void clear();
 	
 	T *samples();
+    const T *c_samples() const;
 	
 	const int &numSamples() const;
     
+/// take a subset of the data by rule Tr
+    template<typename Tr>
+    void drawSamples(SimpleBuffer<T> &subset, Tr &rule) const;
+
 protected:
     
 private:
@@ -60,8 +65,26 @@ T *SampleFilter<T>::samples()
 { return m_samples.data(); }
 
 template<typename T>
+const T *SampleFilter<T>::c_samples() const
+{ return m_samples.c_data(); }
+
+template<typename T>
 const int &SampleFilter<T>::numSamples() const
 { return m_samples.count(); }
+
+template<typename T>
+template<typename Tr>
+void SampleFilter<T>::drawSamples(SimpleBuffer<T> &subset, Tr &rule) const
+{
+    const int n = numSamples();
+    for(int i=0;i<n;++i) {
+        const T &si = m_samples[i];
+        if(rule.accept(si))
+            subset << si;
+        if(rule.finished())
+            return;
+    }
+}
 
 }
     

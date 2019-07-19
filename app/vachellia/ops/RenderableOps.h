@@ -14,6 +14,13 @@
 
 namespace alo {
     
+struct SurfaceGeodesicSample;
+	
+namespace smp {
+template<typename T>
+class SampleFilter;
+}
+    
 class RenderableScene;
 
 class RenderableOps : public GlyphOps, public RenderableObject
@@ -41,7 +48,9 @@ public:
 	virtual void genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const = 0;
     
     virtual bool getVisibleState() const override;
-
+    
+    virtual const smp::SampleFilter<SurfaceGeodesicSample> *getGeodesicSamples() const;
+    
 protected:
     void setRenderableScene(RenderableScene *x);
     RenderableScene *renderableScene();

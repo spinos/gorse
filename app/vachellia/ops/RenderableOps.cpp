@@ -38,4 +38,7 @@ bool RenderableOps::getVisibleState() const
 RenderableScene *RenderableOps::renderableScene()
 { return m_scene; }
 
+const smp::SampleFilter<SurfaceGeodesicSample> *RenderableOps::getGeodesicSamples() const
+{ return nullptr; }
+
 } /// end of alo

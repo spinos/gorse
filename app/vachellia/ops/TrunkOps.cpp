@@ -93,4 +93,7 @@ QString TrunkOps::getShortDescription() const
 bool TrunkOps::hasGeodesicSamples() const
 { return m_geodesicSamples->numSamples() > 0; }
 
-} /// end of namespace alo
+const smp::SampleFilter<SurfaceGeodesicSample> *TrunkOps::getGeodesicSamples() const
+{ return m_geodesicSamples; }
+
+} /// end of alo
