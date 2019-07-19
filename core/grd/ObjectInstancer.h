@@ -19,6 +19,7 @@
 #include <rng/Lehmer.h>
 #include <rng/Uniform.h>
 #include "GridSamples.h"
+#include <math/Int2.h>
 
 namespace alo {
 

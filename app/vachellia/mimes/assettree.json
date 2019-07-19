@@ -314,7 +314,17 @@
                                     "typ": 16
                                 },
                                 {
-                                    "name": "insdf",
+                                    "name": "inbranchsdf",
+                                    "typ": 3,
+                                    "port": {
+                                        "outgoing": false,
+                                        "side": 1,
+                                        "px": -2,
+                                        "py": -10
+                                    }
+                                },
+								{
+                                    "name": "intrunksdf",
                                     "typ": 3,
                                     "port": {
                                         "outgoing": false,

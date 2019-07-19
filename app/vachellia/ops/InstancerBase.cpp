@@ -176,16 +176,27 @@ const RenderableOps *InstancerBase::inputRenderable(int i) const
 void InstancerBase::loadInstanceRecord(grd::InstanceRecord &rec)
 {
     const int &n = rec.numInstances();
-    m_instancer->createInstances(n);
+    createInstances(n);
     
     for(int i=0;i<n;++i) {
-        grd::TestInstance &ti = m_instancer->instance(i);
+        grd::TestInstance &ti = instance(i);
         ti.setObjectId(rec.inds()[i]);
         ti.setSpace(rec.tms()[i]);
     }
+	
+	setInstancedObjectCountAndSize(rec.numObjects(), rec.getMinimumCellSize());
+}
 
-    m_instancer->setNumInstancedObjects(rec.numObjects());
-    m_instancer->setMinimumCellSize(rec.getMinimumCellSize());
+void InstancerBase::createInstances(int count)
+{ m_instancer->createInstances(count); }
+
+grd::TestInstance &InstancerBase::instance(int i)
+{ return m_instancer->instance(i); }
+
+void InstancerBase::setInstancedObjectCountAndSize(int count, float size)
+{
+	m_instancer->setNumInstancedObjects(count);
+    m_instancer->setMinimumCellSize(size);
 }
 
 QString InstancerBase::getInputRenderablesDescription() const

@@ -95,6 +95,9 @@ float CylinderOps::mapLocalDistance(const float *q) const
 bool CylinderOps::hasInstance() const
 { return true; }
 
+bool CylinderOps::hasGeodesicSamples() const
+{ return false; }
+
 void CylinderOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     m_outOps.append(line);

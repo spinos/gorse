@@ -29,7 +29,8 @@ public:
     virtual void addRenderableTo(RenderableScene *scene) override;
 
     virtual bool hasInstance() const override;
-
+    virtual bool hasGeodesicSamples() const override;
+    
     virtual void update() override;
     
     virtual void connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;

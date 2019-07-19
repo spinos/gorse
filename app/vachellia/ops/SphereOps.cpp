@@ -94,6 +94,9 @@ float SphereOps::mapLocalDistance(const float *q) const
 bool SphereOps::hasInstance() const
 { return true; }
 
+bool SphereOps::hasGeodesicSamples() const
+{ return false; }
+
 void SphereOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
 {
     grd::PointSample ap;

@@ -91,6 +91,9 @@ Vector3F ConeOps::mapNormal(const float *q) const
 bool ConeOps::hasInstance() const
 { return true; }
 
+bool ConeOps::hasGeodesicSamples() const
+{ return false; }
+
 void ConeOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     m_outOps.append(line);

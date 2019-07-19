@@ -33,6 +33,7 @@ public:
     virtual ~TrunkOps();
 
     virtual std::string opsName() const override;
+    virtual bool hasGeodesicSamples() const override;
 	virtual AFileDlgProfile *readFileProfileR() const override;
 	virtual QString getShortDescription() const override;
 	
@@ -47,4 +48,3 @@ private:
 } /// end of namespace alo
 
 #endif
-

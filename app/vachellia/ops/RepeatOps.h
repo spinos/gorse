@@ -30,6 +30,7 @@ public:
     virtual void addRenderableTo(RenderableScene *scene) override;
 
     virtual bool hasInstance() const override;
+    virtual bool hasGeodesicSamples() const override;
     virtual bool hasEnable() const override;
     virtual void update() override;
     virtual void setActivated(bool x) override;

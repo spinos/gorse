@@ -31,6 +31,7 @@ public:
 	virtual void removeRenderableFromScene();
 
     virtual bool hasInstance() const = 0;
+    virtual bool hasGeodesicSamples() const = 0;
     
     virtual void expandAabb(float *box) const = 0;
     virtual float mapDistance(const float *q) const = 0;

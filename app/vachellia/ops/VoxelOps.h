@@ -61,7 +61,8 @@ public:
     virtual void addRenderableTo(RenderableScene *scene) override;
 
     virtual bool hasInstance() const override;
-
+    virtual bool hasGeodesicSamples() const override;
+    
     virtual void update() override;
     virtual AFileDlgProfile *readFileProfileR () const override;
     

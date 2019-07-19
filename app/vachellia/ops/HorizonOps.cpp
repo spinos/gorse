@@ -69,6 +69,9 @@ float HorizonOps::radiusInMeters() const
 bool HorizonOps::hasInstance() const
 { return false; }
 
+bool HorizonOps::hasGeodesicSamples() const
+{ return false; }
+
 float HorizonOps::mapLocalDistance(const float *q) const
 { return mapDistance(q); }
 

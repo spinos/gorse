@@ -47,12 +47,18 @@ void CanopyOps::update()
 bool CanopyOps::hasInstance() const
 { return false; }
 
+bool CanopyOps::hasGeodesicSamples() const
+{ return false; }
+
 bool CanopyOps::hasEnable() const
 { return true; }
 
 void CanopyOps::setActivated(bool x)
 {
     RenderableOps::resetAabb();
+	if(x && isInstancerReady())
+		synthesizeBranchInstances();
+
     setInstancerActivated(renderableScene(), x);
     if(x && isInstancerComplete())
        memcpy(RenderableObject::aabb(), &instancerAabb(), 24); 
@@ -86,23 +92,34 @@ bool CanopyOps::intersectRay(IntersectResult& result) const
 
 bool CanopyOps::canConnectTo(GlyphOps *another, const std::string &portName) const
 { 
+	const int portId = IdentifyInput(portName);
+
     if(!another->hasRenderable()) return false;
     RenderableOps *r = static_cast<RenderableOps *>(another);
-    if(!r->hasInstance()) return false;
     if(hasInputRenderable(r)) return false;
-    return true;
+	
+	if(portId == inBranch) return (r->hasInstance() && !r->hasGeodesicSamples());
+	if(portId == inTrunk) return (r->hasInstance() && r->hasGeodesicSamples());
+	
+    return false;
 }
 
 void CanopyOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
-    RenderableOps *r = static_cast<RenderableOps *>(another);
-    appendInputRenderable(r);
+	const int portId = IdentifyInput(portName);
+	RenderableOps *r = static_cast<RenderableOps *>(another);
+	if(portId == inBranch || portId == inTrunk) {
+		appendInputRenderable(r);
+	}
 }
 
 void CanopyOps::disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
+	const int portId = IdentifyInput(portName);
     RenderableOps *r = static_cast<RenderableOps *>(another);
-    removeInputRenderable(r);
+    if(portId == inBranch || portId == inTrunk) {
+		removeInputRenderable(r);
+	}
 }
 
 QString CanopyOps::getShortDescription() const
@@ -110,8 +127,19 @@ QString CanopyOps::getShortDescription() const
     const int nobjs = numInputRenderables();
     QString r = QString("canopy of %1 objs").arg(nobjs);
     if(nobjs > 0) r = r + getInputRenderablesDescription();
-    r = r + QString("\n Not Ready");
+    if(isInstancerReady()) 
+        r = r + QString("\n Ready");
+    else
+        r = r + QString("\n Not Ready");
     return r;
+}
+	
+int CanopyOps::IdentifyInput(const std::string &name)
+{
+	if(name == "inbranchsdf") return inBranch;
+	if(name == "intrunksdf") return inTrunk;
+	if(name == "interrainsdf") return inTerrain;
+	return inUnknown;
 }
 
 } /// end of alo

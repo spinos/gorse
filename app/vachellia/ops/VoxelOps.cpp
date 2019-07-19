@@ -243,6 +243,9 @@ float VoxelOps::mapLocalDistance(const float *q) const
 bool VoxelOps::hasInstance() const
 { return true; }
 
+bool VoxelOps::hasGeodesicSamples() const
+{ return false; }
+
 void VoxelOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
 {
     if(m_gridRule->isEmpty() )
@@ -253,7 +256,7 @@ void VoxelOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) co
 
 QString VoxelOps::getShortDescription() const
 {
-    return QString("voxle file %1").arg(QString::fromStdString(m_cachePath)); 
+    return QString(" file %1").arg(QString::fromStdString(m_cachePath)); 
 }
 
 } /// end of namespace alo

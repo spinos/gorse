@@ -168,6 +168,9 @@ void UnionOps::combineInputs()
 bool UnionOps::hasInstance() const
 { return false; }
 
+bool UnionOps::hasGeodesicSamples() const
+{ return false; }
+
 QString UnionOps::getShortDescription() const
 {
     QString r = QString("union of %1 objs").arg(m_inOps.numElements());

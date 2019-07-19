@@ -90,4 +90,7 @@ QString TrunkOps::getShortDescription() const
     return r + QString("\n n geodesic sample %1").arg(m_geodesicSamples->numSamples()); 
 }
 
+bool TrunkOps::hasGeodesicSamples() const
+{ return m_geodesicSamples->numSamples() > 0; }
+
 } /// end of namespace alo

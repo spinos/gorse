@@ -9,11 +9,11 @@
 #define VCHL_CANOPY_OPS_H
 
 #include "TransformOps.h"
-#include "InstancerBase.h"
+#include "BranchInstancer.h"
 
 namespace alo {
 
-class CanopyOps : public TransformOps, public InstancerBase {
+class CanopyOps : public TransformOps, public BranchInstancer {
 
 public:
 	enum { Type = 800003 };
@@ -25,6 +25,7 @@ public:
     virtual void addRenderableTo(RenderableScene *scene) override;
     virtual void update() override;
     virtual bool hasInstance() const override;
+	virtual bool hasGeodesicSamples() const override;
     virtual bool hasEnable() const override;
     virtual bool getActivatedState() const override;
     virtual void setActivated(bool x) override;
@@ -37,7 +38,15 @@ public:
 protected:
     
 private:
-    
+    enum InputIdentity {
+		inUnknown = 0,
+		inBranch,
+		inTrunk,
+		inTerrain
+	};
+	
+	static int IdentifyInput(const std::string &name);
+	
 };
 
 }

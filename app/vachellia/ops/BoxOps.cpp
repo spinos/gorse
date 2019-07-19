@@ -52,6 +52,9 @@ void BoxOps::update()
 bool BoxOps::hasInstance() const
 { return true; }
 
+bool BoxOps::hasGeodesicSamples() const
+{ return false; }
+
 void BoxOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     m_outOps.append(line);

@@ -109,6 +109,9 @@ void RepeatOps::disconnectFrom(GlyphOps *another, const std::string &portName, G
 bool RepeatOps::hasInstance() const
 { return false; }
 
+bool RepeatOps::hasGeodesicSamples() const
+{ return false; }
+
 bool RepeatOps::loadInstanceFile(const std::string &fileName)
 {
     grd::InstanceRecord rec;

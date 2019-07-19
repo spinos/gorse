@@ -2,7 +2,7 @@
  *  InstancerBase.h
  *  vachellia
  *
- *  scattering input ops
+ *  scattering input renderables
  *
  *  2019/7/18
  */
@@ -97,8 +97,12 @@ protected:
     void updateInstancer(RenderableScene *scene, bool isAppending);
     void setLookupMaxNumSteps(int x);
     void loadInstanceRecord(grd::InstanceRecord &rec);
+	void createInstances(int count);
+/// i-th instance
+	grd::TestInstance &instance(int i);
+	void setInstancedObjectCountAndSize(int count, float size);
 /// met the condition to scatter 
-    bool isInstancerReady() const;
+    virtual bool isInstancerReady() const;
 /// scattered
     bool isInstancerComplete() const;
     bool isInstancerActivated() const;
