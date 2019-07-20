@@ -15,10 +15,11 @@ class GeodesicSampleRule {
 
 	T m_pre;
 	Trng *m_rng;
+	int m_dataSize;
 	int m_numSelected;
 /// size of subset much smaller than size of data
 	int m_maxNumSelected;
-	float m_cellRatio;
+	float m_maxGeod;
 
 public:
 
@@ -31,8 +32,8 @@ public:
 /// max_n_sel / n_cell
 /// after set max_n_sel
 	void setAcceptRatio(const T *data, const int &n);
-
-	bool accept(const T &x);
+/// i-th sample in data
+	bool accept(const T &x, const int &i);
 
 	bool finished() const;
 
@@ -45,9 +46,10 @@ private:
 template<typename T, typename Trng>
 GeodesicSampleRule<T, Trng>::GeodesicSampleRule() :
 m_rng(nullptr),
+m_dataSize(0),
 m_numSelected(0),
 m_maxNumSelected(100),
-m_cellRatio(.5f)
+m_maxGeod(0.f)
 {}
 
 template<typename T, typename Trng>
@@ -65,6 +67,7 @@ void GeodesicSampleRule<T, Trng>::setMaxNumSelected(int x)
 template<typename T, typename Trng>
 void GeodesicSampleRule<T, Trng>::setAcceptRatio(const T *data, const int &n)
 {
+	m_maxGeod = 0;
 	int preK = -1;
 	int nCell = 0;
 	for(int i=0;i<n;++i) {
@@ -72,12 +75,14 @@ void GeodesicSampleRule<T, Trng>::setAcceptRatio(const T *data, const int &n)
 			preK = data[i]._key;
 			nCell++;
 		}
+		
+		if(m_maxGeod < data[i]._geod)
+			m_maxGeod = data[i]._geod;
 	}
+	std::cout << "\n n cell " << nCell
+				<< "\n max geodesic distance " << m_maxGeod;
 
-	int samplesPerCell = n / nCell;
-
-	m_cellRatio = (float)m_maxNumSelected / (float)nCell;
-
+	m_dataSize = n;
 }
 
 template<typename T, typename Trng>
@@ -85,14 +90,33 @@ bool GeodesicSampleRule<T, Trng>::finished() const
 { return m_numSelected >= m_maxNumSelected; }
 
 template<typename T, typename Trng>
-bool GeodesicSampleRule<T, Trng>::accept(const T &x)
-{ 
+bool GeodesicSampleRule<T, Trng>::accept(const T &x, const int &i)
+{
+	const float acceptRatio = (float)(m_maxNumSelected - m_numSelected) / (float)(m_dataSize - i) * 6.f;
+	
+	if(m_rng->randf1() > acceptRatio) return false;
+	
+	if(x._geod < m_maxGeod * .33f)
+		return false;
+	
+	if(x._nml.y < -.1f)
+		return false;
+	
+	if(x._grad.y < -.1f)
+		return false;
+	
+	if(x._nml.cross(x._grad).length() < .7f)
+		return false;
+		
 	if(m_numSelected > 0) {
-
-
+		if(x._pos.distanceTo(m_pre._pos) < 2.f) 
+			return false;
+		if(Absolute<float>(x._geod - m_pre._geod) <  2.f)
+			return false;
 	}
 
 	m_pre = x;
+	m_numSelected++;
 	return true;
 }
 

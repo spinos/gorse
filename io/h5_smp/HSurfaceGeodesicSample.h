@@ -11,6 +11,7 @@
 #include <h5/V1HBase.h>
 #include <math/miscfuncs.h>
 #include <h5/HOocArray.h>
+#include <math/roundi.h>
 
 namespace alo {
    
@@ -52,7 +53,7 @@ bool HSurfaceGeodesicSample::save(const T& sampleArray)
     }
     
     char transient[4096];
-    const int nw = n / 64;
+    const int nw = Round64(n) / 64;
     for(int i=0;i<nw;++i) {
         const int offset = i * 64;
         for(int j=0;j<64;++j) {

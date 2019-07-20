@@ -79,8 +79,9 @@ void SampleFilter<T>::drawSamples(SimpleBuffer<T> &subset, Tr &rule) const
     const int n = numSamples();
     for(int i=0;i<n;++i) {
         const T &si = m_samples[i];
-        if(rule.accept(si))
+        if(rule.accept(si, i))
             subset << si;
+		
         if(rule.finished())
             return;
     }

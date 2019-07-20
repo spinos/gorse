@@ -44,7 +44,7 @@ void BranchInstancer::synthesizeBranchInstances()
         return;
     }
     
-    int nsel = 100;
+    int nsel = 400;
     int sd = 7654321;
     Uniform<Lehmer> lmlcg(sd);
     
@@ -59,22 +59,29 @@ void BranchInstancer::synthesizeBranchInstances()
     filter->drawSamples<GeodRuleTyp>(subset, rule);
 
     const int n = subset.count();
+	std::cout << "\n n subset " << n;
     createInstances(n);
     for(int i=0;i<n;++i) {
         int j = selectABranch();
         
         grd::TestInstance &inst = instance(i);
         inst.setObjectId(j);
-        
-        Matrix44F tm;
-        
+
         const SurfaceGeodesicSample &si = subset[i];
+		
+		Matrix44F tm;
+		Vector3F up = si._grad;
+		Vector3F front = si._nml;
+		Vector3F side = up.cross(front); side.normalize();
+		up = front.cross(side); up.normalize();
+		
         tm.setTranslation(si._pos);
+		tm.setOrientations(side, up, front);
         inst.setSpace(tm);
         
     }
     
-    setInstancedObjectCountAndSize(1, 9.f);
+    setInstancedObjectCountAndSize(1, 10.f);
 }
 
 int BranchInstancer::selectABranch()
