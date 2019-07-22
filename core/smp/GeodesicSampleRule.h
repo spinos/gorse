@@ -36,6 +36,8 @@ public:
 	bool accept(const T &x, const int &i);
 
 	bool finished() const;
+	
+	void getPitchAndRoll(float &pitch, float &rollAngle, const T &x);
 
 protected:
 
@@ -92,6 +94,9 @@ bool GeodesicSampleRule<T, Trng>::finished() const
 template<typename T, typename Trng>
 bool GeodesicSampleRule<T, Trng>::accept(const T &x, const int &i)
 {
+/// same cell exclusion
+	if(x._key == m_pre._key) return false;
+	
 	const float acceptRatio = (float)(m_maxNumSelected - m_numSelected) / (float)(m_dataSize - i) * 6.f;
 	
 	if(m_rng->randf1() > acceptRatio) return false;
@@ -105,10 +110,13 @@ bool GeodesicSampleRule<T, Trng>::accept(const T &x, const int &i)
 	if(x._grad.y < -.1f)
 		return false;
 	
-	if(x._nml.cross(x._grad).length() < .7f)
+/// normal-binormal check
+	if(x._nml.dot(x._grad.normal()) > .3f)
 		return false;
 		
 	if(m_numSelected > 0) {
+		if(x._nml.dot(m_pre._nml) > .9f)
+			return false;
 		if(x._pos.distanceTo(m_pre._pos) < 2.f) 
 			return false;
 		if(Absolute<float>(x._geod - m_pre._geod) <  2.f)
@@ -118,6 +126,14 @@ bool GeodesicSampleRule<T, Trng>::accept(const T &x, const int &i)
 	m_pre = x;
 	m_numSelected++;
 	return true;
+}
+
+template<typename T, typename Trng>
+void GeodesicSampleRule<T, Trng>::getPitchAndRoll(float &pitch, float &rollAngle, const T &x)
+{
+	float alpha = 1.f - x._geod / m_maxGeod;
+	pitch = m_rng->randf(0.1f * alpha, 0.7f * alpha, 65535);
+	rollAngle = 3.14f * (m_rng->randf1() - .5f);
 }
 
 }

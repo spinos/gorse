@@ -13,6 +13,8 @@
 #include "InstancerBase.h"
 
 namespace alo {
+	
+class Matrix33F;
 
 class BranchInstancer : public InstancerBase {
 
@@ -31,6 +33,8 @@ private:
 
     int selectABranch();
     int selectATrunk();
+	Matrix33F getBranchRotation(const Vector3F &binormal, const Vector3F &normal,
+					const float &pitch, const float &rollAngle) const;
     
 };
 

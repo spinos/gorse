@@ -44,8 +44,8 @@ void BranchInstancer::synthesizeBranchInstances()
         return;
     }
     
-    int nsel = 400;
-    int sd = 7654321;
+    int nsel = 200;
+    int sd = 87654321;
     Uniform<Lehmer> lmlcg(sd);
     
     typedef GeodesicSampleRule<SurfaceGeodesicSample, Uniform<Lehmer> > GeodRuleTyp;
@@ -61,6 +61,8 @@ void BranchInstancer::synthesizeBranchInstances()
     const int n = subset.count();
 	std::cout << "\n n subset " << n;
     createInstances(n);
+	Matrix44F tm;
+	float pitch, roll;
     for(int i=0;i<n;++i) {
         int j = selectABranch();
         
@@ -69,14 +71,11 @@ void BranchInstancer::synthesizeBranchInstances()
 
         const SurfaceGeodesicSample &si = subset[i];
 		
-		Matrix44F tm;
-		Vector3F up = si._grad;
-		Vector3F front = si._nml;
-		Vector3F side = up.cross(front); side.normalize();
-		up = front.cross(side); up.normalize();
-		
         tm.setTranslation(si._pos);
-		tm.setOrientations(side, up, front);
+		
+		rule.getPitchAndRoll(pitch, roll, si);
+		Matrix33F r = getBranchRotation(si._grad, si._nml, pitch, roll);
+		tm.setRotation(r);
         inst.setSpace(tm);
         
     }
@@ -110,6 +109,21 @@ int BranchInstancer::selectATrunk()
         }
     }
     return b;
+}
+
+Matrix33F BranchInstancer::getBranchRotation(const Vector3F &binormal, const Vector3F &normal,
+					const float &pitch, const float &rollAngle) const
+{
+	Vector3F up = binormal * (1.f - pitch) + normal * pitch; up.normalize();
+	Vector3F front = normal.cross(up); front.normalize();
+	Vector3F side = up.cross(front); side.normalize();
+	
+	Matrix33F r;
+	r.fill(side, up, front);
+	
+	Quaternion rq(rollAngle, up);
+	Matrix33F roll(rq);
+	return r * roll;
 }
     
 }
