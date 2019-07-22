@@ -15,6 +15,7 @@
 namespace alo {
 	
 class Matrix33F;
+class RandomSelect;
 
 class BranchInstancer : public InstancerBase {
 
@@ -31,8 +32,10 @@ protected:
     
 private:
 
-    int selectABranch();
-    int selectATrunk();
+    void countBranches(RandomSelect &selector);
+    void countTrunks(RandomSelect &selector);
+    float getMeanBranchSize() const;
+
 	Matrix33F getBranchRotation(const Vector3F &binormal, const Vector3F &normal,
 					const float &pitch, const float &rollAngle) const;
     

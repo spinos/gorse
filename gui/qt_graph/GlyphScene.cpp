@@ -53,7 +53,9 @@ GlyphItem *GlyphScene::createGlyph(CreateGlyphParameter &param)
 	GlyphItem *g = new GlyphItem(pix, param._type);
 	addItem(g);
 
-	const int gid = param._id < 1 ? getUid(param._type) : param._id;
+	int gid = param._id;
+    if(gid < 1) gid = getUid(param._type);
+    else countTypedGlyph(param._type);
 	g->setGlyphId(gid);
 	m_glyphMap.insert(gid, g);
 
@@ -173,11 +175,17 @@ void GlyphScene::onFocusIn3D(const Float4 &centerRadius)
 
 int GlyphScene::getUid(const int typeId)
 {
-	int *c = m_typeCounter.find(typeId);
+    int c = countTypedGlyph(typeId);
+	return ((typeId<<10) | c);
+}
+
+int GlyphScene::countTypedGlyph(const int typeId)
+{
+    int *c = m_typeCounter.find(typeId);
 	if(!c) c = m_typeCounter.insert(typeId, 0);
 
 	*c += 1;
-	return ((typeId<<10) | *c);
+    return *c;
 }
 
 void GlyphScene::resetGlyphScene()

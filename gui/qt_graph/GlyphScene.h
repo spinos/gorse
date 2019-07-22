@@ -99,6 +99,8 @@ protected:
 private:
 
 	void resetGlyphScene();
+/// # typed glyph created
+    int countTypedGlyph(const int typeId);
 /// vacant id no less than base
     int getConnectionUid(const int &base);
 	

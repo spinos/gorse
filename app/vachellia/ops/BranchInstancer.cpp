@@ -12,6 +12,7 @@
 #include <smp/GeodesicSampleRule.h>
 #include <rng/Lehmer.h>
 #include <rng/Uniform.h>
+#include <math/RandomSelect.h>
 
 namespace alo {
     
@@ -36,17 +37,23 @@ void BranchInstancer::synthesizeBranchInstances()
 {
     std::cout << "\n BranchInstancer::synthesizeBranchInstances ";
     
-    int t = selectATrunk();
+    RandomSelect branchSel;
+    countBranches(branchSel);
+    RandomSelect trunkSel;
+    countTrunks(trunkSel);
+    
+    int sd = 87654321;
+    int nsel = 200;
+    
+    Uniform<Lehmer> lmlcg(sd);
+    
+    int t = trunkSel.select<Uniform<Lehmer> >(&lmlcg);
     const RenderableOps *top = inputRenderable(t);
     const smp::SampleFilter<SurfaceGeodesicSample> *filter = top->getGeodesicSamples();
     if(!filter) {
         std::cout << "\n ERROR not a trunk ";
         return;
     }
-    
-    int nsel = 200;
-    int sd = 87654321;
-    Uniform<Lehmer> lmlcg(sd);
     
     typedef GeodesicSampleRule<SurfaceGeodesicSample, Uniform<Lehmer> > GeodRuleTyp;
     GeodRuleTyp rule;
@@ -57,6 +64,8 @@ void BranchInstancer::synthesizeBranchInstances()
     
     SimpleBuffer<SurfaceGeodesicSample> subset;
     filter->drawSamples<GeodRuleTyp>(subset, rule);
+    
+    std::map<int, int> instanceCounter;
 
     const int n = subset.count();
 	std::cout << "\n n subset " << n;
@@ -64,7 +73,8 @@ void BranchInstancer::synthesizeBranchInstances()
 	Matrix44F tm;
 	float pitch, roll;
     for(int i=0;i<n;++i) {
-        int j = selectABranch();
+        int j = branchSel.select<Uniform<Lehmer> >(&lmlcg);
+        instanceCounter[j] = 0;
         
         grd::TestInstance &inst = instance(i);
         inst.setObjectId(j);
@@ -80,35 +90,74 @@ void BranchInstancer::synthesizeBranchInstances()
         
     }
     
-    setInstancedObjectCountAndSize(1, 10.f);
+    const float instancerSize = getMeanBranchSize();
+    setInstancedObjectCountAndSize(instanceCounter.size(), instancerSize);
 }
 
-int BranchInstancer::selectABranch()
+void BranchInstancer::countBranches(RandomSelect &selector)
 {
     int b = 0;
     const int n = numInputRenderables();
     for(int i=0;i<n;++i) {
         const RenderableOps *r = inputRenderable(i);
         if(!r->hasGeodesicSamples()) {
-            b = i;
-// randomly?
+            b++;
         }
     }
-    return b;
+    selector.create(b);
+    
+    b = 0;
+    for(int i=0;i<n;++i) {
+        const RenderableOps *r = inputRenderable(i);
+        if(!r->hasGeodesicSamples()) {
+            selector.setValue(i, b);
+            selector.setWeight(1.f, b);
+            b++;
+        }
+    }
+    selector.normalize();
+    
 }
 
-int BranchInstancer::selectATrunk()
+void BranchInstancer::countTrunks(RandomSelect &selector)
 {
     int b = 0;
     const int n = numInputRenderables();
     for(int i=0;i<n;++i) {
         const RenderableOps *r = inputRenderable(i);
         if(r->hasGeodesicSamples()) {
-            b = i;
-// randomly?
+            b++;
         }
     }
-    return b;
+    selector.create(b);
+    
+    b = 0;
+    for(int i=0;i<n;++i) {
+        const RenderableOps *r = inputRenderable(i);
+        if(r->hasGeodesicSamples()) {
+            selector.setValue(i, b);
+            selector.setWeight(1.f, b);
+            b++;
+        }
+    }
+    selector.normalize();
+}
+
+float BranchInstancer::getMeanBranchSize() const
+{
+    float bx[6];
+    float s = 0.f;
+    int b = 0;
+    const int n = numInputRenderables();
+    for(int i=0;i<n;++i) {
+        const RenderableOps *r = inputRenderable(i);
+        if(!r->hasGeodesicSamples()) {
+            r->getAabb(bx);
+            s += BoundingBox(bx).getLongestDistance();
+            b++;
+        }
+    }
+    return s *= 1.f / (float)b;
 }
 
 Matrix33F BranchInstancer::getBranchRotation(const Vector3F &binormal, const Vector3F &normal,

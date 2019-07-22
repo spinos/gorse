@@ -310,6 +310,14 @@
                                 "max": 256
                                 },
                                 {
+                                    "name": "arandseed",
+                                    "label": "Random Seed",
+                                    "typ": 2,
+                                    "value": 7654321,
+                                    "min": 999,
+                                    "max": 1999999999
+                                },
+                                {
                                     "name": "transform",
                                     "typ": 16
                                 },
@@ -331,6 +339,16 @@
                                         "side": 1,
                                         "px": -2,
                                         "py": 20
+                                    }
+                                },
+                                {
+                                    "name": "interrainsdf",
+                                    "typ": 3,
+                                    "port": {
+                                        "outgoing": false,
+                                        "side": 1,
+                                        "px": -2,
+                                        "py": 50
                                     }
                                 }
                             ]
