@@ -20,12 +20,23 @@ AdaptableMesh::~AdaptableMesh()
 
 void AdaptableMesh::createMinimal()
 {
-    addVertex(Vector3F(0.f, 0.f, 0.f));
-    addVertex(Vector3F(8.f, 0.f, 0.f));
-    addVertex(Vector3F(8.f, 8.f, 0.f));
-    addVertex(Vector3F(0.f, 8.f, 0.f));
-    addTriangle(0, 1, 2);
-    addTriangle(0, 2, 3);
+    for(int j=0;j<4;++j) {
+        for(int i=0;i<4;++i) {
+            addVertex(Vector3F(3.f * i, 3.f * j, -1e-5f));
+        }
+    }
+    
+    for(int j=0;j<3;++j) {
+        for(int i=0;i<3;++i) {
+            int a = j * 4 + i;
+            int b = j * 4 + i + 1;
+            int c = (j + 1) * 4 + i + 1;
+            int d = (j + 1) * 4 + i;
+            addTriangle(a, b, c);
+            addTriangle(a, c, d);
+        }
+    }
+    
     calculateVertexNormals();
 }
 

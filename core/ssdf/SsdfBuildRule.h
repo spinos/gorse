@@ -30,6 +30,8 @@ public:
 	bool hasEmptySite(int& iter);
 /// corners connected to corner_i
 	static void GetCellCornersConnectedToCorner(int* vs, const int i);
+    
+    static void GetCellEdge(int *e, const int *v, const int i);
 	
 protected:
 
@@ -37,6 +39,7 @@ private:
 	static int NumEmptySites;
 	static int EmptySiteU[9][3];
 	static int CornerEdges[8][3];
+    static int sCellEdges[12][2];
 	
 };
 
@@ -76,6 +79,13 @@ int SsdfBuildRule<Tc>::CornerEdges[8][3] = {
 };
 
 template<typename Tc>
+int SsdfBuildRule<Tc>::sCellEdges[12][2] = {
+{0, 1}, {2, 3}, {4, 5}, {6, 7},
+{0, 2}, {1, 3}, {4, 6}, {5, 7},
+{0, 4}, {1, 5}, {2, 6}, {3, 7}
+};
+
+template<typename Tc>
 SsdfBuildRule<Tc>::SsdfBuildRule(Tc* sfc) : svf::SvfBuildRule<Tc>(sfc)
 {}
 
@@ -105,6 +115,13 @@ template<typename Tc>
 bool SsdfBuildRule<Tc>::hasEmptySite(int& iter)
 {
 	return iter<NumEmptySites;
+}
+
+template<typename Tc>
+void SsdfBuildRule<Tc>::GetCellEdge(int *e, const int *v, const int i)
+{
+    e[0] = v[sCellEdges[i][0]];
+    e[1] = v[sCellEdges[i][1]];
 }
 
 }

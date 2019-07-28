@@ -155,6 +155,15 @@
             "label": "Test",
             "children": [
                 {
+                    "id": 704005,
+                    "name": "thin_plate_test",
+                    "label": "Thin Plate",
+                    "icon": ":images/unknown.png",
+                    "is_element": true,
+                    "attribs" : [
+                    ]
+                },
+                {
                     "id": 704002,
                     "name": "ssdf_test",
                     "label": "Distance Field",

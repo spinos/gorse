@@ -230,7 +230,6 @@ void AdaptiveHexagonDistance<T>::finishCells(Tr& rule)
 	}
 	
 	int nv = m_nodeHash.finish();
-	std::cout<<"\n n node "<<nv;
 	buildGraph(nv, rule);
 	
 	m_cellsToAdd.clear();
@@ -287,7 +286,6 @@ void AdaptiveHexagonDistance<T>::buildGraph(const int& nv,
 	
 	int ne = edgeMap.size();
 	int ni = edgeInds.size();
-	std::cout<<"\n n edge "<<ne << " n ind " << ni;
 	BaseDistanceField<T>::create(nv, ne, ni);
 	
 	DistanceNode<T> *dst = DFTyp::nodes();
@@ -311,6 +309,7 @@ void AdaptiveHexagonDistance<T>::buildGraph(const int& nv,
 	edgeInds.clear();
 	
 	DFTyp::calculateEdgeLength();
+    DFTyp::verbose();
 	std::cout.flush();
 }
 
@@ -320,55 +319,52 @@ void AdaptiveHexagonDistance<T>::computeDistance(const sds::SpaceFillingVector<T
 								const int level,
 								Tr& rule)
 {
+    std::cout << "\n AdaptiveHexagonDistance::computeDistance ";
 	DFTyp::resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
 	DFTyp::resetEdges(sdf::StBackGround);
 	
-	int closestV, touchE[3];
-	float minD;
 	CellCorners ac;
 	const int n = samples.size();
 	for(int i=0;i<n;++i) {
 		
 		const T1 &sp = samples[i];
-		
-		rule.getLevelCellAt(ac, (const float*)&sp._pos, level);
-		
-		minD = 1e20f;
-		closestV = -1;
-		
-		for(int j=0;j<8;++j) {
-			const int v = findNode(ac._key[j]);
-			if(v<0) {
+        
+        rule.touchCellsAtLevel((const float *)&sp._pos, level, .979f);
+        const int &nt = rule.numTouchedCells();
+        for(int t=0;t<nt;++t) {
+            rule.getLevelCellByCoord(ac, rule.touchedCell(t), level);
+        
+            bool isCellValid = true;
+            for(int j=0;j<8;++j) {
+                const int v = findNode(ac._key[j]);
+                if(v<0) {
 				ac._key[j] = -1;
 				std::cout<<"\n WARNING cannot find cell of "<<i
 						<<" at level "<<level;
 				rule.printCoord(ac._key[j]);
+                isCellValid = false;
 				continue;
-			} 
+                } 
 			
-			ac._key[j] = v;
-			float d = getNodePosition(v).distance2To(sp._pos);
-			if(minD > d) {
-				minD = d;
-				closestV = j;
-			}
-		}
+                ac._key[j] = v;
+
+                DFTyp::setNodeDistanceTValue(ac._key[j], sp);
+            
+            }
+            
+            if(isCellValid) {
+/// block cell edges
+                int ei[2];
+                for(int j=0;j<12;++j) {
+                    Tr::GetCellEdge(ei, ac._key, j);
+                    DFTyp::setEdgeFront(ei[0], ei[1]);
+                }
+            }
 		
-		if(closestV > -1) {
-			DFTyp::setNodeDistanceTValue(ac._key[closestV], sp);
-/// block 3 wdges connected to the closest node
-			rule.GetCellCornersConnectedToCorner(touchE, closestV);
-			DFTyp::setEdgeFront(ac._key[closestV], ac._key[touchE[0]]);
-			DFTyp::setEdgeFront(ac._key[closestV], ac._key[touchE[1]]);
-			DFTyp::setEdgeFront(ac._key[closestV], ac._key[touchE[2]]);
-		}
-
-		for(int j=0;j<8;++j) {
-			if(j == closestV) continue;
-
-			DFTyp::setNodeDistanceTValue(ac._key[j], sp, false);
-		}
+        }
 	}
+    
+    DFTyp::fixKnownBackside();
 
 	const int iFar = firstEmptyCellInd(rule);
 
@@ -376,7 +372,8 @@ void AdaptiveHexagonDistance<T>::computeDistance(const sds::SpaceFillingVector<T
 	DFTyp::marchOutside(iFar);
 	DFTyp::setFarNodeInside();
 	DFTyp::computeAccurateDistance();
-	DFTyp::fixThinSheet(rule.deltaAtLevel(level));
+/// not needed?
+	//DFTyp::fixThinSheet(rule.deltaAtLevel(level));
 	
 }
 

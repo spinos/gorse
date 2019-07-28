@@ -365,9 +365,9 @@ template<typename Tn, typename Te>
 void AGraph<Tn, Te>::verbose() const
 {
 	std::cout<<"\n graph n node "<<numNodes()
-			<<"    n edge "<<numEdges()
-			<<"    n ind "<<numEdgeIndices()
-			<<"    min/max edge len "<<minEdgeLength()
+			<<"  n edge "<<numEdges()
+			<<"  n node-edge "<<numEdgeIndices()
+			<<"  min/max edge length "<<minEdgeLength()
 								<<"/"<<maxEdgeLength();
 }
 

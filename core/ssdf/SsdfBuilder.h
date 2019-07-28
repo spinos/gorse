@@ -88,7 +88,10 @@ SsdfBuilder<T, Tv, P, Q, Tr>::SsdfBuilder()
 
 template<typename T, typename Tv, int P, int Q, typename Tr>
 SsdfBuilder<T, Tv, P, Q, Tr>::~SsdfBuilder()
-{ clearUniformDistances(); }
+{ 
+    clearUniformDistances(); 
+    clearNormals();
+}
 
 template<typename T, typename Tv, int P, int Q, typename Tr>
 void SsdfBuilder<T, Tv, P, Q, Tr>::clearUniformDistances()
@@ -147,15 +150,19 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::build(sds::SpaceFillingVector<T>* samples,
 /// to Q
 /// l7 graph could have over half a million edges
 	for(int j=P;j<Q;++j) {
-		if(j==Q-1)
-		m_hexa.beginGuardCells();
+		if(j==Q-1) m_hexa.beginGuardCells();
+        
 		const sds::SpaceFillingVector<T>& curs = SvfBuilderTyp::levelSample(j);
 		const int n = curs.size();
 		for(int i=0;i<n;++i) {
-			m_hexa. template divideCell<Tr>(curs[i]._key, rule, j, j+1);
+            rule.touchCellsAtLevel((const float *)&curs[i]._pos, j, .49f);
+            const int &nt = rule.numTouchedCells();
+            for(int t=0;t<nt;++t) {
+                const int &kt = rule.touchedCell(t);
+                m_hexa. template divideCell<Tr>(kt, rule, j, j+1);
+            }
 		}
-		if(j==Q-1)
-		m_hexa. template endGuardCells<Tr>(rule, P, j);
+		if(j==Q-1) m_hexa. template endGuardCells<Tr>(rule, P, j);
 		
 	}
 	
@@ -277,8 +284,6 @@ bool SsdfBuilder<T, Tv, P, Q, Tr>::buildPCell(const int coord, const int* range,
 			int ind = m_hexa.findNode(ks[i]);
 			if(ind < 0)
 				continue;
-			
-			//m_hexa. template resampleDistance<T>(ind, range, src);
 				
 			cellFld->value()[i] = m_hexa.getNodeDistance(ind);
             

@@ -4,9 +4,7 @@
  *
  *  en.wikipedia.org/wiki/Dijkstra%27s_algorithm
  *
- *  Created by zhang on 17-1-31.
- *  Copyright 2017 __MyCompanyName__. All rights reserved.
- *
+ *  2019/7/29
  */
 
 #ifndef ALO_GRAPH_BASE_DISTANCE_FIELD_H
@@ -92,6 +90,8 @@ protected:
 	void setNodeTValue(const int& i, const T &x);
 /// fix distance when to-sample direction deviates from sample normal
 	void fixThinSheet(const float &maxDistance);
+/// known site value is negative if behind sample    
+    void fixKnownBackside();
 
 private:
 /// propagate distance value
@@ -190,6 +190,10 @@ void BaseDistanceField<T>::propagate(std::deque<int >& heap, const int& i)
 		int k = GraphTyp::edgeIndices()[j];
 
 		const IDistanceEdge & eg = GraphTyp::edges()[k];
+        
+/// do not cross front edge
+		if(eg.lab > sdf::StFront3)
+			continue;
 		
 		vj = eg.vi.x;
 		if(vj == i) {
@@ -301,7 +305,6 @@ void BaseDistanceField<T>::propagateVisit(std::map<int, int > & heap, const int 
 			vj = eg.vi.y;
 			
 		DistanceNode<T> &B = GraphTyp::nodes()[vj];
-		
 		if(B.label > sdf::StFront3) {
 /// stop
 			B.stat = sdf::StVisited;
@@ -398,6 +401,20 @@ void BaseDistanceField<T>::fixThinSheet(const float &maxDistance)
 
         Vector3F s2g = d.pos - d._tval._pos;
         d.val = s2g.dot(d._tval._nml);
+	}
+}
+
+template<typename T>
+void BaseDistanceField<T>::fixKnownBackside()
+{
+    const int & n = numNodes();
+	for(int i = 0;i<n;++i) {
+		NodeType & d = nodes()[i];
+        if(d.stat != sdf::StKnown) continue;
+
+        Vector3F s2g = d._tval._pos - d.pos;
+        if(s2g.dot(d._tval._nml) > 0)
+            d.val *=  -1.f;
 	}
 }
 

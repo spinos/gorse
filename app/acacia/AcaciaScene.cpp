@@ -25,6 +25,8 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
 { 
     int k = content["id"].toInt();
     switch(k) {
+        case ThinPlateTest::Type :
+            return new ThinPlateTest;
         case BranchTest::Type :
             return new BranchTest;
         case MeshFusionTest::Type :

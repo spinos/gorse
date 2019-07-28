@@ -2,7 +2,7 @@
  *  SvfBuildRule.h
  *  aloe
  *
- *  2019/4/28
+ *  2019/7/29
  */
 
 #ifndef ALO_SVF_BUILD_RULE_H
@@ -21,6 +21,9 @@ class SvfBuildRule {
     BoundingBox m_bbox;
 /// space filling curve
 	Tc* m_sfc;
+/// cell touched by sample with offset
+    int m_cell27Coord[27];
+    int m_numTouchedCells;
 
 public:
 
@@ -67,7 +70,12 @@ public:
 	void getLevelGrid(int* ks, int coord, int level, int p);
 	
 	void printCoord(int coord) const;
-	
+
+/// 27 cell coords
+    void touchCellsAtLevel(const float *p, int level, float size);
+	const int &numTouchedCells() const;
+    const int &touchedCell(int i) const;
+    
 	static void PrintOriginCellSize(const float* orih);
 /// divide box to grid of d resolution
 /// p is float[n] n is 3(1+d)^3
@@ -81,6 +89,8 @@ protected:
 
 private:
 	
+    static float sTwentySevenOffset[27][3];
+    
 };
 
 template<typename Tc>
@@ -392,6 +402,68 @@ void SvfBuildRule<Tc>::PrintAabb(const float *b)
 	std::cout<<" aabb (("<<b[0]<<","<<b[1]<<","<<b[2]
 				<<"), ("<<b[3]<<","<<b[4]<<","<<b[5]<<")) "; 
 }
+
+template<typename Tc>
+float SvfBuildRule<Tc>::sTwentySevenOffset[27][3] = {
+{-1.f,-1.f,-1.f},
+{ 0.f,-1.f,-1.f},
+{ 1.f,-1.f,-1.f},
+{-1.f, 0.f,-1.f},
+{ 0.f, 0.f,-1.f},
+{ 1.f, 0.f,-1.f},
+{-1.f, 1.f,-1.f},
+{ 0.f, 1.f,-1.f},
+{ 1.f, 1.f,-1.f},
+{-1.f,-1.f, 0.f},
+{ 0.f,-1.f, 0.f},
+{ 1.f,-1.f, 0.f},
+{-1.f, 0.f, 0.f},
+{ 0.f, 0.f, 0.f},
+{ 1.f, 0.f, 0.f},
+{-1.f, 1.f, 0.f},
+{ 0.f, 1.f, 0.f},
+{ 1.f, 1.f, 0.f},
+{-1.f,-1.f, 1.f},
+{ 0.f,-1.f, 1.f},
+{ 1.f,-1.f, 1.f},
+{-1.f, 0.f, 1.f},
+{ 0.f, 0.f, 1.f},
+{ 1.f, 0.f, 1.f},
+{-1.f, 1.f, 1.f},
+{ 0.f, 1.f, 1.f},
+{ 1.f, 1.f, 1.f}
+};
+
+template<typename Tc>
+void SvfBuildRule<Tc>::touchCellsAtLevel(const float *p, int level, float size)
+{
+    const float offset = size * deltaAtLevel(level);
+    float q[3];
+    std::map<int, int> touchMap;
+    for(int i=0;i<27;++i) {
+        q[0] = p[0] + offset * sTwentySevenOffset[i][0];
+        q[1] = p[1] + offset * sTwentySevenOffset[i][1];
+        q[2] = p[2] + offset * sTwentySevenOffset[i][2];
+        int x = m_sfc->computeKeyAtLevel(q, level);
+        touchMap[x] = 0;
+    }
+    
+    m_numTouchedCells = touchMap.size();
+
+    std::map<int, int>::iterator it = touchMap.begin();
+    for(int i=0;it!=touchMap.end();++it,++i) 
+        m_cell27Coord[i] = it->first;
+    
+    touchMap.clear();
+}
+
+template<typename Tc>
+const int &SvfBuildRule<Tc>::numTouchedCells() const
+{ return m_numTouchedCells; }
+
+template<typename Tc>
+const int &SvfBuildRule<Tc>::touchedCell(int i) const
+{ return m_cell27Coord[i]; }
 
 }
 
