@@ -49,6 +49,8 @@ GlyphOps *VachellScene::createOps(const QJsonObject &content)
             return new VoxelOps;
         case TrunkOps::Type :
             return new TrunkOps;
+        case TerrainOps::Type :
+            return new TerrainOps;
         case CanopyOps::Type :
             return new CanopyOps;
         case RepeatOps::Type :

@@ -2,7 +2,7 @@
  *  SsdField.cpp
  *  aloe
  *
- *  2019/4/30
+ *  2019/7/29
  */
 
 #include "SsdField.h"
@@ -125,8 +125,8 @@ void SsdField::verbose() const
 	float nec = ((float)numFineValues()) / d3 / numCells() * 100;
 	std::cout << " SsdField "<<m_P<<" "<<m_Q<<" "<<numFineValues()
 	<<" "<< nec << " percent "
-	<<"\n box "<<fieldBox()
-	<<" cell_size "<<originCellSize()[3] << " delta " << delta()
+	<<"\n origin ("<<originCellSize()[0] << ", " << originCellSize()[1] << ", " << originCellSize()[2]
+	<<") cell_size "<<originCellSize()[3] << " delta " << delta()
 	<<"\n aabb "<<m_bbox;
 }
 
