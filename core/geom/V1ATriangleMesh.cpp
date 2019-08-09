@@ -5,6 +5,7 @@
  */
 
 #include "V1ATriangleMesh.h"
+#include <math/Matrix33F.h>
 #include <cmath>
 
 namespace alo {
@@ -334,6 +335,12 @@ void ATriangleMesh::translateBy(float x, float y, float z)
     const Vector3F d(x, y, z);
     for(int i=0;i<m_numVertices;++i)
         m_positions[i] += d;
+}
+
+void ATriangleMesh::rotateBy(const Matrix33F &mat)
+{
+    for(int i=0;i<m_numVertices;++i)
+        mat.transformInPlace(m_positions[i]);
 }
 
 void ATriangleMesh::copyMeshTo(ATriangleMesh *b, const int &nv, const int &nf) const

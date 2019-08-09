@@ -246,12 +246,12 @@ bool VoxelOps::hasInstance() const
 bool VoxelOps::hasGeodesicSamples() const
 { return false; }
 
-void VoxelOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
+void VoxelOps::genSamples(sds::SpaceFillingVector<grd::CellSample> &samples) const
 {
     if(m_gridRule->isEmpty() )
         return TransformOps::genSamples(samples);
 
-    m_grid->genSamples<grd::PointSample>(samples);
+    m_grid->genSamples<grd::CellSample>(samples);
 }
 
 QString VoxelOps::getShortDescription() const

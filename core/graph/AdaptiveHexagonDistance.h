@@ -267,6 +267,8 @@ void AdaptiveHexagonDistance<T>::buildGraph(const int& nv,
 				std::cout<<"\n WARNING cannot find edge "<<ke[j].y;
 				continue;
 			}
+
+			if(v1 == v2) continue;
 			
 			sdb::Coord2 c = sdb::Coord2(v1, v2).ordered();
 				
@@ -329,10 +331,7 @@ void AdaptiveHexagonDistance<T>::computeDistance(const sds::SpaceFillingVector<T
 		
 		const T1 &sp = samples[i];
         
-        rule.touchCellsAtLevel((const float *)&sp._pos, level, .979f);
-        const int &nt = rule.numTouchedCells();
-        for(int t=0;t<nt;++t) {
-            rule.getLevelCellByCoord(ac, rule.touchedCell(t), level);
+			rule.getLevelCellAt(ac, (const float*)&sp._pos, level);
         
             bool isCellValid = true;
             for(int j=0;j<8;++j) {
@@ -360,8 +359,6 @@ void AdaptiveHexagonDistance<T>::computeDistance(const sds::SpaceFillingVector<T
                     DFTyp::setEdgeFront(ei[0], ei[1]);
                 }
             }
-		
-        }
 	}
     
     DFTyp::fixKnownBackside();
@@ -372,8 +369,6 @@ void AdaptiveHexagonDistance<T>::computeDistance(const sds::SpaceFillingVector<T
 	DFTyp::marchOutside(iFar);
 	DFTyp::setFarNodeInside();
 	DFTyp::computeAccurateDistance();
-/// not needed?
-	//DFTyp::fixThinSheet(rule.deltaAtLevel(level));
 	
 }
 

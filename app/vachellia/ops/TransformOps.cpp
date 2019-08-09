@@ -141,21 +141,32 @@ float TransformOps::mapLocalDistance(const float *q) const
 	return d;
 }
 
-void TransformOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
+void TransformOps::genSamples(sds::SpaceFillingVector<grd::CellSample> &samples) const
 {
     const float *b = c_aabb();
     const float dx = b[3] - b[0];
     const float dy = b[4] - b[1];
     const float dz = b[5] - b[2];
-    const float xArea = dy * dz;
-    const float yArea = dx * dz;
-    const float totalArea = (b[4] - b[1]) * (b[3] - b[0]) + xArea + yArea;
-    const float xRatio = xArea / totalArea;
-    const float zRatio = (xArea + yArea) / totalArea;
-    grd::PointSample ap;
-    for(int i=0;i<5000;++i) {
-        randomPointOnAabb((float *)&ap._pos, b, dx, dy, dz, xRatio, zRatio, .05f);
-        samples << ap;
+    const float delta = (dx + dy + dz) * .33f * .0625f;
+    const float h = delta * .5f;
+    int nx = dx / delta; if(dx > delta * nx) nx++;
+    int ny = dy / delta; if(dy > delta * ny) ny++;
+    int nz = dz / delta; if(dz > delta * nz) nz++;
+
+    grd::CellSample ap;
+    ap._span = delta;
+    for(int k=0;k<nz;++k) {
+    	ap._pos.z = b[2] + h + delta * k;
+
+    	for(int j=0;j<ny;++j) {
+    		ap._pos.y = b[1] + h + delta * j;
+
+    		for(int i=0;i<nx;++i) {
+        		ap._pos.x = b[0] + h + delta * i;
+
+        		samples << ap;
+        	}
+        }
     }
 }
 

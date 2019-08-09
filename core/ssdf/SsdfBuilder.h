@@ -155,7 +155,8 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::build(sds::SpaceFillingVector<T>* samples,
 		const sds::SpaceFillingVector<T>& curs = SvfBuilderTyp::levelSample(j);
 		const int n = curs.size();
 		for(int i=0;i<n;++i) {
-            rule.touchCellsAtLevel((const float *)&curs[i]._pos, j, .49f);
+            //m_hexa. template divideCell<Tr>(curs[i]._key, rule, j, j+1);
+            rule.touchCellsAtLevel((const float *)&curs[i]._pos, j, .0625f);
             const int &nt = rule.numTouchedCells();
             for(int t=0;t<nt;++t) {
                 const int &kt = rule.touchedCell(t);
@@ -168,8 +169,7 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::build(sds::SpaceFillingVector<T>* samples,
 	
 	m_hexa.finishCells(rule);
 	
-	m_hexa. template computeDistance<T, Tr>(*samples, 
-							Q, rule);
+	m_hexa. template computeDistance<T, Tr>(*samples, Q, rule);
 	
 	clearUniformDistances();
     clearNormals();

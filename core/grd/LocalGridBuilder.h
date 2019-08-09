@@ -5,7 +5,7 @@
  *  P is level of grid
  *  2^(P*3) cells
  *
- *  2019/5/5
+ *  2019/8/10
  */
 
 #ifndef ALO_LOCAL_GRID_BUILDER_H
@@ -36,7 +36,7 @@ public:
 /// finish grid
 	void detach();
 /// index in cell
-/// Ts is sample array type, value must have _key and _pos
+/// Ts is sample array type, value must have _key, _pos, _span
 /// Tr is build rule
 	template<typename Ts, typename Tr>
 	void measure(const Ts &samples, int objI, Tr &rule);
@@ -144,21 +144,29 @@ template<typename Ts, typename Tr>
 void LocalGridBuilder<T>::measure(const Ts &samples, int objI, Tr &rule)
 {
 	int n = samples.size();
-	const BoundingBox &b = rule.bbox();
 	Ts::ValueTyp ap;
 	sds::SpaceFillingVector<Ts::ValueTyp> destSamples;
 	for(int i=0;i<n;++i) {
 		const Ts::ValueTyp &si = samples[i];
-		const float *q = (const float *)&si._pos;
-		if(isPointOutsideBox(q, b.data())) continue;
 
-		ap._key = rule.computeKeyAtLevel(q, rule.P());
+		const float &sq = si._span;
+/// center to origin
+		const Vector3F q = si._pos - Vector3F(sq * .5f, sq * .5f, sq * .5f);
+		
+		if(!rule.isCellIntersectDomain(q, sq)) continue;
 
-		destSamples << ap;
+		const int np = rule.computeIntersectedCellKeys(q, sq);
+		for(int j=0;j<np;++j) {
+			ap._key = rule.intersectedCellKey(j);
+			destSamples << ap;
+		}
 	}
 
 	n = destSamples.size();
-	if(n < 1) return;
+	if(n < 1) {
+		std::cout << "\n WARNNING zero cell samples ";
+		return;
+	}
 
 	destSamples.sort();
 

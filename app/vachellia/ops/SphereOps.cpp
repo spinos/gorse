@@ -97,15 +97,6 @@ bool SphereOps::hasInstance() const
 bool SphereOps::hasGeodesicSamples() const
 { return false; }
 
-void SphereOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
-{
-    grd::PointSample ap;
-    for(int i=0;i<4000;++i) {
-        randomPointOnSphere((float *)&ap._pos, m_radius, .1f);
-        samples << ap;
-    }
-}
-
 void SphereOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     m_outOps.append(line);

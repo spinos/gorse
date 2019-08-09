@@ -12,7 +12,9 @@
 #include <sds/FZOrder.h>
 #include <sds/SparseFieldBuilder.h>
 #include <sds/SparseFieldBuildRule.h>
-#include <geom/AdaptableMesh.h>
+#include <htf/HeightFieldMesher.h>
+#include <math/Polygon2D.h>
+#include <math/Bilinear.h>
 #include <rng/Lehmer.h>
 #include <rng/Uniform.h>
 #include <smp/Triangle.h>
@@ -27,6 +29,7 @@
 #include <h5/V1H5IO.h>
 #include <h5_ssdf/HSsdf.h>
 #include <h5_grd/HLocalGrid.h>
+#include <math/Matrix33F.h>
 #include <ctime>
 
 namespace alo {
@@ -37,12 +40,69 @@ ThinPlateTest::ThinPlateTest()
 	Uniform<Lehmer> lmlcg(secs);
     
     m_mesh = new AdaptableMesh;
+#if 0
     m_mesh->createMinimal();
+#else    
+    HeightField height;
+    height.create(255, 255);
+    height.setZero();
+    height.setGridSize(1.45678f);
+    height.setHeightScale(10.f);
     
+    Polygon2D blasso;
+    blasso<<Float2(-300.f, -300.f);
+    blasso<<Float2(-300.f, 600.f);
+    blasso<<Float2(600.f, 600.f);
+    blasso<<Float2(600.f, -300.f);
+    blasso.finish();
+    
+    Bilinear<float> bslope;
+    bslope.value()[0] = .5e-3f;
+    bslope.value()[1] = .5e-3f;
+    bslope.value()[2] = .5e-3f;
+    bslope.value()[3] = .5e-3f;
+    
+    Polygon2D flasso;
+    flasso<<Float2(-150.f, -200.f);
+    flasso<<Float2(-350.f, 10.f);
+    flasso<<Float2(90.f, 250.f);
+    flasso<<Float2(119.f, 150.f);
+    flasso<<Float2(149.f, 160.f);
+    flasso<<Float2(179.f, 199.f);
+    flasso<<Float2(209.f, 179.f);
+    flasso<<Float2(250.f, 190.f);
+    flasso<<Float2(100.f, -200.f);
+    flasso.finish();
+    
+    Bilinear<float> fslope;
+    fslope.value()[0] = 5.f;
+    fslope.value()[1] = .5f;
+    fslope.value()[2] = 0.f;
+    fslope.value()[3] = 15.5f;
+    
+    height.setValue(bslope, blasso);
+    height.setValue(fslope, flasso);
+    height.smooth();
+    height.smooth();
+    height.smooth();
+    
+    HeightFieldMesher heighter;
+    heighter.attach(m_mesh);
+    heighter.triangulate(height);
+
+    Quaternion rot(.19f, Vector3F::YAxis);
+    Matrix33F mrot(rot);
+    m_mesh->rotateBy(mrot);
+
+    heighter.detach();
+
+#endif
+
+#if 1
     BoundingBox shapeBox;
     m_mesh->getAabb(shapeBox);
     const float span = shapeBox.getLongestDistance();
-    shapeBox.expand(span * .0019f);
+    shapeBox.expand(span * .001f);
     shapeBox.round();
     std::cout<<"\n shape box"<<shapeBox;
     
@@ -97,7 +157,6 @@ ThinPlateTest::ThinPlateTest()
     typedef grd::LocalGridBuildRule<sds::FZOrderCurve> LocBuildTyp;
 	LocBuildTyp locRule(&sfc);
 	locRule.setBBox(grdBox);
-	locRule.setBoxRelativeBoundary(2.f);
     locRule.setP(5);
     
     grd::LocalGrid<float> locG;
@@ -107,12 +166,12 @@ ThinPlateTest::ThinPlateTest()
     grd::LocalGridBuilder<grd::LocalGrid<float> > locBuilder;
 	locBuilder.attach(&locG);
     
-    grd::PointGridSamplesTyp samples;
-    samples.create<FieldTyp>(&field);
+    grd::GridCellSamplesTyp cells;
+    cells.create<FieldTyp>(&field);
     
-    typedef sds::SpaceFillingVector<grd::PointGridSamplesTyp::SampleTyp> OutSampleTyp;
-	const OutSampleTyp &orignalSamples = samples.samples();
-
+    typedef sds::SpaceFillingVector<grd::GridCellSamplesTyp::SampleTyp> OutSampleTyp;
+	const OutSampleTyp &orignalSamples = cells.samples();
+    
 	locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, 0, locRule);
 
     locBuilder.detach();
@@ -123,6 +182,7 @@ ThinPlateTest::ThinPlateTest()
     
     ga.close();
 	hio.end();
+#endif
     
     DrawableResource *rec = createResource();
     setResource(rec);

@@ -191,22 +191,17 @@ template<typename Ts>
 void LocalGrid<T>::genSamples(sds::SpaceFillingVector<Ts> &samples) const
 {
     Ts ap;
+    ap._span = cellSize();
     BoundingBox b;
-    float orih[4];
-    orih[3] = cellSize();
+    
     const int n = numCells();
     for(int i=0;i<n;++i) {
         if(isCellEmpty(i)) continue;
 
         getCellBox(b, i);
-        memcpy(orih, b.data(), 12);
-
-/// todo adapt to n cells
-        for(int j=0;j<30;++j) {
-
-            randomPointInsideCube((float *)&ap._pos, orih);
-            samples << ap;
-        }
+        ap._pos = b.center();
+        
+        samples << ap;
     }
 }
 

@@ -171,7 +171,6 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 				}
 
 				cellRule.setBBox((const float *)&cell->bbox());
-				cellRule.setBoxRelativeBoundary(1.f);
 				
 				cellBuilder.attach(cell->_grid);
 			}

@@ -38,7 +38,7 @@ BranchTest::BranchTest()
     BoundingBox shapeBox;
     m_mesh->getAabb(shapeBox);
     const float span = shapeBox.getLongestDistance();
-    shapeBox.expand(span * .0019f);
+    shapeBox.expand(span * .001f);
     shapeBox.round();
     std::cout<<"\n shape box"<<shapeBox;
     

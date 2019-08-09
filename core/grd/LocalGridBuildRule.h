@@ -2,13 +2,14 @@
  *  LocalGridBuildRule.h
  *  gorse
  *
- *  2019/5/5
+ *  2019/8/10
  */
 
 #ifndef ALO_LOCAL_GRID_BUILD_RULE_H
 #define ALO_LOCAL_GRID_BUILD_RULE_H
 
 #include <svf/SvfBuildRule.h>
+#include <vector>
 
 namespace alo {
     
@@ -19,8 +20,9 @@ class LocalGridBuildRule : public svf::SvfBuildRule<Tc> {
 
 typedef svf::SvfBuildRule<Tc> SvfRuleTyp;
 
-	float m_boundary;
 	int m_P;
+	float m_pCellSpan;
+	std::vector<int> m_cellKeys;
 
 public:
 
@@ -28,14 +30,12 @@ public:
 
     void setP(int x);
 
-    void setBoxRelativeBoundary(float x);
-
-    void expandBox(float *b) const;
-
-    const float &boundary() const;
-
     const int &P() const;
-    
+
+    int computeIntersectedCellKeys(const Vector3F &origin, 
+    							const float &span);
+    const int &intersectedCellKey(const int &i) const;
+
 protected:
 
 private:
@@ -44,36 +44,51 @@ private:
 
 template<typename Tc>
 LocalGridBuildRule<Tc>::LocalGridBuildRule(Tc* sfc) : svf::SvfBuildRule<Tc>(sfc),
-m_boundary(.1f),
 m_P(4)
 {}
 
 template<typename Tc>
 void LocalGridBuildRule<Tc>::setP(int x)
-{ m_P = x; }
-
-template<typename Tc>
-void LocalGridBuildRule<Tc>::setBoxRelativeBoundary(float x)
-{ m_boundary = x * SvfRuleTyp::deltaAtLevel(9); }
-
-template<typename Tc>
-void LocalGridBuildRule<Tc>::expandBox(float *b) const
-{
-	b[0] -= m_boundary;
-	b[1] -= m_boundary;
-	b[2] -= m_boundary;
-	b[3] += m_boundary;
-	b[4] += m_boundary;
-	b[5] += m_boundary;
+{ 
+	m_P = x;
+	m_pCellSpan = deltaAtLevel(x);
 }
-
-template<typename Tc>
-const float &LocalGridBuildRule<Tc>::boundary() const
-{ return m_boundary; }
 
 template<typename Tc>
 const int &LocalGridBuildRule<Tc>::P() const
 { return m_P; }
+
+template<typename Tc>
+int LocalGridBuildRule<Tc>::computeIntersectedCellKeys(const Vector3F &origin, 
+    							const float &span)
+{
+	m_cellKeys.clear();
+
+	const int n = 1 + span / m_pCellSpan;
+	Vector3F q;
+	for(int k=0;k<=n;++k) {
+		if(k<=n-1) q.z = origin.z + m_pCellSpan * k;
+		else q.z = origin.z + span;
+
+		for(int j=0;j<=n;++j) {
+			if(j<=n-1) q.y = origin.y + m_pCellSpan * j;
+			else q.y = origin.y + span;
+
+			for(int i=0;i<=n;++i) {
+				if(i<=n-1) q.x = origin.x + m_pCellSpan * i;
+				else q.x = origin.x + span;
+
+				if(SvfRuleTyp::isPointInsideDomain(q))
+					m_cellKeys.push_back(SvfRuleTyp::computeKeyAtLevel((const float *)&q, P()));
+			}
+		}
+	}
+	return m_cellKeys.size();
+}
+
+template<typename Tc>
+const int &LocalGridBuildRule<Tc>::intersectedCellKey(const int &i) const
+{ return m_cellKeys[i]; }
 
 }
 

@@ -215,6 +215,8 @@ void AGraph<Tn, Te>::calculateEdgeLength()
 		
 		Te & ei = m_edges[i];
 		ei.len = m_nodes[ei.vi.x].pos.distanceTo(m_nodes[ei.vi.y].pos);
+		if(ei.len < 1e-3f) std::cout << "\n WARNING zero length " << ei.len << " edge " 
+			<< ei.vi.x << ":" << ei.vi.y;
 		
 		if(m_minEdgeLen > ei.len)
 			m_minEdgeLen = ei.len;

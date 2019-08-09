@@ -5,7 +5,7 @@
  *  first find cell by bvh
  *  then find closest primitve in cell
  *
- *  2019/5/14
+ *  2019/8/10
  */
 
 #ifndef ALO_GRD_LOCAL_GRID_LOOK_UP_RULE_H
@@ -56,6 +56,7 @@ class LocalGridLookupRule {
 	int m_maxNumStep;
 	const float *m_originCellSize;
 	float m_invCellSize;
+	float m_delta;
 	int m_dim[3];
 
 public:
@@ -107,6 +108,7 @@ void LocalGridLookupRule<T, Tp>::attach(const T *grid)
 {
 	m_originCellSize = grid->originCellSize();
 	m_invCellSize = 1.f / m_originCellSize[3];
+	m_delta = 1e-3f * m_originCellSize[3];
 	const int d = grid->resolution();
 	m_dim[0] = d;
 	m_dim[1] = d * d;
@@ -161,7 +163,7 @@ bool LocalGridLookupRule<T, Tp>::processLeaf(LocalGridLookupResult &result, cons
 		int firstHit = findClosestHit(bvhResult, t, tmpRay);
 		if(firstHit < 0) break;
 
-		t[0] += 1e-3f;
+		t[0] += m_delta;
 
 		const int &celli = m_grid->primitiveIndex(firstHit);
 
@@ -174,7 +176,7 @@ bool LocalGridLookupRule<T, Tp>::processLeaf(LocalGridLookupResult &result, cons
 		if(intersectPrimitive(primitiveResult, t, rayData)) return true;
 
 /// advance to exit point
-		tmpRay[6] = t[1] + 1e-3f;
+		tmpRay[6] = t[1] + m_delta;
 		tmpRay[7] = bvhResult._t1;
 	}
 
@@ -225,7 +227,7 @@ bool LocalGridLookupRule<T, Tp>::intersectPrimitive(LocalGridPrimitveLookupResul
         	m_grid->c_indices(), result._instanceRange, 
         	result._instanceId);
 
-        if(d < 1e-3f) break;
+        if(d < m_delta) break;
 
         if(d < tt * 1e-5f) break;
 

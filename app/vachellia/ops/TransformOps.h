@@ -36,7 +36,7 @@ public:
 /// q is local
     virtual float mapLocalDistance(const float *q) const override;
 
-    virtual void genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const override;
+    virtual void genSamples(sds::SpaceFillingVector<grd::CellSample> &samples) const override;
     
 protected:
 

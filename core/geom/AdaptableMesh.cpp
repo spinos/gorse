@@ -20,18 +20,19 @@ AdaptableMesh::~AdaptableMesh()
 
 void AdaptableMesh::createMinimal()
 {
-    for(int j=0;j<4;++j) {
-        for(int i=0;i<4;++i) {
-            addVertex(Vector3F(3.f * i, 3.f * j, -1e-5f));
+    int n = 19;
+    for(int j=0;j<n;++j) {
+        for(int i=0;i<n;++i) {
+            addVertex(Vector3F(2.f * i, -1e-5f, 2.f * (n -1 - j)));
         }
     }
     
-    for(int j=0;j<3;++j) {
-        for(int i=0;i<3;++i) {
-            int a = j * 4 + i;
-            int b = j * 4 + i + 1;
-            int c = (j + 1) * 4 + i + 1;
-            int d = (j + 1) * 4 + i;
+    for(int j=0;j<n-1;++j) {
+        for(int i=0;i<n-1;++i) {
+            int a = j * n + i;
+            int b = j * n + i + 1;
+            int c = (j + 1) * n + i + 1;
+            int d = (j + 1) * n + i;
             addTriangle(a, b, c);
             addTriangle(a, c, d);
         }

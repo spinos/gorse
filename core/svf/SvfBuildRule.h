@@ -2,7 +2,7 @@
  *  SvfBuildRule.h
  *  aloe
  *
- *  2019/7/29
+ *  2019/8/10
  */
 
 #ifndef ALO_SVF_BUILD_RULE_H
@@ -19,6 +19,7 @@ class SvfBuildRule {
 
 /// aabb
     BoundingBox m_bbox;
+    BoundingBox m_domain;
 /// space filling curve
 	Tc* m_sfc;
 /// cell touched by sample with offset
@@ -29,6 +30,7 @@ public:
 
 	SvfBuildRule(Tc* sfc);
     
+/// tight box and domain box
     void setBBox(const BoundingBox &b);
     const BoundingBox &bbox() const;
 /// encode position
@@ -75,6 +77,9 @@ public:
     void touchCellsAtLevel(const float *p, int level, float size);
 	const int &numTouchedCells() const;
     const int &touchedCell(int i) const;
+
+    bool isCellIntersectDomain(const Vector3F &origin, const float &span) const;
+    bool isPointInsideDomain(const Vector3F &q) const;
     
 	static void PrintOriginCellSize(const float* orih);
 /// divide box to grid of d resolution
@@ -390,6 +395,11 @@ void SvfBuildRule<Tc>::setBBox(const BoundingBox &b)
     const Vector3F midP = b.center();
 	const float spanL = b.getLongestDistance();
 	m_sfc->setCoord(midP.x, midP.y, midP.z, spanL * .5f);
+
+	memcpy(&m_domain, m_sfc->_origin, 12);
+	m_domain.setMax(m_domain.getMin(0) + spanL, 0);
+	m_domain.setMax(m_domain.getMin(1) + spanL, 1);
+	m_domain.setMax(m_domain.getMin(2) + spanL, 2);
 }
 
 template<typename Tc>
@@ -464,6 +474,18 @@ const int &SvfBuildRule<Tc>::numTouchedCells() const
 template<typename Tc>
 const int &SvfBuildRule<Tc>::touchedCell(int i) const
 { return m_cell27Coord[i]; }
+
+template<typename Tc>
+bool SvfBuildRule<Tc>::isCellIntersectDomain(const Vector3F &origin, const float &span) const
+{
+	const BoundingBox b(origin.x, origin.y, origin.z,
+				origin.x + span, origin.y + span, origin.z + span);
+	return (m_domain.intersect(b));
+}
+
+template<typename Tc>
+bool SvfBuildRule<Tc>::isPointInsideDomain(const Vector3F &q) const
+{ return m_domain.isPointInside(q); }
 
 }
 

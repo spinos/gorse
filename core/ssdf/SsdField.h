@@ -1,12 +1,12 @@
 /*
  *  SsdField.h
- *  aloe
+ *  gorse
  *
  *  sparse signed distance field of unknown P, Q
  *  coarse distance stored in field values
  *  fine data offset stored in grid cells
  *
- *  2019/4/30
+ *  2019/8/10
  */
 
 #ifndef ALO_SSD_FIELD_H
@@ -68,7 +68,7 @@ public:
 	void expandAabb(float *b) const;
 	const float *aabb() const;
 
-/// fill nonempty cells
+/// nonempty p cells
 	template<typename T>
 	void genSamples(sds::SpaceFillingVector<T> &samples) const;
 	
@@ -84,22 +84,17 @@ template<typename T>
 void SsdField::genSamples(sds::SpaceFillingVector<T> &samples) const
 {
 	T ap;
+    ap._span = cellSize();
 	BoundingBox b;
-	float orih[4];
-	orih[3] = cellSize();
 	const int n = numCells();
 	for(int i=0;i<n;++i) {
 		const int offset = c_cell()[i];
 		if(offset < 0) continue;
 
 		getCellBox(b, i);
-		memcpy(orih, b.data(), 12);
-
-		for(int j=0;j<100;++j) {
-
-			randomPointInsideCube((float *)&ap._pos, orih);
-			samples.push_back(ap);
-		}
+		ap._pos = b.center();
+		
+		samples<<ap;
 	}
 }
 

@@ -45,7 +45,7 @@ public:
     virtual Vector3F mapNormal(const float *q) const = 0;
     virtual float mapLocalDistance(const float *q) const = 0;
 
-	virtual void genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const = 0;
+	virtual void genSamples(sds::SpaceFillingVector<grd::CellSample> &samples) const = 0;
     
     virtual bool getVisibleState() const override;
     

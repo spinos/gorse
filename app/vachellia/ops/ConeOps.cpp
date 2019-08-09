@@ -110,18 +110,6 @@ float ConeOps::mapLocalDistance(const float *q) const
     return movePointOntoLocalCone(va, m_height, m_radius, m_lcrc);
 }
 
-void ConeOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
-{
-    const float capArea = m_radius * m_radius * PIF;
-    const float bodyArea = capArea * m_lcrc / m_radius;
-    const float bodyRatio = bodyArea / (bodyArea + capArea);
-    grd::PointSample ap;
-    for(int i=0;i<3000;++i) {
-        randomPointOnCone((float *)&ap._pos, m_radius, m_height, bodyRatio, .05f);
-        samples << ap;
-    }
-}
-
 QString ConeOps::getShortDescription() const
 {
     return QString("height %1\nradius %2").arg(QString::number(m_height), QString::number(m_radius)); 

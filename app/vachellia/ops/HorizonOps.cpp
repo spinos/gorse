@@ -75,7 +75,7 @@ bool HorizonOps::hasGeodesicSamples() const
 float HorizonOps::mapLocalDistance(const float *q) const
 { return mapDistance(q); }
 
-void HorizonOps::genSamples(sds::SpaceFillingVector<grd::PointSample> &samples) const
+void HorizonOps::genSamples(sds::SpaceFillingVector<grd::CellSample> &samples) const
 {}
 
 QString HorizonOps::getShortDescription() const

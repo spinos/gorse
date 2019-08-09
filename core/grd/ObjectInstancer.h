@@ -5,7 +5,7 @@
  *  multiple instances of object T2
  *  transform is carried by T1 
  *
- *  2019/5/14
+ *  2019/8/10
  */
 
 #ifndef ALO_GRD_OBJECT_INSTANCER_H
@@ -83,14 +83,14 @@ class ObjectInstancer {
 
 	SimpleBuffer<T1> m_instances;
 	ElementVector<T2> m_objs;
-	ElementVector<PointGridSamplesTyp> m_samps;
+	ElementVector<GridCellSamplesTyp> m_samps;
     float m_minimumCellSize;
     int m_numInstancedObjects;
 
 public:
 
 	typedef T1 InstanceTyp;
-	typedef sds::SpaceFillingVector<PointGridSamplesTyp::SampleTyp> OutSampleTyp;
+	typedef sds::SpaceFillingVector<GridCellSamplesTyp::SampleTyp> OutSampleTyp;
 
 	ObjectInstancer();
     
@@ -164,7 +164,7 @@ template<typename T1, typename T2>
 void ObjectInstancer<T1, T2>::addObject(T2 *x)
 { 
 	m_objs.append(x); 
-	PointGridSamplesTyp *s = new PointGridSamplesTyp;
+	GridCellSamplesTyp *s = new GridCellSamplesTyp;
 	s-> template create<T2>(x);
 	m_samps.append(s);
 }
@@ -266,17 +266,20 @@ template<typename T1, typename T2>
 void ObjectInstancer<T1, T2>::genInstanceSamples(OutSampleTyp *dest, int ii) const
 {
 	const T1 &inst = m_instances[ii];
-	const PointGridSamplesTyp *shapeSamps = m_samps.element(inst.objectId());
+	const GridCellSamplesTyp *shapeSamps = m_samps.element(inst.objectId());
 
 	const OutSampleTyp &src = shapeSamps->samples(); 
 
-	PointGridSamplesTyp::SampleTyp ap;
+	GridCellSamplesTyp::SampleTyp ap;
+    ap._span = src[0]._span;
+    inst.distanceToWorld(ap._span);
+
 	const int n = src.size();
 	for(int i=0;i<n;++i) {
 		ap._pos = src[i]._pos;
 
 		inst.pointToWorld((float *)&ap._pos);
-
+        
 		(*dest) << ap;
 	}
 }
@@ -361,7 +364,7 @@ void ObjectInstancer<T1, T2>::verbose() const
     
     const int n = m_samps.numElements();
     for(int i=0;i<n;++i) {
-        const PointGridSamplesTyp *shapeSamps = m_samps.element(i);
+        const GridCellSamplesTyp *shapeSamps = m_samps.element(i);
         const OutSampleTyp &s = shapeSamps->samples();
         std::cout << "\n object["<<i<<"] n sample " << s.size();
     }

@@ -2,7 +2,8 @@
  *  GridSamples.h
  *  gorse
  *
- *  2019/5/5
+ *  sample grid cells
+ *  2019/8/10
  */
 
 #ifndef ALO_GRD_GRID_SAMPLES_H
@@ -42,20 +43,21 @@ template<typename T1>
 void GridSamples<T>::create(const T1 *obj)
 {
 	m_samples.clear();
-	//obj-> template genSamples<T>(m_samples);
-    obj->genSamples(m_samples);
+	obj->genSamples(m_samples);
 }
 
 template<typename T>
 const sds::SpaceFillingVector<T> &GridSamples<T>::samples() const
 { return m_samples; }
 
-struct PointSample {
+struct CellSample {
+/// center
 	Vector3F _pos;
+    float _span;
 	int _key;
 };
 
-typedef GridSamples<PointSample> PointGridSamplesTyp;
+typedef GridSamples<CellSample> GridCellSamplesTyp;
 
 }
 

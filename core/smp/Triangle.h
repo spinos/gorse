@@ -110,6 +110,7 @@ bool Triangle<T>::sampleTriangle(T& samp, Tf& finterp, Tr* prng)
 		return false;
 		
 	finterp.interpolate(samp, m_coord, m_ind);
+	//samp._pos -= samp._nml * (.5e-3f * prng->randf1());
 	return true;
 }
 

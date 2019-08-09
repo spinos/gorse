@@ -17,6 +17,8 @@
 #include <math/NamedBufferArray.h>
 
 namespace alo {
+
+class Matrix33F;
        
 namespace ver1 {
 
@@ -81,6 +83,7 @@ public:
 
     void scaleBy(float x);
     void translateBy(float x, float y, float z);
+    void rotateBy(const Matrix33F &mat);
 /// nv vertices nf faces to b
     void copyMeshTo(ATriangleMesh *b, const int &nv, const int &nf) const;
     

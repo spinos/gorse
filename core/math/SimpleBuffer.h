@@ -1,9 +1,10 @@
 /*
- * SimpleBuffer
+ * SimpleBuffer.h
  * aloe
  *
- * extend storage by memcpy
+ * extendable storage of T
  *
+ * 2019/8/8
  */
 
 #ifndef ALO_MATH_SIMPLE_BUFFER_H
