@@ -23,6 +23,7 @@
 #include <gdf/HexahedronDistanceBuildRule.h>
 #include <sds/SparseFieldGradientLookup.h>
 #include <sds/SparseFieldGradientLookupRule.h>
+#include <tbl/TubularProfile.h>
 #include <ctime>
 
 namespace alo {
@@ -35,6 +36,18 @@ BranchTest::BranchTest()
     m_mesh = new AdaptableMesh;
     createRandomRibbon<Uniform<Lehmer> >(*m_mesh, 7, 101, &lmlcg);
     
+    TubularProfile tbprof;
+    tbprof.begin(Vector3F::Zero);
+    tbprof<<Vector3F(0.01f, 1.99f, 0.01f);
+    tbprof<<Vector3F(.76f, 1.19f, 0.12f);
+    tbprof<<Vector3F(.69f, .3f, 0.5f);
+    tbprof<<Vector3F(.3f, .15f, .77f);
+    tbprof<<Vector3F(.2f, .5f, .57f);
+    tbprof<<Vector3F(.1f, .01f, .67f);
+    tbprof<<Vector3F(.05f, -.1f, .47f);
+    
+    tbprof.end();
+#if 0
     BoundingBox shapeBox;
     m_mesh->getAabb(shapeBox);
     const float span = shapeBox.getLongestDistance();
@@ -108,7 +121,7 @@ BranchTest::BranchTest()
                 << "\n n update " << nupd;
 
     reader.detach();
-
+#endif
     DrawableResource *rec = createResource();
     setResource(rec);
 }

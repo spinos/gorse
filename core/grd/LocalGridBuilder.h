@@ -148,8 +148,8 @@ void LocalGridBuilder<T>::measure(const Ts &samples, int objI, Tr &rule)
 	sds::SpaceFillingVector<Ts::ValueTyp> destSamples;
 	for(int i=0;i<n;++i) {
 		const Ts::ValueTyp &si = samples[i];
-
-		const float &sq = si._span;
+/// expand the cell
+		const float sq = si._span * 1.03125f;
 /// center to origin
 		const Vector3F q = si._pos - Vector3F(sq * .5f, sq * .5f, sq * .5f);
 		

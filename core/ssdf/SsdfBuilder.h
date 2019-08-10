@@ -156,7 +156,7 @@ void SsdfBuilder<T, Tv, P, Q, Tr>::build(sds::SpaceFillingVector<T>* samples,
 		const int n = curs.size();
 		for(int i=0;i<n;++i) {
             //m_hexa. template divideCell<Tr>(curs[i]._key, rule, j, j+1);
-            rule.touchCellsAtLevel((const float *)&curs[i]._pos, j, .0625f);
+            rule.touchCellsAtLevel((const float *)&curs[i]._pos, j, .125f);
             const int &nt = rule.numTouchedCells();
             for(int t=0;t<nt;++t) {
                 const int &kt = rule.touchedCell(t);

@@ -78,6 +78,9 @@ public:
 	const int &numTouchedCells() const;
     const int &touchedCell(int i) const;
 
+    template<typename Te>
+    void getEdgeNeighborsAtLevel(Te & neis, const float *p, int level) const;
+
     bool isCellIntersectDomain(const Vector3F &origin, const float &span) const;
     bool isPointInsideDomain(const Vector3F &q) const;
     
@@ -275,7 +278,7 @@ void SvfBuildRule<Tc>::getLevelCellByCoord(Tcell& cell, const int coord, int lev
 	int u[3];
 	m_sfc->decodeKey(u, coord);
 	const int h = 1<<(10-level);
-	cell._key[0] = m_sfc->computeKey(u[0], u[1], u[2]);
+	cell._key[0] = coord;
 	cell._key[1] = m_sfc->computeKey(u[0]+h, u[1], u[2]);
 	cell._key[2] = m_sfc->computeKey(u[0], u[1]+h, u[2]);
 	cell._key[3] = m_sfc->computeKey(u[0]+h, u[1]+h, u[2]);
@@ -301,7 +304,8 @@ template<typename Tcell>
 void SvfBuildRule<Tc>::getLevelCellAt(Tcell& cell, const float* p, int level) const
 {
 	int coord = m_sfc->computeKeyAtLevel(p, level);
-	getLevelCellByCoord(cell, coord, level);
+	if(coord != cell._key[0]) 
+		getLevelCellByCoord(cell, coord, level);
 }
 
 template<typename Tc>
@@ -486,6 +490,41 @@ bool SvfBuildRule<Tc>::isCellIntersectDomain(const Vector3F &origin, const float
 template<typename Tc>
 bool SvfBuildRule<Tc>::isPointInsideDomain(const Vector3F &q) const
 { return m_domain.isPointInside(q); }
+
+template<typename Tc>
+template<typename Te>
+void SvfBuildRule<Tc>::getEdgeNeighborsAtLevel(Te & neis, const float *p, int level) const
+{
+	int coord = m_sfc->computeKeyAtLevel(p, level);
+	getLevelCellByCoord(neis, coord, level);
+	float mind = 1e10f;
+	int cen;
+	float q[3];
+	for(int i=0;i<8;++i) {
+		computePosition(q, neis._key[i]);
+		q[0] -= p[0];
+		q[1] -= p[1];
+		q[2] -= p[2];
+		float d = sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2]);
+		if(mind > d) {
+			mind = d;
+			cen = neis._key[i];
+		}
+	}
+
+	neis._key[0] = cen;
+
+	int u[3];
+	m_sfc->decodeKey(u, cen);
+	const int h = 1<<(10-level);
+	neis._key[1] = m_sfc->computeKey(u[0]-h, u[1]  , u[2]);
+	neis._key[2] = m_sfc->computeKey(u[0]+h, u[1]  , u[2]);
+	neis._key[3] = m_sfc->computeKey(u[0]  , u[1]-h, u[2]);
+	neis._key[4] = m_sfc->computeKey(u[0]  , u[1]+h, u[2]);
+	neis._key[5] = m_sfc->computeKey(u[0]  , u[1]  , u[2]-h);
+	neis._key[6] = m_sfc->computeKey(u[0]  , u[1]  , u[2]+h);
+
+}
 
 }
 

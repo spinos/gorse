@@ -44,9 +44,9 @@ ThinPlateTest::ThinPlateTest()
     m_mesh->createMinimal();
 #else    
     HeightField height;
-    height.create(255, 255);
+    height.create(256, 256);
     height.setZero();
-    height.setGridSize(1.45678f);
+    height.setGridSize(1.345678f);
     height.setHeightScale(10.f);
     
     Polygon2D blasso;
@@ -89,11 +89,9 @@ ThinPlateTest::ThinPlateTest()
     HeightFieldMesher heighter;
     heighter.attach(m_mesh);
     heighter.triangulate(height);
-
-    Quaternion rot(.19f, Vector3F::YAxis);
-    Matrix33F mrot(rot);
-    m_mesh->rotateBy(mrot);
-
+    //Quaternion rot(-.009f, Vector3F::YAxis);
+    //Matrix33F mrot(rot);
+    //m_mesh->rotateBy(mrot);
     heighter.detach();
 
 #endif

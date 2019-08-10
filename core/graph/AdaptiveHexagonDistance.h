@@ -28,9 +28,16 @@ class AdaptiveHexagonDistance : public BaseDistanceField<T> {
 
     typedef BaseDistanceField<T> DFTyp;
 
-	struct CellCorners {
-		int _key[8];
-	};
+/// nodes connected to 0 by axis-aligned edges
+///     4  5
+///     |/
+/// 1 - 0 - 2
+///    /|
+///  6  3
+    struct EdgeNeighbors 
+    {
+    	int _key[8];
+    };
 	
 	struct CellDesc {
 		int _key; /// to origin
@@ -325,40 +332,26 @@ void AdaptiveHexagonDistance<T>::computeDistance(const sds::SpaceFillingVector<T
 	DFTyp::resetNodes(1e20f, sdf::StBackGround, sdf::StUnknown);
 	DFTyp::resetEdges(sdf::StBackGround);
 	
-	CellCorners ac;
+	EdgeNeighbors ac;
+	ac._key[0] = -1;
 	const int n = samples.size();
 	for(int i=0;i<n;++i) {
 		
 		const T1 &sp = samples[i];
         
-			rule.getLevelCellAt(ac, (const float*)&sp._pos, level);
+		rule. template getEdgeNeighborsAtLevel<EdgeNeighbors>(ac, (const float*)&sp._pos, level);
         
-            bool isCellValid = true;
-            for(int j=0;j<8;++j) {
-                const int v = findNode(ac._key[j]);
-                if(v<0) {
-				ac._key[j] = -1;
+        for(int j=0;j<7;++j) {
+            const int v = findNode(ac._key[j]);
+            if(v<0) {
 				std::cout<<"\n WARNING cannot find cell of "<<i
 						<<" at level "<<level;
 				rule.printCoord(ac._key[j]);
-                isCellValid = false;
 				continue;
-                } 
-			
-                ac._key[j] = v;
+            }
 
-                DFTyp::setNodeDistanceTValue(ac._key[j], sp);
-            
-            }
-            
-            if(isCellValid) {
-/// block cell edges
-                int ei[2];
-                for(int j=0;j<12;++j) {
-                    Tr::GetCellEdge(ei, ac._key, j);
-                    DFTyp::setEdgeFront(ei[0], ei[1]);
-                }
-            }
+            DFTyp::setNodeDistanceTValue(v, sp, false);
+        }
 	}
     
     DFTyp::fixKnownBackside();
