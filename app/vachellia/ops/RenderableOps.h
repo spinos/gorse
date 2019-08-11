@@ -15,6 +15,7 @@
 namespace alo {
     
 struct SurfaceGeodesicSample;
+struct SurfaceSample;
 	
 namespace smp {
 template<typename T>
@@ -39,6 +40,7 @@ public:
 
     virtual bool hasInstance() const = 0;
     virtual bool hasGeodesicSamples() const = 0;
+    virtual bool hasSurfaceSamples() const = 0;
     
     virtual void expandAabb(float *box) const = 0;
     virtual float mapDistance(const float *q) const = 0;
@@ -50,6 +52,7 @@ public:
     virtual bool getVisibleState() const override;
     
     virtual const smp::SampleFilter<SurfaceGeodesicSample> *getGeodesicSamples() const;
+    virtual const smp::SampleFilter<SurfaceSample> *getSurfaceSamples() const;
     
 protected:
     void setRenderableScene(RenderableScene *x);

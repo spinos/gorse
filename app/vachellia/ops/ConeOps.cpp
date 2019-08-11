@@ -94,6 +94,9 @@ bool ConeOps::hasInstance() const
 bool ConeOps::hasGeodesicSamples() const
 { return false; }
 
+bool ConeOps::hasSurfaceSamples() const
+{ return false; }
+
 void ConeOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     m_outOps.append(line);

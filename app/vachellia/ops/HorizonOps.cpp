@@ -72,6 +72,9 @@ bool HorizonOps::hasInstance() const
 bool HorizonOps::hasGeodesicSamples() const
 { return false; }
 
+bool HorizonOps::hasSurfaceSamples() const
+{ return false; }
+
 float HorizonOps::mapLocalDistance(const float *q) const
 { return mapDistance(q); }
 

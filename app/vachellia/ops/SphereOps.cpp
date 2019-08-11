@@ -97,6 +97,9 @@ bool SphereOps::hasInstance() const
 bool SphereOps::hasGeodesicSamples() const
 { return false; }
 
+bool SphereOps::hasSurfaceSamples() const
+{ return false; }
+
 void SphereOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     m_outOps.append(line);

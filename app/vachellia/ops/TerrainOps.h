@@ -14,8 +14,8 @@ namespace alo {
 
 class TerrainOps : public VoxelOps {
 	
-	typedef smp::SampleFilter<SurfaceGeodesicSample> SampleCacheTyp;
-	SampleCacheTyp *m_geodesicSamples;
+	typedef smp::SampleFilter<SurfaceSample> SampleCacheTyp;
+	SampleCacheTyp *m_surfaceSamples;
 
 	static AFileDlgProfile SReadTrunkProfile;
 	
@@ -26,10 +26,10 @@ public:
     virtual ~TerrainOps();
 
     virtual std::string opsName() const override;
-    virtual bool hasGeodesicSamples() const override;
+    virtual bool hasSurfaceSamples() const override;
 	virtual AFileDlgProfile *readFileProfileR() const override;
 	virtual QString getShortDescription() const override;
-	virtual const smp::SampleFilter<SurfaceGeodesicSample> *getGeodesicSamples() const override;
+	virtual const smp::SampleFilter<SurfaceSample> *getSurfaceSamples() const override;
     
 protected:
     

@@ -31,6 +31,7 @@ public:
 
     virtual bool hasInstance() const override;
     virtual bool hasGeodesicSamples() const override;
+    virtual bool hasSurfaceSamples() const override;
     virtual bool hasEnable() const override;
     virtual void update() override;
     virtual void setActivated(bool x) override;

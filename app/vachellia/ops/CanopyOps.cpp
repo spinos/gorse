@@ -50,6 +50,9 @@ bool CanopyOps::hasInstance() const
 bool CanopyOps::hasGeodesicSamples() const
 { return false; }
 
+bool CanopyOps::hasSurfaceSamples() const
+{ return false; }
+
 bool CanopyOps::hasEnable() const
 { return true; }
 

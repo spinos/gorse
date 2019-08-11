@@ -10,187 +10,6 @@
             "icon": ":images/sdf_small.png",
             "children": [
                 {
-                    "id": 694285,
-                    "name": "primitive_sdf",
-                    "label": "Primitive",
-                    "icon": ":images/primitive_small.png",
-                    "children": [
-                        {
-                            "id": 299097,
-                            "name": "cone_sdf",
-                            "label": "Cone",
-                            "icon": ":images/cone.png",
-                            "is_element": true,
-                            "attribs" : [
-                                {
-                                    "name": "r",
-                                    "label": "Radius",
-                                    "typ": 3,
-                                    "value": 5.0,
-                                    "min": 0.01,
-                                    "max": 1000.0
-                                },
-                                {
-                                    "name": "h",
-                                    "label": "Height",
-                                    "typ": 3,
-                                    "value": 10.0,
-                                    "min": 0.01,
-                                    "max": 1000.0
-                                },
-                                {
-                                    "name": "transform",
-                                    "typ": 16
-                                },
-                                {
-                                    "name": "outsdf",
-                                    "typ": 3,
-                                    "port": {
-                                        "outgoing": true,
-                                        "side": 2,
-                                        "px": 2,
-                                        "py": 20
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 299098,
-                            "name": "cylinder_sdf",
-                            "label": "Cylinder",
-                            "icon": ":images/cylinder.png",
-                            "is_element": true,
-                            "attribs" : [
-                                {
-                                    "name": "r",
-                                    "label": "Radius",
-                                    "typ": 3,
-                                    "value": 5.0,
-                                    "min": 0.01,
-                                    "max": 1000.0
-                                },
-                                {
-                                    "name": "h",
-                                    "label": "Height",
-                                    "typ": 3,
-                                    "value": 10.0,
-                                    "min": 0.01,
-                                    "max": 1000.0
-                                },
-                                {
-                                    "name": "transform",
-                                    "typ": 16
-                                },
-                                {
-                                    "name": "outsdf",
-                                    "typ": 3,
-                                    "port": {
-                                        "outgoing": true,
-                                        "side": 2,
-                                        "px": 2,
-                                        "py": 20
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 299099,
-                            "name": "sphere_sdf",
-                            "label": "Sphere",
-                            "icon": ":images/sphere.png",
-                            "is_element": true,
-                            "attribs" : [
-                                {
-                                    "name": "r",
-                                    "label": "Radius",
-                                    "typ": 3,
-                                    "value": 5.0,
-                                    "min": 0.01,
-                                    "max": 1000.0
-                                },
-                                {
-                                    "name": "transform",
-                                    "typ": 16
-                                },
-                                {
-                                    "name": "outsdf",
-                                    "typ": 3,
-                                    "port": {
-                                        "outgoing": true,
-                                        "side": 2,
-                                        "px": 2,
-                                        "py": 20
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 299100,
-                            "name": "box_sdf",
-                            "label": "Box",
-                            "icon": ":images/cube.png",
-                            "is_element": true,
-                            "attribs" : [
-                                {
-                                    "name": "bx",
-                                    "label": "X Dimension",
-                                    "typ": 3,
-                                    "value": 10.0,
-                                    "min": 0.01,
-                                    "max": 1000.0
-                                },
-                                {
-                                    "name": "by",
-                                    "label": "Y Dimension",
-                                    "typ": 3,
-                                    "value": 10.0,
-                                    "min": 0.01,
-                                    "max": 1000.0
-                                },
-                                {
-                                    "name": "bz",
-                                    "label": "Z Dimension",
-                                    "typ": 3,
-                                    "value": 10.0,
-                                    "min": 0.01,
-                                    "max": 1000.0
-                                },
-                                {
-                                    "name": "transform",
-                                    "typ": 16
-                                },
-                                {
-                                    "name": "outsdf",
-                                    "typ": 3,
-                                    "port": {
-                                        "outgoing": true,
-                                        "side": 2,
-                                        "px": 2,
-                                        "py": 20
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": 298999,
-                            "name": "horizon_sdf",
-                            "label": "Horizon",
-                            "icon": ":images/horizon.png",
-                            "is_element": true,
-                            "attribs" : [
-                                {
-                                    "name": "r",
-                                    "label": "Planet Radius",
-                                    "typ": 3,
-                                    "value": 6378.0,
-                                    "min": 1.0,
-                                    "max": 10000.0
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
                     "id": 703426,
                     "name": "cache_sdf",
                     "label": "Cache",
@@ -455,6 +274,187 @@
                                         "px": -2,
                                         "py": 20
                                     }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": 694285,
+                    "name": "primitive_sdf",
+                    "label": "Primitive",
+                    "icon": ":images/primitive_small.png",
+                    "children": [
+                        {
+                            "id": 299097,
+                            "name": "cone_sdf",
+                            "label": "Cone",
+                            "icon": ":images/cone.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "r",
+                                    "label": "Radius",
+                                    "typ": 3,
+                                    "value": 5.0,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "h",
+                                    "label": "Height",
+                                    "typ": 3,
+                                    "value": 10.0,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "transform",
+                                    "typ": 16
+                                },
+                                {
+                                    "name": "outsdf",
+                                    "typ": 3,
+                                    "port": {
+                                        "outgoing": true,
+                                        "side": 2,
+                                        "px": 2,
+                                        "py": 20
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 299098,
+                            "name": "cylinder_sdf",
+                            "label": "Cylinder",
+                            "icon": ":images/cylinder.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "r",
+                                    "label": "Radius",
+                                    "typ": 3,
+                                    "value": 5.0,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "h",
+                                    "label": "Height",
+                                    "typ": 3,
+                                    "value": 10.0,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "transform",
+                                    "typ": 16
+                                },
+                                {
+                                    "name": "outsdf",
+                                    "typ": 3,
+                                    "port": {
+                                        "outgoing": true,
+                                        "side": 2,
+                                        "px": 2,
+                                        "py": 20
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 299099,
+                            "name": "sphere_sdf",
+                            "label": "Sphere",
+                            "icon": ":images/sphere.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "r",
+                                    "label": "Radius",
+                                    "typ": 3,
+                                    "value": 5.0,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "transform",
+                                    "typ": 16
+                                },
+                                {
+                                    "name": "outsdf",
+                                    "typ": 3,
+                                    "port": {
+                                        "outgoing": true,
+                                        "side": 2,
+                                        "px": 2,
+                                        "py": 20
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 299100,
+                            "name": "box_sdf",
+                            "label": "Box",
+                            "icon": ":images/cube.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "bx",
+                                    "label": "X Dimension",
+                                    "typ": 3,
+                                    "value": 10.0,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "by",
+                                    "label": "Y Dimension",
+                                    "typ": 3,
+                                    "value": 10.0,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "bz",
+                                    "label": "Z Dimension",
+                                    "typ": 3,
+                                    "value": 10.0,
+                                    "min": 0.01,
+                                    "max": 1000.0
+                                },
+                                {
+                                    "name": "transform",
+                                    "typ": 16
+                                },
+                                {
+                                    "name": "outsdf",
+                                    "typ": 3,
+                                    "port": {
+                                        "outgoing": true,
+                                        "side": 2,
+                                        "px": 2,
+                                        "py": 20
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": 298999,
+                            "name": "horizon_sdf",
+                            "label": "Horizon",
+                            "icon": ":images/horizon.png",
+                            "is_element": true,
+                            "attribs" : [
+                                {
+                                    "name": "r",
+                                    "label": "Planet Radius",
+                                    "typ": 3,
+                                    "value": 6378.0,
+                                    "min": 1.0,
+                                    "max": 10000.0
                                 }
                             ]
                         }

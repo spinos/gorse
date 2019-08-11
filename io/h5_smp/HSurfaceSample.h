@@ -1,12 +1,12 @@
 /*
- *  HSurfaceGeodesicSample.h
+ *  HSurfaceSample.h
  *  gorse
  *
- *  2019/7/15
+ *  2019/8/12
  */
  
-#ifndef ALO_H_SURFACE_GEODESIC_SAMPLE_H
-#define ALO_H_SURFACE_GEODESIC_SAMPLE_H
+#ifndef ALO_H_SURFACE_SAMPLE_H
+#define ALO_H_SURFACE_SAMPLE_H
 
 #include <h5/V1HBase.h>
 #include <math/miscfuncs.h>
@@ -15,13 +15,13 @@
 
 namespace alo {
    
-class HSurfaceGeodesicSample : public ver1::HBase {
+class HSurfaceSample : public ver1::HBase {
 
-    typedef HOocArray<hdata::TChar, 64, 32> GeodData;
+    typedef HOocArray<hdata::TChar, 40, 32> SurfData;
     
 public:
 
-	HSurfaceGeodesicSample(const std::string & name);
+	HSurfaceSample(const std::string & name);
 	
 	virtual bool verifyType();
 	
@@ -38,17 +38,17 @@ private:
 };
 
 template<typename T>
-bool HSurfaceGeodesicSample::save(const T& sampleArray)
+bool HSurfaceSample::save(const T& sampleArray)
 {
     int n = sampleArray.size();
-    if(!hasNamedAttr(".is_surf_geod_sample") )
-	    addIntAttr(".is_surf_geod_sample", 1);
-	writeIntAttr(".is_surf_geod_sample", &n );
+    if(!hasNamedAttr(".is_surf_sample") )
+	    addIntAttr(".is_surf_sample", 1);
+	writeIntAttr(".is_surf_sample", &n );
     
     bool stat;
-    GeodData *smpd = createDataStorage<GeodData>(".smps", true, stat);
+    SurfData *smpd = createDataStorage<SurfData>(".smps", true, stat);
     if(!stat) {
-    	std::cout << "\n ERROR HSurfaceGeodesicSample cannot create ooc storage smp";
+    	std::cout << "\n ERROR HSurfaceSample cannot create ooc storage smp";
     	return false;
     }
     
@@ -65,27 +65,27 @@ bool HSurfaceGeodesicSample::save(const T& sampleArray)
     }
     
     delete smpd;
-    std::cout << "\n HSurfaceGeodesicSample saved n sample " << n;
+    std::cout << "\n HSurfaceSample saved n sample " << n;
     return true;
 }
 
 template<typename T>
-bool HSurfaceGeodesicSample::load(T* y)
+bool HSurfaceSample::load(T* y)
 {
 	int n = 0;
-	readIntAttr(".is_surf_geod_sample", &n );
+	readIntAttr(".is_surf_sample", &n );
 	y->create(n);
 	
 	bool stat;
-    GeodData *smpd = openDataStorage<GeodData>(".smps", stat);
+    SurfData *smpd = openDataStorage<SurfData>(".smps", stat);
     if(!stat) {
-    	std::cout << "\n ERROR HSurfaceGeodesicSample cannot open ooc storage smp";
+    	std::cout << "\n ERROR HSurfaceSample cannot open ooc storage smp";
     	return false;
     }
 	
 	smpd->readColumns((char *)y->samples(), 0, n);
 	delete smpd;
-	std::cout<<"\n HSurfaceGeodesicSample load "<<pathToObject() <<" n sample "<< n;
+	std::cout<<"\n HSurfaceSample load "<<pathToObject() <<" n sample "<< n;
 	return true;
 }
    

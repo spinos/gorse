@@ -112,6 +112,9 @@ bool RepeatOps::hasInstance() const
 bool RepeatOps::hasGeodesicSamples() const
 { return false; }
 
+bool RepeatOps::hasSurfaceSamples() const
+{ return false; }
+
 bool RepeatOps::loadInstanceFile(const std::string &fileName)
 {
     grd::InstanceRecord rec;

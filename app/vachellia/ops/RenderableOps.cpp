@@ -41,4 +41,7 @@ RenderableScene *RenderableOps::renderableScene()
 const smp::SampleFilter<SurfaceGeodesicSample> *RenderableOps::getGeodesicSamples() const
 { return nullptr; }
 
+const smp::SampleFilter<SurfaceSample> *RenderableOps::getSurfaceSamples() const
+{ return nullptr; }
+
 } /// end of alo

@@ -98,6 +98,9 @@ bool CylinderOps::hasInstance() const
 bool CylinderOps::hasGeodesicSamples() const
 { return false; }
 
+bool CylinderOps::hasSurfaceSamples() const
+{ return false; }
+
 void CylinderOps::connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line)
 {
     m_outOps.append(line);

@@ -29,6 +29,7 @@
 #include <h5/V1H5IO.h>
 #include <h5_ssdf/HSsdf.h>
 #include <h5_grd/HLocalGrid.h>
+#include <h5_smp/HSurfaceSample.h>
 #include <math/Matrix33F.h>
 #include <ctime>
 
@@ -104,7 +105,7 @@ ThinPlateTest::ThinPlateTest()
     shapeBox.round();
     std::cout<<"\n shape box"<<shapeBox;
     
-    const float ssz = shapeBox.getLongestDistance() * .001f;
+    const float ssz = span * .001f;
 	std::cout << "\n sample size " << ssz;
 	typedef smp::Triangle<SurfaceSample > SamplerTyp;
     
@@ -177,6 +178,10 @@ ThinPlateTest::ThinPlateTest()
 	HLocalGrid hlocG("/asset/localGrid");
 	hlocG.save<grd::LocalGrid<float> >(locG);
 	hlocG.close();
+
+    HSurfaceSample hsurf("/asset/surf");
+    hsurf.save<PntArrTyp>(pnts);
+    hsurf.close();
     
     ga.close();
 	hio.end();

@@ -246,6 +246,9 @@ bool VoxelOps::hasInstance() const
 bool VoxelOps::hasGeodesicSamples() const
 { return false; }
 
+bool VoxelOps::hasSurfaceSamples() const
+{ return false; }
+
 void VoxelOps::genSamples(sds::SpaceFillingVector<grd::CellSample> &samples) const
 {
     if(m_gridRule->isEmpty() )

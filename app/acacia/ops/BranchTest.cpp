@@ -19,14 +19,22 @@
 #include <smp/Triangle.h>
 #include <smp/SurfaceGeodesicSample.h>
 #include <sds/SparseCubicField.h>
-#include <gdf/HexahedronDistanceBuilder.h>
-#include <gdf/HexahedronDistanceBuildRule.h>
-#include <sds/SparseFieldGradientLookup.h>
-#include <sds/SparseFieldGradientLookupRule.h>
+#include <gdf/GeodesicDistance.h>
 #include <tbl/TubularProfile.h>
 #include <tbl/TubularCrossSection.h>
 #include <tbl/TubularMesher.h>
 #include <tbl/RandomProfileRule.h>
+#include <ssdf/SsdField.h>
+#include <ssdf/SsdfBuilder.h>
+#include <ssdf/SsdfBuildRule.h>
+#include <grd/LocalGrid.h>
+#include <grd/LocalGridBuilder.h>
+#include <grd/LocalGridBuildRule.h>
+#include <grd/GridSamples.h>
+#include <h5/V1H5IO.h>
+#include <h5_ssdf/HSsdf.h>
+#include <h5_grd/HLocalGrid.h>
+#include <h5_smp/HSurfaceGeodesicSample.h>
 #include <ctime>
 
 namespace alo {
@@ -118,7 +126,6 @@ BranchTest::BranchTest()
 
     tbmshr.detach();
     
-#if 1
     BoundingBox shapeBox;
     m_mesh->getAabb(shapeBox);
     const float span = shapeBox.getLongestDistance();
@@ -147,52 +154,70 @@ BranchTest::BranchTest()
     }
     const int ns = pnts.size();
     std::cout<<"\n n samples "<<ns;
-    
+
     sds::FZOrderCurve sfc;
-    typedef gdf::HexahedronDistanceBuildRule<sds::FZOrderCurve> FieldRuleTyp;
-    FieldRuleTyp rule(&sfc);
-    rule.setP(6);
-    rule.setBBox(shapeBox);
+
+    gdf::GeodesicDistance geod;
+    geod.computeHexahedronField<PntArrTyp, sds::FZOrderCurve >(pnts, &sfc, shapeBox);
+
+    typedef sdf::SsdfBuildRule<sds::FZOrderCurve> BuildRuleTyp;
+    BuildRuleTyp rule(&sfc);
     
-    typedef sds::SparseCubicField<float> FieldTyp;
+    typedef sdf::SsdfBuilder<SampleTyp, float, 4, 7, BuildRuleTyp > BuilderTyp;
+    BuilderTyp builder;
+    
+    typedef sdf::SsdField FieldTyp;
     FieldTyp field;
-    gdf::HexahedronDistanceBuilder<FieldTyp> builder;
+    
+    rule.setBBox(shapeBox);
+    builder.build(&pnts, rule);
+    builder.save<FieldTyp>(field, rule);
 
-    builder.attach<FieldRuleTyp>(&field, rule);
-    builder.measure<PntArrTyp, FieldRuleTyp>(pnts, rule);    
-    builder.detach<FieldRuleTyp>(rule);
+    ver1::H5IO hio;
+    bool stat = hio.begin("./trunk.hes", HDocument::oCreate );
+    
+    ver1::HBase ga("/asset");
+    
+    float grdBox[6] = {1e10f, 1e10f, 1e10f, -1e10f, -1e10f, -1e10f};
+    field.expandAabb(grdBox);
+    
+    HSsdf writer("/asset/fld0000");
+    writer.save<FieldTyp>(field);
+    writer.close();
+    
+    typedef grd::LocalGridBuildRule<sds::FZOrderCurve> LocBuildTyp;
+    LocBuildTyp locRule(&sfc);
+    locRule.setBBox(grdBox);
+    locRule.setP(5);
+    
+    grd::LocalGrid<float> locG;
+    locG.create(1<<locRule.P());
+    locG.setAabb(grdBox);
+    
+    grd::LocalGridBuilder<grd::LocalGrid<float> > locBuilder;
+    locBuilder.attach(&locG);
+    
+    grd::GridCellSamplesTyp cells;
+    cells.create<FieldTyp>(&field);
+    
+    typedef sds::SpaceFillingVector<grd::GridCellSamplesTyp::SampleTyp> OutSampleTyp;
+    const OutSampleTyp &orignalSamples = cells.samples();
+    
+    locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, 0, locRule);
 
-    typedef sds::SparseFieldGradientLookupRule<sds::FZOrderCurve> LookupRuleTyp;
-    LookupRuleTyp lookupRule(&sfc);
-    lookupRule.setP(6);
-    lookupRule.setBBox(shapeBox);
+    locBuilder.detach();
 
-    sds::SparseFieldGradientLookup<FieldTyp> reader;
-    reader.attach(&field);
+    HLocalGrid hlocG("/asset/localGrid");
+    hlocG.save<grd::LocalGrid<float> >(locG);
+    hlocG.close();
 
-    Vector3F sum(0,0,0);
-    int nupd = 0;
+    HSurfaceGeodesicSample hgeod("/asset/geod");
+    hgeod.save<PntArrTyp>(pnts);
+    hgeod.close();
+    
+    ga.close();
+    hio.end();
 
-    for(int i=0;i<ns;++i) {
-        const float *p = (const float *)&pnts[i]._pos;
-        reader.lookupGradient<LookupRuleTyp>(p, lookupRule);
-        if(reader.isStatusUnknown()) continue;
-
-        if(reader.isStatusUpdate()) nupd++;
-
-        pnts[i]._geod = reader.interpolate(p);
-        reader.interpolateGradient((float *)&pnts[i]._grad, p);
-
-        sum += pnts[i]._grad;
-    }
-
-    sum *= 1.f / ns;
-
-    std::cout << "\n avg grad " << sum
-                << "\n n update " << nupd;
-
-    reader.detach();
-#endif
     DrawableResource *rec = createResource();
     setResource(rec);
 }

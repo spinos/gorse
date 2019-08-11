@@ -10,7 +10,7 @@
 #include <smp/SampleFilter.h>
 #include <qt_base/AFileDlg.h>
 #include <h5/V1H5IO.h>
-#include <h5_smp/HSurfaceGeodesicSample.h>
+#include <h5_smp/HSurfaceSample.h>
 #include <QProgressDialog>
 #include <QApplication>
 #include <QMessageBox>
@@ -29,12 +29,12 @@ AFileDlgProfile TerrainOps::SReadTrunkProfile(AFileDlgProfile::FRead,
    
 TerrainOps::TerrainOps()
 {
-	m_geodesicSamples = new SampleCacheTyp;
+	m_surfaceSamples = new SampleCacheTyp;
 }
 
 TerrainOps::~TerrainOps()
 {
-	delete m_geodesicSamples;
+	delete m_surfaceSamples;
 }
 
 std::string TerrainOps::opsName() const
@@ -62,12 +62,12 @@ bool TerrainOps::loadSsdfCache(const std::string &fileName)
 		std::string smpName;
 
         ver1::HBase ga("/asset");
-        stat = ga.lsFirstTypedChild<HSurfaceGeodesicSample>(smpName);
+        stat = ga.lsFirstTypedChild<HSurfaceSample>(smpName);
         ga.close();
 		
 		if(stat) {
-			HSurfaceGeodesicSample reader(smpName);
-			stat = reader. template load<SampleCacheTyp>(m_geodesicSamples);
+			HSurfaceSample reader(smpName);
+			stat = reader. template load<SampleCacheTyp>(m_surfaceSamples);
 			reader.close();
 		}
 	}
@@ -77,7 +77,7 @@ bool TerrainOps::loadSsdfCache(const std::string &fileName)
 	if(stat) {
 		
 	} else {
-		m_geodesicSamples->clear();
+		m_surfaceSamples->clear();
 	}
 	
 	progress.setValue(1);
@@ -87,13 +87,13 @@ bool TerrainOps::loadSsdfCache(const std::string &fileName)
 QString TerrainOps::getShortDescription() const
 {
 	QString r = VoxelOps::getShortDescription();
-    return r + QString("\n n terrain sample %1").arg(m_geodesicSamples->numSamples()); 
+    return r + QString("\n n terrain sample %1").arg(m_surfaceSamples->numSamples()); 
 }
 
-bool TerrainOps::hasGeodesicSamples() const
-{ return m_geodesicSamples->numSamples() > 0; }
+bool TerrainOps::hasSurfaceSamples() const
+{ return m_surfaceSamples->numSamples() > 0; }
 
-const smp::SampleFilter<SurfaceGeodesicSample> *TerrainOps::getGeodesicSamples() const
-{ return m_geodesicSamples; }
+const smp::SampleFilter<SurfaceSample> *TerrainOps::getSurfaceSamples() const
+{ return m_surfaceSamples; }
 
 } /// end of alo
