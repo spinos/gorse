@@ -34,6 +34,7 @@ public:
 	bool isValid() const;
 
 	bool isPointInside(const Float2 &q) const;
+    const Float2 &vertex(const int &i) const;
 
 protected:
 

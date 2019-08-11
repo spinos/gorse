@@ -24,6 +24,9 @@
 #include <sds/SparseFieldGradientLookup.h>
 #include <sds/SparseFieldGradientLookupRule.h>
 #include <tbl/TubularProfile.h>
+#include <tbl/TubularCrossSection.h>
+#include <tbl/TubularMesher.h>
+#include <tbl/RandomProfileRule.h>
 #include <ctime>
 
 namespace alo {
@@ -32,22 +35,90 @@ BranchTest::BranchTest()
 {
     std::time_t secs = std::time(0);
 	Uniform<Lehmer> lmlcg(secs);
+
+    typedef tbl::RandomProfileRule<Uniform<Lehmer> > TbRuleTyp;
+
+    TbRuleTyp tbrule(&lmlcg);
+    tbrule.setFirstDirection(Vector3F(.1f, 3.9f, -.1f));
+    tbrule.setMajorDirection(Vector3F(-3.3f, 2.7f, -.7f));
     
     m_mesh = new AdaptableMesh;
-    createRandomRibbon<Uniform<Lehmer> >(*m_mesh, 7, 101, &lmlcg);
+    //createRandomRibbon<Uniform<Lehmer> >(*m_mesh, 7, 101, &lmlcg);
     
-    TubularProfile tbprof;
-    tbprof.begin(Vector3F::Zero);
-    tbprof<<Vector3F(0.01f, 1.99f, 0.01f);
-    tbprof<<Vector3F(.76f, 1.19f, 0.12f);
-    tbprof<<Vector3F(.69f, .3f, 0.5f);
-    tbprof<<Vector3F(.3f, .15f, .77f);
-    tbprof<<Vector3F(.2f, .5f, .57f);
-    tbprof<<Vector3F(.1f, .01f, .67f);
-    tbprof<<Vector3F(.05f, -.1f, .47f);
+    TubularCrossSection tbcrs;
+    tbcrs.create(32, .61f, .59f);
     
-    tbprof.end();
+    TubularProfile prof0;
+    prof0.begin(Vector3F(0.f, -.33f, 0.f));
 #if 0
+    prof0<<Vector3F(0.01f, 2.99f, -0.11f);
+    prof0<<Vector3F(1.06f, 1.79f, 0.2f);
+    prof0<<Vector3F(1.29f, 1.29f, 1.75f);
+    prof0<<Vector3F(-.3f, .85f, 1.97f);
+    prof0<<Vector3F(-.42f, -.5f, 1.77f);
+    prof0<<Vector3F(.71f, -.2f, 1.67f);
+    prof0<<Vector3F(1.25f, -.3f, 1.57f);
+#else
+    prof0.randomSegments<TbRuleTyp>(9, Float2(1.4f, 1.5f), 1.f, 0.2f, tbrule);
+#endif
+    prof0.smooth();
+    prof0.end();
+    
+    TubularMesher tbmshr;
+    tbmshr.attach(m_mesh);
+    tbmshr.triangulate(tbcrs, prof0);
+
+    Vector3F ori[3];
+    ori[0] = prof0.interpolatePosition(.3f);
+    ori[1] = prof0.interpolatePosition(.5f);
+    ori[2] = prof0.interpolatePosition(.7f);
+
+    Vector3F vf[3];
+    vf[0] = Vector3F(.3f, 2.9f, .5f);
+    vf[1] = Vector3F(.4f, 2.9f, -.4f);
+    vf[2] = Vector3F(-.4f, 2.9f, -.3f);
+
+    Vector3F vm[3];
+    vm[0] = Vector3F(1.7f, 2.2f, -1.9f);
+    vm[1] = Vector3F(1.f, 2.1f, 1.1f);
+    vm[2] = Vector3F(-1.9f, 2.3f, -1.f);
+
+    int nss[3] = {7, 6, 5};
+
+    for(int i=0;i<3;++i) {
+        prof0.begin(ori[i]);
+
+        tbrule.setFirstDirection(vf[i]);
+        tbrule.setMajorDirection(vm[i]);
+
+        prof0.randomSegments<TbRuleTyp>(nss[i], Float2(1.4f, 1.5f), 1.f, 0.2f, tbrule);
+        prof0.smooth();
+        prof0.end();
+
+        tbmshr.triangulate(tbcrs, prof0);
+
+        ori[i] = prof0.interpolatePosition(.3f);
+    }
+
+    for(int i=0;i<3;++i) {
+        prof0.begin(ori[i]);
+
+        int j = (i+1) % 3;
+
+        tbrule.setFirstDirection(vf[j]);
+        tbrule.setMajorDirection(vm[j]);
+
+        prof0.randomSegments<TbRuleTyp>(5, Float2(1.f, 1.f), 1.f, 0.2f, tbrule);
+        prof0.smooth();
+        prof0.end();
+
+        tbmshr.triangulate(tbcrs, prof0);
+
+    }
+
+    tbmshr.detach();
+    
+#if 1
     BoundingBox shapeBox;
     m_mesh->getAabb(shapeBox);
     const float span = shapeBox.getLongestDistance();

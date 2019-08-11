@@ -8,23 +8,22 @@
 #ifndef ALO_TUBULAR_MESHER_H
 #define ALO_TUBULAR_MESHER_H
 
+#include <mesh/FrontMesher.h>
+
 namespace alo {
 
 class AdaptableMesh;
 class TubularCrossSection;
+class TubularProfile;
 
-class TubularMesher {
-
-	AdaptableMesh *m_mesh;
+class TubularMesher : public FrontMesher {
 
 public:
 
 	TubularMesher();
 	virtual ~TubularMesher();
 
-	void attach(AdaptableMesh *mesh);
-	void detach();
-	void triangulate(const TubularCrossSection &cs);
+	void triangulate(const TubularCrossSection &cs, const TubularProfile &prof);
 
 protected:
 

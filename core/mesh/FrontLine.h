@@ -3,7 +3,7 @@
  * aloe
  *  
  *  e0 , e1 , e2, ... , ei
- *
+ * 2019/8/11
  */
  
 #ifndef ALO_FRONT_LINE_H
@@ -14,6 +14,8 @@
 #include <deque>
 
 namespace alo {
+    
+struct Float2;
 
 class FrontLine {
     
@@ -39,6 +41,8 @@ public:
 
     void setWorldSpace(const Matrix33F& mat);
     void setLocalRotation(const Matrix33F& mat);
+/// pitch(y) then yaw(z)
+    void setLocalRotation(const Float2& pitchYaw);
     void rotateLocalBy(const Quaternion& q);
     void setDirection(const Vector3F& v);
     void setShrinking(float x);

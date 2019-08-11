@@ -39,18 +39,37 @@ public:
 	void end();
 
 	void operator<<(const Vector3F &p);
+/// double n vertex
+	void smooth();
 
 	int numSegments() const;
 /// iseg-th segment initial postion and rotation, position and rotation change
 	void getSegment(Vector3F &pos, Matrix33F &frm, 
 			Vector3F &disp, Float2 &pitchYaw,
 			const int iseg) const;
+	Vector3F interpolatePosition(const float &alpha) const;
+
+	template<typename Tr>
+	void randomSegments(int n, const Float2 &pitchYaw,
+						const float &mean, const float &size,
+						Tr &rule);
 
 protected:
 
 private:
 
 };
+
+template<typename Tr>
+void TubularProfile::randomSegments(int n, const Float2 &pitchYaw,
+						const float &mean, const float &size,
+						Tr &rule)
+{
+	*this << rule.firstDirection();
+	for(int i=0;i<n-1;++i) {
+		*this << rule.genDirection(pitchYaw, mean, size);
+	}
+}
 	
 }
 

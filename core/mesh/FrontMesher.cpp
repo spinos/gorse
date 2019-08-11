@@ -19,8 +19,14 @@ FrontMesher::~FrontMesher()
 void FrontMesher::setFrontId(int x)
 { m_frontId = x; }
 
-void FrontMesher::attachMesh(AdaptableMesh* msh)
+void FrontMesher::attach(AdaptableMesh* msh)
 { m_msh = msh; }
+
+void FrontMesher::detach()
+{ m_msh->calculateVertexNormals(); }
+
+AdaptableMesh *FrontMesher::mesh()
+{ return m_msh; }
 
 void FrontMesher::advanceFront(FrontLine& b, FrontLine& a)
 {

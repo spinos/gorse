@@ -36,7 +36,7 @@ inline void createRandomRibbon(AdaptableMesh &msh, int nu, int nv, Trng *rng)
     if(nv > 100) nv = 100;
     
     FrontMesher msher;
-    msher.attachMesh(&msh);
+    msher.attach(&msh);
     for(int i=0;i<nv;++i) {
         msher.setFrontId(i+1);
 

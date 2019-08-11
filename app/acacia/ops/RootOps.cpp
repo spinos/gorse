@@ -111,7 +111,7 @@ void RootOps::computeMesh()
     FrontLine *la = &originLine;
 
     FrontMesher msher;
-    msher.attachMesh(m_mesh);
+    msher.attach(m_mesh);
 
     for(int i=1;i<1+numSeg;++i) {
         msher.setFrontId(i);

@@ -11,6 +11,7 @@
 namespace alo {
 
 class Polygon2D;
+class Vector3F;
 
 class TubularCrossSection {
 
@@ -24,6 +25,9 @@ public:
 /// nu # vertices
 /// a, b semi axis length of ellipse
 	void create(int nu, float a, float b);
+
+	int numVertices() const;
+	void getVertex(float *q, int i) const;
 
 protected:
 

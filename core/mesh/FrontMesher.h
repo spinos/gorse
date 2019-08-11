@@ -3,7 +3,7 @@
  * aloe
  *
  * create triangle mesh by advancing edge front
- *
+ * 2019/8/11
  */
  
 #ifndef ALO_FRONT_MESHER_H
@@ -22,13 +22,17 @@ class FrontMesher {
 
 public:
     FrontMesher();
-    ~FrontMesher();
+    virtual ~FrontMesher();
     
-    void attachMesh(AdaptableMesh* msh);
+    void attach(AdaptableMesh* msh);
+    void detach();
     
     void setFrontId(int x);
 /// a --> b
     void advanceFront(FrontLine& b, FrontLine& a);
+    
+protected:
+    AdaptableMesh *mesh();
     
 private:
 

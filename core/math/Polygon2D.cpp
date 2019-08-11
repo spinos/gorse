@@ -92,4 +92,7 @@ bool Polygon2D::isPointInside(const Float2 &q) const
 	return s > 6.28f;
 }
 
+const Float2 &Polygon2D::vertex(const int &i) const
+{ return m_points[i]; }
+
 }

@@ -44,7 +44,7 @@ GeodesicDistanceTest::GeodesicDistanceTest()
     FrontLine l[100];
     
     FrontMesher msher;
-    msher.attachMesh(m_mesh);
+    msher.attach(m_mesh);
     for(int i=0;i<100;++i) {
         msher.setFrontId(i+1);
 

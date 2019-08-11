@@ -27,38 +27,34 @@ void TubularProfile::operator<<(const Vector3F &p)
 void TubularProfile::end()
 {
     const int n = numSegments();
-    for(int i=0;i<n;++i) {
-        std::cout << "\n dv" << i << m_disp[i];
-    }
 
     Vector3F side = m_disp[0]; side.normalize();
     Vector3F up = m_disp[0].cross(m_disp[1]); up.normalize();
     Vector3F front = side.cross(up);
     m_frm0.fill(side, up, front);
-    std::cout << "\n init frame " <<m_frm0;
-
+    
     m_rot.resize(n);
 
     Matrix33F frm = m_frm0;
     Matrix33F invfrm;
     
     for(int i=0;i<n-1;++i) {
-        std::cout << "\n\n segment " << i;
+        //std::cout << "\n\n segment " << i;
 
         Vector3F lside = m_disp[i].normal();
         invfrm = frm; invfrm.inverse();
 
         invfrm.transformInPlace(lside);
-        std::cout << "\n local_side0 " << lside;
+        //std::cout << "\n local_side0 " << lside;
 
         lside = m_disp[i+1].normal();
         invfrm.transformInPlace(lside);
-        std::cout << "\n local_side1 " << lside;
+        //std::cout << "\n local_side1 " << lside;
         lside.y = 0.f; lside.normalize();
 
         float pitch = acos(lside.x);
         if(lside.z > 0.f) pitch = -pitch;
-        std::cout << "\n pitch " << pitch;
+        //std::cout << "\n pitch " << pitch;
         m_rot[i].x = pitch;
 
         up.set(0.f, 1.f, 0.f);
@@ -72,13 +68,13 @@ void TubularProfile::end()
         lside = m_disp[i+1].normal();
         invfrm.transformInPlace(lside);
 
-        std::cout << "\n local_side1 after pitch " << lside;
+        //std::cout << "\n local_side1 after pitch " << lside;
 
         lside.z = 0.f; lside.normalize();
 
         float yaw = acos(lside.x);
         if(lside.y < 0.f) yaw = -yaw;
-        std::cout << "\n yaw " << yaw;
+        //std::cout << "\n yaw " << yaw;
         m_rot[i].y = yaw;
 
         front.set(0.f, 0.f, 1.f);
@@ -90,6 +86,31 @@ void TubularProfile::end()
     }
     m_rot[n-1] = Float2(0.f, 0.f);
 
+}
+
+void TubularProfile::smooth()
+{
+    int n = numSegments();
+    for(int i=0;i<n;++i) {
+        int j = i*2 + 1;
+        m_disp.insert(m_disp.begin() + j, m_disp[j-1]);
+    }
+
+    n = numSegments();
+    for(int i=0;i<n;++i) {
+        m_disp[i] *= .5f;
+    }
+
+    for(int i=0;i<n;++i) {
+        int i0 = i - 1;
+        if(i0 < 0) i0 = 0;
+        int i1 = i + 1;
+        if(i1 > n - 1) i1 = n - 1;
+
+        Vector3F p = m_disp[i0];
+        Vector3F q = m_disp[i1];
+        m_disp[i] = m_disp[i] * .5f + p * .25f + q * .25f;
+    }
 }
 
 int TubularProfile::numSegments() const
@@ -122,6 +143,29 @@ void TubularProfile::getSegment(Vector3F &pos, Matrix33F &frm,
         frm *= Matrix33F(yawi);
 
     }
+}
+
+Vector3F TubularProfile::interpolatePosition(const float &alpha) const
+{
+    const float por = numSegments() * alpha;
+    Vector3F pos = m_p0;
+
+    if(por < 1.f) {
+        pos += m_disp[0] * por;
+        return pos;
+    }
+
+    for(int i=1;i<numSegments();++i) {
+        pos += m_disp[i-1];
+
+        if((por - i) < 1.f) {
+            pos += m_disp[i] * (por - i);
+            break;
+        }
+    }
+
+    return pos;
+    
 }
 
 }

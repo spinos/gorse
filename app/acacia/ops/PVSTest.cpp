@@ -61,7 +61,7 @@ void PVSTest::computeMesh()
     FrontLine l[286];
 
     FrontMesher msher;
-    msher.attachMesh(&srcMesh);
+    msher.attach(&srcMesh);
 
     for(int i=0;i<286;++i) {
         msher.setFrontId(i+1);

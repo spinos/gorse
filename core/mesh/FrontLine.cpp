@@ -1,10 +1,12 @@
 /*
  * FrontLine.cpp
  * aloe
- *
+ * 
+ * 2019/8/11
  */
  
 #include "FrontLine.h"
+#include <math/Float2.h>
 
 namespace alo {
 
@@ -35,6 +37,21 @@ void FrontLine::setWorldSpace(const Matrix33F& mat)
 
 void FrontLine::setLocalRotation(const Matrix33F& mat)
 { m_rot = mat; }
+
+void FrontLine::setLocalRotation(const Float2& pitchYaw)
+{
+    Vector3F up(0.f, 1.f, 0.f);
+    Matrix33F t = m_mat;
+    t.transformInPlace(up);
+    Quaternion q1(pitchYaw.x, up);
+    t *= Matrix33F(q1);
+    
+    Vector3F front(0.f, 0.f, 1.f);
+    t.transformInPlace(front);
+    Quaternion q2(pitchYaw.y, front);
+    
+    m_rot = Matrix33F(q1) * Matrix33F(q2);
+}
 
 void FrontLine::rotateLocalBy(const Quaternion& q)
 { m_rot *= Matrix33F(q); }
@@ -269,8 +286,9 @@ void FrontLine::calcEdgeAdvanceType()
 
 Vector3F FrontLine::getAdvanceToPos(const FrontVertex* vert) const
 {
-    Vector3F vloc = toLocal(vert->pos() - m_center) + vert->dir() + m_dir;
-    return  m_center + toWorld(m_rot.transform(vloc) );
+    Vector3F vloc = toLocal(vert->pos() - m_center) + vert->dir();
+    const Matrix33F aft = m_mat * m_rot;
+    return  m_center + m_dir + aft.transform(vloc);
 }
 
 void FrontLine::preAdvance()
