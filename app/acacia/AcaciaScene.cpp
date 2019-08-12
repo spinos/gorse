@@ -27,6 +27,8 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
     switch(k) {
         case ThinPlateTest::Type :
             return new ThinPlateTest;
+        case LeafTest::Type :
+            return new LeafTest;
         case BranchTest::Type :
             return new BranchTest;
         case MeshFusionTest::Type :

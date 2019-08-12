@@ -155,6 +155,14 @@
             "label": "Test",
             "children": [
                 {
+                    "id": 716944,
+                    "name": "leaf_test",
+                    "label": "Leaf Test",
+                    "icon": ":images/unknown.png",
+                    "is_element": true,
+                    "attribs" : []
+                },
+                {
                     "id": 716943,
                     "name": "branch_test",
                     "label": "Branch Test",

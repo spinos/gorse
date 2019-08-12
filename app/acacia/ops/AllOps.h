@@ -13,6 +13,7 @@
 #include "SsdfTest.h"
 #include "MeshFusionTest.h"
 #include "BranchTest.h"
+#include "LeafTest.h"
 #include "ThinPlateTest.h"
 
 namespace alo {
