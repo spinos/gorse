@@ -547,13 +547,13 @@ bool EdgeCollapse::getTriangulatePolygon(int i)
 
 	std::vector<int> &vring = m_triangulate->vertices();
 	vring.clear();
-	//const VertexValue &vred = vertex(i);
 	if(!getVertexOneRing(vring, i,
 		m_mesh->c_positions(),
 		m_mesh->c_normals()[i])) {
 		std::cout << "\n\n ERROR cannot get one ring around v" << i;
 		return false;
 	}
+    m_triangulate->calculateNormal();
 	return true;
 }
 

@@ -22,20 +22,19 @@ class RandomProfileRule
 {
 	T *m_rng;
 	Vector3F m_v0;
-	Vector3F m_vm;
+	Vector3F m_v1;
 
 public:
 
 	RandomProfileRule(T *rng);
 	virtual ~RandomProfileRule();
 
-	void setFirstDirection(const Vector3F &q);
-	void setMajorDirection(const Vector3F &q);
+	void create(const Vector3F &v0, const Vector3F &v1);
 
 	const Vector3F &firstDirection() const;
 
 	Vector3F genDirection(const Float2 &pitchYaw, const float &mean,
-						const float &size);
+						const float &size, const float &alpha);
 
 protected:
 
@@ -45,7 +44,7 @@ private:
 template <typename T>
 RandomProfileRule<T>::RandomProfileRule(T *rng) :
 m_v0(0.f, 1.f, 0.f),
-m_vm(0.f, 1.f, 0.f)
+m_v1(.5f, 1.f, 0.f)
 { m_rng = rng; }
 
 template <typename T>
@@ -53,12 +52,11 @@ RandomProfileRule<T>::~RandomProfileRule()
 {}
 
 template <typename T>
-void RandomProfileRule<T>::setFirstDirection(const Vector3F &q)
-{ m_v0 = q; }
-
-template <typename T>
-void RandomProfileRule<T>::setMajorDirection(const Vector3F &q)
-{ m_vm = q; }
+void RandomProfileRule<T>::create(const Vector3F &v0, const Vector3F &v1)
+{ 
+	m_v0 = v0; 
+	m_v1 = v1;
+}
 
 template <typename T>
 const Vector3F &RandomProfileRule<T>::firstDirection() const
@@ -66,13 +64,14 @@ const Vector3F &RandomProfileRule<T>::firstDirection() const
 
 template <typename T>
 Vector3F RandomProfileRule<T>::genDirection(const Float2 &pitchYaw, const float &mean,
-						const float &size)
+						const float &size,
+						const float &alpha)
 {
 	float a = pitchYaw.x * (m_rng->randf1() - .5f);
 	float b = pitchYaw.y * (m_rng->randf1() - .5f);
 	float c = mean + (m_rng->randf1() - .5f) * size;
 
-	Vector3F r = m_vm;
+	Vector3F r = m_v0 * (1.f - alpha) + m_v1 * alpha;
 
 	Quaternion q1(a, Vector3F::YAxis);
 	Matrix33F m1(q1);

@@ -8,6 +8,7 @@
 
 #include "RegionMesher.h"
 #include "PolygonTriangulation.h"
+#include "FaceIndex.h"
 #include <geom/AdaptableMesh.h>
 
 namespace alo {
@@ -35,7 +36,14 @@ void RegionMesher::borderEnd()
 {}
 
 void RegionMesher::finish()
-{}
+{
+	m_voffset = m_mesh->numVertices();
+	const int &n = m_positions.count();
+	for(int i=0;i<n;++i)
+		m_mesh->addVertex(m_positions[i]);
+
+	std::cout << "\n finish "<<m_voffset<<" + "<<n;
+}
 
 void RegionMesher::operator<<(const Vector3F &q)
 {
@@ -47,9 +55,6 @@ void RegionMesher::operator<<(const Vector3F &q)
 void RegionMesher::attach(AdaptableMesh *mesh)
 { 
 	m_mesh = mesh;
-	const int &n = m_positions.count();
-	for(int i=0;i<n;++i)
-		mesh->addVertex(m_positions[i]);
 }
 
 void RegionMesher::triangulate(const int &border0, const bool &reverse0,
@@ -60,8 +65,21 @@ void RegionMesher::triangulate(const int &border0, const bool &reverse0,
 	std::vector<int> &polyVs = poly.vertices();
 	addBorderVertices(polyVs, border0, reverse0);
 	addBorderVertices(polyVs, border1, reverse1);
-	Vector3F cen = getRegionCenter(polyVs);
-	poly.setCenter(cen);
+	poly.calculateCenterAndNormal();
+
+	std::cout << "\n region center " << poly.center() << " normal " << poly.normal();
+
+	std::deque<FaceIndex> faces;
+	poly.getTriangles(faces);
+
+	std::deque<FaceIndex>::const_iterator it = faces.begin();
+	for(;it!=faces.end();++it) {
+		const FaceIndex &fi = *it;
+		if(poly.isFaceNormalReversed(fi.v0(), fi.v1(), fi.v2()))
+			m_mesh->addTriangle(m_voffset + fi.v0(), m_voffset + fi.v2(), m_voffset + fi.v1());
+		else
+			m_mesh->addTriangle(m_voffset + fi.v0(), m_voffset + fi.v1(), m_voffset + fi.v2());
+	}
 }
 
 void RegionMesher::detach()
@@ -71,7 +89,7 @@ void RegionMesher::addBorderVertices(std::vector<int> &vs, const int &bi, const 
 {
 	const Int2 &b = m_borders[bi];
 	if(reversed) {
-		for(int i=b.y-1;i>=b.x;++i) {
+		for(int i=b.y-1;i>=b.x;--i) {
 			vs.push_back(i);
 		}
 	} else {
@@ -79,17 +97,6 @@ void RegionMesher::addBorderVertices(std::vector<int> &vs, const int &bi, const 
 			vs.push_back(i);
 		}
 	}
-}
-
-Vector3F RegionMesher::getRegionCenter(const std::vector<int> &vs) const
-{
-	Vector3F cen(0.f, 0.f, 0.f);
-	std::vector<int>::const_iterator it = vs.begin();
-	for(;it!=vs.end();++it) {
-		cen += m_positions[*it];
-	}
-	cen *= 1.f / (float)vs.size();
-	return cen;
 }
 
 }

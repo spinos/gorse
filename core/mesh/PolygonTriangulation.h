@@ -1,10 +1,10 @@
 /*
  *  PolygonTriangulation.h
  *
- *  triangulate a polygon defined by a list of vertices
- *  ngon has n-2 triangles
+ *  triangulate a polygon defined by a list of n vertices
+ *  to n-2 triangles
  *  select corner with minimal circumcircle radius
- *
+ *  2019/8/13
  */
 
 #ifndef ALO_POLYGON_TRIANGULATION_H
@@ -22,6 +22,7 @@ class PolygonTriangulation {
 
 	std::vector<int> m_vertices;
 	Vector3F m_center;
+    Vector3F m_normal;
 	const Vector3F *m_pos;
 
 public:
@@ -29,11 +30,20 @@ public:
 	virtual ~PolygonTriangulation();
 
 	void setPositions(const Vector3F *pos);
-	void setCenter(const Vector3F &c);
-
+	
 	std::vector<int> &vertices();
+    
+    void setCenter(const Vector3F &q);
+/// around center
+    void calculateNormal();
+/// center by mean
+    void calculateCenterAndNormal();
 
 	bool getTriangles(std::deque<FaceIndex> &faces);
+    
+    const Vector3F &center() const;
+    const Vector3F &normal() const;
+    bool isFaceNormalReversed(const int &a, const int &b, const int &c) const;
 
 private:
 	int selectCorner() const;
@@ -56,7 +66,7 @@ private:
 /// | /
 /// c    i-1
 	void getTriangleVertices(int &a, int &b, int &c, int i) const;
-
+    
 };
 
 }

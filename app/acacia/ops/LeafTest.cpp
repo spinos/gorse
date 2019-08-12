@@ -29,7 +29,13 @@
 #include <h5/V1H5IO.h>
 #include <h5_ssdf/HSsdf.h>
 #include <h5_grd/HLocalGrid.h>
-#include <h5_smp/HSurfaceGeodesicSample.h>
+#include <mesh/RegionMesher.h>
+#include <morph/LeafProfile.h>
+#include <morph/Elliptic.h>
+#include <tbl/TubularProfile.h>
+#include <tbl/TubularCrossSection.h>
+#include <tbl/TubularMesher.h>
+#include <tbl/RandomProfileRule.h>
 #include <ctime>
 
 namespace alo {
@@ -41,8 +47,41 @@ LeafTest::LeafTest()
     
     m_mesh = new AdaptableMesh;
 
-// todo region mesher
-    
+    TubularCrossSection tbcrs;
+    tbcrs.create(6, .1f, .09f);
+
+    TubularProfile prof0;
+    Matrix33F frm0 = TubularProfile::calculateFrame0(Vector3F(0.f, .39f, 0.f), Vector3F(-.3f, .27f, -.17f));
+    prof0.begin(Vector3F(0.f, -.1f, 0.f), frm0);
+
+    typedef tbl::RandomProfileRule<Uniform<Lehmer> > TbRuleTyp;
+
+    TbRuleTyp tbrule(&lmlcg);
+    tbrule.create(Vector3F(0.f, .39f, 0.f), Vector3F(-.3f, .27f, -.17f));
+    prof0.randomSegments<TbRuleTyp>(7, Float2(.01f, .5f), 1.f, 0.2f, tbrule);
+    prof0.smooth();
+    prof0.end();
+
+    TubularMesher tbmshr;
+    tbmshr.attach(m_mesh);
+    tbmshr.triangulate(tbcrs, prof0);
+    tbmshr.detach();
+
+    morph::LeafProfile lpf;
+    lpf._resolution.set(8, 1);
+    lpf._oblique.set(.1f, .1f);
+    lpf._twistBendRoll.set(.2f, -.1f, .4f);
+    lpf._size.set(1.f, .7f, .3f);
+    morph::Elliptic elp;
+    elp.create(lpf);
+
+    RegionMesher mshr;
+    mshr.attach(m_mesh);
+
+    mshr.triangulate<morph::Elliptic>(elp);
+
+    mshr.detach();
+ #if 0   
     BoundingBox shapeBox;
     m_mesh->getAabb(shapeBox);
     const float span = shapeBox.getLongestDistance();
@@ -127,14 +166,10 @@ LeafTest::LeafTest()
     HLocalGrid hlocG("/asset/localGrid");
     hlocG.save<grd::LocalGrid<float> >(locG);
     hlocG.close();
-
-    HSurfaceGeodesicSample hgeod("/asset/geod");
-    hgeod.save<PntArrTyp>(pnts);
-    hgeod.close();
     
     ga.close();
     hio.end();
-
+#endif
     DrawableResource *rec = createResource();
     setResource(rec);
 }

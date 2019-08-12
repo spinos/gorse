@@ -35,7 +35,8 @@ public:
 	TubularProfile();
 	virtual ~TubularProfile();
 
-	void begin(const Vector3F &p);
+/// initial position and rotation
+	void begin(const Vector3F &p, const Matrix33F &frm);
 	void end();
 
 	void operator<<(const Vector3F &p);
@@ -48,11 +49,14 @@ public:
 			Vector3F &disp, Float2 &pitchYaw,
 			const int iseg) const;
 	Vector3F interpolatePosition(const float &alpha) const;
+	Matrix33F interpolateRotation(const float &alpha) const;
 
 	template<typename Tr>
 	void randomSegments(int n, const Float2 &pitchYaw,
 						const float &mean, const float &size,
 						Tr &rule);
+
+	static Matrix33F calculateFrame0(const Vector3F &v0, const Vector3F &v1);
 
 protected:
 
@@ -66,8 +70,9 @@ void TubularProfile::randomSegments(int n, const Float2 &pitchYaw,
 						Tr &rule)
 {
 	*this << rule.firstDirection();
-	for(int i=0;i<n-1;++i) {
-		*this << rule.genDirection(pitchYaw, mean, size);
+	const float du = 1.f / (float)n;
+	for(int i=1;i<n;++i) {
+		*this << rule.genDirection(pitchYaw, mean, size, du * i);
 	}
 }
 	

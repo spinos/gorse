@@ -15,9 +15,10 @@ TubularProfile::TubularProfile()
 TubularProfile::~TubularProfile()
 {}
 
-void TubularProfile::begin(const Vector3F &p)
+void TubularProfile::begin(const Vector3F &p, const Matrix33F &frm)
 {
     m_p0 = p;
+    m_frm0 = frm;
     m_disp.clear();
 }
 
@@ -28,11 +29,6 @@ void TubularProfile::end()
 {
     const int n = numSegments();
 
-    Vector3F side = m_disp[0]; side.normalize();
-    Vector3F up = m_disp[0].cross(m_disp[1]); up.normalize();
-    Vector3F front = side.cross(up);
-    m_frm0.fill(side, up, front);
-    
     m_rot.resize(n);
 
     Matrix33F frm = m_frm0;
@@ -57,7 +53,7 @@ void TubularProfile::end()
         //std::cout << "\n pitch " << pitch;
         m_rot[i].x = pitch;
 
-        up.set(0.f, 1.f, 0.f);
+        Vector3F up(0.f, 1.f, 0.f);
         frm.transformInPlace(up);
 
         Quaternion pitchi(pitch, up);
@@ -77,7 +73,7 @@ void TubularProfile::end()
         //std::cout << "\n yaw " << yaw;
         m_rot[i].y = yaw;
 
-        front.set(0.f, 0.f, 1.f);
+        Vector3F front(0.f, 0.f, 1.f);
         frm.transformInPlace(front);
 
         Quaternion yawi(yaw, front);
@@ -166,6 +162,53 @@ Vector3F TubularProfile::interpolatePosition(const float &alpha) const
 
     return pos;
     
+}
+
+Matrix33F TubularProfile::interpolateRotation(const float &alpha) const
+{
+    const float por = numSegments() * alpha;
+    Matrix33F frm = m_frm0;
+
+    for(int i=0;i<numSegments();++i) {
+
+        float pitchAng = m_rot[i].x;
+        float yawAng = m_rot[i].y;
+        if(por < 1.f) {
+            pitchAng *= por;
+            yawAng *= por;
+        }
+
+        Vector3F up(0.f, 1.f, 0.f);
+        frm.transformInPlace(up);
+
+        Quaternion pitchi(pitchAng, up);
+        frm *= Matrix33F(pitchi);
+
+        Vector3F front(0.f, 0.f, 1.f);
+        frm.transformInPlace(front);
+
+        Quaternion yawi(yawAng, front);
+        frm *= Matrix33F(yawi);
+
+        if((por - i) < 1.f) break;
+    }
+
+    return frm;
+}
+
+Matrix33F TubularProfile::calculateFrame0(const Vector3F &v0, const Vector3F &v1)
+{
+    Matrix33F mat;
+    Vector3F side = v0; side.normalize();
+    Vector3F up = v0.cross(v1); up.normalize();
+    Vector3F front = side.cross(up);
+    float fl = front.length();
+    if(fl > 1e-6f) {
+        front /= fl;
+        up = front.cross(side);
+        mat.fill(side, up, front);
+    }
+    return mat;
 }
 
 }

@@ -1,3 +1,9 @@
+/*
+ *  PolygonTriangulation.cpp
+ *
+ *  2019/8/13
+ */
+
 #include "PolygonTriangulation.h"
 #include "FaceIndex.h"
 
@@ -12,11 +18,39 @@ PolygonTriangulation::~PolygonTriangulation()
 void PolygonTriangulation::setPositions(const Vector3F *pos)
 { m_pos = pos; }
 
-void PolygonTriangulation::setCenter(const Vector3F &c)
-{ m_center = c; }
-
 std::vector<int> &PolygonTriangulation::vertices()
 { return m_vertices; }
+
+void PolygonTriangulation::setCenter(const Vector3F &q)
+{ m_center = q; }
+
+void PolygonTriangulation::calculateNormal()
+{
+    m_normal.setZero();
+    const int n = m_vertices.size();
+	for(int i=0;i<n;++i) {
+		int i1 = i+1;
+        if(i1 == n) i1 = 0;
+        
+		m_normal += (m_pos[m_vertices[i]] - m_center).cross(m_pos[m_vertices[i1]] - m_center);
+	}
+    
+    m_normal.normalize();
+}
+
+void PolygonTriangulation::calculateCenterAndNormal()
+{ 
+    m_center.setZero(); 
+    std::vector<int>::const_iterator it = m_vertices.begin();
+	for(;it!=m_vertices.end();++it) {
+		std::cout << " v"<< *it;
+		m_center += m_pos[*it];
+	}
+    
+    const int n = m_vertices.size();
+	m_center *= 1.f / (float)n;
+    calculateNormal();
+}
 
 bool PolygonTriangulation::getTriangles(std::deque<FaceIndex> &faces)
 {
@@ -50,7 +84,7 @@ int PolygonTriangulation::selectCorner() const
 		if(isCornerConcave(m_pos[a], m_pos[b], m_pos[c]))
 			continue;
 		
-		float r = getCircumRadius(m_pos[a], m_pos[b], m_pos[c]);
+		const float r = getCircumRadius(m_pos[a], m_pos[b], m_pos[c]);
 		if(minRadius > r) {
 			minRadius = r;
 			sel = i;
@@ -64,7 +98,8 @@ void PolygonTriangulation::addTriangle(std::deque<FaceIndex> &faces, int i) cons
 {
 	int a, b, c;
 	getTriangleVertices(a,b,c,i);
-	faces.push_back(FaceIndex(a, b, c));
+    FaceIndex fv(a, b, c);
+	faces.push_back(fv);
 }
 
 void PolygonTriangulation::getTriangleVertices(int &a, int &b, int &c, int i) const
@@ -88,10 +123,8 @@ bool PolygonTriangulation::isCornerConcave(const Vector3F &a,
 	Vector3F ab = b - a;
 	Vector3F ac = c - a;
 	Vector3F nf = ab.cross(ac);
-	Vector3F ax = m_center - a;
-	if(ab.cross(ax).dot(nf) < 0.f) return true;
-	if(ax.cross(ac).dot(nf) < 0.f) return true;
-	return false;
+	
+    return nf.dot(m_normal) < 1e-6f;
 }
 
 float PolygonTriangulation::getCircumRadius(const Vector3F &p1, 
@@ -102,6 +135,22 @@ float PolygonTriangulation::getCircumRadius(const Vector3F &p1,
 	float b = p2.distanceTo(p3);
 	float c = p3.distanceTo(p1);
 	return a * b * c / sqrt((a + b + c) * (b + c - a) * (c + a - b) * (a + b - c));
+}
+
+const Vector3F &PolygonTriangulation::center() const
+{ return m_center; }
+
+const Vector3F &PolygonTriangulation::normal() const
+{ return m_normal; }
+
+bool PolygonTriangulation::isFaceNormalReversed(const int &a, const int &b, const int &c) const
+{
+    const Vector3F &pa = m_pos[a];
+    Vector3F ab = m_pos[b] - pa;
+	Vector3F ac = m_pos[c] - pa;
+	Vector3F nf = ab.cross(ac).normal();
+    
+    return nf.dot(m_normal) < 1e-6f;
 }
 
 }

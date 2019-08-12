@@ -47,28 +47,19 @@ BranchTest::BranchTest()
     typedef tbl::RandomProfileRule<Uniform<Lehmer> > TbRuleTyp;
 
     TbRuleTyp tbrule(&lmlcg);
-    tbrule.setFirstDirection(Vector3F(.1f, 3.9f, -.1f));
-    tbrule.setMajorDirection(Vector3F(-3.3f, 2.7f, -.7f));
+    tbrule.create(Vector3F(.1f, 3.9f, -.1f), Vector3F(-1.4f, 1.7f, 1.7f));
     
     m_mesh = new AdaptableMesh;
-    //createRandomRibbon<Uniform<Lehmer> >(*m_mesh, 7, 101, &lmlcg);
-    
+
     TubularCrossSection tbcrs;
     tbcrs.create(32, .61f, .59f);
     
     TubularProfile prof0;
-    prof0.begin(Vector3F(0.f, -.33f, 0.f));
-#if 0
-    prof0<<Vector3F(0.01f, 2.99f, -0.11f);
-    prof0<<Vector3F(1.06f, 1.79f, 0.2f);
-    prof0<<Vector3F(1.29f, 1.29f, 1.75f);
-    prof0<<Vector3F(-.3f, .85f, 1.97f);
-    prof0<<Vector3F(-.42f, -.5f, 1.77f);
-    prof0<<Vector3F(.71f, -.2f, 1.67f);
-    prof0<<Vector3F(1.25f, -.3f, 1.57f);
-#else
-    prof0.randomSegments<TbRuleTyp>(9, Float2(1.4f, 1.5f), 1.f, 0.2f, tbrule);
-#endif
+    Matrix33F frm0 = TubularProfile::calculateFrame0(Vector3F(.1f, 3.9f, -.1f), Vector3F(-1.4f, 1.7f, 1.7f));
+    prof0.begin(Vector3F(0.f, -.33f, 0.f), frm0);
+
+    prof0.randomSegments<TbRuleTyp>(9, Float2(.7f, .8f), 1.f, 0.2f, tbrule);
+
     prof0.smooth();
     prof0.end();
     
@@ -79,44 +70,59 @@ BranchTest::BranchTest()
     Vector3F ori[3];
     ori[0] = prof0.interpolatePosition(.3f);
     ori[1] = prof0.interpolatePosition(.5f);
-    ori[2] = prof0.interpolatePosition(.7f);
+    ori[2] = prof0.interpolatePosition(.77f);
+    Matrix33F mat[3];
+    mat[0] = prof0.interpolateRotation(.3f);
+    mat[1] = prof0.interpolateRotation(.5f);
+    mat[2] = prof0.interpolateRotation(.77f);
 
     Vector3F vf[3];
-    vf[0] = Vector3F(.3f, 2.9f, .5f);
-    vf[1] = Vector3F(.4f, 2.9f, -.4f);
-    vf[2] = Vector3F(-.4f, 2.9f, -.3f);
+    vf[0] = Vector3F(.1f, -.9f, -.9f);
+    vf[1] = Vector3F(.1f, -.9f, .9f);
+    vf[2] = Vector3F(.1f, -.9f, -.9f);
 
     Vector3F vm[3];
-    vm[0] = Vector3F(1.7f, 2.2f, -1.9f);
-    vm[1] = Vector3F(1.f, 2.1f, 1.1f);
-    vm[2] = Vector3F(-1.9f, 2.3f, -1.f);
+    vm[0] = Vector3F(1.4f, 3.2f, .5f);
+    vm[1] = Vector3F(-.5f, 3.1f, -.6f);
+    vm[2] = Vector3F(1.6f, 3.3f, -.7f);
 
-    int nss[3] = {7, 6, 5};
+    int nss[3] = {8, 7, 6};
+
+    tbcrs.create(15, .51f, .49f);
 
     for(int i=0;i<3;++i) {
-        prof0.begin(ori[i]);
 
-        tbrule.setFirstDirection(vf[i]);
-        tbrule.setMajorDirection(vm[i]);
+        Vector3F bori = mat[i].transform(vf[i]);
+        if(bori.y < 0.f) bori.y *= -1.f;
 
-        prof0.randomSegments<TbRuleTyp>(nss[i], Float2(1.4f, 1.5f), 1.f, 0.2f, tbrule);
+        frm0 = TubularProfile::calculateFrame0(bori, vm[i]);
+        prof0.begin(ori[i], frm0);
+
+        tbrule.create(bori, vm[i]);
+
+        prof0.randomSegments<TbRuleTyp>(nss[i], Float2(.7f, .8f), 1.f, 0.2f, tbrule);
         prof0.smooth();
         prof0.end();
 
         tbmshr.triangulate(tbcrs, prof0);
 
-        ori[i] = prof0.interpolatePosition(.3f);
+        ori[i] = prof0.interpolatePosition(.5f);
+        mat[i] = prof0.interpolateRotation(.5f);
     }
 
     for(int i=0;i<3;++i) {
-        prof0.begin(ori[i]);
 
         int j = (i+1) % 3;
 
-        tbrule.setFirstDirection(vf[j]);
-        tbrule.setMajorDirection(vm[j]);
+        Vector3F bori = mat[j].transform(vf[j]);
+        if(bori.y < 0.f) bori.y *= -1.f;
 
-        prof0.randomSegments<TbRuleTyp>(5, Float2(1.f, 1.f), 1.f, 0.2f, tbrule);
+        frm0 = TubularProfile::calculateFrame0(bori, vm[j]);
+        prof0.begin(ori[i], frm0);
+
+        tbrule.create(bori, vm[j]);
+
+        prof0.randomSegments<TbRuleTyp>(5, Float2(.9f, .9f), 1.f, 0.2f, tbrule);
         prof0.smooth();
         prof0.end();
 
@@ -125,7 +131,7 @@ BranchTest::BranchTest()
     }
 
     tbmshr.detach();
-    
+#if 0
     BoundingBox shapeBox;
     m_mesh->getAabb(shapeBox);
     const float span = shapeBox.getLongestDistance();
@@ -217,7 +223,7 @@ BranchTest::BranchTest()
     
     ga.close();
     hio.end();
-
+#endif
     DrawableResource *rec = createResource();
     setResource(rec);
 }
