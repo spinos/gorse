@@ -35,6 +35,8 @@
 #include <h5_ssdf/HSsdf.h>
 #include <h5_grd/HLocalGrid.h>
 #include <h5_smp/HSurfaceGeodesicSample.h>
+#include <morph/Monopodial.h>
+#include <morph/PlantMesher.h>
 #include <ctime>
 
 namespace alo {
@@ -44,93 +46,21 @@ BranchTest::BranchTest()
     std::time_t secs = std::time(0);
 	Uniform<Lehmer> lmlcg(secs);
 
-    typedef tbl::RandomProfileRule<Uniform<Lehmer> > TbRuleTyp;
+    morph::Monopodial<Uniform<Lehmer> > plantRule(&lmlcg);
+    morph::Plant aplant;
+    morph::PlantProfile plantF;
+    plantF.setGrowDirections(Vector3F(0.f, 1.f, 0.f), Vector3F(-.1f, .9f, -.1f));
+    plantF.setAge(9);
+    morph::StemProfile stemF;
+    plantRule.grow(&aplant, plantF, stemF);
 
-    TbRuleTyp tbrule(&lmlcg);
-    tbrule.create(Vector3F(.1f, 3.9f, -.1f), Vector3F(-1.4f, 1.7f, 1.7f));
-    
     m_mesh = new AdaptableMesh;
 
-    TubularCrossSection tbcrs;
-    tbcrs.create(32, .61f, .59f);
-    
-    TubularProfile prof0;
-    Matrix33F frm0 = TubularProfile::calculateFrame0(Vector3F(.1f, 3.9f, -.1f), Vector3F(-1.4f, 1.7f, 1.7f));
-    prof0.begin(Vector3F(0.f, -.33f, 0.f), frm0);
+    morph::PlantMesher plmshr;
+    plmshr.attach(m_mesh);
+    plmshr.triangulate(aplant, plantF);
+    plmshr.detach();
 
-    prof0.randomSegments<TbRuleTyp>(9, Float2(.7f, .8f), 1.f, 0.2f, tbrule);
-
-    prof0.smooth();
-    prof0.end();
-    
-    TubularMesher tbmshr;
-    tbmshr.attach(m_mesh);
-    tbmshr.triangulate(tbcrs, prof0);
-
-    Vector3F ori[3];
-    ori[0] = prof0.interpolatePosition(.3f);
-    ori[1] = prof0.interpolatePosition(.5f);
-    ori[2] = prof0.interpolatePosition(.77f);
-    Matrix33F mat[3];
-    mat[0] = prof0.interpolateRotation(.3f);
-    mat[1] = prof0.interpolateRotation(.5f);
-    mat[2] = prof0.interpolateRotation(.77f);
-
-    Vector3F vf[3];
-    vf[0] = Vector3F(.1f, -.9f, -.9f);
-    vf[1] = Vector3F(.1f, -.9f, .9f);
-    vf[2] = Vector3F(.1f, -.9f, -.9f);
-
-    Vector3F vm[3];
-    vm[0] = Vector3F(1.4f, 3.2f, .5f);
-    vm[1] = Vector3F(-.5f, 3.1f, -.6f);
-    vm[2] = Vector3F(1.6f, 3.3f, -.7f);
-
-    int nss[3] = {8, 7, 6};
-
-    tbcrs.create(15, .51f, .49f);
-
-    for(int i=0;i<3;++i) {
-
-        Vector3F bori = mat[i].transform(vf[i]);
-        if(bori.y < 0.f) bori.y *= -1.f;
-
-        frm0 = TubularProfile::calculateFrame0(bori, vm[i]);
-        prof0.begin(ori[i], frm0);
-
-        tbrule.create(bori, vm[i]);
-
-        prof0.randomSegments<TbRuleTyp>(nss[i], Float2(.7f, .8f), 1.f, 0.2f, tbrule);
-        prof0.smooth();
-        prof0.end();
-
-        tbmshr.triangulate(tbcrs, prof0);
-
-        ori[i] = prof0.interpolatePosition(.5f);
-        mat[i] = prof0.interpolateRotation(.5f);
-    }
-
-    for(int i=0;i<3;++i) {
-
-        int j = (i+1) % 3;
-
-        Vector3F bori = mat[j].transform(vf[j]);
-        if(bori.y < 0.f) bori.y *= -1.f;
-
-        frm0 = TubularProfile::calculateFrame0(bori, vm[j]);
-        prof0.begin(ori[i], frm0);
-
-        tbrule.create(bori, vm[j]);
-
-        prof0.randomSegments<TbRuleTyp>(5, Float2(.9f, .9f), 1.f, 0.2f, tbrule);
-        prof0.smooth();
-        prof0.end();
-
-        tbmshr.triangulate(tbcrs, prof0);
-
-    }
-
-    tbmshr.detach();
 #if 0
     BoundingBox shapeBox;
     m_mesh->getAabb(shapeBox);

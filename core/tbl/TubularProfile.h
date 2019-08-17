@@ -43,6 +43,9 @@ public:
 /// double n vertex
 	void smooth();
 
+    const Vector3F &pos0() const;
+    const Matrix33F &frm0() const;
+    const Vector3F &displacement(const int &i) const;
 	int numSegments() const;
 /// iseg-th segment initial postion and rotation, position and rotation change
 	void getSegment(Vector3F &pos, Matrix33F &frm, 
@@ -50,6 +53,9 @@ public:
 			const int iseg) const;
 	Vector3F interpolatePosition(const float &alpha) const;
 	Matrix33F interpolateRotation(const float &alpha) const;
+/// num_radius <- num_displacement
+/// each radius plus x
+	void expandRadius(const float &x);
 
 	template<typename Tr>
 	void randomSegments(int n, const Float2 &pitchYaw,

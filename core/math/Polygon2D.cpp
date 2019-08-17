@@ -32,7 +32,6 @@ int Polygon2D::numSegments() const
 
 void Polygon2D::finish()
 {
-	std::cout << "\n Polygon2D::finish n v" << m_points.count();
 	Float2 cen(0.f, 0.f);
 	for(int i=0;i<m_points.count();++i) {
 		cen.x += m_points[i].x;
@@ -40,7 +39,6 @@ void Polygon2D::finish()
 	}
 	cen.x *= 1.f / m_points.count();
 	cen.y *= 1.f / m_points.count();
-	std::cout << " center " << cen.x << ", "<< cen.y;
 }
 
 bool Polygon2D::isValid() const

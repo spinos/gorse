@@ -106,7 +106,14 @@ namespace alo {
 	
     friend std::ostream& operator<<(std::ostream &output, const Matrix33F & p);
     
-	
+	static void rotateAroundLocalX(Matrix33F &mat, const float &ang);
+	static void rotateAroundLocalY(Matrix33F &mat, const float &ang);
+	static void rotateAroundLocalZ(Matrix33F &mat, const float &ang);
+	static void rotateToAlign(Matrix33F &mat, const Vector3F &vp);
+/// limit > 0 maximum angle of rotation
+    static void rotateToAlignLimited(Matrix33F &mat, const Vector3F &vp,
+                            const float &limit);
+    
  };
 
 }

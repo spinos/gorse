@@ -109,6 +109,15 @@ void TubularProfile::smooth()
     }
 }
 
+const Vector3F &TubularProfile::pos0() const
+{ return m_p0; }
+
+const Matrix33F &TubularProfile::frm0() const
+{ return m_frm0; }
+
+const Vector3F &TubularProfile::displacement(const int &i) const
+{ return m_disp[i]; }
+
 int TubularProfile::numSegments() const
 { return m_disp.size(); }
 
@@ -209,6 +218,11 @@ Matrix33F TubularProfile::calculateFrame0(const Vector3F &v0, const Vector3F &v1
         mat.fill(side, up, front);
     }
     return mat;
+}
+
+void TubularProfile::expandRadius(const float &x)
+{
+    
 }
 
 }

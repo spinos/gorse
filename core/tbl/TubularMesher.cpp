@@ -51,7 +51,7 @@ void TubularMesher::triangulate(const TubularCrossSection &cs, const TubularProf
 	fline.setWorldSpace(frm);
     fline.setDirection(disp);
 	fline.setLocalRotation(pitchYaw);
-    fline.setShrinking(0.f);
+    fline.setShrinking(0.0f);
     
     const int ns = prof.numSegments();
 
@@ -65,7 +65,7 @@ void TubularMesher::triangulate(const TubularCrossSection &cs, const TubularProf
     	lb.setWorldSpace(frm);
     	lb.setDirection(disp);
     	lb.setLocalRotation(pitchYaw);
-		lb.setShrinking(0.f);
+		lb.setShrinking(0.0f);
     	
     	FrontLine &la = line[(i-1)&1];
     	

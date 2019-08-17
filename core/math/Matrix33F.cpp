@@ -733,5 +733,100 @@ bool Matrix33F::rotateUpTo(const Vector3F& vref)
 	return true;
 }
 
+void Matrix33F::rotateAroundLocalX(Matrix33F &mat, const float &ang)
+{ 
+	Vector3F ax = Vector3F::XAxis;
+	mat.transformInPlace(ax);
+	Quaternion q(ang, ax);
+	mat *= Matrix33F(q);
+}
+
+void Matrix33F::rotateAroundLocalY(Matrix33F &mat, const float &ang)
+{
+    Vector3F ay = Vector3F::YAxis;
+	mat.transformInPlace(ay);
+	Quaternion q(ang, ay);
+	mat *= Matrix33F(q);
+}
+
+void Matrix33F::rotateAroundLocalZ(Matrix33F &mat, const float &ang)
+{
+    Vector3F az = Vector3F::ZAxis;
+	mat.transformInPlace(az);
+	Quaternion q(ang, az);
+	mat *= Matrix33F(q);
+}
+
+void Matrix33F::rotateToAlign(Matrix33F &mat, const Vector3F &vp)
+{
+	Matrix33F invfrm = mat;
+	invfrm.inverse();
+	Vector3F lside = vp;
+	invfrm.transformInPlace(lside);
+    lside.y = 0.f; lside.normalize();
+    float pitch = acos(lside.x);
+    if(lside.z > 0.f) pitch = -pitch;
+
+    Vector3F up(0.f, 1.f, 0.f);
+    mat.transformInPlace(up);
+
+    Quaternion pitchi(pitch, up);
+    mat *= Matrix33F(pitchi);
+
+    invfrm = mat;
+	invfrm.inverse();
+
+	lside = vp;
+    invfrm.transformInPlace(lside);
+    lside.z = 0.f; lside.normalize();
+
+    float yaw = acos(lside.x);
+    if(lside.y < 0.f) yaw = -yaw;
+
+    Vector3F front(0.f, 0.f, 1.f);
+    mat.transformInPlace(front);
+
+    Quaternion yawi(yaw, front);
+    mat *= Matrix33F(yawi);
+}
+
+void Matrix33F::rotateToAlignLimited(Matrix33F &mat, const Vector3F &vp,
+                            const float &limit)
+{
+    Matrix33F invfrm = mat;
+	invfrm.inverse();
+	Vector3F lside = vp;
+	invfrm.transformInPlace(lside);
+    lside.y = 0.f; lside.normalize();
+    float pitch = acos(lside.x);
+    if(lside.z > 0.f) pitch = -pitch;
+    if(pitch > limit) pitch = limit;
+    if(pitch < -limit) pitch = -limit;
+
+    Vector3F up(0.f, 1.f, 0.f);
+    mat.transformInPlace(up);
+
+    Quaternion pitchi(pitch, up);
+    mat *= Matrix33F(pitchi);
+
+    invfrm = mat;
+	invfrm.inverse();
+
+	lside = vp;
+    invfrm.transformInPlace(lside);
+    lside.z = 0.f; lside.normalize();
+
+    float yaw = acos(lside.x);
+    if(lside.y < 0.f) yaw = -yaw;
+    if(yaw > limit) yaw = limit;
+    if(yaw < -limit) yaw = -limit;
+
+    Vector3F front(0.f, 0.f, 1.f);
+    mat.transformInPlace(front);
+
+    Quaternion yawi(yaw, front);
+    mat *= Matrix33F(yawi);
+}
+
 }
 //:~
