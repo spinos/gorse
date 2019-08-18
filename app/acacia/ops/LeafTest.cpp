@@ -52,7 +52,7 @@ LeafTest::LeafTest()
 
     TubularProfile prof0;
     Matrix33F frm0 = TubularProfile::calculateFrame0(Vector3F(0.f, .39f, 0.f), Vector3F(-.3f, .27f, -.17f));
-    prof0.begin(Vector3F(0.f, -.1f, 0.f), frm0);
+    prof0.begin(Vector3F(0.f, -.1f, 0.f), frm0, 0.0143f);
 
     typedef tbl::RandomProfileRule<Uniform<Lehmer> > TbRuleTyp;
 
@@ -68,10 +68,11 @@ LeafTest::LeafTest()
     tbmshr.detach();
 
     morph::LeafProfile lpf;
-    lpf._resolution.set(8, 1);
+    lpf._resolution.set(9, 1);
     lpf._oblique.set(.1f, .1f);
     lpf._twistBendRoll.set(.2f, -.1f, .4f);
     lpf._size.set(1.f, .7f, .3f);
+    lpf._petiolePortion.set(.24f, .1f);
     morph::Elliptic elp;
     elp.create(lpf);
 

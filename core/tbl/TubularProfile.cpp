@@ -15,15 +15,23 @@ TubularProfile::TubularProfile()
 TubularProfile::~TubularProfile()
 {}
 
-void TubularProfile::begin(const Vector3F &p, const Matrix33F &frm)
+void TubularProfile::begin(const Vector3F &p, const Matrix33F &frm, const float &r0)
 {
     m_p0 = p;
     m_frm0 = frm;
     m_disp.clear();
+    m_radius.clear();
+    m_iniRadius = r0;
 }
 
 void TubularProfile::operator<<(const Vector3F &p)
-{ m_disp.push_back(p); }
+{ 
+    m_disp.push_back(p); 
+    const int n = m_disp.size();
+    while(m_radius.size() < n) {
+        m_radius.push_back(m_iniRadius);
+    }
+}
 
 void TubularProfile::end()
 {
@@ -117,6 +125,9 @@ const Matrix33F &TubularProfile::frm0() const
 
 const Vector3F &TubularProfile::displacement(const int &i) const
 { return m_disp[i]; }
+
+const float &TubularProfile::radius(const int &i) const
+{ return m_radius[i]; }
 
 int TubularProfile::numSegments() const
 { return m_disp.size(); }
@@ -220,9 +231,18 @@ Matrix33F TubularProfile::calculateFrame0(const Vector3F &v0, const Vector3F &v1
     return mat;
 }
 
-void TubularProfile::expandRadius(const float &x)
+void TubularProfile::addRadius(const float &x)
 {
-    
+    std::deque<float>::iterator it = m_radius.begin();
+    for(;it!=m_radius.end();++it) {
+        *it += x;
+    }
+}
+
+float TubularProfile::getShrinkingFactor(const int &i) const
+{
+    if(i+1 >= m_radius.size()) return 0.f;
+    return (m_radius[i] - m_radius[i+1]) / m_radius[i];
 }
 
 }

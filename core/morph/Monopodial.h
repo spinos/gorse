@@ -55,10 +55,10 @@ void Monopodial<T>::grow(Plant *pl, PlantProfile &plp, StemProfile &stp)
 {
 	const float rootAng = 0.f;
 	Stem *st = pl->addStem(plp.rootPosition(), plp.getRootRotation(),
-								rootAng, .1f);
+								rootAng, .015f);
 
 	for(int i=0;i<plp.age();++i) {
-		if(i>0) processBranching(pl, plp, stp);
+		if(i>1) processBranching(pl, plp, stp);
 		float sfac = 1.f + (m_rng->randf1() - .5f) * .5f;
 		plp.setSeasonalFactor(sfac);
 		pl->grow(plp, stp);
@@ -77,7 +77,7 @@ void Monopodial<T>::processBranching(Plant *pl, PlantProfile &plp, StemProfile &
 		if(m_rng->randf1() > plp.branchProbability()) continue;
 
 		pl->getTerminalBud(budPos, budMat, stp, i);
-		Matrix33F::rotateAroundLocalY(budMat, stp.lateralAngle());
+		Matrix33F::rotateAroundLocalY(budMat, stp.axilAngle());
 
 		const float branchAng = 0.f;
 		Stem *st = pl->addStem(budPos, budMat,

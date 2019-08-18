@@ -26,6 +26,8 @@ struct LeafProfile {
     Float3 _size;
     Matrix33F _rotation;
     Vector3F _position;
+/// petiole / (petiole + blade)
+    Float2 _petiolePortion;
 
 };
 

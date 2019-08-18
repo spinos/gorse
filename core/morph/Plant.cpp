@@ -72,7 +72,7 @@ void Plant::getStemCrossSection(TubularCrossSection *tucrs,
                     const int &i, PlantProfile &plp) const
 {
     const Stem *si = stem(i);
-    const float &r = si->radius();
+    const float &r = si->radius0();
     tucrs->create(10, r, r);
 }
 

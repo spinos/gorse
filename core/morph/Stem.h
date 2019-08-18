@@ -27,7 +27,6 @@ class Stem {
 
 /// one node per-segment
 	TubularProfile *m_tube;
-	float m_radius;
 /// first node rotation around x
 	float m_node0Ang;
 /// number of seasons
@@ -47,8 +46,8 @@ public:
 	void end();
 
 	const TubularProfile *profile() const;
-	const float &radius() const;
 	const int &age() const;
+	const float &radius0() const;
 
 	void getTerminalBud(Vector3F &pos, Matrix33F &mat, StemProfile &stp) const;
 	void getTerminalBudRotation(Matrix33F &mat, StemProfile &stp) const;

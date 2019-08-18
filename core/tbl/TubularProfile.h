@@ -19,8 +19,9 @@ namespace alo {
 
 class TubularProfile {
 
-/// per-segment displacement
+/// per-segment displacement and radius
 	std::deque<Vector3F> m_disp;
+	std::deque<float> m_radius;
 /// per-segment (pitch, yaw)
 	std::deque<Float2> m_rot;
 /// initial position
@@ -29,14 +30,16 @@ class TubularProfile {
 /// x facing direction of growth
 /// rotate y (pitch) then z (yaw) bending to next segment
 	Matrix33F m_frm0;
+/// radius of new segment
+	float m_iniRadius;
 
 public:
 
 	TubularProfile();
 	virtual ~TubularProfile();
 
-/// initial position and rotation
-	void begin(const Vector3F &p, const Matrix33F &frm);
+/// initial position, rotation and radius
+	void begin(const Vector3F &p, const Matrix33F &frm, const float &r0);
 	void end();
 
 	void operator<<(const Vector3F &p);
@@ -46,16 +49,19 @@ public:
     const Vector3F &pos0() const;
     const Matrix33F &frm0() const;
     const Vector3F &displacement(const int &i) const;
+    const float &radius(const int &i) const;
 	int numSegments() const;
 /// iseg-th segment initial postion and rotation, position and rotation change
 	void getSegment(Vector3F &pos, Matrix33F &frm, 
 			Vector3F &disp, Float2 &pitchYaw,
 			const int iseg) const;
+/// (r_i - r_i1) / r_i
+	float getShrinkingFactor(const int &i) const;
 	Vector3F interpolatePosition(const float &alpha) const;
 	Matrix33F interpolateRotation(const float &alpha) const;
-/// num_radius <- num_displacement
+
 /// each radius plus x
-	void expandRadius(const float &x);
+	void addRadius(const float &x);
 
 	template<typename Tr>
 	void randomSegments(int n, const Float2 &pitchYaw,

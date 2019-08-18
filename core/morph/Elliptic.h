@@ -45,6 +45,7 @@ public:
 protected:
 
     Matrix33F getLocalRotation(const float &alpha, const Float3 &twistBendRoll) const;
+    Matrix33F getLocalRollRotation(const float &alpha, const Float3 &twistBendRoll) const;
 
 private:
 

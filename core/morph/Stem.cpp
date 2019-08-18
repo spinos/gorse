@@ -23,10 +23,9 @@ Stem::~Stem()
 void Stem::begin(const Vector3F &pos, const Matrix33F &mat,
 				const float &a0, const float &radius0)
 { 
-	m_tube->begin(pos, mat); 
+	m_tube->begin(pos, mat, radius0); 
 	m_node0Ang = a0;
 	m_age = 0;
-	m_radius = radius0;
 }
 
 void Stem::grow(const Vector3F &gv, const float &dWidth, StemProfile &stp)
@@ -37,10 +36,9 @@ void Stem::grow(const Vector3F &gv, const float &dWidth, StemProfile &stp)
 	const float d = dWidth / (float)n;
 	for(int i=0;i<n;++i) {
 		*m_tube << getGrowDirection(gvn, stp) * l;
-		m_tube->expandRadius(d);
+		m_tube->addRadius(d);
 	}
 	m_age++;
-	m_radius += dWidth;
 }
 
 void Stem::end()
@@ -48,9 +46,6 @@ void Stem::end()
 
 const TubularProfile *Stem::profile() const
 { return m_tube; }
-
-const float &Stem::radius() const
-{ return m_radius; }
 
 const int &Stem::age() const
 { return m_age; }
@@ -90,6 +85,9 @@ Vector3F Stem::getGrowDirection(const Vector3F &ref, StemProfile &stp) const
 	Matrix33F::rotateToAlignLimited(mat, ref, stp.bendingLimit());
 	return Vector3F(mat.M(0, 0), mat.M(0, 1), mat.M(0, 2));
 }
+
+const float &Stem::radius0() const
+{ return m_tube->radius(0); }
 
 }
 

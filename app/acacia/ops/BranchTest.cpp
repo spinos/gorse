@@ -49,8 +49,8 @@ BranchTest::BranchTest()
     morph::Monopodial<Uniform<Lehmer> > plantRule(&lmlcg);
     morph::Plant aplant;
     morph::PlantProfile plantF;
-    plantF.setGrowDirections(Vector3F(0.f, 1.f, 0.f), Vector3F(-.1f, .9f, -.1f));
-    plantF.setAge(9);
+    plantF.setGrowDirections(Vector3F(0.f, 1.f, 0.f), Vector3F(.03f, 1.3f, -.05f));
+    plantF.setAge(10);
     morph::StemProfile stemF;
     plantRule.grow(&aplant, plantF, stemF);
 

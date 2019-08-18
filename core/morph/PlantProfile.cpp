@@ -17,7 +17,7 @@ m_pos(0.f, -.1f, 0.f),
 m_v0(0.f, 1.f, 0.f),
 m_vm(0.f, 1.f, 0.f),
 m_age(5),
-m_growSpeed(1.f, .05f),
+m_growSpeed(1.04f, .04f),
 m_branchProbability(.9f),
 m_seasonalFactor(1.f)
 {}
