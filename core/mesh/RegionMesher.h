@@ -11,7 +11,7 @@
 #define ALO_MESH_REGION_MESHER_H
 
 #include <math/SimpleBuffer.h>
-#include <math/Vector3F.h>
+#include <math/Matrix33F.h>
 #include <math/Int2.h>
 #include <vector>
 #include <deque>
@@ -46,7 +46,8 @@ public:
 					const int &border1, const bool &reverse1);
 
 	template<typename T>
-	void triangulate(const T &rule);
+	void triangulate(const T &rule, const Vector3F &pos,
+                    const Matrix33F &rot);
 
 protected:
 
@@ -56,7 +57,8 @@ private:
 };
 
 template<typename T>
-void RegionMesher::triangulate(const T &rule)
+void RegionMesher::triangulate(const T &rule, const Vector3F &pos,
+                    const Matrix33F &rot)
 {
 	clear();
 	const int nb = rule.numBorders();
@@ -64,7 +66,10 @@ void RegionMesher::triangulate(const T &rule)
 		borderBegin();
 		const Int2 &be = rule.border(i);
 		for(int j=be.x;j<be.y;++j) {
-			*this << rule.position(j);
+            Vector3F q = rule.position(j);
+            rot.transformInPlace(q);
+            q += pos;
+			*this << q;
 		}
 		borderEnd();
 	}

@@ -39,7 +39,7 @@ protected:
 
 private:
 	void processBranching(Plant *pl, PlantProfile &plp, StemProfile &stp);
-
+    
 };
 
 template<typename T>
@@ -53,12 +53,12 @@ Monopodial<T>::~Monopodial()
 template<typename T>
 void Monopodial<T>::grow(Plant *pl, PlantProfile &plp, StemProfile &stp)
 {
-	const float rootAng = 0.f;
+	const float rootAng = (m_rng->randf1() - .5f) * 6.28f;
 	Stem *st = pl->addStem(plp.rootPosition(), plp.getRootRotation(),
 								rootAng, .015f);
 
 	for(int i=0;i<plp.age();++i) {
-		if(i>1) processBranching(pl, plp, stp);
+		if(i >= plp.minBranchSeason()) processBranching(pl, plp, stp);
 		float sfac = 1.f + (m_rng->randf1() - .5f) * .5f;
 		plp.setSeasonalFactor(sfac);
 		pl->grow(plp, stp);
@@ -77,15 +77,15 @@ void Monopodial<T>::processBranching(Plant *pl, PlantProfile &plp, StemProfile &
 		if(m_rng->randf1() > plp.branchProbability()) continue;
 
 		pl->getTerminalBud(budPos, budMat, stp, i);
-		Matrix33F::rotateAroundLocalY(budMat, stp.axilAngle());
+        const float axil = stp.axilAngle() * (1.f - m_rng->randf1() * .2f);
+		Matrix33F::rotateAroundLocalY(budMat, axil);
 
-		const float branchAng = 0.f;
+		const float branchAng = -1.57f - stp.nodeAngle();
 		Stem *st = pl->addStem(budPos, budMat,
-								branchAng, .02f);
+								branchAng, .015f);
+        st->setParent(pl->stem(i));
 	}
-
 }
-
 
 }
 

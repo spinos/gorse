@@ -47,6 +47,9 @@ void PlantMesher::triangulate(const Plant &pl, PlantProfile &prof)
 void PlantMesher::detach()
 { m_mesh->calculateVertexNormals(); }
 
+AdaptableMesh *PlantMesher::mesh()
+{ return m_mesh; }
+
 }
 
 }

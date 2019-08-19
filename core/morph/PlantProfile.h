@@ -29,6 +29,8 @@ class PlantProfile {
     float m_branchProbability;
 /// change grow speed based on available resource
     float m_seasonalFactor;
+/// first season to branch
+    int m_minBranchSeason;
 
 public:
 
@@ -41,6 +43,7 @@ public:
 	void setGrowSpeed(const Float2 &q);
     void setBranchProbability(const float &x);
     void setSeasonalFactor(const float &x);
+    void setMinBranchSeason(const int &x);
 
 	const Vector3F &rootPosition() const;
 	const Vector3F &initialGrowDirection() const;
@@ -48,6 +51,7 @@ public:
 	const int &age() const;
 	const Float2 &growSpeed() const;
     const float &branchProbability() const;
+    const int &minBranchSeason() const;
 	Matrix33F getRootRotation() const;
 	Vector3F getGrowVector() const;
 

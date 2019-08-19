@@ -50,8 +50,10 @@ BranchTest::BranchTest()
     morph::Plant aplant;
     morph::PlantProfile plantF;
     plantF.setGrowDirections(Vector3F(0.f, 1.f, 0.f), Vector3F(.03f, 1.3f, -.05f));
-    plantF.setAge(10);
+    plantF.setAge(11);
+    plantF.setMinBranchSeason(3);
     morph::StemProfile stemF;
+    stemF.setAxilAngle(.78f);
     plantRule.grow(&aplant, plantF, stemF);
 
     m_mesh = new AdaptableMesh;
@@ -61,7 +63,7 @@ BranchTest::BranchTest()
     plmshr.triangulate(aplant, plantF);
     plmshr.detach();
 
-#if 0
+#if 1
     BoundingBox shapeBox;
     m_mesh->getAabb(shapeBox);
     const float span = shapeBox.getLongestDistance();

@@ -13,9 +13,9 @@ namespace morph {
 
 StemProfile::StemProfile() :
 m_segmentsPerSeason(3),
-m_nodeAngle(.8f),
-m_axilAngle(.7f),
-m_bendingLimit(.021f)
+m_nodeAngle(2.34f),
+m_axilAngle(.75f),
+m_bendingLimit(.025f)
 {}
 
 StemProfile::~StemProfile()
@@ -38,6 +38,9 @@ const int &StemProfile::segmentsPerSeason() const
 
 const float &StemProfile::nodeAngle() const
 { return m_nodeAngle; }
+
+float StemProfile::segmentAngle() const
+{ return m_nodeAngle / (float)m_segmentsPerSeason; }
 
 const float &StemProfile::axilAngle() const
 { return m_axilAngle; }

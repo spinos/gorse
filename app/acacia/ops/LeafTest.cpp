@@ -29,13 +29,10 @@
 #include <h5/V1H5IO.h>
 #include <h5_ssdf/HSsdf.h>
 #include <h5_grd/HLocalGrid.h>
-#include <mesh/RegionMesher.h>
 #include <morph/LeafProfile.h>
 #include <morph/Elliptic.h>
-#include <tbl/TubularProfile.h>
-#include <tbl/TubularCrossSection.h>
-#include <tbl/TubularMesher.h>
-#include <tbl/RandomProfileRule.h>
+#include <morph/Monopodial.h>
+#include <morph/LeafyMesher.h>
 #include <ctime>
 
 namespace alo {
@@ -44,50 +41,47 @@ LeafTest::LeafTest()
 {
     std::time_t secs = std::time(0);
 	Uniform<Lehmer> lmlcg(secs);
+
+    morph::Monopodial<Uniform<Lehmer> > plantRule(&lmlcg);
+    morph::Plant aplant;
+    morph::PlantProfile plantF;
+    plantF.setRootPosition(Vector3F::Zero);
+    plantF.setGrowDirections(Vector3F(.5f, 1.f, 0.f), Vector3F(.03f, 1.3f, -.05f));
+    plantF.setAge(4);
+    plantF.setBranchProbability(.99f);
+    plantF.setMinBranchSeason(-1);
+    plantF.setGrowSpeed(Float2(.13f, .0031f));
+    morph::StemProfile stemF;
+    stemF.setSegmentsPerSeason(2);
+    stemF.setAxilAngle(1.1f);
+    stemF.setBendingLimit(.01f);
+    plantRule.grow(&aplant, plantF, stemF);
     
     m_mesh = new AdaptableMesh;
 
-    TubularCrossSection tbcrs;
-    tbcrs.create(6, .1f, .09f);
-
-    TubularProfile prof0;
-    Matrix33F frm0 = TubularProfile::calculateFrame0(Vector3F(0.f, .39f, 0.f), Vector3F(-.3f, .27f, -.17f));
-    prof0.begin(Vector3F(0.f, -.1f, 0.f), frm0, 0.0143f);
-
-    typedef tbl::RandomProfileRule<Uniform<Lehmer> > TbRuleTyp;
-
-    TbRuleTyp tbrule(&lmlcg);
-    tbrule.create(Vector3F(0.f, .39f, 0.f), Vector3F(-.3f, .27f, -.17f));
-    prof0.randomSegments<TbRuleTyp>(7, Float2(.01f, .5f), 1.f, 0.2f, tbrule);
-    prof0.smooth();
-    prof0.end();
-
-    TubularMesher tbmshr;
-    tbmshr.attach(m_mesh);
-    tbmshr.triangulate(tbcrs, prof0);
-    tbmshr.detach();
-
+    morph::LeafyMesher<Uniform<Lehmer> > plmshr(&lmlcg);
+    plmshr.attach(m_mesh);
+    plmshr.triangulate(aplant, plantF);
+    
     morph::LeafProfile lpf;
     lpf._resolution.set(9, 1);
     lpf._oblique.set(.1f, .1f);
     lpf._twistBendRoll.set(.2f, -.1f, .4f);
-    lpf._size.set(1.f, .7f, .3f);
+    lpf._size.set(.3f, .2f, .1f);
     lpf._petiolePortion.set(.24f, .1f);
-    morph::Elliptic elp;
-    elp.create(lpf);
-
-    RegionMesher mshr;
-    mshr.attach(m_mesh);
-
-    mshr.triangulate<morph::Elliptic>(elp);
-
-    mshr.detach();
- #if 0   
+    
+    plmshr.triangulateLeaf<morph::Elliptic>(aplant, lpf);
+    
+    plmshr.detach();
+    
+ #if 1   
     BoundingBox shapeBox;
     m_mesh->getAabb(shapeBox);
+    std::cout << "\n shape aabb " << shapeBox;
     const float span = shapeBox.getLongestDistance();
     shapeBox.expand(span * .001f);
-    shapeBox.round();
+/// box dim bellow one?
+    //shapeBox.round();
     std::cout<<"\n shape box"<<shapeBox;
     
     const float ssz = span * .001f;

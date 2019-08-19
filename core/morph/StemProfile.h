@@ -35,6 +35,7 @@ public:
 
 	const int &segmentsPerSeason() const;
 	const float &nodeAngle() const;
+    float segmentAngle() const;
 	const float &axilAngle() const;
     const float &bendingLimit() const;
 

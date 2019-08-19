@@ -2,7 +2,7 @@
  *  PlantMesher.h
  *  gorse
  *
- *  2019/8/17
+ *  2019/8/19
  */
  
 #ifndef ALO_MORPH_PLANT_MESHER_H
@@ -29,8 +29,10 @@ public:
 	void attach(AdaptableMesh *mesh);
     void triangulate(const Plant &pl, PlantProfile &prof);
     void detach();
-
+    
 protected:
+
+    AdaptableMesh *mesh();
 
 private:
 
