@@ -31,9 +31,17 @@
 #include <h5_grd/HLocalGrid.h>
 #include <h5_smp/HSurfaceSample.h>
 #include <math/Matrix33F.h>
+#include <mesh/Fissure.h>
+#include <bvh/BVHNodeIterator.h>
+#include <boost/format.hpp>
+#include <boost/chrono/include.hpp>
+#include <boost/bind.hpp>
+#include <boost/thread.hpp>
 #include <ctime>
 
 namespace alo {
+    
+boost::mutex ThinPlateTest::sMutex;
    
 ThinPlateTest::ThinPlateTest() 
 {
@@ -41,45 +49,52 @@ ThinPlateTest::ThinPlateTest()
 	Uniform<Lehmer> lmlcg(secs);
     
     m_mesh = new AdaptableMesh;
-#if 0
-    m_mesh->createMinimal();
-#else    
+   
     HeightField height;
     height.create(256, 256);
     height.setZero();
-    height.setGridSize(1.345678f);
-    height.setHeightScale(10.f);
+    height.setGridSize(7.345678f);
+    height.setHeightScale(79.f);
     
+    const float regionBound = 3000.f;
     Polygon2D blasso;
-    blasso<<Float2(-300.f, -300.f);
-    blasso<<Float2(-300.f, 600.f);
-    blasso<<Float2(600.f, 600.f);
-    blasso<<Float2(600.f, -300.f);
+    blasso<<Float2(-regionBound, -regionBound);
+    blasso<<Float2(-regionBound, regionBound);
+    blasso<<Float2(regionBound, regionBound);
+    blasso<<Float2(regionBound, -regionBound);
     blasso.finish();
     
     Bilinear<float> bslope;
-    bslope.value()[0] = .5e-3f;
-    bslope.value()[1] = .5e-3f;
-    bslope.value()[2] = .5e-3f;
-    bslope.value()[3] = .5e-3f;
+    bslope.value()[0] = 4.5f + .5e-3f;
+    bslope.value()[1] = -.5f + .5e-3f;
+    bslope.value()[2] = 0.f + .5e-3f;
+    bslope.value()[3] = -1.5f + .5e-3f;
     
     Polygon2D flasso;
-    flasso<<Float2(-150.f, -200.f);
-    flasso<<Float2(-350.f, 10.f);
-    flasso<<Float2(90.f, 250.f);
-    flasso<<Float2(119.f, 150.f);
-    flasso<<Float2(149.f, 160.f);
-    flasso<<Float2(179.f, 199.f);
-    flasso<<Float2(209.f, 179.f);
-    flasso<<Float2(250.f, 190.f);
-    flasso<<Float2(100.f, -200.f);
+    flasso<<Float2(-100.f, -100.f);
+    flasso<<Float2(100.f, 110.f);
+    flasso<<Float2(90.f, 210.f);
+    flasso<<Float2(190.f, 200.f);
+    flasso<<Float2(229.f, 300.f);
+    flasso<<Float2(490.f, 239.f);
+    flasso<<Float2(400.f, 579.f);
+    flasso<<Float2(650.f, 500.f);
+    flasso<<Float2(500.f, 800.f);
+    flasso<<Float2(700.f, 1200.f);
+    flasso<<Float2(900.f, 1300.f);
+    flasso<<Float2(1200.f, 1000.f);
+    flasso<<Float2(1550.f, 1050.f);
+    flasso<<Float2(1600.f, 650.f);
+    flasso<<Float2(1750.f, 550.f);
+    flasso<<Float2(1850.f, 250.f);
+    flasso<<Float2(1950.f, 0.f);
     flasso.finish();
     
     Bilinear<float> fslope;
     fslope.value()[0] = 5.f;
     fslope.value()[1] = .5f;
-    fslope.value()[2] = 0.f;
-    fslope.value()[3] = 15.5f;
+    fslope.value()[2] = 1.5f;
+    fslope.value()[3] = 8.5f;
     
     height.setValue(bslope, blasso);
     height.setValue(fslope, flasso);
@@ -94,94 +109,64 @@ ThinPlateTest::ThinPlateTest()
     //Matrix33F mrot(rot);
     //m_mesh->rotateBy(mrot);
     heighter.detach();
-
-#endif
+    
+    Fissure fis;
+    const int npart = fis.granulate(m_mesh);
+    std::cout << " granulate to " << npart << " parts ";
 
 #if 1
-    BoundingBox shapeBox;
-    m_mesh->getAabb(shapeBox);
-    const float span = shapeBox.getLongestDistance();
-    shapeBox.expand(span * .001f);
-    shapeBox.round();
-    std::cout<<"\n shape box"<<shapeBox;
-    
-    const float ssz = span * .001f;
-	std::cout << "\n sample size " << ssz;
-	typedef smp::Triangle<SurfaceSample > SamplerTyp;
-    
-    SamplerTyp sampler;
-	sampler.setSampleSize(ssz);
-    
-    SurfaceSample asmp;
-    SampleInterp<SurfaceSample> interp;
-    
-    typedef alo::sds::SpaceFillingVector<SurfaceSample> PntArrTyp;
-	PntArrTyp pnts;
-    
-    const int nt = m_mesh->numTriangles();
-    for(int i=0;i<nt;++i) {
-        m_mesh->getTriangle<SurfaceSample, SamplerTyp >(sampler, i);
-        sampler.addSamples <PntArrTyp, SampleInterp<SurfaceSample>, Uniform<Lehmer> >(pnts, asmp, interp, &lmlcg);
-    }
-    
-    std::cout<<"\n n samples "<<pnts.size();
-    
-    sds::FZOrderCurve sfc;
-    
-    typedef sdf::SsdfBuildRule<sds::FZOrderCurve> BuildRuleTyp;
-    BuildRuleTyp rule(&sfc);
-    
-    typedef sdf::SsdfBuilder<SurfaceSample, float, 4, 7, BuildRuleTyp > BuilderTyp;
-	BuilderTyp builder;
-    
-    typedef sdf::SsdField FieldTyp;
-    FieldTyp field;
-    
-    rule.setBBox(shapeBox);
-    builder.build(&pnts, rule);
-	builder.save<FieldTyp>(field, rule);
-    
     ver1::H5IO hio;
 	bool stat = hio.begin("./thin_plate.hes", HDocument::oCreate );
     
     ver1::HBase ga("/asset");
     
     float grdBox[6] = {1e10f, 1e10f, 1e10f, -1e10f, -1e10f, -1e10f};
-	field.expandAabb(grdBox);
+    std::vector<sdf::SsdField *> fields;
+	fields.resize(npart);
     
-    HSsdf writer("/asset/fld0000");
-	writer.save<FieldTyp>(field);
-	writer.close();
+    boost::chrono::system_clock::time_point t0 = boost::chrono::system_clock::now();
     
-    typedef grd::LocalGridBuildRule<sds::FZOrderCurve> LocBuildTyp;
-	LocBuildTyp locRule(&sfc);
-	locRule.setBBox(grdBox);
-    locRule.setP(5);
+    AdaptableMesh *transient[8];
+	for(int i=0;i<8;++i) transient[i] = new AdaptableMesh;
+	
+	boost::thread tref[8];
+    int ntref = 0;
     
-    grd::LocalGrid<float> locG;
-	locG.create(1<<locRule.P());
-	locG.setAabb(grdBox);
+    int mi=0;
+	BVHNodeIterator it = fis.firstPart();
+    while(it._node) {
+        
+        fis.reformPart(transient[ntref], it, m_mesh);
+		
+		tref[ntref] = boost::thread(boost::bind(&ThinPlateTest::WriteField, _1, _2, _3, _4), 
+												transient[ntref], mi, &fields, grdBox);
+		ntref++;
+		
+		if(ntref==8) {
+            for(int i=0;i<ntref;++i)
+                tref[i].join();
+            ntref = 0;
+        }
+		
+        it = fis.nextPart(it);
+		mi++;
+    }
+	
+	if(ntref>0) {
+        for(int i=0;i<ntref;++i)
+            tref[i].join();
+    }
+	
+	for(int i=0;i<8;++i) delete transient[i];
     
-    grd::LocalGridBuilder<grd::LocalGrid<float> > locBuilder;
-	locBuilder.attach(&locG);
+    WriteGrid(fields, grdBox);
     
-    grd::GridCellSamplesTyp cells;
-    cells.create<FieldTyp>(&field);
+    WriteTerrainSamples(m_mesh, grdBox);
     
-    typedef sds::SpaceFillingVector<grd::GridCellSamplesTyp::SampleTyp> OutSampleTyp;
-	const OutSampleTyp &orignalSamples = cells.samples();
-    
-	locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, 0, locRule);
+    boost::chrono::system_clock::time_point t1 = boost::chrono::system_clock::now();
 
-    locBuilder.detach();
-
-	HLocalGrid hlocG("/asset/localGrid");
-	hlocG.save<grd::LocalGrid<float> >(locG);
-	hlocG.close();
-
-    HSurfaceSample hsurf("/asset/surf");
-    hsurf.save<PntArrTyp>(pnts);
-    hsurf.close();
+    boost::chrono::duration<double> sec = t1 - t0;
+    std::cout << "\n terrain finished in " << sec.count() << " seconds ";
     
     ga.close();
 	hio.end();
@@ -223,6 +208,149 @@ void ThinPlateTest::computeMesh()
     unlockScene();
 
     setBound(m_mesh);
+}
+
+bool ThinPlateTest::WriteField(const AdaptableMesh *msh, 
+				const int &grpId,
+				std::vector<sdf::SsdField *> *fields,
+				float *grdBox)
+{
+    std::time_t secs = std::time(0);
+	Uniform<Lehmer> lmlcg(secs);
+    
+    BoundingBox shapeBox;
+    msh->getAabb(shapeBox);
+    const float span = shapeBox.getLongestDistance();
+    shapeBox.expand(span * .001f);
+    shapeBox.round();
+    
+    const float ssz = span * .001f;
+	
+	typedef smp::Triangle<SurfaceSample > SamplerTyp;
+    
+    SamplerTyp sampler;
+	sampler.setSampleSize(ssz);
+    
+    SurfaceSample asmp;
+    SampleInterp<SurfaceSample> interp;
+    
+    typedef alo::sds::SpaceFillingVector<SurfaceSample> PntArrTyp;
+	PntArrTyp pnts;
+    
+    const int nt = msh->numTriangles();
+    for(int i=0;i<nt;++i) {
+        msh->getTriangle<SurfaceSample, SamplerTyp >(sampler, i);
+        sampler.addSamples <PntArrTyp, SampleInterp<SurfaceSample>, Uniform<Lehmer> >(pnts, asmp, interp, &lmlcg);
+    }
+    
+    sds::FZOrderCurve sfc;
+    
+    typedef sdf::SsdfBuildRule<sds::FZOrderCurve> BuildRuleTyp;
+    BuildRuleTyp rule(&sfc);
+    
+    typedef sdf::SsdfBuilder<SurfaceSample, float, 5, 7, BuildRuleTyp > BuilderTyp;
+	BuilderTyp builder;
+    
+    typedef sdf::SsdField FieldTyp;
+    FieldTyp *field = new FieldTyp;
+    
+    rule.setBBox(shapeBox);
+    builder.build(&pnts, rule);
+	builder.save<FieldTyp>(*field, rule);
+    
+    boost::lock_guard<boost::mutex> lock(sMutex);
+    
+    std::cout<<"\n shape box"<<shapeBox
+        << "\n sample size " << ssz
+        <<"\n n samples "<<pnts.size();
+        
+	field->expandAabb(grdBox);
+    
+    const std::string idName = boost::str(boost::format("%04i") % grpId);
+	const std::string fullName = boost::str(boost::format("/asset/fld%1%") % idName );
+
+	HSsdf writer(fullName);
+	writer.save<FieldTyp>(*field);
+	writer.close();
+	
+	(*fields)[grpId] = field;
+		
+	return true;
+    
+}
+
+bool ThinPlateTest::WriteGrid(const std::vector<sdf::SsdField *> &fields,
+				const float *grdBox)
+{
+    sds::FZOrderCurve sfc;
+    
+    typedef grd::LocalGridBuildRule<sds::FZOrderCurve> LocBuildTyp;
+	LocBuildTyp locRule(&sfc);
+	locRule.setBBox(grdBox);
+    locRule.setP(5);
+    
+    grd::LocalGrid<float> locG;
+	locG.create(1<<locRule.P());
+	locG.setAabb(grdBox);
+    
+    grd::LocalGridBuilder<grd::LocalGrid<float> > locBuilder;
+	locBuilder.attach(&locG);
+    
+    typedef sdf::SsdField FieldTyp;
+    
+    grd::GridCellSamplesTyp cells;
+    typedef sds::SpaceFillingVector<grd::GridCellSamplesTyp::SampleTyp> OutSampleTyp;
+	
+    std::vector<FieldTyp *>::const_iterator it = fields.begin();
+	for(int i=0;it!=fields.end();++it,++i) {
+		cells.create<FieldTyp>(*it);
+        
+        const OutSampleTyp &orignalSamples = cells.samples();
+        locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, i, locRule);
+
+    }
+
+    locBuilder.detach();
+
+	HLocalGrid hlocG("/asset/localGrid");
+	hlocG.save<grd::LocalGrid<float> >(locG);
+	hlocG.close();
+	
+	return true;
+}
+
+bool ThinPlateTest::WriteTerrainSamples(const AdaptableMesh *msh, 
+                const float *grdBox)
+{
+    std::time_t secs = std::time(0);
+	Uniform<Lehmer> lmlcg(secs);
+    
+    BoundingBox shapeBox(grdBox);
+    const float span = shapeBox.getLongestDistance();
+    const float ssz = span * .002f;
+	
+	typedef smp::Triangle<SurfaceSample > SamplerTyp;
+    
+    SamplerTyp sampler;
+	sampler.setSampleSize(ssz);
+    
+    SurfaceSample asmp;
+    SampleInterp<SurfaceSample> interp;
+    
+    typedef alo::sds::SpaceFillingVector<SurfaceSample> PntArrTyp;
+	PntArrTyp pnts;
+    
+    const int nt = msh->numTriangles();
+    for(int i=0;i<nt;++i) {
+        msh->getTriangle<SurfaceSample, SamplerTyp >(sampler, i);
+        sampler.addSamples <PntArrTyp, SampleInterp<SurfaceSample>, Uniform<Lehmer> >(pnts, asmp, interp, &lmlcg);
+    }
+    
+    HSurfaceSample hsurf("/asset/surf");
+    hsurf.save<PntArrTyp>(pnts);
+    hsurf.close();
+    
+    return true;
 }
 
 }

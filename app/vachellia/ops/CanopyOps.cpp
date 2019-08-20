@@ -103,6 +103,7 @@ bool CanopyOps::canConnectTo(GlyphOps *another, const std::string &portName) con
 	
 	if(portId == inBranch) return (r->hasInstance() && !r->hasGeodesicSamples());
 	if(portId == inTrunk) return (r->hasInstance() && r->hasGeodesicSamples());
+	if(portId == inTerrain) return (!r->hasInstance() && r->hasSurfaceSamples());
 	
     return false;
 }

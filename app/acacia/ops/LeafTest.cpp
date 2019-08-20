@@ -47,8 +47,8 @@ LeafTest::LeafTest()
     morph::PlantProfile plantF;
     plantF.setRootPosition(Vector3F::Zero);
     plantF.setGrowDirections(Vector3F(.5f, 1.f, 0.f), Vector3F(.03f, 1.3f, -.05f));
-    plantF.setAge(4);
-    plantF.setBranchProbability(.99f);
+    plantF.setAge(5);
+    plantF.setBranchProbability(.87f);
     plantF.setMinBranchSeason(-1);
     plantF.setGrowSpeed(Float2(.13f, .0031f));
     morph::StemProfile stemF;
@@ -80,8 +80,7 @@ LeafTest::LeafTest()
     std::cout << "\n shape aabb " << shapeBox;
     const float span = shapeBox.getLongestDistance();
     shapeBox.expand(span * .001f);
-/// box dim bellow one?
-    //shapeBox.round();
+    if(span > 1.5f) shapeBox.round();
     std::cout<<"\n shape box"<<shapeBox;
     
     const float ssz = span * .001f;

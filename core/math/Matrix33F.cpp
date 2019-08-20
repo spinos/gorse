@@ -828,5 +828,78 @@ void Matrix33F::rotateToAlignLimited(Matrix33F &mat, const Vector3F &vp,
     mat *= Matrix33F(yawi);
 }
 
+void Matrix33F::rotateUpToAlign(Matrix33F &mat, const Vector3F &vp)
+{
+    Matrix33F invfrm = mat;
+
+	invfrm.inverse();
+	Vector3F lup = vp;
+	invfrm.transformInPlace(lup);
+    lup.x = 0.f; lup.normalize();
+    float roll = acos(lup.y);
+    if(lup.z < 0.f) roll = -roll;
+
+    Vector3F side(1.f, 0.f, 0.f);
+    mat.transformInPlace(side);
+
+    Quaternion rolli(roll, side);
+    mat *= Matrix33F(rolli);
+
+    invfrm = mat;
+	invfrm.inverse();
+
+	lup = vp;
+    invfrm.transformInPlace(lup);
+    lup.z = 0.f; lup.normalize();
+
+    float yaw = acos(lup.y);
+    if(lup.x > 0.f) yaw = -yaw;
+
+    Vector3F front(0.f, 0.f, 1.f);
+    mat.transformInPlace(front);
+
+    Quaternion yawi(yaw, front);
+    mat *= Matrix33F(yawi);
+}
+
+void Matrix33F::rotateUpToAlignLimited(Matrix33F &mat, const Vector3F &vp,
+                            const float &limit)
+{
+    Matrix33F invfrm = mat;
+
+	invfrm.inverse();
+	Vector3F lup = vp;
+	invfrm.transformInPlace(lup);
+    lup.x = 0.f; lup.normalize();
+    float roll = acos(lup.y);
+    if(lup.z < 0.f) roll = -roll;
+    if(roll > limit) roll = limit;
+    if(roll < -limit) roll = -limit;
+
+    Vector3F side(1.f, 0.f, 0.f);
+    mat.transformInPlace(side);
+
+    Quaternion rolli(roll, side);
+    mat *= Matrix33F(rolli);
+
+    invfrm = mat;
+	invfrm.inverse();
+
+	lup = vp;
+    invfrm.transformInPlace(lup);
+    lup.z = 0.f; lup.normalize();
+
+    float yaw = acos(lup.y);
+    if(lup.x > 0.f) yaw = -yaw;
+    if(yaw > limit) yaw = limit;
+    if(yaw < -limit) yaw = -limit;
+
+    Vector3F front(0.f, 0.f, 1.f);
+    mat.transformInPlace(front);
+
+    Quaternion yawi(yaw, front);
+    mat *= Matrix33F(yawi);
+}
+
 }
 //:~

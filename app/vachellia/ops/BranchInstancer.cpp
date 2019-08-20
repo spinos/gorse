@@ -43,7 +43,7 @@ void BranchInstancer::synthesizeBranchInstances()
     countTrunks(trunkSel);
     
     int sd = 87654321;
-    int nsel = 200;
+    int nsel = 300;
     
     Uniform<Lehmer> lmlcg(sd);
     
@@ -59,6 +59,8 @@ void BranchInstancer::synthesizeBranchInstances()
     GeodRuleTyp rule;
     rule.setRng(&lmlcg);
     rule.setMaxNumSelected(nsel);
+    float collisionDistance = getBranchCollisionDistance();
+    rule.setMinDistance(collisionDistance);
     const int ns = filter->numSamples();
     rule.setAcceptRatio(filter->c_samples(), ns);
     
@@ -71,7 +73,6 @@ void BranchInstancer::synthesizeBranchInstances()
 	std::cout << "\n n subset " << n;
     createInstances(n);
 	Matrix44F tm;
-	float pitch, roll;
     for(int i=0;i<n;++i) {
         int j = branchSel.select<Uniform<Lehmer> >(&lmlcg);
         instanceCounter[j] = 0;
@@ -83,8 +84,8 @@ void BranchInstancer::synthesizeBranchInstances()
 		
         tm.setTranslation(si._pos);
 		
-		rule.getPitchAndRoll(pitch, roll, si);
-		Matrix33F r = getBranchRotation(si._grad, si._nml, pitch, roll);
+		Matrix33F r = rule.getRotation(si);
+		Matrix33F::rotateUpToAlignLimited(r, Vector3F(0.f, 1.f, 0.f), .7f);
 		tm.setRotation(r);
         inst.setSpace(tm);
         
@@ -160,19 +161,21 @@ float BranchInstancer::getMeanBranchSize() const
     return s *= 1.f / (float)b;
 }
 
-Matrix33F BranchInstancer::getBranchRotation(const Vector3F &binormal, const Vector3F &normal,
-					const float &pitch, const float &rollAngle) const
+float BranchInstancer::getBranchCollisionDistance() const
 {
-	Vector3F up = binormal * (1.f - pitch) + normal * pitch; up.normalize();
-	Vector3F front = normal.cross(up); front.normalize();
-	Vector3F side = up.cross(front); side.normalize();
-	
-	Matrix33F r;
-	r.fill(side, up, front);
-	
-	Quaternion rq(rollAngle, up);
-	Matrix33F roll(rq);
-	return r * roll;
+    float bx[6];
+    float s = 0.f;
+    int b = 0;
+    const int n = numInputRenderables();
+    for(int i=0;i<n;++i) {
+        const RenderableOps *r = inputRenderable(i);
+        if(!r->hasGeodesicSamples()) {
+            r->getAabb(bx);
+            s += BoundingBox(bx).distance(0) + BoundingBox(bx).distance(1);
+            b+=2;
+        }
+    }
+    return s *= 1.f / (float)b;
 }
     
 }

@@ -40,6 +40,9 @@ TerrainOps::~TerrainOps()
 std::string TerrainOps::opsName() const
 { return "terrain"; }
 
+bool TerrainOps::hasInstance() const
+{ return false; }
+
 AFileDlgProfile *TerrainOps::readFileProfileR () const
 { return &SReadTrunkProfile; }
 

@@ -113,6 +113,9 @@ namespace alo {
 /// limit > 0 maximum angle of rotation
     static void rotateToAlignLimited(Matrix33F &mat, const Vector3F &vp,
                             const float &limit);
+    static void rotateUpToAlign(Matrix33F &mat, const Vector3F &vp);
+    static void rotateUpToAlignLimited(Matrix33F &mat, const Vector3F &vp,
+                            const float &limit);
     
  };
 

@@ -26,6 +26,7 @@ public:
     virtual ~TerrainOps();
 
     virtual std::string opsName() const override;
+    virtual bool hasInstance() const override;
     virtual bool hasSurfaceSamples() const override;
 	virtual AFileDlgProfile *readFileProfileR() const override;
 	virtual QString getShortDescription() const override;
