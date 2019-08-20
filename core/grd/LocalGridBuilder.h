@@ -146,7 +146,17 @@ void LocalGridBuilder<T>::measure(const Ts &samples, int objI, Tr &rule)
 	int n = samples.size();
 	Ts::ValueTyp ap;
 	sds::SpaceFillingVector<Ts::ValueTyp> destSamples;
-	for(int i=0;i<n;++i) {
+    
+    int sampleBegin = 1;
+    int sampleEnd = n;
+    
+    const Ts::ValueTyp &s0 = samples[0];
+    if(s0._span < m_grid->cellSize() * 2.f) {
+        sampleBegin = 0;
+        sampleEnd = 1;
+    }
+    
+	for(int i=sampleBegin;i<sampleEnd;++i) {
 		const Ts::ValueTyp &si = samples[i];
 /// expand the cell
 		const float sq = si._span * 1.03125f;
@@ -164,7 +174,7 @@ void LocalGridBuilder<T>::measure(const Ts &samples, int objI, Tr &rule)
 
 	n = destSamples.size();
 	if(n < 1) {
-		std::cout << "\n WARNNING zero cell samples ";
+		//std::cout << "\n WARNNING zero cell samples ";
 		return;
 	}
 

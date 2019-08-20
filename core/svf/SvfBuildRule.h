@@ -84,6 +84,9 @@ public:
     bool isCellIntersectDomain(const Vector3F &origin, const float &span) const;
     bool isPointInsideDomain(const Vector3F &q) const;
     
+/// (-1 0 +1)^3 cells centered at coord
+    void getLevel27Cells(int *nei, const int coord, int level) const;
+    
 	static void PrintOriginCellSize(const float* orih);
 /// divide box to grid of d resolution
 /// p is float[n] n is 3(1+d)^3
@@ -269,7 +272,20 @@ int SvfBuildRule<Tc>::getGuardCells(Tcell* gcells, int coord, int level0, int le
 	}
 	
 	return count;
-}	
+}
+
+template<typename Tc>
+void SvfBuildRule<Tc>::getLevel27Cells(int *nei, const int coord, int level) const
+{
+    int u[3];
+	m_sfc->decodeKey(u, coord);
+	const int h = 1<<(10-level);
+    for(int i=0;i<27;++i) {
+        nei[i] = m_sfc->computeKey(u[0] + h * sTwentySevenOffset[i][0], 
+                                    u[1] + h * sTwentySevenOffset[i][1], 
+                                    u[2] + h * sTwentySevenOffset[i][2]);
+    }
+}
 
 template<typename Tc>
 template<typename Tcell>

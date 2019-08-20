@@ -86,7 +86,7 @@ class ObjectInstancer {
 	ElementVector<GridCellSamplesTyp> m_samps;
     float m_minimumCellSize;
     int m_numInstancedObjects;
-
+    
 public:
 
 	typedef T1 InstanceTyp;
@@ -117,8 +117,7 @@ public:
 				int &closestObjectId) const;
 	float mapDistanceInstance(const float *p, int i) const;
 	void mapNormal(Vector3F &nml, const float *p, int ii) const;
-	void limitStepSize(float &d, int ii) const;
-
+	
 	void genInstanceSamples(OutSampleTyp *dest, int ii) const;
     
     void createPhalanx(const int &udim, const int &vdim, 
@@ -126,13 +125,13 @@ public:
                     const float &coverOrigin, const float &scaleSpan,
                     const int &iseed);
                     
-    float getMediumObjectSize() const;
+    float getMediumObjectSize(std::map<int, int> &counter) const;
 
     void setMinimumCellSize(float x);
     void setNumInstancedObjects(int x);
 /// y no smaller than min_cell_size
     void limitCellSize(float &y) const;
-
+    
     void verbose() const;
     
 };
@@ -254,15 +253,6 @@ void ObjectInstancer<T1, T2>::mapNormal(Vector3F &nml, const float *p, int i) co
 }
 
 template<typename T1, typename T2>
-void ObjectInstancer<T1, T2>::limitStepSize(float &d, int ii) const
-{
-//	const T1 &inst = m_instances[ii];
-//	const T2 *shape = m_objs.element(inst.objectId()); 
-/// todo scaling distance
-//	shape->limitStepSize(d);
-}
-
-template<typename T1, typename T2>
 void ObjectInstancer<T1, T2>::genInstanceSamples(OutSampleTyp *dest, int ii) const
 {
 	const T1 &inst = m_instances[ii];
@@ -273,13 +263,20 @@ void ObjectInstancer<T1, T2>::genInstanceSamples(OutSampleTyp *dest, int ii) con
 	GridCellSamplesTyp::SampleTyp ap;
     ap._span = src[0]._span;
     inst.distanceToWorld(ap._span);
+    
+    ap._pos = src[0]._pos;
+	inst.pointToWorld((float *)&ap._pos);
+    
+    (*dest) << ap;
+    
+    ap._span = src[1]._span;
+    inst.distanceToWorld(ap._span);
 
 	const int n = src.size();
-	for(int i=0;i<n;++i) {
+	for(int i=1;i<n;++i) {
 		ap._pos = src[i]._pos;
-
 		inst.pointToWorld((float *)&ap._pos);
-        
+       
 		(*dest) << ap;
 	}
 }
@@ -325,12 +322,13 @@ int ObjectInstancer<T1, T2>::numObjects() const
 { return m_objs.numElements(); }
 
 template<typename T1, typename T2>
-float ObjectInstancer<T1, T2>::getMediumObjectSize() const
+float ObjectInstancer<T1, T2>::getMediumObjectSize(std::map<int, int> &counter) const
 {
     float mnD = 1e8f;
     float mxD = -1e8f;
     const int nobj = m_objs.numElements();
     for(int i=0;i<nobj;++i) {
+        if(counter.find(i) == counter.end()) continue;
         const T2 *iobj = m_objs.element(i);
         const float *b = iobj->c_aabb();
         float dx = b[3] - b[0];

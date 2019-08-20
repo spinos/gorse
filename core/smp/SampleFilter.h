@@ -76,6 +76,7 @@ template<typename T>
 template<typename Tr>
 void SampleFilter<T>::drawSamples(SimpleBuffer<T> &subset, Tr &rule) const
 {
+    rule.begin();
     const int n = numSamples();
     for(int i=0;i<n;++i) {
         const T &si = m_samples[i];

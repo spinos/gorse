@@ -120,6 +120,7 @@ template<typename T, typename Tc>
 template<typename Ti, typename Tcb, typename Tcr>
 void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, Tcr &cellRule)
 {
+    std::cout << "\n build world cells ";
 	const int ninst = m_objectCellMap.size();
 	int nmc = 0;
 	int preInd = -1;
@@ -127,7 +128,7 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 #define TEST_MT_SAMPLE
 
 #ifdef TEST_MT_SAMPLE
-#define NUM_SAMPLE_THREAD 4
+#define NUM_SAMPLE_THREAD 8
     Ti::OutSampleTyp sampleData[NUM_SAMPLE_THREAD];
     boost::thread sampleThread[NUM_SAMPLE_THREAD];
     int objectInd[NUM_SAMPLE_THREAD];
@@ -200,6 +201,7 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 			cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(sampleData, ci.x, cellRule);
 #endif
 		}
+        std::cout << ".";
 
 		block = m_objectCellMap.next(block);
 	}

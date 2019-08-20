@@ -114,7 +114,7 @@ void InstancerBase::updateInstancerInProgress(bool isAppending)
         typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
         CellBuilderTyp cellBuilder;
         
-        float fcellSize = m_instancer->getMediumObjectSize() * 6.f;
+        float fcellSize = m_instancer->getMediumObjectSize(m_objectCounter) * 5.f;
         m_instancer->limitCellSize(fcellSize);
         int cellSize = fcellSize;
         cellSize = Round64(cellSize);
@@ -178,13 +178,16 @@ void InstancerBase::loadInstanceRecord(grd::InstanceRecord &rec)
     const int &n = rec.numInstances();
     createInstances(n);
     
+    std::map<int, int> counter;
     for(int i=0;i<n;++i) {
         grd::TestInstance &ti = instance(i);
         ti.setObjectId(rec.inds()[i]);
         ti.setSpace(rec.tms()[i]);
+        
+        counter[rec.inds()[i]] = 0;
     }
 	
-	setInstancedObjectCountAndSize(rec.numObjects(), rec.getMinimumCellSize());
+	setInstancedObjectCountAndSize(counter, rec.getMinimumCellSize());
 }
 
 void InstancerBase::createInstances(int count)
@@ -193,10 +196,16 @@ void InstancerBase::createInstances(int count)
 grd::TestInstance &InstancerBase::instance(int i)
 { return m_instancer->instance(i); }
 
-void InstancerBase::setInstancedObjectCountAndSize(int count, float size)
+void InstancerBase::setInstancedObjectCountAndSize(std::map<int, int> &counter, float size)
 {
-	m_instancer->setNumInstancedObjects(count);
+	m_instancer->setNumInstancedObjects(counter.size());
     m_instancer->setMinimumCellSize(size);
+    
+    m_objectCounter.clear();
+    std::map<int, int>::const_iterator it = counter.begin();
+    for(;it!=counter.end();++it) {
+        m_objectCounter[it->first] = 0;
+    }
 }
 
 QString InstancerBase::getInputRenderablesDescription() const

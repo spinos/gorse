@@ -112,7 +112,9 @@ void CanopyOps::connectTo(GlyphOps *another, const std::string &portName, GlyphC
 {
 	const int portId = IdentifyInput(portName);
 	RenderableOps *r = static_cast<RenderableOps *>(another);
-	if(portId == inBranch || portId == inTrunk) {
+	if(portId == inBranch 
+        || portId == inTrunk
+        || portId == inTerrain) {
 		appendInputRenderable(r);
 	}
 }
@@ -121,7 +123,9 @@ void CanopyOps::disconnectFrom(GlyphOps *another, const std::string &portName, G
 {
 	const int portId = IdentifyInput(portName);
     RenderableOps *r = static_cast<RenderableOps *>(another);
-    if(portId == inBranch || portId == inTrunk) {
+    if(portId == inBranch 
+        || portId == inTrunk
+        || portId == inTerrain) {
 		removeInputRenderable(r);
 	}
 }

@@ -52,13 +52,13 @@ bool HSurfaceSample::save(const T& sampleArray)
     	return false;
     }
     
-    char transient[4096];
+    char transient[2560];
     const int nw = Round64(n) / 64;
     for(int i=0;i<nw;++i) {
         const int offset = i * 64;
         for(int j=0;j<64;++j) {
             if(offset + j > n-1) break;
-            memcpy(&transient[j * 64], &sampleArray[offset + j], 64);
+            memcpy(&transient[j * 40], &sampleArray[offset + j], 40);
         }
         
         smpd->writeColumns(transient, offset, 64);

@@ -11,13 +11,23 @@
 #define VCHL_BRANCH_INSTANCER_H
 
 #include "InstancerBase.h"
+#include <rng/Lehmer.h>
 
 namespace alo {
-	
-class Matrix33F;
+
+template<typename T>
+class Uniform;
+template<typename T>
+class SimpleBuffer;
+class Matrix44F;
 class RandomSelect;
+struct SurfaceGeodesicSample;
+template<typename T1, typename T2>
+class GeodesicSampleRule;
 
 class BranchInstancer : public InstancerBase {
+    
+    typedef GeodesicSampleRule<SurfaceGeodesicSample, Uniform<Lehmer> > GeodRuleTyp;
 
 public:
 
@@ -35,7 +45,18 @@ private:
     void countBranches(RandomSelect &selector);
     void countTrunks(RandomSelect &selector);
     float getMeanBranchSize() const;
+    float getMeanTrunkSize() const;
     float getBranchCollisionDistance() const;
+    float getTrunkCollisionDistance() const;
+    const RenderableOps *getTerrain(int &ind) const;
+    void synthesizeSingleBranchInstances();
+    void synthesizeBranchInstancesOnTerrain(const smp::SampleFilter<SurfaceSample> *filter);
+    void synthesizeBranchInstancesOnTrunk(SimpleBuffer<int> &branchObjectIds,
+                    SimpleBuffer<Matrix44F> &branchTms,
+                    Uniform<Lehmer> *lmlcg, 
+                    const smp::SampleFilter<SurfaceGeodesicSample> *filter,
+                    RandomSelect &branchSel,
+                    const Matrix44F &trunkTm, GeodRuleTyp *trunkRule);
     
 };
 

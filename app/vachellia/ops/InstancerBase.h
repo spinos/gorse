@@ -76,6 +76,8 @@ class InstancerBase {
     WorldLookupRuleTyp *m_worldLookupRule;
 
     bool m_isActive;
+    
+    std::map<int, int> m_objectCounter;
 
 public:
 
@@ -100,7 +102,7 @@ protected:
 	void createInstances(int count);
 /// i-th instance
 	grd::TestInstance &instance(int i);
-	void setInstancedObjectCountAndSize(int count, float size);
+	void setInstancedObjectCountAndSize(std::map<int, int> &counter, float size);
 /// met the condition to scatter 
     virtual bool isInstancerReady() const;
 /// scattered

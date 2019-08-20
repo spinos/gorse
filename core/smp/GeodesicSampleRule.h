@@ -8,7 +8,7 @@
 #ifndef ALO_GEODESIC_SAMPLE_RULE_H
 #define ALO_GEODESIC_SAMPLE_RULE_H
 
-#include <math/Matrix33F.h>
+#include <math/Matrix44F.h>
 
 namespace alo {
 
@@ -23,6 +23,7 @@ class GeodesicSampleRule {
 	int m_maxNumSelected;
 	float m_maxGeod;
     float m_minDistance;
+    Matrix33F m_worldRotation;
     
 public:
 
@@ -32,14 +33,14 @@ public:
 	void setRng(Trng *x);
 	void setMaxNumSelected(int x);
     void setMinDistance(float x);
-/// per cell
-/// max_n_sel / n_cell
-/// after set max_n_sel
-	void setAcceptRatio(const T *data, const int &n);
+    void setTransform(const Matrix44F &x);
+	void calculateMaxGeod(const T *data, const int &n);
+    void clear();
 /// i-th sample in data
 	bool accept(const T &x, const int &i);
 
 	bool finished() const;
+    void begin();
 	
 	Matrix33F getRotation(const T &s);
 
@@ -76,7 +77,11 @@ void GeodesicSampleRule<T, Trng>::setMinDistance(float x)
 { m_minDistance = x; }
 
 template<typename T, typename Trng>
-void GeodesicSampleRule<T, Trng>::setAcceptRatio(const T *data, const int &n)
+void GeodesicSampleRule<T, Trng>::setTransform(const Matrix44F &x)
+{ m_worldRotation = x.rotation(); }
+
+template<typename T, typename Trng>
+void GeodesicSampleRule<T, Trng>::calculateMaxGeod(const T *data, const int &n)
 {
 	m_maxGeod = 0;
 	int preK = -1;
@@ -90,8 +95,8 @@ void GeodesicSampleRule<T, Trng>::setAcceptRatio(const T *data, const int &n)
 		if(m_maxGeod < data[i]._geod)
 			m_maxGeod = data[i]._geod;
 	}
-	std::cout << "\n n cell " << nCell
-				<< "\n max geodesic distance " << m_maxGeod;
+	//std::cout << "\n n cell " << nCell
+	//			<< "\n max geodesic distance " << m_maxGeod;
 
 	m_dataSize = n;
 }
@@ -112,8 +117,11 @@ bool GeodesicSampleRule<T, Trng>::accept(const T &x, const int &i)
 	
 	if(x._geod < m_maxGeod * .5f)
 		return false;
+    
+    Vector3F worldNml = x._nml;
+    m_worldRotation.transformInPlace(worldNml);
 	
-	if(x._nml.y < -.1f)
+	if(worldNml.y < -.1f)
 		return false;
 	
 /// normal-binormal check
@@ -133,6 +141,13 @@ bool GeodesicSampleRule<T, Trng>::accept(const T &x, const int &i)
 }
 
 template<typename T, typename Trng>
+void GeodesicSampleRule<T, Trng>::begin()
+{ 
+    m_numSelected = 0; 
+    m_pre._key = -1;
+}
+
+template<typename T, typename Trng>
 Matrix33F GeodesicSampleRule<T, Trng>::getRotation(const T &s)
 {
 	Vector3F up = s._grad; up.normalize();
@@ -146,7 +161,8 @@ Matrix33F GeodesicSampleRule<T, Trng>::getRotation(const T &s)
 
 	Quaternion rq(rollAngle, up);
 	Matrix33F roll(rq);
-	return r * roll;
+	r = r * roll;
+    return r * m_worldRotation;
 }
 
 }

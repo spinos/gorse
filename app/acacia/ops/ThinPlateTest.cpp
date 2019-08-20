@@ -54,7 +54,7 @@ ThinPlateTest::ThinPlateTest()
     height.create(256, 256);
     height.setZero();
     height.setGridSize(7.345678f);
-    height.setHeightScale(79.f);
+    height.setHeightScale(49.f);
     
     const float regionBound = 3000.f;
     Polygon2D blasso;
@@ -327,7 +327,15 @@ bool ThinPlateTest::WriteTerrainSamples(const AdaptableMesh *msh,
     
     BoundingBox shapeBox(grdBox);
     const float span = shapeBox.getLongestDistance();
-    const float ssz = span * .002f;
+    const float ssz = span * .001f;
+    shapeBox.expandBy(ssz * 2.f);
+    shapeBox.round();
+    
+    const Vector3F midP = shapeBox.center();
+	const float spanL = shapeBox.getLongestDistance();
+    
+    sds::FZOrderCurve sfc;
+	sfc.setCoord(midP.x, midP.y, midP.z, spanL * .5f);
 	
 	typedef smp::Triangle<SurfaceSample > SamplerTyp;
     
@@ -345,6 +353,9 @@ bool ThinPlateTest::WriteTerrainSamples(const AdaptableMesh *msh,
         msh->getTriangle<SurfaceSample, SamplerTyp >(sampler, i);
         sampler.addSamples <PntArrTyp, SampleInterp<SurfaceSample>, Uniform<Lehmer> >(pnts, asmp, interp, &lmlcg);
     }
+    
+    pnts.createSFC<sds::FZOrderCurve>(sfc);
+    pnts.sort();
     
     HSurfaceSample hsurf("/asset/surf");
     hsurf.save<PntArrTyp>(pnts);
