@@ -148,9 +148,11 @@ BranchTest::BranchTest()
     HLocalGrid hlocG("/asset/localGrid");
     hlocG.save<grd::LocalGrid<float> >(locG);
     hlocG.close();
+    
+    PntArrTyp outpnts = pnts.reduceTo<Uniform<Lehmer> >(10000, &lmlcg);
 
     HSurfaceGeodesicSample hgeod("/asset/geod");
-    hgeod.save<PntArrTyp>(pnts);
+    hgeod.save<PntArrTyp>(outpnts);
     hgeod.close();
     
     ga.close();

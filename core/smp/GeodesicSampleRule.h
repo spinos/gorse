@@ -110,19 +110,16 @@ bool GeodesicSampleRule<T, Trng>::accept(const T &x, const int &i)
 {
 /// same cell exclusion
 	if(x._key == m_pre._key) return false;
+    if(x._geod < m_maxGeod * .5f) return false;
 	
 	const float acceptRatio = (float)(m_maxNumSelected - m_numSelected) / (float)(m_dataSize - i) * 6.f;
 	
 	if(m_rng->randf1() > acceptRatio) return false;
-	
-	if(x._geod < m_maxGeod * .5f)
-		return false;
     
     Vector3F worldNml = x._nml;
     m_worldRotation.transformInPlace(worldNml);
 	
-	if(worldNml.y < -.1f)
-		return false;
+	if(worldNml.y < -.1f) return false;
 	
 /// normal-binormal check
 	if(x._nml.dot(x._grad.normal()) > .3f)

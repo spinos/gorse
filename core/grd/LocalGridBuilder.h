@@ -36,10 +36,10 @@ public:
 /// finish grid
 	void detach();
 /// index in cell
-/// Ts is sample array type, value must have _key, _pos, _span
+/// Ts is sample array type, value must have _key, _pos, _span, _objId
 /// Tr is build rule
 	template<typename Ts, typename Tr>
-	void measure(const Ts &samples, int objI, Tr &rule);
+	void measure(const Ts &samples, Tr &rule);
 
 protected:
 
@@ -141,23 +141,16 @@ void LocalGridBuilder<T>::detach()
 
 template<typename T>
 template<typename Ts, typename Tr>
-void LocalGridBuilder<T>::measure(const Ts &samples, int objI, Tr &rule)
+void LocalGridBuilder<T>::measure(const Ts &samples, Tr &rule)
 {
 	int n = samples.size();
 	Ts::ValueTyp ap;
 	sds::SpaceFillingVector<Ts::ValueTyp> destSamples;
-    
-    int sampleBegin = 1;
-    int sampleEnd = n;
-    
-    const Ts::ValueTyp &s0 = samples[0];
-    if(s0._span < m_grid->cellSize() * 2.f) {
-        sampleBegin = 0;
-        sampleEnd = 1;
-    }
-    
-	for(int i=sampleBegin;i<sampleEnd;++i) {
+
+	for(int i=0;i<n;++i) {
 		const Ts::ValueTyp &si = samples[i];
+/// instance id from sample
+        ap._objId = si._objId;
 /// expand the cell
 		const float sq = si._span * 1.03125f;
 /// center to origin
@@ -180,22 +173,17 @@ void LocalGridBuilder<T>::measure(const Ts &samples, int objI, Tr &rule)
 
 	destSamples.sort();
 
-	int prek =-1;
 	for(int i=0;i<n;++i) {
 		const Ts::ValueTyp &si = destSamples[i];
-		if(si._key != prek) {
 
-			prek = si._key;
+        const int celli = rule.computeCellInd(si._key, rule.P());
 
-			const int celli = rule.computeCellInd(si._key, rule.P());
-
-			if(celli >= m_grid->numCells() ) {
-				std::cout << "\n ERROR oor cell ind " << celli;
-				rule.printCoord(si._key);
-			}
-
-			m_objectCellMap.insert(sdb::Coord2(objI, celli), 0);
-		}
+        if(celli >= m_grid->numCells() ) {
+            std::cout << "\n ERROR oor cell ind " << celli;
+            rule.printCoord(si._key);
+        }
+        
+        m_objectCellMap.insert(sdb::Coord2(si._objId, celli), 0);
 	}
 	
 }

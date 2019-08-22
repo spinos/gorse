@@ -4,7 +4,7 @@
  *
  * extendable storage of T
  *
- * 2019/8/8
+ * 2019/8/22
  */
 
 #ifndef ALO_MATH_SIMPLE_BUFFER_H
@@ -56,6 +56,7 @@ public:
 /// copy n element to data at loc
     void copyFrom(const T *b, int n, int loc=0);
     void copyFrom(const SimpleBuffer &b);
+    void append(const SimpleBuffer &b);
 
     void operator<<(const T& x);
     
@@ -220,6 +221,15 @@ void SimpleBuffer<T>::purgeBuffer()
     delete[] m_data;
 	m_data = 0;
     m_count = m_cap = 0;  
+}
+
+template<typename T>
+void SimpleBuffer<T>::append(const SimpleBuffer &b)
+{
+    const int oldn = count();
+    const int &nb = b.count();
+    createBuffer(oldn + nb);
+    copyFrom(b.c_data(), nb, oldn);
 }
 
 }

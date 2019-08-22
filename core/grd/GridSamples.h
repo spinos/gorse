@@ -55,6 +55,7 @@ struct CellSample {
 	Vector3F _pos;
     float _span;
 	int _key;
+    int _objId;
 };
 
 typedef GridSamples<CellSample> GridCellSamplesTyp;

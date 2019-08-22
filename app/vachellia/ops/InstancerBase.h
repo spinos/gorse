@@ -13,6 +13,7 @@
 #include "RenderableOps.h"
 #include <math/ElementVector.h>
 #include <sdb/Types.h>
+#include <math/Int2.h>
 
 namespace alo {
 
@@ -78,7 +79,7 @@ class InstancerBase {
     bool m_isActive;
     
     std::map<int, int> m_objectCounter;
-
+    
 public:
 
     InstancerBase();
@@ -115,6 +116,11 @@ protected:
     const RenderableOps *inputRenderable(int i) const;
 
     QString getInputRenderablesDescription() const;
+    
+/// to instancer
+    void clearClusters();
+    void clusterBegin(const int &i);
+    void clusterEnd(const int &i);
     
 private:
     void updateInstancerInProgress(bool isAppending);

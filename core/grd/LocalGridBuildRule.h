@@ -63,23 +63,34 @@ int LocalGridBuildRule<Tc>::computeIntersectedCellKeys(const Vector3F &origin,
     							const float &span)
 {
 	m_cellKeys.clear();
+    
+    Vector3F p0 = origin;
+    Vector3F p1 = origin + Vector3F(span, span, span);
+    SvfRuleTyp::clipBoxInsideDomain(p0, p1);
+    
+    float d0[3];
+    SvfRuleTyp::getDomainOrigin(d0);
+    int u0[3];
+    u0[0] = (p0.x - d0[0]) / m_pCellSpan;
+    u0[1] = (p0.y - d0[1]) / m_pCellSpan;
+    u0[2] = (p0.z - d0[2]) / m_pCellSpan;
+    int u1[3];
+    u1[0] = 1 + (p1.x - d0[0]) / m_pCellSpan;
+    u1[1] = 1 + (p1.y - d0[1]) / m_pCellSpan;
+    u1[2] = 1 + (p1.z - d0[2]) / m_pCellSpan;
 
 	const int n = 1 + span / m_pCellSpan;
 	Vector3F q;
-	for(int k=0;k<=n;++k) {
-		if(k<=n-1) q.z = origin.z + m_pCellSpan * k;
-		else q.z = origin.z + span;
+	for(int k=u0[2];k<u1[2];++k) {
+		q.z = d0[2] + m_pCellSpan * k;
 
-		for(int j=0;j<=n;++j) {
-			if(j<=n-1) q.y = origin.y + m_pCellSpan * j;
-			else q.y = origin.y + span;
+		for(int j=u0[1];j<u1[1];++j) {
+			q.y = d0[1] + m_pCellSpan * j;
 
-			for(int i=0;i<=n;++i) {
-				if(i<=n-1) q.x = origin.x + m_pCellSpan * i;
-				else q.x = origin.x + span;
+			for(int i=u0[0];i<u1[0];++i) {
+				q.x = d0[0] + m_pCellSpan * i;
 
-				if(SvfRuleTyp::isPointInsideDomain(q))
-					m_cellKeys.push_back(SvfRuleTyp::computeKeyAtLevel((const float *)&q, P()));
+				m_cellKeys.push_back(SvfRuleTyp::computeKeyAtLevel((const float *)&q, P()));
 			}
 		}
 	}

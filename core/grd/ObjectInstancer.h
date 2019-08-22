@@ -75,6 +75,16 @@ struct TestInstance {
     
     void distanceToWorld(float &d) const
     { _tm.transformDistance(d); }
+    
+    void expandWorldBox(BoundingBox &wb, const float *lb) const
+    {
+        const BoundingBox bx(lb);
+        for(int i=0;i<8;++i) {
+            Vector3F v = bx.corner(i);
+            pointToWorld((float *)&v);
+            wb.expandBy(v);
+        }
+    }
 
 };
 
@@ -86,6 +96,7 @@ class ObjectInstancer {
 	ElementVector<GridCellSamplesTyp> m_samps;
     float m_minimumCellSize;
     int m_numInstancedObjects;
+    std::vector<Int2> m_clusters;
     
 public:
 
@@ -112,13 +123,16 @@ public:
     bool validateNumObjects() const;
 
 	void getAabb(float *b, int ii) const;
+/// bounding box of objects from begin to end, excluding end
+    void getClusterAabb(float *b, int begin, int end) const;
+    
 	float mapDistance(const float *q, 
 				const int *inds, const Int2 &range, 
 				int &closestObjectId) const;
 	float mapDistanceInstance(const float *p, int i) const;
 	void mapNormal(Vector3F &nml, const float *p, int ii) const;
 	
-	void genInstanceSamples(OutSampleTyp *dest, int ii) const;
+	void genInstanceSamples(OutSampleTyp *dest, const Int2 &instanceRange) const;
     
     void createPhalanx(const int &udim, const int &vdim, 
                     const float &spacing, const float &xzSpan, const float &ySpan, 
@@ -132,7 +146,20 @@ public:
 /// y no smaller than min_cell_size
     void limitCellSize(float &y) const;
     
+/// cluster small instances together
+    void clearClusters();
+/// begin at i-th instance
+    void clusterBegin(const int &i);
+/// end before i-th instance
+    void clusterEnd(const int &i);
+    
+    const std::vector<Int2> &clusters() const;
+    
     void verbose() const;
+    
+private:
+
+    void genSingleInstanceSamples(OutSampleTyp *dest, const int &instanceId) const;
     
 };
 
@@ -191,17 +218,27 @@ void ObjectInstancer<T1, T2>::getAabb(float *b, int ii) const
 	const T2 *shape = m_objs.element(inst.objectId()); 
 
 	shape->getAabb(b);
-	shape->expandAabb(b);
-	const BoundingBox lb(b);
-
+	//shape->expandAabb(b);
+	
 	BoundingBox wb;
-	for(int i=0;i<8;++i) {
-		Vector3F v = lb.corner(i);
-		inst.pointToWorld((float *)&v);
-		wb.expandBy(v);
-	}
+    inst.expandWorldBox(wb, b);
 
 	memcpy(b, &wb, 24);
+}
+
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::getClusterAabb(float *b, int begin, int end) const
+{
+    BoundingBox wb;
+    float bi[6];
+    for(int i=begin; i<end; ++i) {
+        const T1 &inst = m_instances[i];
+        const T2 *shape = m_objs.element(inst.objectId()); 
+        shape->getAabb(bi);
+        inst.expandWorldBox(wb, bi);
+        
+    }
+    memcpy(b, &wb, 24);
 }
 
 template<typename T1, typename T2>
@@ -253,27 +290,46 @@ void ObjectInstancer<T1, T2>::mapNormal(Vector3F &nml, const float *p, int i) co
 }
 
 template<typename T1, typename T2>
-void ObjectInstancer<T1, T2>::genInstanceSamples(OutSampleTyp *dest, int ii) const
+void ObjectInstancer<T1, T2>::genInstanceSamples(OutSampleTyp *dest, const Int2 &instanceRange) const
 {
-	const T1 &inst = m_instances[ii];
+    if(instanceRange.x == instanceRange.y)
+        return genSingleInstanceSamples(dest, instanceRange.x);
+    
+    GridCellSamplesTyp::SampleTyp ap;
+    
+    float bi[6];
+    for(int i=instanceRange.x;i<instanceRange.y;++i) {
+        const T1 &inst = m_instances[i];
+        ap._objId = i;
+        
+        const T2 *shape = m_objs.element(inst.objectId()); 
+        shape->getAabb(bi);
+        
+        BoundingBox wb;
+        inst.expandWorldBox(wb, bi);
+        
+        ap._pos = wb.center();
+        ap._span = wb.getLongestDistance();
+        
+        (*dest) << ap;
+    }
+}
+    
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::genSingleInstanceSamples(OutSampleTyp *dest, const int &instanceId) const
+{
+	const T1 &inst = m_instances[instanceId];
 	const GridCellSamplesTyp *shapeSamps = m_samps.element(inst.objectId());
 
 	const OutSampleTyp &src = shapeSamps->samples(); 
 
 	GridCellSamplesTyp::SampleTyp ap;
+    ap._objId = instanceId;
     ap._span = src[0]._span;
-    inst.distanceToWorld(ap._span);
-    
-    ap._pos = src[0]._pos;
-	inst.pointToWorld((float *)&ap._pos);
-    
-    (*dest) << ap;
-    
-    ap._span = src[1]._span;
     inst.distanceToWorld(ap._span);
 
 	const int n = src.size();
-	for(int i=1;i<n;++i) {
+	for(int i=0;i<n;++i) {
 		ap._pos = src[i]._pos;
 		inst.pointToWorld((float *)&ap._pos);
        
@@ -391,6 +447,22 @@ bool ObjectInstancer<T1, T2>::validateNumObjects() const
 template<typename T1, typename T2>
 const int &ObjectInstancer<T1, T2>::numInstancedObjects() const
 { return m_numInstancedObjects; }
+
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::clearClusters()
+{ m_clusters.clear(); }
+
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::clusterBegin(const int &i)
+{ m_clusters.push_back(Int2(i,i)); }
+
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::clusterEnd(const int &i)
+{ m_clusters.back().y = i; }
+
+template<typename T1, typename T2>
+const std::vector<Int2> &ObjectInstancer<T1, T2>::clusters() const
+{ return m_clusters; }
 
 }
 

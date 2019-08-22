@@ -5,9 +5,7 @@
  *  T is element type
  *  Tc is space filling curve type
  *
- *  Created by jian zhang on 2/12/18.
- *  Copyright 2018 __MyCompanyName__. All rights reserved.
- *
+ *  2019/8/22
  */
 
 #ifndef ALO_SDS_SPACE_FILLING_VECTOR_H
@@ -55,6 +53,10 @@ public:
 	const T& operator[](int i) const;
 
 	void operator<<(const T &x);
+    
+/// randomly pick a portion of the data
+    template<typename Trng>
+    SpaceFillingVector<T> reduceTo(int nr, Trng *rng) const;
 	
 protected:
 	
@@ -210,6 +212,19 @@ int SpaceFillingVector<T>::findElement(const int& k) const
 		return i-1;
 		
 	return -1;
+}
+
+template<typename T>
+template<typename Trng>
+SpaceFillingVector<T> SpaceFillingVector<T>::reduceTo(int nr, Trng *rng) const
+{
+    SpaceFillingVector<T> res;
+    const int n = m_v.size();
+    const float selectRatio = (float)nr / (float)n;
+	for(int i=0;i<n;++i) {
+		if(rng->randf1() < selectRatio) res << m_v[i];
+	}
+    return res;
 }
 
 }

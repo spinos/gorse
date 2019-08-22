@@ -14,6 +14,10 @@
 #include <rng/Uniform.h>
 #include <sds/FZOrder.h>
 #include <math/RandomSelect.h>
+#include <scatter/SynthesisBundle.h>
+#include <boost/bind.hpp>
+#include <boost/thread.hpp>
+#include <boost/chrono/include.hpp>
 
 namespace alo {
     
@@ -243,13 +247,15 @@ void BranchInstancer::synthesizeBranchInstancesOnTerrain(const smp::SampleFilter
     countTrunks(trunkSel);
     
     int sd = 87654321;
-    int nsel = 20000;
+    int nsel = 12000;
     
-    Uniform<Lehmer> lmlcg(sd);
+    Uniform<Lehmer> *lmlcgs[8];
+    for(int i=0;i<8;++i) lmlcgs[i] = new Uniform<Lehmer>(sd + i);
+    
     sds::FZOrderCurve sfc;
     typedef SpatialSampleRule<Uniform<Lehmer>, sds::FZOrderCurve > SurfaceRuleTyp;
     SurfaceRuleTyp trunkRule(&sfc);
-    trunkRule.setRng(&lmlcg);
+    trunkRule.setRng(lmlcgs[0]);
     trunkRule.setMaxNumSelected(nsel);
     float collisionDistance = getTrunkCollisionDistance();
     const int ns = filter->numSamples();
@@ -263,12 +269,14 @@ void BranchInstancer::synthesizeBranchInstancesOnTerrain(const smp::SampleFilter
     const int ntrunk = subset.count();
 	std::cout << "\n n trunk " << ntrunk;
     
+    boost::chrono::system_clock::time_point t0 = boost::chrono::system_clock::now();
+    
     SimpleBuffer<int> trunkObjectIds;
     SimpleBuffer<Matrix44F> trunkTms;
     
     Matrix44F tm;
     for(int i=0;i<ntrunk;++i) {
-        int j = trunkSel.select<Uniform<Lehmer> >(&lmlcg);
+        int j = trunkSel.select<Uniform<Lehmer> >(lmlcgs[0]);
         
         trunkObjectIds << j;
         
@@ -284,46 +292,102 @@ void BranchInstancer::synthesizeBranchInstancesOnTerrain(const smp::SampleFilter
         trunkTms << tm;
     }
     
-    std::map<int, GeodRuleTyp *> geodRuleMap;
+    typedef sca::SynthesisBundle<64> SynthBudleTyp;
     
-    float branchCollisionDistance = getBranchCollisionDistance();
-        
+    const float branchCollisionDistance = getBranchCollisionDistance();
+    
+    std::map<int, SynthBudleTyp *> trunkBundleMap;
+       
     std::map<int, int>::const_iterator trunkIt = instanceCounter.begin();
     for(;trunkIt!=instanceCounter.end();++trunkIt) {
-        GeodRuleTyp *rule = new GeodRuleTyp;
-        rule->setRng(&lmlcg);
-        rule->setMaxNumSelected(300);
-        rule->setMinDistance(branchCollisionDistance);
+        GeodRuleTyp rule;
+        rule.setRng(lmlcgs[0]);
+        rule.setMaxNumSelected(330);
+        rule.setMinDistance(branchCollisionDistance);
         
         const RenderableOps *top = inputRenderable(trunkIt->first);
         const smp::SampleFilter<SurfaceGeodesicSample> *filter = top->getGeodesicSamples();
         
         const int ns = filter->numSamples();
-        rule->calculateMaxGeod(filter->c_samples(), ns);
+        rule.calculateMaxGeod(filter->c_samples(), ns);
     
-        geodRuleMap[trunkIt->first] = rule;
+        SynthBudleTyp *bnd = new SynthBudleTyp;
+        
+        bnd->synthesize<SurfaceGeodesicSample, GeodRuleTyp, Uniform<Lehmer> >(filter, rule, branchSel, lmlcgs[0]);
+        
+        trunkBundleMap[trunkIt->first] = bnd;
     }
+    
+    clearClusters();
     
     SimpleBuffer<int> branchObjectIds;
     SimpleBuffer<Matrix44F> branchTms;
     
+    SimpleBuffer<int> thObjectIds[8];
+    SimpleBuffer<Matrix44F> thTms[8];
+    boost::thread transformThread[8];
+    
+    int threadCount = 0;
     for(int i=0;i<ntrunk;++i) {
-        GeodRuleTyp *rule = geodRuleMap[trunkObjectIds[i]];
-        rule->setTransform(trunkTms[i]);
+        SynthBudleTyp *bnd = trunkBundleMap[trunkObjectIds[i]];
+
+        transformThread[threadCount] = boost::thread(boost::bind(
+        &SynthBudleTyp::transformABundle, bnd, 
+                &thObjectIds[threadCount], &thTms[threadCount], &trunkTms[i], lmlcgs[threadCount])
+        );
+        threadCount++;
         
-        const RenderableOps *top = inputRenderable(trunkObjectIds[i]);
-        const smp::SampleFilter<SurfaceGeodesicSample> *filter = top->getGeodesicSamples();
-        
-        synthesizeBranchInstancesOnTrunk(branchObjectIds, branchTms, &lmlcg, filter, branchSel, trunkTms[i], rule);
+        if(threadCount == 8) {
+            for(int t=0;t<threadCount;++t) {
+                transformThread[t].join();
+            }
+            
+            for(int t=0;t<threadCount;++t) {
+                clusterBegin(ntrunk + branchObjectIds.count());
+                
+                branchObjectIds.append(thObjectIds[t]);
+                thObjectIds[t].purgeBuffer();
+                branchTms.append(thTms[t]);
+                thTms[t].purgeBuffer();
+                
+                clusterEnd(ntrunk + branchObjectIds.count());
+            }
+            threadCount = 0;
+        }
     }
     
-    std::map<int, GeodRuleTyp *>::iterator trunkRuleIt = geodRuleMap.begin();
-    for(;trunkRuleIt != geodRuleMap.end();++trunkRuleIt) {
-        delete trunkRuleIt->second;
+    if(threadCount > 0) {
+        for(int t=0;t<threadCount;++t) {
+            transformThread[t].join();
+        }
+        
+        for(int t=0;t<threadCount;++t) {
+            clusterBegin(ntrunk + branchObjectIds.count());
+            
+            branchObjectIds.append(thObjectIds[t]);
+            thObjectIds[t].purgeBuffer();
+            branchTms.append(thTms[t]);
+            thTms[t].purgeBuffer();
+            
+            clusterEnd(ntrunk + branchObjectIds.count());
+        }
+
     }
+    
+    std::map<int, SynthBudleTyp *>::iterator bundleIt = trunkBundleMap.begin();
+    for(;bundleIt != trunkBundleMap.end();++bundleIt) {
+        delete bundleIt->second;
+    }
+    
+    for(int i=0;i<8;++i) delete lmlcgs[i];
     
     const int nbranch = branchObjectIds.count();
     std::cout << "\n n branch " << nbranch;
+    
+    boost::chrono::system_clock::time_point t1 = boost::chrono::system_clock::now();
+    
+    boost::chrono::duration<double> sec = t1 - t0;
+    std::cout << "\n finished in " << sec.count() << " seconds ";
     
     const int n = ntrunk + nbranch;
     createInstances(n);
@@ -348,37 +412,6 @@ void BranchInstancer::synthesizeBranchInstancesOnTerrain(const smp::SampleFilter
     
     const float instancerSize = getMeanTrunkSize();
     setInstancedObjectCountAndSize(instanceCounter, instancerSize);
-}
-
-void BranchInstancer::synthesizeBranchInstancesOnTrunk(SimpleBuffer<int> &branchObjectIds,
-                    SimpleBuffer<Matrix44F> &branchTms,
-                    Uniform<Lehmer> *lmlcg, 
-                    const smp::SampleFilter<SurfaceGeodesicSample> *filter,
-                    RandomSelect &branchSel,
-                    const Matrix44F &trunkTm, GeodRuleTyp *trunkRule)
-{
-    SimpleBuffer<SurfaceGeodesicSample> subset;
-    filter->drawSamples<GeodRuleTyp>(subset, *trunkRule);
-    
-    const int n = subset.count();
-
-	Matrix44F tm;
-    for(int i=0;i<n;++i) {
-        int j = branchSel.select<Uniform<Lehmer> >(lmlcg);
-        
-        branchObjectIds << j;
-
-        const SurfaceGeodesicSample &si = subset[i];
-		
-        tm.setTranslation(trunkTm.transform(si._pos));
-		
-		Matrix33F r = trunkRule->getRotation(si);
-		Matrix33F::rotateUpToAlignLimited(r, Vector3F(0.f, 1.f, 0.f), .7f);
-		tm.setRotation(r);
-        
-        branchTms << tm;
-        
-    }
 }
     
 }

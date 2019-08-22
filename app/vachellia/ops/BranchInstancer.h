@@ -51,12 +51,6 @@ private:
     const RenderableOps *getTerrain(int &ind) const;
     void synthesizeSingleBranchInstances();
     void synthesizeBranchInstancesOnTerrain(const smp::SampleFilter<SurfaceSample> *filter);
-    void synthesizeBranchInstancesOnTrunk(SimpleBuffer<int> &branchObjectIds,
-                    SimpleBuffer<Matrix44F> &branchTms,
-                    Uniform<Lehmer> *lmlcg, 
-                    const smp::SampleFilter<SurfaceGeodesicSample> *filter,
-                    RandomSelect &branchSel,
-                    const Matrix44F &trunkTm, GeodRuleTyp *trunkRule);
     
 };
 

@@ -11,6 +11,7 @@
 
 #include "WorldGrid.h"
 #include <boost/thread.hpp>
+#include <boost/chrono/include.hpp>
 
 namespace alo {
 
@@ -19,8 +20,10 @@ namespace grd {
 template<typename T, typename Tc>
 class WorldGridBuilder {
 
-/// (object, cell)
-	sdb::L3Tree<sdb::Coord2, int, 2048, 512, 1024 > m_objectCellMap;
+/// key (object, cell) value (object_begin, object_end) 
+/// storage range of bundled objects 
+/// singular object object_begin = object_end
+	sdb::L3Tree<sdb::Coord2, Int2, 2048, 512, 1024 > m_objectCellMap;
 	WorldGrid<T, Tc> *m_grid;
 	bool m_toRebuild;
 
@@ -41,7 +44,7 @@ private:
 /// object to cell(s) by rule Tr
 /// keep object-cell map for later build
 	template<typename Tr, typename Tcr>
-	void mapCells(const float *b, const int &objI, Tr &rule, Tcr &cellRule);
+	void mapCells(const float *b, const Int2 &objI, Tr &rule, Tcr &cellRule);
 /// build mapped cells by objects of T1, builder of Tb, and rule of Tr 
 /// clear the object-cell map
 	template<typename Ti, typename Tcb, typename Tcr>
@@ -74,13 +77,37 @@ template<typename T, typename Tc>
 template<typename Ti, typename Tr, typename Tcb, typename Tcr>
 void WorldGridBuilder<T, Tc>::addInstances(const Ti &instancer, Tr &gridRule, Tcb &cellBuilder, Tcr &cellRule)
 {
+    const std::vector<Int2> &smallBundles = instancer.clusters();
+    Int2 currentBundle(-1, -1);
+    std::vector<Int2>::const_iterator bundleIt = smallBundles.begin();
+    if(bundleIt != smallBundles.end())
+        currentBundle = *bundleIt;
+
+    bool isBundled = false;
 	float b[6];
 	const int &n = instancer.numInstances();
 	for(int i=0;i<n;++i) {
-		instancer.getAabb(b, i);
-
-		mapCells <Tr, Tcr>(b, i, gridRule, cellRule);
         
+        if(i == currentBundle.x) {
+            isBundled = true;
+        } else if(i+1 == currentBundle.y) {
+            isBundled = false;
+            
+            instancer.getClusterAabb(b, currentBundle.x, currentBundle.y);
+            mapCells <Tr, Tcr>(b, currentBundle, gridRule, cellRule);
+            
+            bundleIt++;
+            if(bundleIt != smallBundles.end()) {
+                currentBundle = *bundleIt;
+            } else
+                currentBundle.set(-1,-1);
+            
+        } 
+
+        if(!isBundled) {
+            instancer.getAabb(b, i);
+            mapCells <Tr, Tcr>(b, Int2(i,i), gridRule, cellRule);
+        }
 	}
 
 	buildCells<Ti, Tcb, Tcr>(instancer, cellBuilder, cellRule);
@@ -89,7 +116,7 @@ void WorldGridBuilder<T, Tc>::addInstances(const Ti &instancer, Tr &gridRule, Tc
 
 template<typename T, typename Tc>
 template<typename Tr, typename Tcr>
-void WorldGridBuilder<T, Tc>::mapCells(const float *b, const int &objI, Tr &rule, Tcr &cellRule)
+void WorldGridBuilder<T, Tc>::mapCells(const float *b, const Int2 &objI, Tr &rule, Tcr &cellRule)
 {
 	rule.calcCellCoords(b);
 	
@@ -111,7 +138,7 @@ void WorldGridBuilder<T, Tc>::mapCells(const float *b, const int &objI, Tr &rule
 			std::cout << ".";
 		}
 
-		m_objectCellMap.insert(sdb::Coord2(objI, ki), 0);
+		m_objectCellMap.insert(sdb::Coord2(objI.x, ki), objI);
 	}
 
 }
@@ -120,6 +147,8 @@ template<typename T, typename Tc>
 template<typename Ti, typename Tcb, typename Tcr>
 void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, Tcr &cellRule)
 {
+    boost::chrono::system_clock::time_point t0 = boost::chrono::system_clock::now();
+    
     std::cout << "\n build world cells ";
 	const int ninst = m_objectCellMap.size();
 	int nmc = 0;
@@ -131,17 +160,17 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 #define NUM_SAMPLE_THREAD 8
     Ti::OutSampleTyp sampleData[NUM_SAMPLE_THREAD];
     boost::thread sampleThread[NUM_SAMPLE_THREAD];
-    int objectInd[NUM_SAMPLE_THREAD];
     int threadCount = 0;
 #else
     Ti::OutSampleTyp sampleData;
 #endif
     
-	sdb::L3Node<sdb::Coord2, int, 1024> *block = m_objectCellMap.begin();
+	sdb::L3Node<sdb::Coord2, Int2, 1024> *block = m_objectCellMap.begin();
 	while(block) {
 		for (int i=0;i<block->count();++i) { 
         	
         	const sdb::Coord2 &ci = block->key(i);
+            const Int2 &objRange = block->value(i);
 
 			if(preInd < ci.y) {
 
@@ -154,7 +183,7 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
                         }
                         
                         for(int t=0;t<threadCount;++t) {
-                            cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(sampleData[t], objectInd[t], cellRule);
+                            cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(sampleData[t], cellRule);
                         }
                         
                         threadCount = 0;
@@ -176,10 +205,9 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 				cellBuilder.attach(cell->_grid);
 			}
 #ifdef TEST_MT_SAMPLE            
-            objectInd[threadCount] = ci.x;
             sampleData[threadCount].clear();
             sampleThread[threadCount] = boost::thread( 
-            boost::bind(&Ti::genInstanceSamples, &instancer, &sampleData[threadCount], ci.x ) );
+            boost::bind(&Ti::genInstanceSamples, &instancer, &sampleData[threadCount], objRange ) );
             
             threadCount++;
             
@@ -189,7 +217,7 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
                 }
                 
                 for(int t=0;t<threadCount;++t) {
-                    cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(sampleData[t], objectInd[t], cellRule);
+                    cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(sampleData[t], cellRule);
                 }
                 
                 threadCount = 0;
@@ -198,7 +226,7 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 			sampleData.clear();
 			instancer.genInstanceSamples(&sampleData, ci.x);
 
-			cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(sampleData, ci.x, cellRule);
+			cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(sampleData, cellRule);
 #endif
 		}
         std::cout << ".";
@@ -215,7 +243,7 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
             }
             
             for(int t=0;t<threadCount;++t) {
-                cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(sampleData[t], objectInd[t], cellRule);
+                cellBuilder. template measure<Ti::OutSampleTyp, Tcr>(sampleData[t], cellRule);
             }
             
             threadCount = 0;
@@ -225,8 +253,13 @@ void WorldGridBuilder<T, Tc>::buildCells(const Ti &instancer, Tcb &cellBuilder, 
 	}
 
 	m_objectCellMap.clear();
+    
+    boost::chrono::system_clock::time_point t1 = boost::chrono::system_clock::now();
+    
+    boost::chrono::duration<double> sec = t1 - t0;
 
-	std::cout << "\n INFO WorldGridBuilder built "<<ninst<<" instance in "<<nmc<<" cell ";
+	std::cout << "\n "<<ninst<<" instance in "<<nmc
+                <<" cell \n finished in " << sec.count() << " seconds ";
 
 }
 

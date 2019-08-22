@@ -114,7 +114,7 @@ void InstancerBase::updateInstancerInProgress(bool isAppending)
         typedef grd::LocalGridBuilder<grd::LocalGrid<float> > CellBuilderTyp;
         CellBuilderTyp cellBuilder;
         
-        float fcellSize = m_instancer->getMediumObjectSize(m_objectCounter) * 5.f;
+        float fcellSize = m_instancer->getMediumObjectSize(m_objectCounter) * 4.f;
         m_instancer->limitCellSize(fcellSize);
         int cellSize = fcellSize;
         cellSize = Round64(cellSize);
@@ -219,5 +219,14 @@ QString InstancerBase::getInputRenderablesDescription() const
     }
     return r;
 }
+
+void InstancerBase::clearClusters()
+{ m_instancer->clearClusters(); }
+
+void InstancerBase::clusterBegin(const int &i)
+{ m_instancer->clusterBegin(i); }
+
+void InstancerBase::clusterEnd(const int &i)
+{ m_instancer->clusterEnd(i); }
 
 } /// end of alo

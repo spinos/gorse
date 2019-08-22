@@ -83,7 +83,8 @@ public:
 
     bool isCellIntersectDomain(const Vector3F &origin, const float &span) const;
     bool isPointInsideDomain(const Vector3F &q) const;
-    
+    void clipBoxInsideDomain(Vector3F &qmin, Vector3F &qmax) const;
+
 /// (-1 0 +1)^3 cells centered at coord
     void getLevel27Cells(int *nei, const int coord, int level) const;
     
@@ -506,6 +507,13 @@ bool SvfBuildRule<Tc>::isCellIntersectDomain(const Vector3F &origin, const float
 template<typename Tc>
 bool SvfBuildRule<Tc>::isPointInsideDomain(const Vector3F &q) const
 { return m_domain.isPointInside(q); }
+
+template<typename Tc>
+void SvfBuildRule<Tc>::clipBoxInsideDomain(Vector3F &qmin, Vector3F &qmax) const
+{ 
+    m_domain.putInside(qmin);
+    m_domain.putInside(qmax); 
+}
 
 template<typename Tc>
 template<typename Te>

@@ -119,7 +119,7 @@ bool SpatialSampleRule<Trng, Tc>::accept(const Ts &x, const int &i)
 {
     if(x._nml.y < .7f) return false;
     
-    const float acceptRatio = (float)(m_maxNumSelected - m_numSelected) / (float)(m_dataSize - i) * 5.f;
+    const float acceptRatio = (float)(m_maxNumSelected - m_numSelected) / (float)(m_dataSize - i) * 3.f;
 	
 	if(m_rng->randf1() > acceptRatio) return false;
     

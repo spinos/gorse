@@ -191,13 +191,8 @@ template<typename Ts>
 void LocalGrid<T>::genSamples(sds::SpaceFillingVector<Ts> &samples) const
 {
     Ts ap;
-    BoundingBox b = PGridTyp::fieldBox();
-    ap._span = b.distance(0);
-    ap._pos = b.center();
-    samples << ap;
-    
     ap._span = cellSize();
-    
+    BoundingBox b;
     const int n = numCells();
     for(int i=0;i<n;++i) {
         if(isCellEmpty(i)) continue;
