@@ -2,7 +2,7 @@
  *  InstancerBase.cpp
  *  vachellia
  *
- *  2019/7/18
+ *  2019/8/24
  */
 
 #include "InstancerBase.h"
@@ -35,6 +35,10 @@ m_isActive(false)
     m_worldRule = new WorldRuleTyp;
     m_worldBuilder = new WorldBuilderTyp;
     m_worldLookupRule = new WorldLookupRuleTyp;
+    m_worldCenterCellSize[0] = 0;
+    m_worldCenterCellSize[1] = 0;
+    m_worldCenterCellSize[2] = 0;
+    m_worldCenterCellSize[3] = 64;
 }
 
 InstancerBase::~InstancerBase()
@@ -118,9 +122,12 @@ void InstancerBase::updateInstancerInProgress(bool isAppending)
         m_instancer->limitCellSize(fcellSize);
         int cellSize = fcellSize;
         cellSize = Round64(cellSize);
-        std::cout << "\n cell size " << cellSize;
-        const int cencz[4] = {0,0,0,cellSize};
-        m_worldRule->setCenterCellSize(cencz);
+        m_worldCenterCellSize[3] = cellSize;
+        std::cout << "\n world center (" << m_worldCenterCellSize[0]
+                    << ", " << m_worldCenterCellSize[1]
+                    << ", " << m_worldCenterCellSize[2]
+                    << ") cell size " << m_worldCenterCellSize[3];
+        m_worldRule->setCenterCellSize(m_worldCenterCellSize);
 
         m_worldGrid->clear();
         m_worldBuilder->attach(m_worldGrid);
@@ -228,5 +235,24 @@ void InstancerBase::clusterBegin(const int &i)
 
 void InstancerBase::clusterEnd(const int &i)
 { m_instancer->clusterEnd(i); }
+
+void InstancerBase::setWorldCenter(const float *b)
+{
+    int cx = (b[0] + b[3]) * .5f;
+    int cy = (b[1] + b[4]) * .5f;
+    int cz = (b[2] + b[5]) * .5f;
+    int sx = cx > 0 ? 1 : -1;
+    int sy = cy > 0 ? 1 : -1;
+    int sz = cz > 0 ? 1 : -1;
+    if(sx < 0) cx = -cx;
+    if(sy < 0) cy = -cy;
+    if(sz < 0) cz = -cz;
+    cx = Round32(cx);
+    cy = Round32(cy);
+    cz = Round32(cz);
+    m_worldCenterCellSize[0] = cx * sx;
+    m_worldCenterCellSize[1] = cy * sy;
+    m_worldCenterCellSize[2] = cz * sz;
+}
 
 } /// end of alo

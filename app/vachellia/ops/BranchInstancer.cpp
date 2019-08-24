@@ -21,21 +21,39 @@
 
 namespace alo {
     
-BranchInstancer::BranchInstancer()
+BranchInstancer::BranchInstancer() : m_synthesizeNumTrunk(100),
+m_synthesizeNumBranch(200),
+m_randomSeed(7654321),
+m_relativeSpacing(1.f)
 {}
     
 BranchInstancer::~BranchInstancer()
 {} 
 
+void BranchInstancer::setSynthesizeNumTrunk(const int &x)
+{ m_synthesizeNumTrunk = x; }
+
+void BranchInstancer::setSynthesizeNumBranch(const int &x)
+{ m_synthesizeNumBranch = x; }
+
+void BranchInstancer::setRandomSeed(const int &x)
+{ m_randomSeed = x; }
+
+void BranchInstancer::setRelativeSpacing(const float &x)
+{ m_relativeSpacing = x; }
+
 bool BranchInstancer::isInstancerReady() const
 {
     const int n = numInputRenderables();
     if(n < 2) return false;
+    bool hasBranch = false;
+    bool hasTrunk = false;
     for(int i=0;i<n;++i) {
         const RenderableOps *r = inputRenderable(i);
-        if(r->hasGeodesicSamples()) return true;
+        if(isTrunk(r)) hasTrunk = true;
+        if(isBranch(r)) hasBranch = true;
     }
-    return false;
+    return hasBranch && hasTrunk;
 }
 
 const RenderableOps *BranchInstancer::getTerrain(int &ind) const
@@ -43,7 +61,7 @@ const RenderableOps *BranchInstancer::getTerrain(int &ind) const
     const int n = numInputRenderables();
     for(int i=0;i<n;++i) {
         const RenderableOps *r = inputRenderable(i);
-        if(r->hasSurfaceSamples()) {
+        if(isTerrain(r)) {
             ind = i;
             return r;
         }
@@ -56,6 +74,9 @@ void BranchInstancer::synthesizeBranchInstances()
     int terrainObjI;
     const RenderableOps *terrain = getTerrain(terrainObjI);
     if(terrain) {
+        float bx[6];
+        terrain->getAabb(bx);
+        setWorldCenter(bx);
         const smp::SampleFilter<SurfaceSample> *flt = terrain->getSurfaceSamples();
         synthesizeBranchInstancesOnTerrain(flt);
     } else {
@@ -70,10 +91,7 @@ void BranchInstancer::synthesizeSingleBranchInstances()
     RandomSelect trunkSel;
     countTrunks(trunkSel);
     
-    int sd = 87654321;
-    int nsel = 300;
-    
-    Uniform<Lehmer> lmlcg(sd);
+    Uniform<Lehmer> lmlcg(m_randomSeed);
     
     int t = trunkSel.select<Uniform<Lehmer> >(&lmlcg);
     const RenderableOps *top = inputRenderable(t);
@@ -86,7 +104,7 @@ void BranchInstancer::synthesizeSingleBranchInstances()
     typedef GeodesicSampleRule<SurfaceGeodesicSample, Uniform<Lehmer> > GeodRuleTyp;
     GeodRuleTyp rule;
     rule.setRng(&lmlcg);
-    rule.setMaxNumSelected(nsel);
+    rule.setMaxNumSelected(m_synthesizeNumBranch);
     float collisionDistance = getBranchCollisionDistance();
     rule.setMinDistance(collisionDistance);
     const int ns = filter->numSamples();
@@ -129,7 +147,7 @@ void BranchInstancer::countBranches(RandomSelect &selector)
     const int n = numInputRenderables();
     for(int i=0;i<n;++i) {
         const RenderableOps *r = inputRenderable(i);
-        if(!r->hasGeodesicSamples()) {
+        if(isBranch(r)) {
             b++;
         }
     }
@@ -138,7 +156,7 @@ void BranchInstancer::countBranches(RandomSelect &selector)
     b = 0;
     for(int i=0;i<n;++i) {
         const RenderableOps *r = inputRenderable(i);
-        if(!r->hasGeodesicSamples()) {
+        if(isBranch(r)) {
             selector.setValue(i, b);
             selector.setWeight(1.f, b);
             b++;
@@ -153,7 +171,7 @@ void BranchInstancer::countTrunks(RandomSelect &selector)
     const int n = numInputRenderables();
     for(int i=0;i<n;++i) {
         const RenderableOps *r = inputRenderable(i);
-        if(r->hasGeodesicSamples()) {
+        if(isTrunk(r)) {
             b++;
         }
     }
@@ -162,7 +180,7 @@ void BranchInstancer::countTrunks(RandomSelect &selector)
     b = 0;
     for(int i=0;i<n;++i) {
         const RenderableOps *r = inputRenderable(i);
-        if(r->hasGeodesicSamples()) {
+        if(isTrunk(r)) {
             selector.setValue(i, b);
             selector.setWeight(1.f, b);
             b++;
@@ -179,7 +197,7 @@ float BranchInstancer::getMeanBranchSize() const
     const int n = numInputRenderables();
     for(int i=0;i<n;++i) {
         const RenderableOps *r = inputRenderable(i);
-        if(!r->hasGeodesicSamples() && !r->hasSurfaceSamples()) {
+        if(isBranch(r)) {
             r->getAabb(bx);
             s += BoundingBox(bx).getLongestDistance();
             b++;
@@ -196,7 +214,7 @@ float BranchInstancer::getMeanTrunkSize() const
     const int n = numInputRenderables();
     for(int i=0;i<n;++i) {
         const RenderableOps *r = inputRenderable(i);
-        if(r->hasGeodesicSamples()) {
+        if(isTrunk(r)) {
             r->getAabb(bx);
             s += BoundingBox(bx).getLongestDistance();
             b++;
@@ -213,7 +231,7 @@ float BranchInstancer::getBranchCollisionDistance() const
     const int n = numInputRenderables();
     for(int i=0;i<n;++i) {
         const RenderableOps *r = inputRenderable(i);
-        if(!r->hasGeodesicSamples() && !r->hasSurfaceSamples()) {
+        if(isBranch(r)) {
             r->getAabb(bx);
             s += BoundingBox(bx).distance(0) + BoundingBox(bx).distance(2);
             b+=2;
@@ -230,7 +248,7 @@ float BranchInstancer::getTrunkCollisionDistance() const
     const int n = numInputRenderables();
     for(int i=0;i<n;++i) {
         const RenderableOps *r = inputRenderable(i);
-        if(r->hasGeodesicSamples()) {
+        if(isTrunk(r)) {
             r->getAabb(bx);
             s += BoundingBox(bx).distance(0) + BoundingBox(bx).distance(2);
             b+=2;
@@ -246,18 +264,15 @@ void BranchInstancer::synthesizeBranchInstancesOnTerrain(const smp::SampleFilter
     RandomSelect trunkSel;
     countTrunks(trunkSel);
     
-    int sd = 87654321;
-    int nsel = 12000;
-    
     Uniform<Lehmer> *lmlcgs[8];
-    for(int i=0;i<8;++i) lmlcgs[i] = new Uniform<Lehmer>(sd + i);
+    for(int i=0;i<8;++i) lmlcgs[i] = new Uniform<Lehmer>(m_randomSeed + i);
     
     sds::FZOrderCurve sfc;
     typedef SpatialSampleRule<Uniform<Lehmer>, sds::FZOrderCurve > SurfaceRuleTyp;
     SurfaceRuleTyp trunkRule(&sfc);
     trunkRule.setRng(lmlcgs[0]);
-    trunkRule.setMaxNumSelected(nsel);
-    float collisionDistance = getTrunkCollisionDistance();
+    trunkRule.setMaxNumSelected(m_synthesizeNumTrunk);
+    float collisionDistance = getTrunkCollisionDistance() * m_relativeSpacing;
     const int ns = filter->numSamples();
     trunkRule.createGrid<SurfaceSample>(filter->c_samples(), ns, collisionDistance);
     
@@ -302,7 +317,7 @@ void BranchInstancer::synthesizeBranchInstancesOnTerrain(const smp::SampleFilter
     for(;trunkIt!=instanceCounter.end();++trunkIt) {
         GeodRuleTyp rule;
         rule.setRng(lmlcgs[0]);
-        rule.setMaxNumSelected(330);
+        rule.setMaxNumSelected(m_synthesizeNumBranch);
         rule.setMinDistance(branchCollisionDistance);
         
         const RenderableOps *top = inputRenderable(trunkIt->first);
@@ -400,10 +415,9 @@ void BranchInstancer::synthesizeBranchInstancesOnTerrain(const smp::SampleFilter
         inst.setSpace(trunkTms[i]);
         
     }
-    
+   
     for(int i=0;i<nbranch;++i) {
         int j = branchObjectIds[i];
-        
         grd::TestInstance &inst = instance(i + ntrunk);
         inst.setObjectId(j);
         inst.setSpace(branchTms[i]);
@@ -413,5 +427,14 @@ void BranchInstancer::synthesizeBranchInstancesOnTerrain(const smp::SampleFilter
     const float instancerSize = getMeanTrunkSize();
     setInstancedObjectCountAndSize(instanceCounter, instancerSize);
 }
+
+bool BranchInstancer::isBranch(const RenderableOps *r) const
+{ return !r->hasGeodesicSamples() && !r->hasSurfaceSamples(); }
+
+bool BranchInstancer::isTrunk(const RenderableOps *r) const
+{ return r->hasGeodesicSamples(); }
+
+bool BranchInstancer::isTerrain(const RenderableOps *r) const
+{ return r->hasSurfaceSamples(); }
     
 }

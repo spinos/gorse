@@ -42,6 +42,21 @@ void CanopyOps::update()
     getIntAttribValue(mns, "amaxnstep");
     setLookupMaxNumSteps(mns);
     
+    int ntrunk;
+    getIntAttribValue(ntrunk, "antree");
+    setSynthesizeNumTrunk(ntrunk);
+    
+    int nbranch;
+    getIntAttribValue(nbranch, "anbranch");
+    setSynthesizeNumBranch(nbranch);
+    
+    int iseed;
+    getIntAttribValue(iseed, "arandseed");
+    setRandomSeed(iseed);
+    
+    float fspacing;
+    getFloatAttribValue(fspacing, "aspacing");
+    setRelativeSpacing(fspacing);
 }
 
 bool CanopyOps::hasInstance() const

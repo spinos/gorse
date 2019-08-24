@@ -174,12 +174,36 @@
                                 "max": 256
                                 },
                                 {
+                                    "name": "antree",
+                                    "label": "Num Tree",
+                                    "typ": 2,
+                                    "value": 100,
+                                    "min": 20,
+                                    "max": 20000
+                                },
+                                {
+                                    "name": "anbranch",
+                                    "label": "Num Branch Per Tree",
+                                    "typ": 2,
+                                    "value": 200,
+                                    "min": 10,
+                                    "max": 500
+                                },
+                                {
                                     "name": "arandseed",
                                     "label": "Random Seed",
                                     "typ": 2,
                                     "value": 7654321,
                                     "min": 999,
                                     "max": 1999999999
+                                },
+                                {
+                                    "name": "aspacing",
+                                    "label": "Spacing",
+                                    "typ": 3,
+                                    "value": 1.0,
+                                    "min": 0.5,
+                                    "max": 20
                                 },
                                 {
                                     "name": "transform",

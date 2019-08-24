@@ -304,9 +304,10 @@ bool ThinPlateTest::WriteGrid(const std::vector<sdf::SsdField *> &fields,
     std::vector<FieldTyp *>::const_iterator it = fields.begin();
 	for(int i=0;it!=fields.end();++it,++i) {
 		cells.create<FieldTyp>(*it);
+        cells.setSampleObjectId(i);
         
         const OutSampleTyp &orignalSamples = cells.samples();
-        locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, i, locRule);
+        locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, locRule);
 
     }
 
@@ -357,8 +358,10 @@ bool ThinPlateTest::WriteTerrainSamples(const AdaptableMesh *msh,
     pnts.createSFC<sds::FZOrderCurve>(sfc);
     pnts.sort();
     
+    PntArrTyp outpnts = pnts.reduceTo<Uniform<Lehmer> >(500000, &lmlcg);
+    
     HSurfaceSample hsurf("/asset/surf");
-    hsurf.save<PntArrTyp>(pnts);
+    hsurf.save<PntArrTyp>(outpnts);
     hsurf.close();
     
     return true;

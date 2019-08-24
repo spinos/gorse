@@ -28,15 +28,27 @@ class GeodesicSampleRule;
 class BranchInstancer : public InstancerBase {
     
     typedef GeodesicSampleRule<SurfaceGeodesicSample, Uniform<Lehmer> > GeodRuleTyp;
-
+/// limit of n trees
+    int m_synthesizeNumTrunk;
+/// limit of n branch per tree
+    int m_synthesizeNumBranch;
+    int m_randomSeed;
+/// spacing between trees relative to mean tree size
+    float m_relativeSpacing;
+    
 public:
 
     BranchInstancer();
     virtual ~BranchInstancer();
 
 protected:
-/// has branch and trunk
+/// has at least one branch and one trunk
     virtual bool isInstancerReady() const override;
+    
+    void setSynthesizeNumTrunk(const int &x);
+    void setSynthesizeNumBranch(const int &x);
+    void setRandomSeed(const int &x);
+    void setRelativeSpacing(const float &x);
 
     void synthesizeBranchInstances();
     
@@ -44,6 +56,9 @@ private:
 
     void countBranches(RandomSelect &selector);
     void countTrunks(RandomSelect &selector);
+    bool isBranch(const RenderableOps *r) const;
+    bool isTrunk(const RenderableOps *r) const;
+    bool isTerrain(const RenderableOps *r) const;
     float getMeanBranchSize() const;
     float getMeanTrunkSize() const;
     float getBranchCollisionDistance() const;

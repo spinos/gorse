@@ -46,14 +46,14 @@ LeafTest::LeafTest()
     morph::Plant aplant;
     morph::PlantProfile plantF;
     plantF.setRootPosition(Vector3F::Zero);
-    plantF.setGrowDirections(Vector3F(.5f, 1.f, 0.f), Vector3F(.03f, 1.3f, -.05f));
+    plantF.setGrowDirections(Vector3F(0.f, 1.f, 0.f), Vector3F(-.09f, 1.3f, .05f));
     plantF.setAge(5);
-    plantF.setBranchProbability(.87f);
-    plantF.setMinBranchSeason(-1);
-    plantF.setGrowSpeed(Float2(.13f, .0031f));
+    plantF.setBranchProbability(.8f);
+    plantF.setMinBranchSeason(0);
+    plantF.setGrowSpeed(Float2(.15f, .0031f));
     morph::StemProfile stemF;
     stemF.setSegmentsPerSeason(2);
-    stemF.setAxilAngle(1.1f);
+    stemF.setAxilAngle(1.f);
     stemF.setBendingLimit(.01f);
     plantRule.grow(&aplant, plantF, stemF);
     
@@ -153,7 +153,7 @@ LeafTest::LeafTest()
     typedef sds::SpaceFillingVector<grd::GridCellSamplesTyp::SampleTyp> OutSampleTyp;
     const OutSampleTyp &orignalSamples = cells.samples();
     
-    locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, 0, locRule);
+    locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, locRule);
 
     locBuilder.detach();
 

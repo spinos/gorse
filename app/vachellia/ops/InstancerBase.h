@@ -4,7 +4,7 @@
  *
  *  scattering input renderables
  *
- *  2019/7/18
+ *  2019/8/24
  */
 
 #ifndef VCHL_INSTANCER_BASE_H
@@ -80,6 +80,8 @@ class InstancerBase {
     
     std::map<int, int> m_objectCounter;
     
+    int m_worldCenterCellSize[4];
+    
 public:
 
     InstancerBase();
@@ -117,10 +119,13 @@ protected:
 
     QString getInputRenderablesDescription() const;
     
-/// to instancer
+/// refer to instancer
     void clearClusters();
     void clusterBegin(const int &i);
     void clusterEnd(const int &i);
+    
+/// b[6] is aabb
+    void setWorldCenter(const float *b);
     
 private:
     void updateInstancerInProgress(bool isAppending);

@@ -150,7 +150,7 @@ void SsdfTest::saveToFile(const std::string &filename)
 		typedef sds::SpaceFillingVector<grd::GridCellSamplesTyp::SampleTyp> OutSampleTyp;
 		const OutSampleTyp &orignalSamples = samples.samples();
 
-		locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, i, locRule);
+		locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, locRule);
 
 	}
 

@@ -49,11 +49,11 @@ BranchTest::BranchTest()
     morph::Monopodial<Uniform<Lehmer> > plantRule(&lmlcg);
     morph::Plant aplant;
     morph::PlantProfile plantF;
-    plantF.setGrowDirections(Vector3F(0.f, 1.f, 0.f), Vector3F(.03f, 1.3f, -.05f));
+    plantF.setGrowDirections(Vector3F(0.f, 1.f, 0.f), Vector3F(-.1f, 1.3f, .05f));
     plantF.setAge(11);
     plantF.setMinBranchSeason(3);
     morph::StemProfile stemF;
-    stemF.setAxilAngle(.78f);
+    stemF.setAxilAngle(.7f);
     plantRule.grow(&aplant, plantF, stemF);
 
     m_mesh = new AdaptableMesh;
@@ -141,7 +141,7 @@ BranchTest::BranchTest()
     typedef sds::SpaceFillingVector<grd::GridCellSamplesTyp::SampleTyp> OutSampleTyp;
     const OutSampleTyp &orignalSamples = cells.samples();
     
-    locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, 0, locRule);
+    locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, locRule);
 
     locBuilder.detach();
 

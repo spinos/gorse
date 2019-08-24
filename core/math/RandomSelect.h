@@ -3,8 +3,8 @@
  *  gorse
  *
  *  pick one in multiple by percentage
- *
- *  2019/7/23
+ *  0---w[0]---w[1]---w[n-1](1)
+ *  2019/8/24
  */
 
 #ifndef ALO_RANDOM_SELECT_H
@@ -45,7 +45,7 @@ int RandomSelect::select(T *rng) const
 	if(m_count < 2) return m_val[0];
 
 	int r;
-	for(int i=0;i<m_count-1;++i) {
+	for(int i=0;i<m_count;++i) {
 		r = m_val[i];
 
 		if(rng->randf1() < m_wei[i])

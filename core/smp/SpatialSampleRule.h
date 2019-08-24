@@ -87,6 +87,7 @@ void SpatialSampleRule<Trng, Tc>::createGrid(const Ts *data, const int &n,
                                             const float &minDistance)
 {
     m_minDistance = minDistance;
+    if(m_minDistance < .1f) m_minDistance = .1f;
     
     BoundingBox b;
 	for(int i=0;i<n;++i) {
@@ -94,10 +95,10 @@ void SpatialSampleRule<Trng, Tc>::createGrid(const Ts *data, const int &n,
 	}
     
     BoundingBox domainBox;
-    int d = minDistance * 512.f + 1;
+    int d = m_minDistance * 512.f + 1;
     domainBox.set(b.center(), (float)d);
     
-    std::cout << "\n cell size " << minDistance << "\n domain box " << domainBox;
+    std::cout << "\n cell size " << m_minDistance << "\n domain box " << domainBox;
     
     svf::SvfBuildRule<Tc>::setBBox(domainBox);
 	m_dataSize = n;

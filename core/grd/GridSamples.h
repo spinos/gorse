@@ -3,7 +3,7 @@
  *  gorse
  *
  *  sample grid cells
- *  2019/8/10
+ *  2019/8/24
  */
 
 #ifndef ALO_GRD_GRID_SAMPLES_H
@@ -29,6 +29,8 @@ public:
 
 	template<typename T1>
 	void create(const T1 *obj);
+    
+    void setSampleObjectId(const int &x);
 
 	const sds::SpaceFillingVector<T> &samples() const;
 
@@ -44,6 +46,15 @@ void GridSamples<T>::create(const T1 *obj)
 {
 	m_samples.clear();
 	obj->genSamples(m_samples);
+}
+
+template<typename T>
+void GridSamples<T>::setSampleObjectId(const int &x)
+{
+    const int n = m_samples.size();
+    for(int i=0;i<n;++i) {
+        m_samples[i]._objId = x;
+    }
 }
 
 template<typename T>
