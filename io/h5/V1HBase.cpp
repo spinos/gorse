@@ -9,6 +9,7 @@
 #include "HIntAttribute.h"
 #include "HFloatAttribute.h"
 #include "HStringAttribute.h"
+#include "boost/date_time/posix_time/posix_time.hpp"
 #include <sstream>
 
 namespace alo {
@@ -299,6 +300,29 @@ bool HBase::load()
 
 bool HBase::verifyType()
 { return true; }
+
+void HBase::writeModifiedTime()
+{
+	const boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
+	boost::posix_time::ptime ref(boost::posix_time::from_iso_string("20120131T235959"));
+	
+	boost::posix_time::time_duration td = now - ref;
+	int modifiedTime = td.total_seconds();
+	
+	if(!hasNamedAttr(".modifed"))
+		addIntAttr(".modifed");
+	writeIntAttr(".modifed", &modifiedTime);
+}
+
+bool HBase::readModifiedTime(int &t, std::string &strt)
+{
+	if(!hasNamedAttr(".modifed")) return false;
+	readIntAttr(".modifed", &t);
+	boost::posix_time::time_duration td = boost::posix_time::seconds(t);
+	boost::posix_time::ptime rec = boost::posix_time::ptime(boost::posix_time::from_iso_string("20120131T235959")) + td;
+	strt = boost::posix_time::to_iso_extended_string(rec);
+	return true;
+}
 
 }
 

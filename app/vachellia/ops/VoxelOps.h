@@ -48,6 +48,7 @@ class VoxelOps : public TransformOps {
     static AFileDlgProfile SReadProfile;
     
     std::string m_cachePath;
+	std::string m_assetName;
     ElementVector<GlyphConnection> m_outOps;
 
 public:
@@ -78,6 +79,8 @@ public:
     virtual QString getShortDescription() const override;
     virtual void genSamples(sds::SpaceFillingVector<grd::CellSample> &samples) const override;
     
+	const std::string &assetName() const;
+	
 protected:
 
     virtual bool loadSsdfCache(const std::string &fileName);

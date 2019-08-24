@@ -23,6 +23,7 @@ class GeodesicSampleRule {
 	int m_maxNumSelected;
 	float m_maxGeod;
     float m_minDistance;
+	float m_minGrowDistance;
     Matrix33F m_worldRotation;
     
 public:
@@ -34,6 +35,7 @@ public:
 	void setMaxNumSelected(int x);
     void setMinDistance(float x);
     void setTransform(const Matrix44F &x);
+	void setMinGrowDistance(const float &x);
 	void calculateMaxGeod(const T *data, const int &n);
     void clear();
 /// i-th sample in data
@@ -57,7 +59,8 @@ m_dataSize(0),
 m_numSelected(0),
 m_maxNumSelected(100),
 m_maxGeod(0.f),
-m_minDistance(1.f)
+m_minDistance(1.f),
+m_minGrowDistance(.5f)
 {}
 
 template<typename T, typename Trng>
@@ -79,6 +82,10 @@ void GeodesicSampleRule<T, Trng>::setMinDistance(float x)
 template<typename T, typename Trng>
 void GeodesicSampleRule<T, Trng>::setTransform(const Matrix44F &x)
 { m_worldRotation = x.rotation(); }
+
+template<typename T, typename Trng>
+void GeodesicSampleRule<T, Trng>::setMinGrowDistance(const float &x)
+{ m_minGrowDistance = x; }
 
 template<typename T, typename Trng>
 void GeodesicSampleRule<T, Trng>::calculateMaxGeod(const T *data, const int &n)
@@ -108,26 +115,24 @@ bool GeodesicSampleRule<T, Trng>::finished() const
 template<typename T, typename Trng>
 bool GeodesicSampleRule<T, Trng>::accept(const T &x, const int &i)
 {
-/// same cell exclusion
-	if(x._key == m_pre._key) return false;
-    if(x._geod < m_maxGeod * .5f) return false;
+    if(x._geod < m_maxGeod * m_minGrowDistance) return false;
 	
-	const float acceptRatio = (float)(m_maxNumSelected - m_numSelected) / (float)(m_dataSize - i) * 6.f;
+	const float acceptRatio = (float)(m_maxNumSelected - m_numSelected) / (float)(m_dataSize - i) * 5.f;
 	
 	if(m_rng->randf1() > acceptRatio) return false;
     
     Vector3F worldNml = x._nml;
     m_worldRotation.transformInPlace(worldNml);
 	
-	if(worldNml.y < -.1f) return false;
+	if(worldNml.y < 0.f) return false;
 	
 /// normal-binormal check
-	if(x._nml.dot(x._grad.normal()) > .3f)
+	if(x._nml.dot(x._grad.normal()) > .5f)
 		return false;
 		
 	if(m_numSelected > 0) {
-		if(x._nml.dot(m_pre._nml) > .9f)
-			return false;
+		//if(x._nml.dot(m_pre._nml) > .9f)
+		//	return false;
 		if(x._pos.distanceTo(m_pre._pos) < m_minDistance) 
 			return false;
 	}
@@ -147,15 +152,17 @@ void GeodesicSampleRule<T, Trng>::begin()
 template<typename T, typename Trng>
 Matrix33F GeodesicSampleRule<T, Trng>::getRotation(const T &s)
 {
-	Vector3F up = s._grad; up.normalize();
-	Vector3F front = s._nml.cross(up); front.normalize();
-	Vector3F side = up.cross(front); side.normalize();
+/// gradient as x
+	Vector3F side = s._grad; side.normalize();
+	Vector3F front = side.cross(s._nml); front.normalize();
+	Vector3F up = front.cross(side); side.normalize();
 	
 	Matrix33F r;
 	r.fill(side, up, front);
 	
-    float rollAngle = 6.28f * (m_rng->randf1() - .5f);
-
+    float rollAngle = m_rng->randf1() * .13f;
+	if(m_rng->binary()) rollAngle = -rollAngle;
+	
 	Quaternion rq(rollAngle, up);
 	Matrix33F roll(rq);
 	r = r * roll;

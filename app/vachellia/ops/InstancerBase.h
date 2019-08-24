@@ -126,10 +126,14 @@ protected:
     
 /// b[6] is aabb
     void setWorldCenter(const float *b);
-    
+	
+	void saveInstanceToFile(const std::string &filename);
+	
 private:
     void updateInstancerInProgress(bool isAppending);
-    
+	void saveObjects(const std::string &parentName);
+    void saveInstances(const std::string &pathName);
+	
 };
 
 template<typename T>

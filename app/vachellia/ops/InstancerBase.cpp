@@ -22,8 +22,12 @@
 #include <h5/V1H5IO.h>
 #include <h5_grd/HInstanceRecord.h>
 #include <sds/FZOrder.h>
+#include <h5_grd/HInstanceRecord.h>
 #include <QProgressDialog>
 #include <QApplication>
+#include <h5/V1H5IO.h>
+#include "VoxelOps.h"
+#include <boost/format.hpp>
 
 namespace alo {
     
@@ -253,6 +257,67 @@ void InstancerBase::setWorldCenter(const float *b)
     m_worldCenterCellSize[0] = cx * sx;
     m_worldCenterCellSize[1] = cy * sy;
     m_worldCenterCellSize[2] = cz * sz;
+}
+
+void InstancerBase::saveInstanceToFile(const std::string &filename)
+{
+	QProgressDialog progress("Processing...", QString(), 0, 2, QApplication::activeWindow() );
+    progress.setWindowModality(Qt::ApplicationModal);
+    progress.show();
+	
+	ver1::H5IO hio;
+	bool stat = hio.begin(filename, HDocument::oCreate );
+	if(!stat) {
+		std::cout << "\n ERROR cannot create file " << filename;
+		return;
+	}
+	
+	ver1::HBase ga("/asset");
+	
+	saveObjects("/asset");
+	progress.setValue(1);
+	
+	saveInstances("/asset/inst");
+	
+	ga.writeModifiedTime();
+	ga.close();
+	
+	hio.end();
+	
+	progress.setValue(2);
+}
+
+void InstancerBase::saveObjects(const std::string &parentName)
+{
+	const int nobjs = numInputRenderables();
+    for(int i=0;i<nobjs;++i) {
+		const std::string idName = boost::str(boost::format("%04i") % i);
+		const std::string fullName = boost::str(boost::format("/asset/obj%1%") % idName );
+
+		ver1::HBase gi(fullName);
+		
+		gi.addIntAttr(".objid");
+		gi.writeIntAttr(".objid", &i);
+		
+		const RenderableOps *e = inputRenderable(i);
+		gi.addVLStringAttr(".objname");
+		gi.writeVLStringAttr(".objname", e->displayName());
+		
+		std::string altName = "unknown";
+		const VoxelOps *v = static_cast<const VoxelOps *>(e);
+		if(v) altName = v->assetName();
+		
+		gi.addVLStringAttr(".altname");
+		gi.writeVLStringAttr(".altname", altName);
+		gi.close();
+    }
+}
+
+void InstancerBase::saveInstances(const std::string &pathName)
+{
+	HInstanceRecord writer(pathName);
+	writer.save<InstancerTyp>(*m_instancer);
+	writer.close();
 }
 
 } /// end of alo

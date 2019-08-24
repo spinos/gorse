@@ -2,7 +2,7 @@
  *  CanopyOps.h
  *  vachellia
  *
- *  2019/7/18
+ *  2019/8/24
  */
 
 #ifndef VCHL_CANOPY_OPS_H
@@ -15,6 +15,8 @@ namespace alo {
 
 class CanopyOps : public TransformOps, public BranchInstancer {
 
+	static AFileDlgProfile SWriteProfile;
+	
 public:
 	enum { Type = 800003 };
 
@@ -35,7 +37,10 @@ public:
     virtual void connectTo(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
     virtual void disconnectFrom(GlyphOps *another, const std::string &portName, GlyphConnection *line) override;
     virtual QString getShortDescription() const override;
-
+	virtual void getMenuItems(std::vector<std::pair<std::string, int > > &ks) const override;
+    virtual void recvAction(int x) override;
+	virtual AFileDlgProfile *writeFileProfileR () const override;
+	
 protected:
     
 private:

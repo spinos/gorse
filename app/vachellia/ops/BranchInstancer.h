@@ -35,6 +35,7 @@ class BranchInstancer : public InstancerBase {
     int m_randomSeed;
 /// spacing between trees relative to mean tree size
     float m_relativeSpacing;
+	float m_relativeBranchSpacing;
     
 public:
 
@@ -49,6 +50,7 @@ protected:
     void setSynthesizeNumBranch(const int &x);
     void setRandomSeed(const int &x);
     void setRelativeSpacing(const float &x);
+	void setRelativeBranchSpacing(const float &x);
 
     void synthesizeBranchInstances();
     

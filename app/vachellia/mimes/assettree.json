@@ -199,11 +199,19 @@
                                 },
                                 {
                                     "name": "aspacing",
-                                    "label": "Spacing",
+                                    "label": "Tree Spacing",
                                     "typ": 3,
                                     "value": 1.0,
                                     "min": 0.5,
-                                    "max": 20
+                                    "max": 20.0
+                                },
+								{
+                                    "name": "aspacingb",
+                                    "label": "Branch Spacing",
+                                    "typ": 3,
+                                    "value": 0.5,
+                                    "min": 0.1,
+                                    "max": 2.0
                                 },
                                 {
                                     "name": "transform",

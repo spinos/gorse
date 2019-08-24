@@ -24,7 +24,8 @@ namespace alo {
 BranchInstancer::BranchInstancer() : m_synthesizeNumTrunk(100),
 m_synthesizeNumBranch(200),
 m_randomSeed(7654321),
-m_relativeSpacing(1.f)
+m_relativeSpacing(1.f),
+m_relativeBranchSpacing(.5f)
 {}
     
 BranchInstancer::~BranchInstancer()
@@ -41,6 +42,9 @@ void BranchInstancer::setRandomSeed(const int &x)
 
 void BranchInstancer::setRelativeSpacing(const float &x)
 { m_relativeSpacing = x; }
+
+void BranchInstancer::setRelativeBranchSpacing(const float &x)
+{ m_relativeBranchSpacing = x; }
 
 bool BranchInstancer::isInstancerReady() const
 {
@@ -105,7 +109,8 @@ void BranchInstancer::synthesizeSingleBranchInstances()
     GeodRuleTyp rule;
     rule.setRng(&lmlcg);
     rule.setMaxNumSelected(m_synthesizeNumBranch);
-    float collisionDistance = getBranchCollisionDistance();
+    float collisionDistance = getBranchCollisionDistance() * m_relativeBranchSpacing;
+	std::cout << "\n branch coll dist " << collisionDistance<< " rel " << m_relativeBranchSpacing;
     rule.setMinDistance(collisionDistance);
     const int ns = filter->numSamples();
     rule.calculateMaxGeod(filter->c_samples(), ns);
@@ -131,7 +136,7 @@ void BranchInstancer::synthesizeSingleBranchInstances()
         tm.setTranslation(si._pos);
 		
 		Matrix33F r = rule.getRotation(si);
-		Matrix33F::rotateUpToAlignLimited(r, Vector3F(0.f, 1.f, 0.f), .7f);
+		Matrix33F::rotateUpToAlignLimited(r, Vector3F(0.f, 1.f, 0.f), .5f);
 		tm.setRotation(r);
         inst.setSpace(tm);
         
@@ -233,7 +238,7 @@ float BranchInstancer::getBranchCollisionDistance() const
         const RenderableOps *r = inputRenderable(i);
         if(isBranch(r)) {
             r->getAabb(bx);
-            s += BoundingBox(bx).distance(0) + BoundingBox(bx).distance(2);
+            s += BoundingBox(bx).distance(1) + BoundingBox(bx).distance(2);
             b+=2;
         }
     }
@@ -309,7 +314,7 @@ void BranchInstancer::synthesizeBranchInstancesOnTerrain(const smp::SampleFilter
     
     typedef sca::SynthesisBundle<64> SynthBudleTyp;
     
-    const float branchCollisionDistance = getBranchCollisionDistance();
+    const float branchCollisionDistance = getBranchCollisionDistance() * m_relativeBranchSpacing;
     
     std::map<int, SynthBudleTyp *> trunkBundleMap;
        

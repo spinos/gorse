@@ -63,6 +63,9 @@ struct TestInstance {
 
     const int &objectId() const
     { return _objId; }
+	
+	const Matrix44F &space() const
+	{ return _tm; }
 
     void pointToWorld(float *q) const
     { _tm.transformPoint(q); }
@@ -122,6 +125,9 @@ public:
 /// n instanced obj > 0 and n obj >= n instanced obj 
     bool validateNumObjects() const;
 
+/// all instances
+	void getAabb(float *b) const;
+/// ii-th instance
 	void getAabb(float *b, int ii) const;
 /// bounding box of objects from begin to end, excluding end
     void getClusterAabb(float *b, int begin, int end) const;
@@ -210,6 +216,21 @@ const T1 &ObjectInstancer<T1, T2>::c_instance(int i) const
 template<typename T1, typename T2>
 const int &ObjectInstancer<T1, T2>::numInstances() const
 { return m_instances.count(); }
+
+template<typename T1, typename T2>
+void ObjectInstancer<T1, T2>::getAabb(float *b) const
+{
+	BoundingBox allBox;
+	for(int i=0;i<numInstances();++i) {
+		const T1 &inst = m_instances[i];
+		const T2 *shape = m_objs.element(inst.objectId());
+		shape->getAabb(b);
+		BoundingBox wb;
+		inst.expandWorldBox(wb, b);
+		allBox.expandBy(wb);
+	}
+	memcpy(b, &allBox, 24);
+}
 
 template<typename T1, typename T2>
 void ObjectInstancer<T1, T2>::getAabb(float *b, int ii) const

@@ -190,6 +190,10 @@ public:
 	template<typename T>
 	bool lsFirstTypedChild(std::string &name);
 	
+/// .modfied as seconds since epoche
+	void writeModifiedTime();
+	bool readModifiedTime(int &t, std::string &strt);
+	
 };
 
 template<typename T>

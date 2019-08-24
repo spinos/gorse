@@ -40,11 +40,11 @@ bool HInstanceRecord::save(const grd::InstanceRecord &rec)
     	return false;
     }
     
-    const int nc = Round32(rec.numInstances())>>5;
+    const int nc = Round64(rec.numInstances())>>6;
     indd->writeColumns((char *)rec.c_inds(), 0, nc);
     delete indd;
     
-    MatData *tmd = createDataStorage<MatData>(".tm", true, stat);
+    MatData *tmd = createDataStorage<MatData>(".obj_tm", true, stat);
     if(!stat) {
     	std::cout << "\n ERROR HInstanceRecord cannot create ooc storage tm";
     	return false;
@@ -77,12 +77,12 @@ bool HInstanceRecord::load(grd::InstanceRecord &rec)
         return false;
     }
     
-    const int nc = Round32(mn[1])>>5;
+    const int nc = Round64(mn[1])>>6;
     
     indd->readColumns((char *)rec.inds(), 0, nc);
     delete indd;
     
-    MatData *tmd = openDataStorage<MatData>(".tm", stat);
+    MatData *tmd = openDataStorage<MatData>(".obj_tm", stat);
     if(!stat) {
         std::cout << "\n ERROR HInstanceRecord cannot open ooc storage tm";
         return false;

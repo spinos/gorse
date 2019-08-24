@@ -78,10 +78,7 @@ MainWindow::MainWindow()
 					
     connect(m_renderView, &RenderWidget::requestBound,
             m_scene, &VachellScene::recvRequestBound );
-
-    //connect(m_renderView, &RenderWidget::preRenderRestart,
-    //        m_scene, &VachellScene::recvPreRenderRestart );
-			
+	
     connect(m_scene, &VachellScene::sendBound,
             m_renderView, &RenderWidget::recvBound );
 
@@ -193,6 +190,7 @@ void MainWindow::createActions()
     quitAct->setStatusTip(tr("Quit the application"));
 
     viewMenu = menuBar()->addMenu(tr("&View"));
+	/*
     displayMenu = menuBar()->addMenu(tr("&Display"));
 
     QIcon solidIcon(":/images/solid_ball.png");
@@ -206,6 +204,7 @@ void MainWindow::createActions()
 
     displayMenu->addAction(m_displaySolidAct);
     displayMenu->addAction(m_displayWireAct);
+	*/
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     //connect(m_displaySolidAct, &QAction::triggered,

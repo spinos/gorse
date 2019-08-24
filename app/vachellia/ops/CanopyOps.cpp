@@ -2,7 +2,7 @@
  *  CanopyOps.cpp
  *  vachellia
  *
- *  2019/7/18
+ *  2019/8/24
  */
 
 #include "CanopyOps.h"
@@ -14,8 +14,19 @@
 #include <grd/WorldGridLookupRule.h>
 #include <grd/ObjectInstancer.h>
 #include <grd/GridInCell.h>
+#include <qt_base/AFileDlg.h>
+#include <boost/format.hpp>
 
 namespace alo {
+	
+AFileDlgProfile CanopyOps::SWriteProfile(AFileDlgProfile::FWrite,
+        "Choose File To Save",
+        ":images/canopy_save.png",
+        "Export instancer setup ",
+        "Save .hes",
+        ".hes",
+        "./",
+        "untitled");
     
 CanopyOps::CanopyOps()
 {
@@ -57,6 +68,10 @@ void CanopyOps::update()
     float fspacing;
     getFloatAttribValue(fspacing, "aspacing");
     setRelativeSpacing(fspacing);
+	
+	float fbranchSpacing;
+    getFloatAttribValue(fbranchSpacing, "aspacingb");
+    setRelativeBranchSpacing(fbranchSpacing);
 }
 
 bool CanopyOps::hasInstance() const
@@ -163,6 +178,28 @@ int CanopyOps::IdentifyInput(const std::string &name)
 	if(name == "intrunksdf") return inTrunk;
 	if(name == "interrainsdf") return inTerrain;
 	return inUnknown;
+}
+
+void CanopyOps::getMenuItems(std::vector<std::pair<std::string, int > > &ks) const 
+{
+	TransformOps::getMenuItems(ks);
+    if(isInstancerComplete()) 
+		ks.push_back(std::make_pair("Export", AFileDlgProfile::FWrite));
+}
+
+void CanopyOps::recvAction(int x) 
+{
+	TransformOps::recvAction(x);
+    if(x == AFileDlgProfile::FWrite) {
+    	saveInstanceToFile(SWriteProfile.getFilePath());
+    }
+}
+
+AFileDlgProfile *CanopyOps::writeFileProfileR () const
+{
+	SWriteProfile._notice = boost::str(boost::format(" export %1% instances of %2% objects ") 
+		% numInstances() % numInstancedObjects() );
+    return &SWriteProfile; 
 }
 
 } /// end of alo

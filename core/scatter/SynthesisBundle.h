@@ -133,7 +133,7 @@ void SynthesisBundle<Nbundle>::transformABundle(SimpleBuffer<int> *objectIds,
         Matrix44F stm = selTms[i].transformBy(*worldTm);
         
         Matrix33F r = stm.rotation();
-        Matrix33F::rotateUpToAlignLimited(r, Vector3F::YAxis, .7f);
+        Matrix33F::rotateUpToAlignLimited(r, Vector3F::YAxis, .5f);
 		stm.setRotation(r);
         
         *objectTms << stm;

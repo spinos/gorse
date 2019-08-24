@@ -34,7 +34,8 @@ AFileDlgProfile VoxelOps::SReadProfile(AFileDlgProfile::FRead,
         "./",
         "");
    
-VoxelOps::VoxelOps() : m_cachePath("unknown")
+VoxelOps::VoxelOps() : m_cachePath("unknown"),
+m_assetName("unknown")
 {
     m_primitiveLookup = new PrimitiveLookupRule;
     m_gridRule = new GridLookupRuleTyp;
@@ -72,6 +73,7 @@ void VoxelOps::update()
     StringAttrib *fcp = static_cast<StringAttrib *>(acp);
     std::string scachePath;
     fcp->getValue(scachePath);
+/// reload?
     if(m_cachePath != scachePath && scachePath.size() > 3)
         loadSsdfCache(scachePath);
 
@@ -93,6 +95,7 @@ bool VoxelOps::loadSsdfCache(const std::string &fileName)
     bool stat = hio.begin(fileName);
     if(!stat) {
         m_cachePath = "unknown";
+		m_assetName = "unknown";
         QMessageBox msgBox;
         msgBox.setText(QString("Cannot open file %1").arg(QString::fromStdString(fileName)));
         msgBox.setInformativeText("The file does not exist or it is not a HDF5 file.");
@@ -113,6 +116,11 @@ bool VoxelOps::loadSsdfCache(const std::string &fileName)
         ver1::HBase ga("/asset");
         ga.lsTypedChild<HSsdf>(fldNames);
         bool hasGrd = ga.lsFirstTypedChild<HLocalGrid>(grdName);
+		if(ga.hasNamedAttr(".assetname")) {
+			ga.readVLStringAttr(".assetname", m_assetName);
+		} else {
+			m_assetName = "unknown";
+		}
         ga.close();
 
         stat = hasGrd && (fldNames.size() > 0);
@@ -259,7 +267,11 @@ void VoxelOps::genSamples(sds::SpaceFillingVector<grd::CellSample> &samples) con
 
 QString VoxelOps::getShortDescription() const
 {
-    return QString(" file %1").arg(QString::fromStdString(m_cachePath)); 
+    return QString(" file %1 \n asset %2 ").arg(QString::fromStdString(m_cachePath),
+												QString::fromStdString(m_assetName)); 
 }
+
+const std::string &VoxelOps::assetName() const
+{ return m_assetName; }
 
 } /// end of namespace alo

@@ -46,6 +46,7 @@
     <file>images/quit.png</file>
     <file>images/tree_trunk.png</file>
     <file>images/canopy.png</file>
+	<file>images/canopy_save.png</file>
     <file>images/terrain.png</file>
     <file>mimes/assettree.json</file>
     <file>mimes/attribpreset.json</file>
