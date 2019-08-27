@@ -98,7 +98,6 @@ class ObjectInstancer {
 	ElementVector<T2> m_objs;
 	ElementVector<GridCellSamplesTyp> m_samps;
     float m_minimumCellSize;
-    int m_numInstancedObjects;
     std::vector<Int2> m_clusters;
     
 public:
@@ -121,7 +120,7 @@ public:
     
     int numObjects() const;
 	const int &numInstances() const;
-    const int &numInstancedObjects() const;
+    int numInstancedObjects() const;
 /// n instanced obj > 0 and n obj >= n instanced obj 
     bool validateNumObjects() const;
 
@@ -148,7 +147,6 @@ public:
     float getMediumObjectSize(std::map<int, int> &counter) const;
 
     void setMinimumCellSize(float x);
-    void setNumInstancedObjects(int x);
 /// y no smaller than min_cell_size
     void limitCellSize(float &y) const;
     
@@ -170,7 +168,7 @@ private:
 };
 
 template<typename T1, typename T2>
-ObjectInstancer<T1, T2>::ObjectInstancer() : m_numInstancedObjects(0),
+ObjectInstancer<T1, T2>::ObjectInstancer() :
 m_minimumCellSize(32.f)
 {}
 
@@ -426,8 +424,7 @@ void ObjectInstancer<T1, T2>::verbose() const
 {
     std::cout << "\n ObjectInstancer n obj "<< m_objs.numElements()
             << " n instance " << m_instances.count()
-            << "\n min cell size " << m_minimumCellSize
-            << "\n n instanced obj " << m_numInstancedObjects;
+            << "\n min cell size " << m_minimumCellSize;
             
     const int nobj = m_objs.numElements();
     for(int i=0;i<nobj;++i) {
@@ -450,24 +447,16 @@ void ObjectInstancer<T1, T2>::setMinimumCellSize(float x)
 { m_minimumCellSize = x; }
 
 template<typename T1, typename T2>
-void ObjectInstancer<T1, T2>::setNumInstancedObjects(int x)
-{ m_numInstancedObjects = x; }
-
-template<typename T1, typename T2>
 void ObjectInstancer<T1, T2>::limitCellSize(float &y) const
 { if(y < m_minimumCellSize) y = m_minimumCellSize; }
 
 template<typename T1, typename T2>
 bool ObjectInstancer<T1, T2>::validateNumObjects() const
-{
-    if(m_numInstancedObjects < 1) return false;
-    const int nobj = m_objs.numElements();
-    return nobj >= m_numInstancedObjects;
-}
+{ return m_objs.numElements() > 0; }
 
 template<typename T1, typename T2>
-const int &ObjectInstancer<T1, T2>::numInstancedObjects() const
-{ return m_numInstancedObjects; }
+int ObjectInstancer<T1, T2>::numInstancedObjects() const
+{ return m_objs.numElements(); }
 
 template<typename T1, typename T2>
 void ObjectInstancer<T1, T2>::clearClusters()

@@ -175,7 +175,7 @@ void InstancerBase::setLookupMaxNumSteps(int x)
 int InstancerBase::numInputRenderables() const
 { return m_inOps.numElements(); }
 
-const int &InstancerBase::numInstancedObjects() const
+int InstancerBase::numInstancedObjects() const
 { return m_instancer->numInstancedObjects(); }
 
 const int &InstancerBase::numInstances() const
@@ -209,8 +209,7 @@ grd::TestInstance &InstancerBase::instance(int i)
 
 void InstancerBase::setInstancedObjectCountAndSize(std::map<int, int> &counter, float size)
 {
-	m_instancer->setNumInstancedObjects(counter.size());
-    m_instancer->setMinimumCellSize(size);
+	m_instancer->setMinimumCellSize(size);
     
     m_objectCounter.clear();
     std::map<int, int>::const_iterator it = counter.begin();

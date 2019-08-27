@@ -23,6 +23,7 @@ class SpatialSampleRule : public svf::SvfBuildRule<Tc> {
     Trng *m_rng;
  	int m_dataSize;
 	int m_numSelected;
+/// limit size of subset much smaller than size of data
 	int m_maxNumSelected;
     float m_minDistance;
 /// selected position in each cell
@@ -55,7 +56,12 @@ public:
     Matrix33F getRotation(const Ts &s);
 
 protected:
-
+	
+	Trng *rng();
+	float getAcceptRation(const int &i, const float &scaling) const;
+	bool rejectByPosition(const Vector3F &pos);
+	void select(const Vector3F &pos);
+	
 private:
 
 };
@@ -102,8 +108,6 @@ void SpatialSampleRule<Trng, Tc>::createGrid(const Ts *data, const int &n,
     
     svf::SvfBuildRule<Tc>::setBBox(domainBox);
 	m_dataSize = n;
-    m_cellSelPosMap.clear();
-    for(int i=0;i<27;++i) m_touchedCells[i] = -1;
 }
 
 template<typename Trng, typename Tc>
@@ -112,7 +116,11 @@ bool SpatialSampleRule<Trng, Tc>::finished() const
 
 template<typename Trng, typename Tc>
 void SpatialSampleRule<Trng, Tc>::begin()
-{ m_numSelected = 0; }
+{ 
+	m_numSelected = 0; 
+	m_cellSelPosMap.clear();
+    for(int i=0;i<27;++i) m_touchedCells[i] = -1;
+}
 
 template<typename Trng, typename Tc>
 template<typename Ts>
@@ -120,9 +128,7 @@ bool SpatialSampleRule<Trng, Tc>::accept(const Ts &x, const int &i)
 {
     if(x._nml.y < .7f) return false;
     
-    const float acceptRatio = (float)(m_maxNumSelected - m_numSelected) / (float)(m_dataSize - i) * 3.f;
-	
-	if(m_rng->randf1() > acceptRatio) return false;
+	if(m_rng->randf1() > getAcceptRation(i, 3.f)) return false;
     
     const int k = PRuleTyp::computeKey((const float *)&x._pos);
     Vector3F *inCell = m_cellSelPosMap.find(k);
@@ -171,7 +177,45 @@ Matrix33F SpatialSampleRule<Trng, Tc>::getRotation(const Ts &s)
     Matrix33F::rotateUpToAlignLimited(r, Vector3F::YAxis, .1f + m_rng->randf1() * .8f);
     return r;
 }
+
+template<typename Trng, typename Tc>
+Trng *SpatialSampleRule<Trng, Tc>::rng()
+{ return m_rng; }
+
+template<typename Trng, typename Tc>
+float SpatialSampleRule<Trng, Tc>::getAcceptRation(const int &i, const float &scaling) const
+{ return (float)(m_maxNumSelected - m_numSelected) / (float)(m_dataSize - i) * scaling; }
+
+template<typename Trng, typename Tc> 
+bool SpatialSampleRule<Trng, Tc>::rejectByPosition(const Vector3F &pos)
+{
+	const int k = PRuleTyp::computeKey((const float *)&pos);
+    Vector3F *inCell = m_cellSelPosMap.find(k);
+    if(inCell) return true;
     
+    if(k != m_touchedCells[13]) {
+        PRuleTyp::getLevel27Cells(m_touchedCells, k, 10);
+    }
+    
+    for(int j = 0;j < 27;++j) {
+        if(j==13) continue;
+        inCell = m_cellSelPosMap.find(m_touchedCells[j]);
+        if(!inCell) continue;
+        
+        if(pos.distanceTo(*inCell) < m_minDistance) return true;
+    }
+	
+	return false;
+}
+
+template<typename Trng, typename Tc> 
+void SpatialSampleRule<Trng, Tc>::select(const Vector3F &pos)
+{
+	const int k = PRuleTyp::computeKey((const float *)&pos);
+    m_cellSelPosMap.insert(k, pos);
+	m_numSelected++;
+}
+	
 }
 
 #endif

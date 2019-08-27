@@ -105,15 +105,16 @@ void BranchInstancer::synthesizeSingleBranchInstances()
         return;
     }
     
-    typedef GeodesicSampleRule<SurfaceGeodesicSample, Uniform<Lehmer> > GeodRuleTyp;
-    GeodRuleTyp rule;
+	sds::FZOrderCurve sfc;
+    GeodRuleTyp rule(&sfc);
     rule.setRng(&lmlcg);
     rule.setMaxNumSelected(m_synthesizeNumBranch);
     float collisionDistance = getBranchCollisionDistance() * m_relativeBranchSpacing;
 	std::cout << "\n branch coll dist " << collisionDistance<< " rel " << m_relativeBranchSpacing;
-    rule.setMinDistance(collisionDistance);
     const int ns = filter->numSamples();
-    rule.calculateMaxGeod(filter->c_samples(), ns);
+	rule.createGrid<SurfaceGeodesicSample>(filter->c_samples(), ns, collisionDistance);
+    
+    rule.calculateMaxGeod<SurfaceGeodesicSample>(filter->c_samples(), ns);
     
     SimpleBuffer<SurfaceGeodesicSample> subset;
     filter->drawSamples<GeodRuleTyp>(subset, rule);
@@ -320,16 +321,18 @@ void BranchInstancer::synthesizeBranchInstancesOnTerrain(const smp::SampleFilter
        
     std::map<int, int>::const_iterator trunkIt = instanceCounter.begin();
     for(;trunkIt!=instanceCounter.end();++trunkIt) {
-        GeodRuleTyp rule;
+        GeodRuleTyp rule(&sfc);
         rule.setRng(lmlcgs[0]);
         rule.setMaxNumSelected(m_synthesizeNumBranch);
-        rule.setMinDistance(branchCollisionDistance);
-        
+
         const RenderableOps *top = inputRenderable(trunkIt->first);
         const smp::SampleFilter<SurfaceGeodesicSample> *filter = top->getGeodesicSamples();
         
         const int ns = filter->numSamples();
-        rule.calculateMaxGeod(filter->c_samples(), ns);
+		
+		rule.createGrid<SurfaceGeodesicSample>(filter->c_samples(), ns, branchCollisionDistance);
+    
+        rule.calculateMaxGeod<SurfaceGeodesicSample>(filter->c_samples(), ns);
     
         SynthBudleTyp *bnd = new SynthBudleTyp;
         

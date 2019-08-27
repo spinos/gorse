@@ -25,9 +25,13 @@ struct SurfaceGeodesicSample;
 template<typename T1, typename T2>
 class GeodesicSampleRule;
 
+namespace sds {
+struct FZOrderCurve;
+}
+
 class BranchInstancer : public InstancerBase {
     
-    typedef GeodesicSampleRule<SurfaceGeodesicSample, Uniform<Lehmer> > GeodRuleTyp;
+    typedef GeodesicSampleRule<Uniform<Lehmer>, sds::FZOrderCurve > GeodRuleTyp;
 /// limit of n trees
     int m_synthesizeNumTrunk;
 /// limit of n branch per tree

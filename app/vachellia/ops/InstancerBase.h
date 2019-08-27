@@ -113,7 +113,7 @@ protected:
     bool isInstancerActivated() const;
     const BoundingBox &instancerAabb() const;
     int numInputRenderables() const;
-    const int &numInstancedObjects() const;
+    int numInstancedObjects() const;
     const int &numInstances() const;
     const RenderableOps *inputRenderable(int i) const;
 
