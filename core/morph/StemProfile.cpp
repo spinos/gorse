@@ -14,8 +14,8 @@ namespace morph {
 StemProfile::StemProfile() :
 m_segmentsPerSeason(3),
 m_nodeAngle(2.34f),
-m_axilAngle(.75f),
-m_bendingLimit(.025f)
+m_axilAngle(.79f),
+m_bendingLimit(.035f)
 {}
 
 StemProfile::~StemProfile()

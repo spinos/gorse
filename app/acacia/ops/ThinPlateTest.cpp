@@ -301,17 +301,19 @@ bool ThinPlateTest::WriteGrid(const std::vector<sdf::SsdField *> &fields,
     grd::GridCellSamplesTyp cells;
     typedef sds::SpaceFillingVector<grd::GridCellSamplesTyp::SampleTyp> OutSampleTyp;
 	
+    grd::LocalGridBuilder<grd::LocalGrid<float> >::ObjectInCellMap cellMap;
+    
     std::vector<FieldTyp *>::const_iterator it = fields.begin();
 	for(int i=0;it!=fields.end();++it,++i) {
 		cells.create<FieldTyp>(*it);
         cells.setSampleObjectId(i);
         
         const OutSampleTyp &orignalSamples = cells.samples();
-        locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, locRule);
+        locBuilder.measure<OutSampleTyp, LocBuildTyp>(cellMap, orignalSamples, locRule);
 
     }
 
-    locBuilder.detach();
+    locBuilder.detach(&cellMap);
 
 	HLocalGrid hlocG("/asset/localGrid");
 	hlocG.save<grd::LocalGrid<float> >(locG);

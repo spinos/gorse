@@ -28,6 +28,8 @@ class SvfBuildRule {
 
 public:
 
+    typedef Tc SfcTyp;
+
 	SvfBuildRule(Tc* sfc);
     
 /// tight box and domain box

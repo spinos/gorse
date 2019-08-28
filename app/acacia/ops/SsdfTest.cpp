@@ -141,7 +141,8 @@ void SsdfTest::saveToFile(const std::string &filename)
 	locBuilder.attach(&locG);
 
 	grd::GridCellSamplesTyp samples;
-
+    grd::LocalGridBuilder<grd::LocalGrid<float> >::ObjectInCellMap cellMap;
+    
 	for(int i=0;i<NUM_RIBBONS;++i) {
 		progress.setValue(NUM_RIBBONS+i);
 
@@ -150,7 +151,7 @@ void SsdfTest::saveToFile(const std::string &filename)
 		typedef sds::SpaceFillingVector<grd::GridCellSamplesTyp::SampleTyp> OutSampleTyp;
 		const OutSampleTyp &orignalSamples = samples.samples();
 
-		locBuilder.measure<OutSampleTyp, LocBuildTyp>(orignalSamples, locRule);
+		locBuilder.measure<OutSampleTyp, LocBuildTyp>(cellMap, orignalSamples, locRule);
 
 	}
 
@@ -158,7 +159,7 @@ void SsdfTest::saveToFile(const std::string &filename)
 		delete fields[i];
 	}
 
-	locBuilder.detach();
+	locBuilder.detach(&cellMap);
 
 	HLocalGrid hlocG("/asset/localGrid");
 	hlocG.save<grd::LocalGrid<float> >(locG);

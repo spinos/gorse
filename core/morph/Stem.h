@@ -28,6 +28,8 @@ class Stem {
 
 /// from which this stem is grown
     const Stem *m_parent;
+/// germinated from this
+    std::vector<Stem *> m_children;
 /// one node per-segment
 	TubularProfile *m_tube;
 /// first node rotation around x
@@ -38,6 +40,8 @@ class Stem {
     std::vector<int> m_nodeIndex;
 /// angle between tube segments
 	std::vector<float> m_segmentAngles;
+/// not grows any longer
+    bool m_isStopped;
     
 public:
 
@@ -45,6 +49,7 @@ public:
 	virtual ~Stem();
     
     void setParent(const Stem *x);
+    void addChild(Stem *x);
 
 /// position, rotation, node0_angle, and radius
 	void begin(const Vector3F &pos, const Matrix33F &mat,
@@ -53,23 +58,31 @@ public:
 	void grow(const Vector3F &gv, const float &dWidth, StemProfile &stp);
 
 	void end();
+    
+    void setStopped();
 
     const Stem *parent() const;
-	const TubularProfile *profile() const;
+	int numChildren() const;
+    const TubularProfile *profile() const;
 	const int &age() const;
 	const float &radius0() const;
+    const bool &isStopped() const;
 
 	void getTerminalBud(Vector3F &pos, Matrix33F &mat, StemProfile &stp) const;
 	void getTerminalBudRotation(Matrix33F &mat, StemProfile &stp) const;
 	Vector3F getGrowDirection(const Vector3F &ref, StemProfile &stp) const;
 /// lateral and terminal
     void getAllBuds(std::vector<Vector3F> &positions, std::vector<Matrix33F> &rotations) const;
-
+/// go upstream to find how much resource is available
+    void getResourceFlow(float &res, const float &ratio) const;
+    
 protected:
 
 	
 private:
 
+    void growThicker(const float &dWidth, StemProfile &stp);
+    
 };
 
 }

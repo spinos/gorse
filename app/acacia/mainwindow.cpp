@@ -43,19 +43,18 @@ MainWindow::MainWindow()
     connect(m_scene, SIGNAL(sendSelectGlyph(bool)), 
     m_editor, SLOT(recvSelectGlyph(bool)));
 
-    connect(m_editor, SIGNAL(sendAttribChanged()), 
-    m_glview, SLOT(recvAttribChanged()));
-
-    connect(m_scene, SIGNAL(sendUpdateDrawable()),
-    m_glview, SLOT(recvAttribChanged()));
-
     qRegisterMetaType<alo::CameraEvent>();
     
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    connect(m_editor, &AttribEditor::sendAttribChanged, 
+            m_scene, &AcaciaScene::recvAttribChanged);
+
+    connect(m_scene, &AcaciaScene::sendUpdateDrawable,
+            m_glview, &GLWidget::recvAttribChanged);
+    
     connect(m_glview, &alo::View3DWidget::cameraChanged,
             m_scene, &AcaciaScene::recvCameraChanged );
-    //connect(m_graphView, &alo::SceneGraph::sendGraphChanged,
-    //        m_glview, &GLWidget::recvAttribChanged );
+    
     connect(m_glview, &alo::View3DWidget::requestBound,
             m_scene, &AcaciaScene::recvRequestBound );
     connect(m_scene, &AcaciaScene::sendBound,

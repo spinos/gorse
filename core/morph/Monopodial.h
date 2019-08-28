@@ -39,6 +39,7 @@ protected:
 
 private:
 	void processBranching(Plant *pl, PlantProfile &plp, StemProfile &stp);
+    void processStopping(Plant *pl, PlantProfile &plp, StemProfile &stp);
     
 };
 
@@ -58,10 +59,12 @@ void Monopodial<T>::grow(Plant *pl, PlantProfile &plp, StemProfile &stp)
 								rootAng, .015f);
 
 	for(int i=0;i<plp.age();++i) {
+        processStopping(pl, plp, stp);
 		if(i >= plp.minBranchSeason()) processBranching(pl, plp, stp);
 		float sfac = 1.f + (m_rng->randf1() - .5f) * .5f;
 		plp.setSeasonalFactor(sfac);
 		pl->grow(plp, stp);
+        
 	}
 
 	pl->end();
@@ -76,14 +79,40 @@ void Monopodial<T>::processBranching(Plant *pl, PlantProfile &plp, StemProfile &
 	for(int i=0;i<n;++i) {
 		if(m_rng->randf1() > plp.branchProbability()) continue;
 
+        Stem *pst = pl->stem(i);
+        if(pst->isStopped()) continue;
+        
 		pl->getTerminalBud(budPos, budMat, stp, i);
         const float axil = stp.axilAngle() * (1.f - m_rng->randf1() * .2f);
 		Matrix33F::rotateAroundLocalY(budMat, axil);
 
 		const float branchAng = -1.57f - stp.nodeAngle();
-		Stem *st = pl->addStem(budPos, budMat,
+		Stem *cst = pl->addStem(budPos, budMat,
 								branchAng, .015f);
-        st->setParent(pl->stem(i));
+        cst->setParent(pl->stem(i));
+        
+        pst->addChild(cst);
+	}
+}
+
+template<typename T>
+void Monopodial<T>::processStopping(Plant *pl, PlantProfile &plp, StemProfile &stp)
+{
+    const int n = pl->numStems();
+	for(int i=0;i<n;++i) {
+        Stem *cst = pl->stem(i);
+        if(cst->numChildren() < 1) continue;
+        
+        bool toStop = false;
+        if(cst->parent() == nullptr) {
+            if(cst->age() >= plp.stopAge().x)
+                toStop = true;
+        } else {
+            toStop = cst->age() >= plp.stopAge().y
+                || m_rng->randf1() < plp.stopProbability();
+        }
+        
+        if(toStop) cst->setStopped();
 	}
 }
 

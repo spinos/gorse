@@ -25,6 +25,8 @@ GlyphOps *AcaciaScene::createOps(const QJsonObject &content)
 { 
     int k = content["id"].toInt();
     switch(k) {
+        case MorphologyOps::Type :
+            return new MorphologyOps;
         case ThinPlateTest::Type :
             return new ThinPlateTest;
         case LeafTest::Type :
@@ -129,3 +131,10 @@ void AcaciaScene::removeConnection(GlyphConnection *conn)
     emit sendUpdateDrawable();
 }
 
+void AcaciaScene::recvAttribChanged()
+{
+    GlyphItem *item = getActiveGlyph();
+    if(item) item->updateOps();
+
+    emit sendUpdateDrawable();
+}
