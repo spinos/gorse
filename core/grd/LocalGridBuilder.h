@@ -2,10 +2,7 @@
  *  LocalGridBuilder.h
  *  gorse
  *
- *  P is level of grid
- *  2^(P*3) cells
- *
- *  2019/8/10
+ *  2019/8/28
  */
 
 #ifndef ALO_LOCAL_GRID_BUILDER_H
@@ -24,28 +21,28 @@ template<typename T>
 class LocalGridBuilder {
 
 	T *m_grid;
-/// (object, cell) as key
-	sdb::L3Tree<sdb::Coord2, int, 2048, 512, 1024 > m_objectCellMap;
-
+    
 public:
+
+/// (object, cell) as key
+	typedef sdb::L3Tree<sdb::Coord2, int, 2048, 512, 1024 > ObjectInCellMap;
 
 	LocalGridBuilder();
 	~LocalGridBuilder();
 
 	void attach(T *grid);
 /// finish grid
-	void detach();
+	void detach(ObjectInCellMap *objvaryingcell);
 /// index in cell
 /// Ts is sample array type, value must have _key, _pos, _span, _objId
 /// Tr is build rule
 	template<typename Ts, typename Tr>
-	void measure(const Ts &samples, Tr &rule);
+	void measure(ObjectInCellMap &objvaryingcell, 
+                const Ts &samples, Tr &rule);
 
 protected:
 
 private:
-/// extract existing indices in grid
-	void recordIndices(T *grid);
 
 	struct CellKH {
 		int _key;
@@ -68,23 +65,23 @@ void LocalGridBuilder<T>::attach(T *grid)
 }
 
 template<typename T>
-void LocalGridBuilder<T>::detach()
+void LocalGridBuilder<T>::detach(ObjectInCellMap *objvaryingcell)
 {
 	sdb::L3Tree<int, int, 2048, 512, 1024 > allObjs;
-	sdb::L3Node<sdb::Coord2, int, 1024> *block = m_objectCellMap.begin();
+	sdb::L3Node<sdb::Coord2, int, 1024> *block = objvaryingcell->begin();
 	while(block) {
 		for (int i=0;i<block->count();++i) { 
 			const sdb::Coord2 &ci = block->key(i);
 			allObjs.insert(ci.x, 0);
 
 		}
-		block = m_objectCellMap.next(block);
+		block = objvaryingcell->next(block);
 	}
 
 	const int nObjs = allObjs.size();
 	m_grid->setNumObjects(nObjs);
 
-	const int numInstances = m_objectCellMap.size();
+	const int numInstances = objvaryingcell->size();
 	int *inds = m_grid->createIndices(nObjs + numInstances);
 
 	m_grid->reset();
@@ -104,7 +101,7 @@ void LocalGridBuilder<T>::detach()
 	int preCell = -1;
 	int valueInd;
 	
-	block = m_objectCellMap.begin();
+	block = objvaryingcell->begin();
 	while(block) {
 		for (int i=0;i<block->count();++i) { 
 			const sdb::Coord2 &ci = block->key(i);
@@ -132,16 +129,17 @@ void LocalGridBuilder<T>::detach()
 			cellEnd.y = offset;
 
 		}
-		block = m_objectCellMap.next(block);
+		block = objvaryingcell->next(block);
 	}
 
-	m_objectCellMap.clear();
+	objvaryingcell->clear();
     
 }
 
 template<typename T>
 template<typename Ts, typename Tr>
-void LocalGridBuilder<T>::measure(const Ts &samples, Tr &rule)
+void LocalGridBuilder<T>::measure(ObjectInCellMap &objvaryingcell,
+                                const Ts &samples, Tr &rule)
 {
 	int n = samples.size();
 	Ts::ValueTyp ap;
@@ -183,24 +181,9 @@ void LocalGridBuilder<T>::measure(const Ts &samples, Tr &rule)
             rule.printCoord(si._key);
         }
         
-        m_objectCellMap.insert(sdb::Coord2(si._objId, celli), 0);
+        objvaryingcell.insert(sdb::Coord2(si._objId, celli), 0);
 	}
 	
-}
-
-template<typename T>
-void LocalGridBuilder<T>::recordIndices(T *grid)
-{
-	const int n = grid->numCells();
-	for(int i=0;i<n;++i) {
-		const Int2 &range = grid->c_cell()[i];
-		if(range.x >= range.y) continue;
-
-		for(int j=range.x;j<range.y;++j) {
-			const int &objI = grid->c_indices()[j];
-			m_objectCellMap.insert(sdb::Coord2(objI, i), 0);
-		}
-	}
 }
 
 }

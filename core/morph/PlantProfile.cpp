@@ -16,11 +16,14 @@ PlantProfile::PlantProfile() :
 m_pos(0.f, -.1f, 0.f),
 m_v0(0.f, 1.f, 0.f),
 m_vm(0.f, 1.f, 0.f),
-m_age(5),
-m_growSpeed(1.04f, .04f),
-m_branchProbability(.9f),
+m_age(8),
+m_stopAge(8, 4),
+m_growSpeed(1.24f, .04f),
+m_branchProbability(.99f),
 m_seasonalFactor(1.f),
-m_minBranchSeason(1)
+m_minBranchSeason(1),
+m_stopProbability(.17f),
+m_resourceRatio(.8f)
 {}
 
 PlantProfile::~PlantProfile()
@@ -35,6 +38,9 @@ void PlantProfile::setGrowDirections(const Vector3F &v0, const Vector3F &vm)
 void PlantProfile::setAge(const int &x)
 { m_age = x; }
 
+void PlantProfile::setStopAge(const Int2 &x)
+{ m_stopAge = x; }
+
 void PlantProfile::setGrowSpeed(const Float2 &q)
 { m_growSpeed = q; }
 
@@ -46,6 +52,12 @@ void PlantProfile::setSeasonalFactor(const float &x)
 
 void PlantProfile::setMinBranchSeason(const int &x)
 { m_minBranchSeason = x; }
+
+void PlantProfile::setStopProbability(const float &x)
+{ m_stopProbability = x; }
+
+void PlantProfile::setResourceRatio(const float &x)
+{ m_resourceRatio = x; }
 
 const Vector3F &PlantProfile::rootPosition() const
 { return m_pos; }
@@ -59,6 +71,9 @@ const Vector3F &PlantProfile::generalGrowDirection() const
 const int &PlantProfile::age() const
 { return m_age; }
 
+const Int2 &PlantProfile::stopAge() const
+{ return m_stopAge; }
+
 const Float2 &PlantProfile::growSpeed() const
 { return m_growSpeed; }
 
@@ -67,6 +82,12 @@ const float &PlantProfile::branchProbability() const
 
 const int &PlantProfile::minBranchSeason() const
 { return m_minBranchSeason; }
+
+const float &PlantProfile::stopProbability() const
+{ return m_stopProbability; }
+
+const float &PlantProfile::resourceRatio() const
+{ return m_resourceRatio; }
 
 Matrix33F PlantProfile::getRootRotation() const
 { return TubularProfile::calculateFrame0(m_v0, m_vm); }

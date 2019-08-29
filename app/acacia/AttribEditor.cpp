@@ -355,7 +355,7 @@ void AttribEditor::recvFloatValue(QPair<std::string, float> x)
 {
 	GlyphOps *ops = m_scene->getActiveOps();
 	if(!ops) return;
-
+    
 	if(ops->setFloatAttrValue(x.first, x.second) )
 		emit sendAttribChanged();
 }

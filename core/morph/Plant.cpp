@@ -43,7 +43,10 @@ void Plant::grow(PlantProfile &plp, StemProfile &stp)
 
 	std::deque<Stem *>::iterator it = m_stems.begin();
 	for(;it!=m_stems.end();++it) {
-		(*it)->grow(gv, plp.growSpeed().y, stp);
+        Stem *cst = *it;
+        float flow = 1.f;
+        cst->getResourceFlow(flow, plp.resourceRatio());
+		cst->grow(gv * sqrt(flow), plp.growSpeed().y * flow, stp);
 	}
 }
 
@@ -57,6 +60,9 @@ void Plant::end()
 
 int Plant::numStems() const
 { return m_stems.size(); }
+
+Stem *Plant::stem(const int &i)
+{ return m_stems[i]; }
 
 const Stem *Plant::stem(const int &i) const
 { return m_stems[i]; }

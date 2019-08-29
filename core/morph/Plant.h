@@ -38,6 +38,7 @@ public:
 	void end();
 
 	int numStems() const;
+    Stem *stem(const int &i);
 	const Stem *stem(const int &i) const;
 	void getTerminalBud(Vector3F &pos, Matrix33F &mat,
 					StemProfile &stp, const int &i) const;

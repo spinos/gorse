@@ -15,7 +15,8 @@ namespace morph {
 
 Stem::Stem() :
 m_parent(nullptr),
-m_node0Ang(0.f)
+m_node0Ang(0.f),
+m_isStopped(false)
 { m_tube = new TubularProfile; }
 
 Stem::~Stem()
@@ -23,6 +24,9 @@ Stem::~Stem()
 
 void Stem::setParent(const Stem *x)
 { m_parent = x; }
+
+void Stem::addChild(Stem *x)
+{ m_children.push_back(x); }
 
 void Stem::begin(const Vector3F &pos, const Matrix33F &mat,
 				const float &a0, const float &radius0)
@@ -36,6 +40,9 @@ void Stem::begin(const Vector3F &pos, const Matrix33F &mat,
 
 void Stem::grow(const Vector3F &gv, const float &dWidth, StemProfile &stp)
 {
+    if(m_isStopped)
+        return growThicker(dWidth, stp);
+
 	const Vector3F gvn = gv.normal();
 	const int &n = stp.segmentsPerSeason();
 	const float l = gv.length() / (float)n;
@@ -58,6 +65,9 @@ const TubularProfile *Stem::profile() const
 
 const Stem *Stem::parent() const
 { return m_parent; }
+
+int Stem::numChildren() const
+{ return m_children.size(); }
 
 const int &Stem::age() const
 { return m_age; }
@@ -99,6 +109,12 @@ Vector3F Stem::getGrowDirection(const Vector3F &ref, StemProfile &stp) const
 const float &Stem::radius0() const
 { return m_tube->radius(0); }
 
+const bool &Stem::isStopped() const
+{ return m_isStopped; }
+
+void Stem::setStopped()
+{ m_isStopped = true; }
+
 void Stem::getAllBuds(std::vector<Vector3F> &positions, std::vector<Matrix33F> &rotations) const
 {
     Vector3F pos = m_tube->pos0();
@@ -119,6 +135,22 @@ void Stem::getAllBuds(std::vector<Vector3F> &positions, std::vector<Matrix33F> &
             curNode++;
         }
 	}
+}
+
+void Stem::growThicker(const float &dWidth, StemProfile &stp)
+{
+    m_tube->addRadius(dWidth);
+	m_age++;
+}
+
+void Stem::getResourceFlow(float &res, const float &ratio) const
+{
+    const Stem *pst = parent();
+    while(pst) {
+        res *= ratio;
+        pst = pst->parent();
+    }
+    
 }
 
 }

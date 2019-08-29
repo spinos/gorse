@@ -38,6 +38,7 @@ signals:
 public slots:
 	void recvCameraChanged(const alo::CameraEvent &x);
 	void recvRequestBound();
+    void recvAttribChanged();
 		
 protected:
     virtual alo::GlyphOps *createOps(const QJsonObject &content) override;

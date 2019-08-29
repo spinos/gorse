@@ -15,6 +15,7 @@
 #include "BranchTest.h"
 #include "LeafTest.h"
 #include "ThinPlateTest.h"
+#include "MorphologyOps.h"
 
 namespace alo {
 
