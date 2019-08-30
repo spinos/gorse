@@ -24,6 +24,7 @@ class MorphologyOps : public DrawableOps {
     morph::PlantProfile *m_plf;
     morph::StemProfile *m_stf;
     int m_randseed;
+    float m_triangulatePercent;
     
 public:
 

@@ -10,7 +10,6 @@
 #include "Stem.h"
 #include "PlantProfile.h"
 #include "StemProfile.h"
-#include <tbl/TubularCrossSection.h>
 
 namespace alo {
 
@@ -46,7 +45,7 @@ void Plant::grow(PlantProfile &plp, StemProfile &stp)
         Stem *cst = *it;
         float flow = 1.f;
         cst->getResourceFlow(flow, plp.resourceRatio());
-		cst->grow(gv * sqrt(flow), plp.growSpeed().y * flow, stp);
+		cst->grow(gv, plp.growSpeed().y * sqrt(flow), stp);
 	}
 }
 
@@ -72,14 +71,6 @@ void Plant::getTerminalBud(Vector3F &pos, Matrix33F &mat,
 {
 	const Stem *st = stem(i);
 	st->getTerminalBud(pos, mat, stp);
-}
-
-void Plant::getStemCrossSection(TubularCrossSection *tucrs,
-                    const int &i, PlantProfile &plp) const
-{
-    const Stem *si = stem(i);
-    const float &r = si->radius0();
-    tucrs->create(10, r, r);
 }
 
 }

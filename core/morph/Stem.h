@@ -19,6 +19,7 @@
 namespace alo {
 
 class TubularProfile;
+class TubularCrossSection;
 
 namespace morph {
 
@@ -38,10 +39,16 @@ class Stem {
 	int m_age;
 /// node as tube segment index
     std::vector<int> m_nodeIndex;
-/// angle between tube segments
+/// angle of rotation around x between tube segments
 	std::vector<float> m_segmentAngles;
+/// per-age
+    std::vector<float> m_radiusChanges;
 /// not grows any longer
     bool m_isStopped;
+/// germinating a child
+    bool m_isBranched;
+/// when it is germinated
+    int m_ageOffset;
     
 public:
 
@@ -60,6 +67,8 @@ public:
 	void end();
     
     void setStopped();
+    void setBranched(const bool &x);
+    void setAgeOffset(const int &x);
 
     const Stem *parent() const;
 	int numChildren() const;
@@ -67,22 +76,31 @@ public:
 	const int &age() const;
 	const float &radius0() const;
     const bool &isStopped() const;
+    const bool &isBranched() const;
+    const Matrix33F &germinatedSpace() const;
+    const int &ageOffset() const;
 
 	void getTerminalBud(Vector3F &pos, Matrix33F &mat, StemProfile &stp) const;
 	void getTerminalBudRotation(Matrix33F &mat, StemProfile &stp) const;
-	Vector3F getGrowDirection(const Vector3F &ref, StemProfile &stp) const;
+	
 /// lateral and terminal
     void getAllBuds(std::vector<Vector3F> &positions, std::vector<Matrix33F> &rotations) const;
 /// go upstream to find how much resource is available
     void getResourceFlow(float &res, const float &ratio) const;
-    
+/// iseg.ffrac by fage
+    float getSegment(const float &fage, StemProfile &stp) const;
+    void getCrossSection(TubularCrossSection *tucrs,
+                            StemProfile *stp = nullptr) const;
+                    
 protected:
 
 	
 private:
-
+    Vector3F getGeneralDirection(const Vector3F &gv, StemProfile &stp) const;
+    Vector3F getGrowDirection(const Vector3F &ref, StemProfile &stp) const;
     void growThicker(const float &dWidth, StemProfile &stp);
-    
+    void getSegmentRadius(float &res, const float &fseg) const;
+
 };
 
 }

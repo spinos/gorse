@@ -22,6 +22,7 @@ class StemProfile {
 	float m_axilAngle;
 /// max bending per-node
     float m_bendingLimit;
+    float m_currentSegment;
 
 public:
 
@@ -32,12 +33,14 @@ public:
 	void setNodeAngle(const float &x);
 	void setAxilAngle(const float &x);
     void setBendingLimit(const float &x);
+    void setCurrentSegment(const float &x);
 
 	const int &segmentsPerSeason() const;
 	const float &nodeAngle() const;
     float segmentAngle() const;
 	const float &axilAngle() const;
     const float &bendingLimit() const;
+    const float &currentSegment() const;
 
 protected:
 

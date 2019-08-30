@@ -56,12 +56,15 @@ void Monopodial<T>::grow(Plant *pl, PlantProfile &plp, StemProfile &stp)
 {
 	const float rootAng = (m_rng->randf1() - .5f) * 6.28f;
 	Stem *st = pl->addStem(plp.rootPosition(), plp.getRootRotation(),
-								rootAng, .015f);
+								rootAng, .013f);
 
 	for(int i=0;i<plp.age();++i) {
         processStopping(pl, plp, stp);
-		if(i >= plp.minBranchSeason()) processBranching(pl, plp, stp);
-		float sfac = 1.f + (m_rng->randf1() - .5f) * .5f;
+		if(i >= plp.minBranchSeason()) {
+            plp.setCurrentSeason(i);
+            processBranching(pl, plp, stp);
+        }
+		float sfac = 1.f + (m_rng->randf1() - .5f) * .3f;
 		plp.setSeasonalFactor(sfac);
 		pl->grow(plp, stp);
         
@@ -74,13 +77,18 @@ template<typename T>
 void Monopodial<T>::processBranching(Plant *pl, PlantProfile &plp, StemProfile &stp)
 {
 	const int n = pl->numStems();
+    if(n > 2000) {
+        std::cout << "\n WARNING plant reached max n branch " << 2000;
+        return;
+    }
 	Vector3F budPos;
 	Matrix33F budMat;
 	for(int i=0;i<n;++i) {
-		if(m_rng->randf1() > plp.branchProbability()) continue;
-
         Stem *pst = pl->stem(i);
         if(pst->isStopped()) continue;
+        
+        pst->setBranched(false);
+		if(m_rng->randf1() > plp.branchProbability()) continue;
         
 		pl->getTerminalBud(budPos, budMat, stp, i);
         const float axil = stp.axilAngle() * (1.f - m_rng->randf1() * .2f);
@@ -90,8 +98,10 @@ void Monopodial<T>::processBranching(Plant *pl, PlantProfile &plp, StemProfile &
 		Stem *cst = pl->addStem(budPos, budMat,
 								branchAng, .015f);
         cst->setParent(pl->stem(i));
+        cst->setAgeOffset(plp.currentSeason());
         
         pst->addChild(cst);
+        pst->setBranched(true);
 	}
 }
 

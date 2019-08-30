@@ -36,12 +36,12 @@ class PlantProfile {
 /// first season to branch
     int m_minBranchSeason;
 /// terminal bud is lost, stop growing longer
-/// continue to grow thicker
 /// has no effect on main axis
     float m_stopProbability;
 /// how much resources are going to grow child branches
 /// relative to what is going to grow the parent
     float m_resourceRatio;
+    int m_currentSeason;
 
 public:
 
@@ -58,6 +58,7 @@ public:
     void setMinBranchSeason(const int &x);
     void setStopProbability(const float &x);
     void setResourceRatio(const float &x);
+    void setCurrentSeason(const int &x);
 
 	const Vector3F &rootPosition() const;
 	const Vector3F &initialGrowDirection() const;
@@ -69,6 +70,7 @@ public:
     const int &minBranchSeason() const;
     const float &stopProbability() const;
     const float &resourceRatio() const;
+    const int &currentSeason() const;
 	Matrix33F getRootRotation() const;
 	Vector3F getGrowVector() const;
 

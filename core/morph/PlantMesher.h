@@ -16,6 +16,7 @@ namespace morph {
     
 class Plant;
 class PlantProfile;
+class StemProfile;
 
 class PlantMesher {
 
@@ -28,6 +29,8 @@ public:
 
 	void attach(AdaptableMesh *mesh);
     void triangulate(const Plant &pl, PlantProfile &prof);
+    void triangulate(const Plant &pl, const float &alpha, 
+                    PlantProfile &prof, StemProfile &stf);
     void detach();
     
 protected:

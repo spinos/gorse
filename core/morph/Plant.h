@@ -14,8 +14,6 @@
 
 namespace alo {
     
-class TubularCrossSection;
-
 namespace morph {
 
 class Stem;
@@ -42,9 +40,6 @@ public:
 	const Stem *stem(const int &i) const;
 	void getTerminalBud(Vector3F &pos, Matrix33F &mat,
 					StemProfile &stp, const int &i) const;
-                    
-    void getStemCrossSection(TubularCrossSection *tucrs,
-                    const int &i, PlantProfile &plp) const;
 
 protected:
 

@@ -20,10 +20,15 @@ class TubularMesher : public FrontMesher {
 
 public:
 
+    struct Parameter {
+        float _toSegment;
+    };
+
 	TubularMesher();
 	virtual ~TubularMesher();
 
-	void triangulate(const TubularCrossSection &cs, const TubularProfile &prof);
+	void triangulate(const TubularCrossSection &cs, const TubularProfile &prof,
+                    Parameter *param = nullptr);
 
 protected:
 

@@ -18,7 +18,8 @@ namespace alo {
 
 MorphologyOps::MorphologyOps() : m_randseed(7654321),
 m_plf(new morph::PlantProfile),
-m_stf(new morph::StemProfile)
+m_stf(new morph::StemProfile),
+m_triangulatePercent(1.f)
 {
     m_mesh = new AdaptableMesh;
 
@@ -38,6 +39,14 @@ void MorphologyOps::update()
     getIntAttribValue(age, "aage");
     m_plf->setAge(age);
     
+    float branchprob;
+    getFloatAttribValue(branchprob, "abranchprob");
+    m_plf->setBranchProbability(branchprob);
+    
+    float flow;
+    getFloatAttribValue(flow, "abranchflow");
+    m_plf->setResourceRatio(flow);
+    
     int branchAge = 4;
     getIntAttribValue(branchAge, "abranchmin");
     m_plf->setMinBranchSeason(branchAge);
@@ -56,6 +65,7 @@ void MorphologyOps::update()
     m_stf->setAxilAngle(axilAngle);
     
     getIntAttribValue(m_randseed, "arandseed");
+    getFloatAttribValue(m_triangulatePercent, "atripercent");
     
     computeMesh();
 }
@@ -74,7 +84,7 @@ void MorphologyOps::computeMesh()
     
     morph::PlantMesher plmshr;
     plmshr.attach(m_mesh);
-    plmshr.triangulate(aplant, *m_plf);
+    plmshr.triangulate(aplant, m_triangulatePercent, *m_plf, *m_stf);
     plmshr.detach();
     
     DrawableResource *rec = resource();

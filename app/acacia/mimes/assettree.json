@@ -167,23 +167,39 @@
                             "typ": 2,
                             "value": 8,
                             "min": 1,
-                            "max": 16
+                            "max": 20
                         },
                         {
                             "name": "aaxilangle",
                             "label": "Axil Angle",
                             "typ": 3,
                             "value": 0.8,
-                            "min": 0.2,
+                            "min": 0.24,
                             "max": 1.5
                         },
                         {
                             "name": "abranchmin",
-                            "label": "Branch Start Season",
+                            "label": "Start Branch Season",
                             "typ": 2,
                             "value": 1,
                             "min": 0,
                             "max": 16
+                        },
+                        {
+                            "name": "abranchflow",
+                            "label": "Resource Ratio",
+                            "typ": 3,
+                            "value": 0.7,
+                            "min": 0.5,
+                            "max": 1.0
+                        },
+                        {
+                            "name": "abranchprob",
+                            "label": "Branch Probability",
+                            "typ": 3,
+                            "value": 0.9,
+                            "min": 0.5,
+                            "max": 1.0
                         },
                         {
                             "name": "astop1st",
@@ -216,6 +232,14 @@
                             "value": 7654321,
                             "min": 999,
                             "max": 1999999999
+                        },
+                        {
+                            "name": "atripercent",
+                            "label": "Percentage",
+                            "typ": 3,
+                            "value": 1.0,
+                            "min": 0.01,
+                            "max": 1.0
                         }
                     ]
                 },

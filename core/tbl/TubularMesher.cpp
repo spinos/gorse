@@ -19,11 +19,13 @@ TubularMesher::TubularMesher()
 TubularMesher::~TubularMesher()
 {}
 
-void TubularMesher::triangulate(const TubularCrossSection &cs, const TubularProfile &prof)
+void TubularMesher::triangulate(const TubularCrossSection &cs, const TubularProfile &prof,
+                                Parameter *param)
 {
-	Vector3F q, center, disp;
+	Vector3F q, center, disp, realDisp;
+    float shrk, realShrink;
 	Matrix33F frm; 
-	Float2 pitchYaw;
+	Float2 pitchYaw, realPitchYaw;
 	prof.getSegment(center, frm, disp, pitchYaw, 0);
 
 	AdaptableMesh *msh = mesh();
@@ -47,14 +49,34 @@ void TubularMesher::triangulate(const TubularCrossSection &cs, const TubularProf
 	fline.closeLine();
 
 	FrontLine::EnableMerging = false;
+    
+    float lastFrac = 1.f;
+    int ns = prof.numSegments();
+    if(param != nullptr) {
+        ns = param->_toSegment;
+        lastFrac = param->_toSegment - ns;
+        if(lastFrac > 0.01f) ns++;
+        
+        if(ns > prof.numSegments()) {
+            ns = prof.numSegments();
+            lastFrac = 1.f;
+        }
+    }
+    
+    realDisp = disp;
+    realPitchYaw = pitchYaw;
+    shrk = prof.getShrinkingFactor(0);
+    realShrink = shrk;
+    if(ns == 1 && lastFrac < .99f) {
+        realDisp *= lastFrac;
+        realPitchYaw.set(pitchYaw.x * lastFrac, pitchYaw.y * lastFrac);
+        realShrink *= lastFrac;
+    }
 
 	fline.setWorldSpace(frm);
-    fline.setDirection(disp);
-	fline.setLocalRotation(pitchYaw);
-	float shrk = prof.getShrinkingFactor(0);
-    fline.setShrinking(shrk);
-    
-    const int ns = prof.numSegments();
+    fline.setDirection(realDisp);
+	fline.setLocalRotation(realPitchYaw);
+    fline.setShrinking(realShrink);
 
     for(int i=1;i<ns;++i) {
     	prof.getSegment(center, frm, disp, pitchYaw, i);
@@ -64,10 +86,20 @@ void TubularMesher::triangulate(const TubularCrossSection &cs, const TubularProf
     	FrontLine &lb = line[i&1];
     	lb.clearLine();
     	lb.setWorldSpace(frm);
-    	lb.setDirection(disp);
-    	lb.setLocalRotation(pitchYaw);
-    	shrk = prof.getShrinkingFactor(i);
-		lb.setShrinking(shrk);
+        
+        realDisp = disp;
+        realPitchYaw = pitchYaw;
+        shrk = prof.getShrinkingFactor(i);
+        realShrink = shrk;
+        if(i == ns - 1 && lastFrac < .99f) {
+            realDisp *= lastFrac;
+            realPitchYaw.set(pitchYaw.x * lastFrac, pitchYaw.y * lastFrac);
+            realShrink *= lastFrac;
+        }
+        
+    	lb.setDirection(realDisp);
+    	lb.setLocalRotation(realPitchYaw);
+		lb.setShrinking(realShrink);
     	
     	FrontLine &la = line[(i-1)&1];
     	
