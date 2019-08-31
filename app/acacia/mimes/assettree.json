@@ -202,6 +202,38 @@
                             "max": 1.0
                         },
                         {
+                            "name": "aggspeed1",
+                            "label": "Length Speed",
+                            "typ": 3,
+                            "value": 1.0,
+                            "min": 0.1,
+                            "max": 100.0
+                        },
+                        {
+                            "name": "aggspeed2",
+                            "label": "Width Speed",
+                            "typ": 3,
+                            "value": 0.05,
+                            "min": 0.01,
+                            "max": 1.0
+                        },
+                        {
+                            "name": "agmainspeed1",
+                            "label": "Main Length Speed",
+                            "typ": 3,
+                            "value": 1.0,
+                            "min": 0.1,
+                            "max": 10.0
+                        },
+                        {
+                            "name": "agmainspeed2",
+                            "label": "Main Width Speed",
+                            "typ": 3,
+                            "value": 1.0,
+                            "min": 0.1,
+                            "max": 10.0
+                        },
+                        {
                             "name": "astop1st",
                             "label": "Main Age Limit",
                             "typ": 2,

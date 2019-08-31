@@ -30,6 +30,7 @@ class PlantProfile {
     Int2 m_stopAge;
 /// (length, width) of growth per season
 	Float2 m_growSpeed;
+    Float2 m_mainAxisGrowSpeedRatio;
     float m_branchProbability;
 /// change grow speed based on available resource
     float m_seasonalFactor;
@@ -59,6 +60,7 @@ public:
     void setStopProbability(const float &x);
     void setResourceRatio(const float &x);
     void setCurrentSeason(const int &x);
+    void setMainAxisGrowSpeedRatio(const Float2 &x);
 
 	const Vector3F &rootPosition() const;
 	const Vector3F &initialGrowDirection() const;
@@ -73,6 +75,7 @@ public:
     const int &currentSeason() const;
 	Matrix33F getRootRotation() const;
 	Vector3F getGrowVector() const;
+    const Float2 &mainAxisGrowSpeedRatio() const;
 
 protected:
 

@@ -232,6 +232,9 @@ void Stem::getSegmentRadius(float &res, const float &fseg) const
     
 }
 
+bool Stem::isMainAxis() const
+{ return m_parent == nullptr; }
+
 }
 
 }

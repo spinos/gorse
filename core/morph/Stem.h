@@ -91,6 +91,8 @@ public:
     float getSegment(const float &fage, StemProfile &stp) const;
     void getCrossSection(TubularCrossSection *tucrs,
                             StemProfile *stp = nullptr) const;
+                            
+    bool isMainAxis() const;
                     
 protected:
 

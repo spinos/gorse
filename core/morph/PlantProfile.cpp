@@ -18,7 +18,8 @@ m_v0(0.f, 1.f, 0.f),
 m_vm(0.f, 1.f, 0.f),
 m_age(8),
 m_stopAge(8, 4),
-m_growSpeed(1.24f, .04f),
+m_growSpeed(1.f, .05f),
+m_mainAxisGrowSpeedRatio(1.f, 1.f),
 m_branchProbability(.9f),
 m_seasonalFactor(1.f),
 m_minBranchSeason(1),
@@ -101,6 +102,12 @@ Matrix33F PlantProfile::getRootRotation() const
 
 Vector3F PlantProfile::getGrowVector() const
 { return m_vm.normal() * (m_growSpeed.x * m_seasonalFactor); }
+
+void PlantProfile::setMainAxisGrowSpeedRatio(const Float2 &x)
+{ m_mainAxisGrowSpeedRatio = x; }
+
+const Float2 &PlantProfile::mainAxisGrowSpeedRatio() const
+{ return m_mainAxisGrowSpeedRatio; }
 
 }
 

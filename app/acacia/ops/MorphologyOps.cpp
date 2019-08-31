@@ -51,6 +51,16 @@ void MorphologyOps::update()
     getIntAttribValue(branchAge, "abranchmin");
     m_plf->setMinBranchSeason(branchAge);
     
+    float speed1, speed2;
+    getFloatAttribValue(speed1, "aggspeed1");
+    getFloatAttribValue(speed2, "aggspeed2");
+    m_plf->setGrowSpeed(Float2(speed1, speed2));
+    
+    float mainSpeed1, mainSpeed2;
+    getFloatAttribValue(mainSpeed1, "agmainspeed1");
+    getFloatAttribValue(mainSpeed2, "agmainspeed2");
+    m_plf->setMainAxisGrowSpeedRatio(Float2(mainSpeed1, mainSpeed2));
+    
     int stop1, stop2;
     getIntAttribValue(stop1, "astop1st");
     getIntAttribValue(stop2, "astop2nd");
