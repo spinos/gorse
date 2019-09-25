@@ -5,9 +5,8 @@
  *  Graph system with nodes and edges
  *  per-node edge indices like 0 1 2 3 0 3 4 ...
  *  per-node edge offsets like 0 4 7 ...
- *  Created by jian zhang on 7/14/16.
- *  Copyright 2016 __MyCompanyName__. All rights reserved.
- *
+ *  
+ *  2019/9/25
  */
 
 #ifndef ALO_GRAPH_H
@@ -23,26 +22,22 @@ namespace alo {
 template<typename Tn, typename Te>
 class AGraph {
 
-	int m_numNode, m_numEdge, m_numEdgeInd;
-	float m_minEdgeLen, m_maxEdgeLen;
-	
 	Te * m_edges;
 	int * m_vvEdgeIndices;
 	int * m_vvEdgeBegins;
 	Tn * m_nodes;
+	int m_numNode, m_numEdge, m_numEdgeInd;
 	
 public:
 
 	AGraph();
-	virtual ~AGraph();
+	~AGraph();
 	
 	void create(int nn, int ne, int ni);
 	
 	const int & numNodes() const;
 	const int & numEdges() const;
 	const int & numEdgeIndices() const;
-	const float & minEdgeLength() const;
-	const float & maxEdgeLength() const;
 	
 	Tn * nodes();
 	Te * edges();
@@ -63,22 +58,14 @@ public:
 	
 	typedef Tn NodeType;
 	typedef Te EdgeType;
-	
-protected:
+    
 	void extractEdges(sdb::L3Tree<sdb::Coord2, int, 2048, 512, 1024> *a);
 	void extractEdgeBegins(const std::vector<int> & a);
 	void extractEdgeIndices(const std::vector<int> & a);
-	void calculateEdgeLength();
-	void setAllEdgeLength(const float& x);
+	
+protected:
 /// ind to edge by vertex i
 	int edgeIndex(const int & v1, const int & v2) const;
-
-	template<typename Tm, typename Tb>
-	static void MapVertexEdgeIndex(std::vector<int> &edgeBegins,
-					std::vector<int> &edgeInds,
-					Tm &edgeMap);
-	static void PushIndices(const std::vector<int> & a,
-					std::vector<int> & b);
 	
 private:
 	void internalClear();
@@ -87,13 +74,13 @@ private:
 
 template<typename Tn, typename Te>
 AGraph<Tn, Te>::AGraph() : 
+m_edges(0),
+m_vvEdgeIndices(0),
+m_vvEdgeBegins(0),
+m_nodes(0),
 m_numNode(0),
 m_numEdge(0),
-m_numEdgeInd(0),
-m_edges(NULL),
-m_vvEdgeIndices(NULL),
-m_vvEdgeBegins(NULL),
-m_nodes(NULL)
+m_numEdgeInd(0)
 {}
 
 template<typename Tn, typename Te>
@@ -201,50 +188,7 @@ void AGraph<Tn, Te>::extractEdgeIndices(const std::vector<int> & a)
 	for(;it!=a.end();++it) {
 		m_vvEdgeIndices[i++] = *it;
 	}
-}
-
-template<typename Tn, typename Te>
-void AGraph<Tn, Te>::calculateEdgeLength()
-{
-	m_minEdgeLen = 1e9f;
-	m_maxEdgeLen = -1e9f;
-	
-	const int n = numEdges();
-	int i = 0;
-	for(;i<n;++i) {
-		
-		Te & ei = m_edges[i];
-		ei.len = m_nodes[ei.vi.x].pos.distanceTo(m_nodes[ei.vi.y].pos);
-		if(ei.len < 1e-3f) std::cout << "\n WARNING zero length " << ei.len << " edge " 
-			<< ei.vi.x << ":" << ei.vi.y;
-		
-		if(m_minEdgeLen > ei.len)
-			m_minEdgeLen = ei.len;
-			
-		if(m_maxEdgeLen < ei.len)
-			m_maxEdgeLen = ei.len;
-	}
-}
-
-template<typename Tn, typename Te>
-void AGraph<Tn, Te>::setAllEdgeLength(const float& x)
-{
-	const int n = numEdges();
-	int i = 0;
-	for(;i<n;++i) {
-		Te & ei = m_edges[i];
-		ei.len = x;
-	}
-	m_minEdgeLen = m_maxEdgeLen = x;
-}
-
-template<typename Tn, typename Te>
-const float & AGraph<Tn, Te>::minEdgeLength() const
-{ return m_minEdgeLen; }
-
-template<typename Tn, typename Te>
-const float & AGraph<Tn, Te>::maxEdgeLength() const
-{ return m_maxEdgeLen; }	
+}	
 	
 template<typename Tn, typename Te>
 int AGraph<Tn, Te>::edgeIndex(const int & v1, const int & v2) const
@@ -318,59 +262,11 @@ int AGraph<Tn, Te>::oppositeNodeIndex(const int& v1, const int& ej) const
 }
 
 template<typename Tn, typename Te>
-template<typename Tm, typename Tb>
-void AGraph<Tn, Te>::MapVertexEdgeIndex(std::vector<int> &edgeBegins,
-					std::vector<int> &edgeInds,
-					Tm &edgeMap)
-{
-	std::map<int, std::vector<int> > vvemap;
-
-	int c = 0;
-	Tb *block = edgeMap.begin();
-	while(block) {
-		for (int i=0;i<block->count();++i) { 
-			const sdb::Coord2 &edgeI = block->key(i);
-			int v0 = edgeI.x;
-			vvemap[v0].push_back(c);
-		
-			int v1 = edgeI.y;
-			vvemap[v1].push_back(c);
-		
-			c++;
-		}
-		block = edgeMap.next(block);
-	}
-
-	int nvve = 0;
-	std::map<int, std::vector<int> >::iterator it = vvemap.begin();
-	for(;it!=vvemap.end();++it) {
-		edgeBegins.push_back(nvve);
-		
-		PushIndices(it->second, edgeInds);
-		nvve += (it->second).size();
-		
-		it->second.clear();
-	}
-}
-
-template<typename Tn, typename Te>
-void AGraph<Tn, Te>::PushIndices(const std::vector<int> & a,
-							std::vector<int> & b)
-{
-	std::vector<int>::const_iterator it = a.begin();
-	for(;it!=a.end();++it) {
-		b.push_back(*it);
-    }
-}
-
-template<typename Tn, typename Te>
 void AGraph<Tn, Te>::verbose() const
 {
 	std::cout<<"\n graph n node "<<numNodes()
 			<<"  n edge "<<numEdges()
-			<<"  n node-edge "<<numEdgeIndices()
-			<<"  min/max edge length "<<minEdgeLength()
-								<<"/"<<maxEdgeLength();
+			<<"  n node-edge "<<numEdgeIndices();
 }
 
 }

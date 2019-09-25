@@ -16,7 +16,7 @@
 #include "BaseDistanceField.h"
 #include <sds/HashedIndex.h>
 #include <sds/SpaceFillingVector.h>
-#include <vector>
+#include <graph/GraphUtil.h>
 #include <deque>
 
 namespace alo {
@@ -291,7 +291,7 @@ void AdaptiveHexagonDistance<T>::buildGraph(const int& nv,
 	std::vector<int> edgeBegins;
 	std::vector<int> edgeInds;
 
-	DFTyp::MapVertexEdgeIndex<EdgeMapTyp, EdgeMapBlockTyp >(edgeBegins, edgeInds, edgeMap);
+	GraphUtil:: template MapVertexEdgeIndex<EdgeMapTyp, EdgeMapBlockTyp >(edgeBegins, edgeInds, edgeMap);
 	
 	int ne = edgeMap.size();
 	int ni = edgeInds.size();

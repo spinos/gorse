@@ -10,6 +10,7 @@
 #define ALO_HEXAHEDRON_DISTANCE_H
 
 #include <graph/BaseDistanceField.h>
+#include <graph/GraphUtil.h>
 
 namespace alo {
 
@@ -75,7 +76,7 @@ void HexahedronDistance<T>::buildGraph(Tf *field, Tr &rule)
 	std::vector<int> edgeBegins;
 	std::vector<int> edgeInds;
 
-	DFTyp::MapVertexEdgeIndex<EdgeMapTyp, EdgeMapBlockTyp >(edgeBegins, edgeInds, edgeMap);
+	GraphUtil:: template MapVertexEdgeIndex<EdgeMapTyp, EdgeMapBlockTyp >(edgeBegins, edgeInds, edgeMap);
 
 	int ni = edgeInds.size();
 	std::cout << "\n n ind " << ni;
