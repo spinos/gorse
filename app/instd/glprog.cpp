@@ -1,6 +1,5 @@
 #include "glprog.h"
 #include <QOpenGLShaderProgram>
-#include <math.h>
 
 GLProg::GLProg()
     : m_program(0)
