@@ -3,9 +3,16 @@
 
 #include <qt_ogl/View3DWidget.h>
 
+QT_FORWARD_DECLARE_CLASS(QThread)
 QT_FORWARD_DECLARE_CLASS(QMatrix4x4)
 
+class SimulationThread;
 class ParticleRenderer;
+
+namespace alo {
+class ParticleSystem;
+class ShapeMatchingSolver;
+}
 
 class GLWidget : public alo::View3DWidget
 {
@@ -13,10 +20,10 @@ class GLWidget : public alo::View3DWidget
 
 public:
     GLWidget(QWidget *parent = 0);
-    ~GLWidget();
 
 public slots:
     void cleanup();
+    void recvDoneStep();
 
 signals:
 
@@ -25,8 +32,10 @@ protected:
     virtual void clientDraw(const QMatrix4x4 &proj, const QMatrix4x4 &cam);
 
 private:
-
-    ParticleRenderer *m_particleRenderer;
+    SimulationThread *m_thread;
+    ParticleRenderer *m_renderer;
+    alo::ParticleSystem *m_particle;
+    alo::ShapeMatchingSolver *m_solver;
 
 };
 

@@ -10,8 +10,8 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
-#include <pbd/SphereEmitter.h>
 #include <pbd/ParticleSystem.h>
+#include <math/Vector3F.h>
 
 struct ParticleRenderer::Impl
 {
@@ -22,11 +22,19 @@ struct ParticleRenderer::Impl
     int _projMatrixLoc;
     int _mvMatrixLoc;
     int _invCameraMatrixLoc;
+    const alo::ParticleSystem *_particles;
+    
+    Impl() : _particles(0)
+    {}
+    
 };
 
 ParticleRenderer::ParticleRenderer() : m_pimpl(0)
 {
 }
+
+void ParticleRenderer::setParticles(const alo::ParticleSystem *x)
+{ m_pimpl->_particles = x; }
 
 void ParticleRenderer::cleanup()
 {
@@ -105,20 +113,22 @@ void ParticleRenderer::initializeGL()
     
     posVbo->create();
     posVbo->bind();
+    posVbo->setUsagePattern(QOpenGLBuffer::DynamicDraw);
     
-    QVector<float> pos;
-    for(int i=0;i<1024;++i) {
-        pos << (1.f * i);
+    /*QVector<float> pos;
+    for(int i=0;i<3072;++i) {
+        pos << (10.f - 1.f * i);
         pos << (1.f * i);
         pos << (-1.f * i);
     }
 
-    posVbo->allocate((const GLfloat *)pos.constData(), 1024 * 3 * sizeof(GLfloat));
+    posVbo->allocate((const GLfloat *)pos.constData(), 3072 * sizeof(GLfloat));
+    */
     f->glEnableVertexAttribArray(1);
     f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 
-            3 * sizeof(GLfloat), 
-            (void *)sizeof(QVector3D));
-    f->glVertexAttribDivisor(1, 1);        
+            sizeof(QVector3D), 
+            (void *)0);
+    f->glVertexAttribDivisor(1, 1);       
             
     posVbo->release();
     
@@ -126,9 +136,25 @@ void ParticleRenderer::initializeGL()
 
 void ParticleRenderer::paintGL(const QMatrix4x4 &projectionMat, const QMatrix4x4 &cameraMat)
 { 
+    const alo::ParticleSystem *particles = m_pimpl->_particles;
+    if(!particles) return;
+    const int np = particles->numParticles();
+    if(np < 1) return;
+
     QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
 
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_pimpl->_vao);
+    
+    QOpenGLBuffer *posVbo = &m_pimpl->_posVbo;
+
+    posVbo->bind();
+    
+    if(particles->capacity() * 12 > posVbo->size())
+        posVbo->allocate((const GLfloat *)particles->positions(), particles->capacity() * 3 * sizeof(GLfloat));  
+    else
+        posVbo->write(0, (const GLfloat *)particles->positions(), np * 3 * sizeof(GLfloat));  
+    
+    posVbo->release();
     
     QOpenGLShaderProgram *program = &m_pimpl->_program;
     program->bind();
@@ -138,7 +164,7 @@ void ParticleRenderer::paintGL(const QMatrix4x4 &projectionMat, const QMatrix4x4
     invCamera.setRow(3, QVector4D(0.0, 0.0, 0.0, 1.0));
     program->setUniformValue(m_pimpl->_invCameraMatrixLoc, invCamera);
 
-    f->glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 1024);
+    f->glDrawArraysInstanced(GL_TRIANGLES, 0, 6, np);
 
     program->release();
     

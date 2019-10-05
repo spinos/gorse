@@ -24,10 +24,10 @@ struct SphereEmitter::Impl {
     int _maxNum;
     
     Impl() : _rng(new Uniform<Lehmer>(654321)),
-    _center(0.f, 10.f, 0.f),
-    _radius(1.f),
-    _minNum(20),
-    _maxNum(30)
+    _center(0.f, 20.f, 0.f),
+    _radius(10.f),
+    _minNum(200),
+    _maxNum(300)
     {}
     
     int randNum()
@@ -57,7 +57,7 @@ void SphereEmitter::coreUpdate()
         const float r = m_pimpl->randR();
         const Vector3F v = Spherical::toCartesian(r, phi, theta);
         setPosition(m_pimpl->_center + v, i);
-        setPosition(v.normal(), i);
+        setVelocity(v.normal(), i);
         setMass(1.f, i);
     }
 }

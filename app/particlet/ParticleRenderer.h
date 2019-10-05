@@ -13,11 +13,17 @@
 
 QT_FORWARD_DECLARE_CLASS(QMatrix4x4)
 
+namespace alo {
+class ParticleSystem;
+}
+
 class ParticleRenderer : protected QOpenGLExtraFunctions
 {
 
 public:
     ParticleRenderer();
+    
+    void setParticles(const alo::ParticleSystem *x);
     
     void cleanup();
     void initializeGL();

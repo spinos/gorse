@@ -1,5 +1,12 @@
-#ifndef APH_LINEARMATH_H
-#define APH_LINEARMATH_H
+/*
+ *  linearMath.h
+ *  aloe
+ *
+ *  2018/1/12
+ */
+
+#ifndef ALO_LINEARMATH_H
+#define ALO_LINEARMATH_H
 
 #include <iostream>
 #include <sstream>

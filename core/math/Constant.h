@@ -17,6 +17,8 @@ public:
     static const float PI;
     static const float PI2;
     static const float PIOver2;
+    static const float VeryLow;
+    static const float VeryHigh;
     
 };
     

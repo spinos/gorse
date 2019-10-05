@@ -1,4 +1,5 @@
 set (PARTT_SOURCE_FILES main.cpp
+SimulationThread.cpp
 ParticleRenderer.cpp
 glwidget.cpp
 mainwindow.cpp)
@@ -13,3 +14,6 @@ ${GORS_SDB_SRC}
 ${GORS_SDS_SRC})
 
 target_link_libraries (particle Qt5::OpenGL)
+target_link_libraries (particle ${BLAS_LIBRARY})
+target_link_libraries (particle ${LAPACK_LIBRARY})
+target_link_libraries (particle ${F2C_LIBRARY})

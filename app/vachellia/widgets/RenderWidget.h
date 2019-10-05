@@ -46,8 +46,6 @@ signals:
     void preRenderRestart();
 
 protected:
-    //virtual void clientInit();
-    //virtual void clientDraw(const QMatrix4x4 &proj, const QMatrix4x4 &cam);
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
     void keyPressEvent(QKeyEvent *event);

@@ -25,10 +25,16 @@ public:
     ParticleSystem();
     
     void create(const ParticleEmitter &emitter);
+    void addGravity(const Vector3F &g);
+    void projectPosition(const float dt);
+    void updateVelocityAndPosition(const float dt);
     
     const int &numParticles() const;
     const Vector3F *positions() const;
+    const Vector3F *projectedPositions() const;
     const Vector3F *velocities() const;
+    const float *inversedMasses() const;
+    const int &capacity() const;
     
 protected:
 
