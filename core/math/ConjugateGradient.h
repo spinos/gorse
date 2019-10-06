@@ -11,6 +11,7 @@
 #define ALO_MATH_CONJUDATE_GRADIENT_H
 
 #include "sparseLinearMath.h"
+#include "Absolute.h"
 
 namespace alo {
 
@@ -94,7 +95,7 @@ void ConjugateGradient<T>::solve(DenseVector<T>& x, const DenseVector<T>& b)
 			d2 += m_prev[i] * m_Ap[i];
 		}
 		
-		if(Absolute<T>(d2)< 1e-6f)
+		if(Absolute<T>::f(d2)< 1e-6f)
 			d2 = 1e-6f;
 			
 /// alpha <- r_k^Tr_k / p_k^TAp_k
@@ -116,7 +117,7 @@ void ConjugateGradient<T>::solve(DenseVector<T>& x, const DenseVector<T>& b)
 		if(r_k1Tr_k1 < 1e-3f)
 			break;
 
-		if(Absolute<T>(r_kTr_k)<1e-6f)
+		if(Absolute<T>::f(r_kTr_k)<1e-6f)
 			r_kTr_k = 1e-6f;
 			
 /// beta <- r_k+1^T r_k+1 / r_k^Tr_k

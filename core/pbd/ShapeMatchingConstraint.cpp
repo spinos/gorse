@@ -12,7 +12,7 @@
 namespace alo {
 
 ShapeMatchingConstraint::ShapeMatchingConstraint() : 
-_stiffness(.5f)
+_stiffness(.998f)
 {}
 
 void ShapeMatchingConstraint::setOffset(const int x)
@@ -28,11 +28,7 @@ void ShapeMatchingConstraint::calculateMass(float *mass, const float *invMass,
     const int end = _offset + _numVertices;
     for(int i=_offset;i<end;++i) {
         const int &vi = ind[i];
-        float mi = invMass[vi];
-        if(mi > Constant::VeryLow)
-            mi = 1.f / mi;
-        else
-            mi = 100000.f;
+        const float mi = getMass(invMass[vi]);
         mass[i] = mi;
         _totalMass += mi;
     }
@@ -55,6 +51,15 @@ void ShapeMatchingConstraint::calculateP(Vector3F *p,
     
     for(int i=_offset;i<end;++i) {
         p[i] -= _centerOfMass;
+    }
+}
+
+void ShapeMatchingConstraint::setQ(Vector3F *q, const Vector3F *p,
+                        const int *ind)
+{
+    const int end = _offset + _numVertices;
+    for(int i=_offset;i<end;++i) {
+        q[i] = p[i];
     }
 }
 
@@ -85,23 +90,22 @@ void ShapeMatchingConstraint::calculateG(Vector3F *g,
 		
 	}
     
-    A_pq.extractRotation(_rotq, 50);
+    A_pq.extractRotation(_rotq, 20);
 	MatrixC33F R(_rotq);
-    
+
     for(int i=_offset;i<end;++i) {
         
-        Vector3F &gv = g[i];
         const Vector3F &qv = q[i];
         
-		gv.x = R.col(0)[0] * qv.x
+		g[i].x = R.col(0)[0] * qv.x
 					+ R.col(1)[0] * qv.y
 					+ R.col(2)[0] * qv.z
 					+ _centerOfMass.x;
-		gv.y = R.col(0)[1] * qv.x
+		g[i].y = R.col(0)[1] * qv.x
 					+ R.col(1)[1] * qv.y
 					+ R.col(2)[1] * qv.z
 					+ _centerOfMass.y;
-		gv.z = R.col(0)[2] * qv.x
+		g[i].z = R.col(0)[2] * qv.x
 					+ R.col(1)[2] * qv.y
 					+ R.col(2)[2] * qv.z
 					+ _centerOfMass.z;
@@ -111,5 +115,20 @@ void ShapeMatchingConstraint::calculateG(Vector3F *g,
 
 const float &ShapeMatchingConstraint::stiffness() const
 { return _stiffness; }
+
+float ShapeMatchingConstraint::getMass(const float &invMass)
+{
+    return invMass > Constant::VeryLow ? 1.f / invMass : 1e6f;
+}
+
+void ShapeMatchingConstraint::solvePosition(Vector3F &pos, 
+            const float* q_n1, const int &vi,
+			const int& i, const Vector3F *g) const
+{
+    const int oi = _offset + i;
+	pos.x = q_n1[vi * 3]     + (g[oi].x - q_n1[vi * 3]    ) * _stiffness;
+	pos.y = q_n1[vi * 3 + 1] + (g[oi].y - q_n1[vi * 3 + 1]) * _stiffness;
+	pos.z = q_n1[vi * 3 + 2] + (g[oi].z - q_n1[vi * 3 + 2]) * _stiffness;
+}
 
 }

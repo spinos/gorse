@@ -22,7 +22,10 @@ struct ShapeMatchingArray::Impl {
     SimpleBuffer<Vector3F> _q;
     SimpleBuffer<Vector3F> _g;
     SimpleBuffer<float> _mass;
+    float _stiffness;
     
+    Impl() : _stiffness(30000.f)
+    {}
 };
 
 ShapeMatchingArray::ShapeMatchingArray() : 
@@ -45,9 +48,6 @@ void ShapeMatchingArray::createConstraints(const ParticleSystem &particles)
     m_pimpl->_q.resetBuffer(ni);
     m_pimpl->_g.resetBuffer(ni);
     m_pimpl->_mass.resetBuffer(ni);
-    
-    std::cout<<"\n ShapeMatchingArray::create n constraints "<<nr
-                << " array len " << ni;
                 
     const int *vertexInd = m_pimpl->_index.c_data();
     
@@ -68,12 +68,10 @@ void ShapeMatchingArray::createConstraints(const ParticleSystem &particles)
                         particles.positions(),
                         vertexInd);
                         
-        m_pimpl->_q.copyFrom(m_pimpl->_p);                
+        ci.setQ(m_pimpl->_q.data(),
+                m_pimpl->_p.c_data(),
+                vertexInd);
         
-        ci.calculateG(m_pimpl->_g.data(), 
-                        m_pimpl->_p.c_data(),
-                        m_pimpl->_q.c_data());
-                        
     }
 }
 
@@ -98,5 +96,52 @@ const float &ShapeMatchingArray::mass(const int i) const
 
 const float &ShapeMatchingArray::regionStiffness(const int i) const
 { return m_pimpl->_constraints[i].stiffness(); }
+
+const float &ShapeMatchingArray::stiffness() const
+{ return m_pimpl->_stiffness; }
+
+void ShapeMatchingArray::applyRegionConstraint(float *b, const float *q_n1, const int iregion)
+{
+    ShapeMatchingConstraint &ci = m_pimpl->_constraints[iregion];
+    
+    ci.calculateP(m_pimpl->_p.data(), 
+                        m_pimpl->_mass.c_data(),
+                        (const Vector3F *)q_n1,
+                        m_pimpl->_index.c_data());
+                        
+    ci.calculateG(m_pimpl->_g.data(), 
+                        m_pimpl->_p.c_data(),
+                        m_pimpl->_q.c_data());
+                                          
+    const int ne = regionIndexCount(iregion) - 1;
+    const int *rind = regionIndices(iregion);
+    
+    const Vector3F *goals = m_pimpl->_g.c_data();
+    Vector3F pSpring[2];
+    for(int i=0;i<ne;++i) {
+        const int &v1 = rind[i];
+        const int &v2 = rind[i+1];
+        
+        //std::cout << "\n v1v2 " << v1 << ":" << v2;
+        
+        ci.solvePosition(pSpring[0], q_n1, v1, i, goals);
+		ci.solvePosition(pSpring[1], q_n1, v2, i+1, goals);
+        
+        pSpring[0] -= pSpring[1];
+        pSpring[1] = pSpring[0] * -1.f;
+        
+        pSpring[0] *= m_pimpl->_stiffness;
+        pSpring[1] *= m_pimpl->_stiffness;
+			
+        b[v1 * 3    ] += pSpring[0].x;
+        b[v1 * 3 + 1] += pSpring[0].y;
+        b[v1 * 3 + 2] += pSpring[0].z;
+        
+        b[v2 * 3    ] += pSpring[1].x;
+        b[v2 * 3 + 1] += pSpring[1].y;
+        b[v2 * 3 + 2] += pSpring[1].z;
+    }
+    
+}
 
 }

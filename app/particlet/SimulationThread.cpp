@@ -10,6 +10,7 @@
 #include <QWaitCondition>
 #include <QTime>
 #include <pbd/ParticleSystem.h>
+#include <pbd/ShapeMatchingSolver.h>
 #include <math/Vector3F.h>
 
 struct SimulationThread::Impl {
@@ -17,10 +18,9 @@ struct SimulationThread::Impl {
     QMutex _mutex;
     QWaitCondition _condition;
     bool _toAbort;
-    alo::ParticleSystem *_particles;
+    alo::ShapeMatchingSolver *_sms;
     
-    Impl() : _toAbort(false),
-    _particles(0)
+    Impl() : _toAbort(false)
     {}
     
 };
@@ -45,8 +45,8 @@ void SimulationThread::stopSimulation()
 	}
 }
 
-void SimulationThread::setParticles(alo::ParticleSystem *x)
-{ m_pimpl->_particles = x; }
+void SimulationThread::setShapeMatchingSolver(alo::ShapeMatchingSolver *x)
+{ m_pimpl->_sms = x; }
 
 void SimulationThread::run()
 {
@@ -58,11 +58,13 @@ void SimulationThread::run()
         
         const QTime t0 = QTime::currentTime();
 
-        alo::ParticleSystem *particles = m_pimpl->_particles;
+        alo::ShapeMatchingSolver *smSolver = m_pimpl->_sms;
+        alo::ParticleSystem *particles = smSolver->particles();
         const float dt = .016f;
-        particles->addGravity(alo::Vector3F(0.f, -9.8f * dt, 0.f));
+        particles->dampVelocity(.002f);
+        particles->addGravity(alo::Vector3F(0.f, -98.f * dt, 0.f));
         particles->projectPosition(dt);
-        
+        smSolver->applyPositionConstraint();
         particles->updateVelocityAndPosition(dt);
         
         const QTime t1 = QTime::currentTime();

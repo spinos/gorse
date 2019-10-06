@@ -28,6 +28,9 @@ public:
     void addGravity(const Vector3F &g);
     void projectPosition(const float dt);
     void updateVelocityAndPosition(const float dt);
+    void dampVelocity(const float damping);
+    
+    void setProjectedPositions(const Vector3F *x);
     
     const int &numParticles() const;
     const Vector3F *positions() const;

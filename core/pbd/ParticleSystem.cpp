@@ -103,4 +103,18 @@ void ParticleSystem::updateVelocityAndPosition(const float dt)
     m_pimpl->_pos.copyFrom(m_pimpl->_projPos);
 }
 
+void ParticleSystem::setProjectedPositions(const Vector3F *x)
+{
+    m_pimpl->_projPos.copyFrom(x, numParticles());
+}
+
+void ParticleSystem::dampVelocity(const float damping)
+{
+    const float d = 1.f - damping;
+    const int &n = numParticles();
+    for(int i=0;i<n;++i) {
+        m_pimpl->_vel[i] *= d;
+    }
+}
+
 }

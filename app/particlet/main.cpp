@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    QCoreApplication::setApplicationName("Qt Hello GL ES Instanced Draw");
+    QCoreApplication::setApplicationName("Projective Shape Matching Particle System");
     QCoreApplication::setOrganizationName("QtProject");
     QCoreApplication::setApplicationVersion(QT_VERSION_STR);
 

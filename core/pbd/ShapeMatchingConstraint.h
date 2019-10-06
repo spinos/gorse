@@ -26,11 +26,19 @@ public:
                         const float *mass,
                         const Vector3F *positions,
                         const int *ind);
+    void setQ(Vector3F *q, const Vector3F *p,
+                        const int *ind);
     void calculateG(Vector3F *g,
                         const Vector3F *p, 
                         const Vector3F *q);
+                        
+    void solvePosition(Vector3F &pos, 
+                    const float* q_n1, const int &vi,
+                    const int& i, const Vector3F *g) const;
                       
     const float &stiffness() const;
+    
+    static float getMass(const float &invMass);
     
 private:
 

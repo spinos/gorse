@@ -24,13 +24,19 @@ public:
     void clearRegions();
     void addRegions(const RegionEmitter &emitter, const int &offset);
     
-    void createConstraints(const ParticleSystem &particles);
+    void setParticles(ParticleSystem *particles);
+    void createConstraints();
+    
+    void applyPositionConstraint();
+    
+    ParticleSystem *particles();
     
 protected:
     
 private:
 
-    void addStiffness(const int v1, const int v2, const float &stiffness);
+    int systemDimension() const;
+    void addStiffness(const int v1, const int v2);
 
     struct Impl;
     boost::shared_ptr<Impl> m_pimpl;

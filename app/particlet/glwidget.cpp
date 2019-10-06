@@ -33,10 +33,10 @@ void GLWidget::clientInit()
     m_solver->clearRegions();
     
     alo::CurveEmitter curve;
-    for(int j=0;j<10;++j) {
+    for(int j=0;j<20;++j) {
         curve.begin();
-        for(int i=0;i<50;++i) {
-            curve << alo::Vector3F(-25.f + 1.1f * i, 25.f + .7f * j, -.9f * j - .01f * i);
+        for(int i=0;i<40;++i) {
+            curve << alo::Vector3F(-1.5f + 2.f * i, 25.f + .57f * j, -1.35f * j - .5f * i);
         }
         curve.end();
         curve.update();
@@ -45,13 +45,14 @@ void GLWidget::clientInit()
         m_solver->addRegions(curve, offset);
     }
     
-    m_solver->createConstraints(*m_particle);
+    m_solver->setParticles(m_particle);
+    m_solver->createConstraints();
 
     m_renderer->setParticles(m_particle);
     
     connect(m_thread, &SimulationThread::doneStep, this, &GLWidget::recvDoneStep);
     
-    m_thread->setParticles(m_particle);
+    m_thread->setShapeMatchingSolver(m_solver);
     m_thread->start();
 }
 
