@@ -35,6 +35,7 @@ private:
     SimulationThread *m_thread;
     ParticleRenderer *m_renderer;
     alo::ParticleSystem *m_particle;
+    alo::ParticleSystem *m_sphere;
     alo::ShapeMatchingSolver *m_solver;
 
 };

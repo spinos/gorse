@@ -24,6 +24,7 @@ public:
     void addRegion();
     void addVertex(const int ind);
     void createConstraints(const ParticleSystem &particles);
+    void setStiffness(const float &x);
     
     void applyRegionConstraint(float *b, const float *q_n1, const int iregion);
 

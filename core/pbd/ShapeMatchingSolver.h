@@ -26,6 +26,7 @@ public:
     
     void setParticles(ParticleSystem *particles);
     void createConstraints();
+    void setStiffness(const float &x);
     
     void applyPositionConstraint();
     

@@ -75,6 +75,9 @@ void ShapeMatchingArray::createConstraints(const ParticleSystem &particles)
     }
 }
 
+void ShapeMatchingArray::setStiffness(const float &x)
+{ m_pimpl->_stiffness = x; }
+
 const int &ShapeMatchingArray::numRegions() const
 { return m_pimpl->_offset.count(); }
 
@@ -121,8 +124,6 @@ void ShapeMatchingArray::applyRegionConstraint(float *b, const float *q_n1, cons
     for(int i=0;i<ne;++i) {
         const int &v1 = rind[i];
         const int &v2 = rind[i+1];
-        
-        //std::cout << "\n v1v2 " << v1 << ":" << v2;
         
         ci.solvePosition(pSpring[0], q_n1, v1, i, goals);
 		ci.solvePosition(pSpring[1], q_n1, v2, i+1, goals);

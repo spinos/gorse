@@ -13,6 +13,7 @@
 namespace alo {
     
 class Vector3F;
+class BoundingBox;
 class ParticleEmitter;
     
 class ParticleSystem {
@@ -38,6 +39,7 @@ public:
     const Vector3F *velocities() const;
     const float *inversedMasses() const;
     const int &capacity() const;
+    const BoundingBox &projectedBoundingBox() const;
     
 protected:
 

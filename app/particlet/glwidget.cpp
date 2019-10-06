@@ -8,11 +8,19 @@
 #include <pbd/ParticleSystem.h>
 #include <pbd/CurveEmitter.h>
 #include <pbd/ShapeMatchingSolver.h>
+#include <pbd/SampleEmitter.h>
+#include <smp/Triangle.h>
+#include <smp/SurfaceSample.h>
+#include <sds/SpaceFillingVector.h>
+#include <geom/GeodesicSphere.h>
+#include <rng/Lehmer.h>
+#include <rng/Uniform.h>
 
 GLWidget::GLWidget(QWidget *parent) : alo::View3DWidget(parent),
 m_thread(new SimulationThread),
 m_renderer(new ParticleRenderer),
 m_particle(new alo::ParticleSystem),
+m_sphere(new alo::ParticleSystem),
 m_solver(new alo::ShapeMatchingSolver)
 {}
 
@@ -26,6 +34,40 @@ void GLWidget::cleanup()
 
 void GLWidget::clientInit()
 {
+    typedef alo::SurfaceSample SampleTyp;
+    typedef alo::SampleInterp<SampleTyp> SampleInterpTyp;
+    typedef alo::smp::Triangle<SampleTyp > SamplerTyp;
+    SamplerTyp sampler;
+	sampler.setSampleSize(.2f);
+    
+    typedef alo::sds::SpaceFillingVector<SampleTyp> PntArrTyp;
+	PntArrTyp pnts;
+    
+    SampleTyp asmp;
+    SampleInterpTyp interp;
+    
+    alo::GeodesicSphere transient;
+    transient.scaleBy(11.f);
+    transient.translateBy(1.f, -5.f, -4.f);
+    
+    alo::Uniform<alo::Lehmer> lmlcg(654123);
+    
+    const int nt = transient.numTriangles();
+    for(int i=0;i<nt;++i) {
+        transient.getTriangle<SampleTyp, SamplerTyp >(sampler, i);
+        sampler.addSamples <PntArrTyp, SampleInterpTyp, alo::Uniform<alo::Lehmer> >(pnts, asmp, interp, &lmlcg);
+    }
+    
+    alo::BoundingBox shapeBox;
+    transient.getAabb(shapeBox);
+    
+    alo::SampleEmitter surf;
+    surf.setSamples(&pnts);
+    surf.setSampleBox(shapeBox, 2.f);
+    surf.update();
+    
+    m_sphere->create(surf);
+    
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLWidget::cleanup);
 
     m_renderer->initializeGL();
@@ -47,8 +89,6 @@ void GLWidget::clientInit()
     
     m_solver->setParticles(m_particle);
     m_solver->createConstraints();
-
-    m_renderer->setParticles(m_particle);
     
     connect(m_thread, &SimulationThread::doneStep, this, &GLWidget::recvDoneStep);
     
@@ -59,6 +99,11 @@ void GLWidget::clientInit()
 void GLWidget::clientDraw(const QMatrix4x4 &proj, const QMatrix4x4 &cam)
 {
     QMutexLocker fence(&m_thread->mutex());
+    
+    m_renderer->setParticles(m_particle);
+    m_renderer->paintGL(proj, cam);
+    
+    m_renderer->setParticles(m_sphere);
     m_renderer->paintGL(proj, cam);
 }
 

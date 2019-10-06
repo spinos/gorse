@@ -12,7 +12,7 @@
 namespace alo {
 
 ShapeMatchingConstraint::ShapeMatchingConstraint() : 
-_stiffness(.998f)
+_stiffness(.5f)
 {}
 
 void ShapeMatchingConstraint::setOffset(const int x)
@@ -118,7 +118,7 @@ const float &ShapeMatchingConstraint::stiffness() const
 
 float ShapeMatchingConstraint::getMass(const float &invMass)
 {
-    return invMass > Constant::VeryLow ? 1.f / invMass : 1e6f;
+    return invMass > Constant::VeryLow ? 1.f / invMass : Constant::VeryHigh;
 }
 
 void ShapeMatchingConstraint::solvePosition(Vector3F &pos, 

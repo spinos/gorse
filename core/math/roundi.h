@@ -10,6 +10,14 @@
 #define ALO_ROUND_I_H
 
 namespace alo {
+    
+inline int Round16(int a)
+{
+    if(a < 16) return 16;
+    int b = a>>4;
+    if(a & 15) b++;
+    return b<<4;
+}
 
 inline int Round32(int a)
 {

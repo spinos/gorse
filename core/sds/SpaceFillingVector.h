@@ -57,6 +57,8 @@ public:
 /// randomly pick a portion of the data
     template<typename Trng>
     SpaceFillingVector<T> reduceTo(int nr, Trng *rng) const;
+    
+    SpaceFillingVector<T> aggregatTo() const;
 	
 protected:
 	
@@ -224,6 +226,38 @@ SpaceFillingVector<T> SpaceFillingVector<T>::reduceTo(int nr, Trng *rng) const
 	for(int i=0;i<n;++i) {
 		if(rng->randf1() < selectRatio) res << m_v[i];
 	}
+    return res;
+}
+
+template<typename T>
+SpaceFillingVector<T> SpaceFillingVector<T>::aggregatTo() const
+{
+    SpaceFillingVector<T> res;
+    T aggr = m_v[0];
+/// must have initial weight
+	aggr._wei = 1.f;
+	
+	const int n = size();
+	for(int i=1;i<n;++i) {
+		
+		const T& cur = m_v[i];
+		if(cur._key != aggr._key) {
+			if(aggr._wei > 1.f)
+				aggr /= aggr._wei;
+			res.push_back(aggr);
+			
+			aggr = cur;
+			aggr._wei = 1.f;
+			
+		} else {
+			aggr += cur;
+			aggr._wei += 1.f;
+		}
+	}
+/// last one
+	if(aggr._wei > 1.f)
+		aggr /= aggr._wei;
+	res.push_back(aggr);
     return res;
 }
 

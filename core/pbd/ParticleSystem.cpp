@@ -8,7 +8,7 @@
 #include "ParticleSystem.h"
 #include "ParticleEmitter.h"
 #include <math/SimpleBuffer.h>
-#include <math/Vector3F.h>
+#include <math/BoundingBox.h>
 #include <math/Constant.h>
 
 namespace alo {
@@ -19,6 +19,7 @@ struct ParticleSystem::Impl {
     SimpleBuffer<Vector3F> _projPos;
     SimpleBuffer<Vector3F> _vel;
     SimpleBuffer<float> _invMass;
+    BoundingBox _bbox;
     
 };
 
@@ -45,6 +46,9 @@ const Vector3F *ParticleSystem::velocities() const
 
 const float *ParticleSystem::inversedMasses() const
 { return m_pimpl->_invMass.c_data(); }
+
+const BoundingBox &ParticleSystem::projectedBoundingBox() const
+{ return m_pimpl->_bbox; }
 
 void ParticleSystem::create(const ParticleEmitter &emitter)
 {
@@ -80,12 +84,14 @@ void ParticleSystem::addGravity(const Vector3F &g)
 
 void ParticleSystem::projectPosition(const float dt)
 {
+    m_pimpl->_bbox.reset();
     Vector3F *projX = m_pimpl->_projPos.data();
     const Vector3F *x = positions();
     const Vector3F *u = velocities();
     const int &n = numParticles();
     for(int i=0;i<n;++i) {
         projX[i] = x[i] + u[i] * dt;
+        m_pimpl->_bbox.expandBy(projX[i]);
     }
 }
 

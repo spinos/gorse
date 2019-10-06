@@ -132,7 +132,6 @@ void ShapeMatchingSolver::applyPositionConstraint()
     DenseVector<float> s_n; 
 	s_n.copy(q_n1);
     
-    
     static const float oneovert2 = 900.f;
     for(int i=0;i<np;++i) {
 
@@ -169,5 +168,8 @@ ParticleSystem *ShapeMatchingSolver::particles()
 
 int ShapeMatchingSolver::systemDimension() const
 { return m_pimpl->_particles->numParticles() * 3; }
+
+void ShapeMatchingSolver::setStiffness(const float &x)
+{ m_pimpl->_sma.setStiffness(x); }
 
 }

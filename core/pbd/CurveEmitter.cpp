@@ -34,7 +34,7 @@ void CurveEmitter::end()
 
         regionBegin();
         
-        const int nv = nleft < 8 ? nleft : 5;
+        const int nv = nleft < 7 ? nleft : 4;
         
         for(int j=0;j<nv;++j) {
             addRegionIndex(i + j);
@@ -42,7 +42,7 @@ void CurveEmitter::end()
         
         regionEnd();
         
-        if(nv > 5) break;
+        if(nv > 4) break;
     }
 }
 
@@ -58,7 +58,7 @@ void CurveEmitter::coreUpdate()
             
     createParticles(n);
     
-    const float dm = .7f / (float)n;
+    const float dm = .5f / (float)n;
     for(int i=0;i<n;++i) {
         setPosition(m_pimpl->_pos[i], i);
         setVelocity(Vector3F::Zero, i);
