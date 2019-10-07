@@ -20,6 +20,10 @@ struct ParticleSystem::Impl {
     SimpleBuffer<Vector3F> _vel;
     SimpleBuffer<float> _invMass;
     BoundingBox _bbox;
+    bool _isDynamic;
+    
+    Impl() : _isDynamic(true)
+    {}
     
 };
 
@@ -31,6 +35,12 @@ struct ParticleSystem::AParticle {
 
 ParticleSystem::ParticleSystem() : m_pimpl(new Impl)
 {}
+
+void ParticleSystem::setIsDynamic(const bool x)
+{ m_pimpl->_isDynamic = x; }
+
+const bool &ParticleSystem::isDynamic() const
+{ return m_pimpl->_isDynamic; }
 
 const int &ParticleSystem::numParticles() const
 { return m_pimpl->_pos.count(); }
@@ -46,9 +56,6 @@ const Vector3F *ParticleSystem::velocities() const
 
 const float *ParticleSystem::inversedMasses() const
 { return m_pimpl->_invMass.c_data(); }
-
-const BoundingBox &ParticleSystem::projectedBoundingBox() const
-{ return m_pimpl->_bbox; }
 
 void ParticleSystem::create(const ParticleEmitter &emitter)
 {
@@ -84,14 +91,12 @@ void ParticleSystem::addGravity(const Vector3F &g)
 
 void ParticleSystem::projectPosition(const float dt)
 {
-    m_pimpl->_bbox.reset();
     Vector3F *projX = m_pimpl->_projPos.data();
     const Vector3F *x = positions();
     const Vector3F *u = velocities();
     const int &n = numParticles();
     for(int i=0;i<n;++i) {
         projX[i] = x[i] + u[i] * dt;
-        m_pimpl->_bbox.expandBy(projX[i]);
     }
 }
 
@@ -101,9 +106,11 @@ void ParticleSystem::updateVelocityAndPosition(const float dt)
     const Vector3F *projX = projectedPositions();
     Vector3F *x = m_pimpl->_pos.data();
     Vector3F *u = m_pimpl->_vel.data();
+    m_pimpl->_bbox.reset();
     const int &n = numParticles();
     for(int i=0;i<n;++i) {
         u[i] = (projX[i] - x[i]) * invDt;
+        m_pimpl->_bbox.expandBy(projX[i]);
     }
     
     m_pimpl->_pos.copyFrom(m_pimpl->_projPos);
@@ -122,5 +129,18 @@ void ParticleSystem::dampVelocity(const float damping)
         m_pimpl->_vel[i] *= d;
     }
 }
+
+void ParticleSystem::updateAabb()
+{
+    m_pimpl->_bbox.reset();
+    const Vector3F *x = positions();
+    const int &n = numParticles();
+    for(int i=0;i<n;++i) {
+        m_pimpl->_bbox.expandBy(x[i]);
+    }
+}
+
+const BoundingBox &ParticleSystem::aabb() const
+{ return m_pimpl->_bbox; }
 
 }

@@ -30,16 +30,18 @@ public:
     void projectPosition(const float dt);
     void updateVelocityAndPosition(const float dt);
     void dampVelocity(const float damping);
-    
+    void updateAabb();
     void setProjectedPositions(const Vector3F *x);
+    void setIsDynamic(const bool x);
     
+    const bool &isDynamic() const;
     const int &numParticles() const;
     const Vector3F *positions() const;
     const Vector3F *projectedPositions() const;
     const Vector3F *velocities() const;
     const float *inversedMasses() const;
     const int &capacity() const;
-    const BoundingBox &projectedBoundingBox() const;
+    const BoundingBox &aabb() const;
     
 protected:
 

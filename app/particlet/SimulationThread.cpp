@@ -11,7 +11,8 @@
 #include <QTime>
 #include <pbd/ParticleSystem.h>
 #include <pbd/ShapeMatchingSolver.h>
-#include <math/Vector3F.h>
+#include <pbd/UniformGridCollisionSolver.h>
+#include <math/BoundingBox.h>
 
 struct SimulationThread::Impl {
     
@@ -19,6 +20,7 @@ struct SimulationThread::Impl {
     QWaitCondition _condition;
     bool _toAbort;
     alo::ShapeMatchingSolver *_sms;
+    alo::UniformGridCollisionSolver *_coll;
     
     Impl() : _toAbort(false)
     {}
@@ -48,6 +50,9 @@ void SimulationThread::stopSimulation()
 void SimulationThread::setShapeMatchingSolver(alo::ShapeMatchingSolver *x)
 { m_pimpl->_sms = x; }
 
+void SimulationThread::setCollisionSolver(alo::UniformGridCollisionSolver *x)
+{ m_pimpl->_coll = x; }
+
 void SimulationThread::run()
 {
     for(;;) {
@@ -60,9 +65,15 @@ void SimulationThread::run()
 
         alo::ShapeMatchingSolver *smSolver = m_pimpl->_sms;
         alo::ParticleSystem *particles = smSolver->particles();
+        alo::UniformGridCollisionSolver *cls = m_pimpl->_coll;
+        cls->setGridBox(particles->aabb());
+        
         const float dt = .016f;
-        particles->dampVelocity(.002f);
         particles->addGravity(alo::Vector3F(0.f, -98.f * dt, 0.f));
+        particles->dampVelocity(.002f);
+        
+        cls->resolveCollision();
+        
         particles->projectPosition(dt);
         smSolver->applyPositionConstraint();
         particles->updateVelocityAndPosition(dt);

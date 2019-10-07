@@ -14,5 +14,6 @@ const float Constant::PI2 = 6.2831853f;
 const float Constant::PIOver2 = 1.5707963f;
 const float Constant::VeryLow = 1e-10f;
 const float Constant::VeryHigh = 1e11f;
+const int Constant::HighestInt = 2147483647;
 
 }

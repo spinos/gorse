@@ -19,6 +19,7 @@ public:
     static const float PIOver2;
     static const float VeryLow;
     static const float VeryHigh;
+    static const int HighestInt;
     
 };
     

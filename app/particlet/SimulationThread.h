@@ -16,6 +16,7 @@ QT_FORWARD_DECLARE_CLASS(QMutex)
 namespace alo {
 class ParticleSystem;
 class ShapeMatchingSolver;
+class UniformGridCollisionSolver;
 }
 
 class SimulationThread : public QThread
@@ -30,6 +31,7 @@ public:
     void stopSimulation();
     
     void setShapeMatchingSolver(alo::ShapeMatchingSolver *x);
+    void setCollisionSolver(alo::UniformGridCollisionSolver *x);
     
     QMutex &mutex();
     

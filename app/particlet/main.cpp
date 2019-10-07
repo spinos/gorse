@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    QCoreApplication::setApplicationName("Projective Shape Matching Particle System");
+    QCoreApplication::setApplicationName("Projective Shape Matching Particle System Uniform Grid Collision");
     QCoreApplication::setOrganizationName("QtProject");
     QCoreApplication::setApplicationVersion(QT_VERSION_STR);
 

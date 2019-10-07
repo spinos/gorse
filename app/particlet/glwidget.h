@@ -12,6 +12,7 @@ class ParticleRenderer;
 namespace alo {
 class ParticleSystem;
 class ShapeMatchingSolver;
+class UniformGridCollisionSolver;
 }
 
 class GLWidget : public alo::View3DWidget
@@ -37,7 +38,8 @@ private:
     alo::ParticleSystem *m_particle;
     alo::ParticleSystem *m_sphere;
     alo::ShapeMatchingSolver *m_solver;
-
+    alo::UniformGridCollisionSolver *m_collider;
+    
 };
 
 #endif

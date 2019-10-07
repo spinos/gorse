@@ -9,6 +9,7 @@
 #include <pbd/CurveEmitter.h>
 #include <pbd/ShapeMatchingSolver.h>
 #include <pbd/SampleEmitter.h>
+#include <pbd/UniformGridCollisionSolver.h>
 #include <smp/Triangle.h>
 #include <smp/SurfaceSample.h>
 #include <sds/SpaceFillingVector.h>
@@ -21,7 +22,8 @@ m_thread(new SimulationThread),
 m_renderer(new ParticleRenderer),
 m_particle(new alo::ParticleSystem),
 m_sphere(new alo::ParticleSystem),
-m_solver(new alo::ShapeMatchingSolver)
+m_solver(new alo::ShapeMatchingSolver),
+m_collider(new alo::UniformGridCollisionSolver)
 {}
 
 void GLWidget::cleanup()
@@ -67,6 +69,8 @@ void GLWidget::clientInit()
     surf.update();
     
     m_sphere->create(surf);
+    m_sphere->setIsDynamic(false);
+    m_collider->addParticles(m_sphere);
     
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLWidget::cleanup);
 
@@ -86,6 +90,9 @@ void GLWidget::clientInit()
         m_particle->create(curve);
         m_solver->addRegions(curve, offset);
     }
+    m_particle->updateAabb();
+    m_collider->addParticles(m_particle);
+    m_collider->setCellSize(4.f);
     
     m_solver->setParticles(m_particle);
     m_solver->createConstraints();
@@ -93,6 +100,7 @@ void GLWidget::clientInit()
     connect(m_thread, &SimulationThread::doneStep, this, &GLWidget::recvDoneStep);
     
     m_thread->setShapeMatchingSolver(m_solver);
+    m_thread->setCollisionSolver(m_collider);
     m_thread->start();
 }
 
