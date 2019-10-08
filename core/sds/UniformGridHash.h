@@ -15,6 +15,7 @@ namespace alo {
 class BoundingBox;
 class Vector3F;
 struct Int3;
+struct Int2;
 
 namespace sds {
   
@@ -34,7 +35,9 @@ public:
     
     Int3 calculateCellCoord(const Vector3F &p) const;
     Int3 getOffsetCellCoord(const Int3 &c, const int i) const;
-    int getCellStart(const Int3 &c) const;
+    Int2 getCellRange(const Int3 &c) const;
+    
+    const int &indirection(const int i) const;
 
 protected:
 

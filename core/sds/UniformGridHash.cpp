@@ -11,6 +11,7 @@
 #include <math/Constant.h>
 #include <math/QuickSort.h>
 #include <math/Int3.h>
+#include <math/Int2.h>
 
 namespace alo {
     
@@ -55,6 +56,7 @@ struct UniformGridHash::Impl {
     
     SimpleBuffer<KeyInd> _table;
     SimpleBuffer<int> _cellStart;
+    SimpleBuffer<int> _cellFinish;
     Vector3F _gridOrigin;
     float _cellSize;
     float _invCellSize;
@@ -64,6 +66,7 @@ struct UniformGridHash::Impl {
     _invCellSize(1.f)
     {
         _cellStart.resetBuffer(2097152);
+        _cellFinish.resetBuffer(2097152);
     }
     
 };
@@ -123,17 +126,21 @@ void UniformGridHash::findCellStarts()
     const int &n = table.count();
     QuickSort1::SortByKey<int, KeyInd>(table.data(), 0, n - 1);
     
-    memset(m_pimpl->_cellStart.data(), 1, 2097152<<2);
-    
+/// reset to -1
+    memset(m_pimpl->_cellStart.data(), 255, 2097152<<2);
+
     int preK = -1;
-    for(int i=0;i<n;++i) {
+    int i=0;
+    for(;i<n;++i) {
         const int &curK = table[i]._key;
         if(curK > 2097152) break;
         if(curK != preK) {
+            if(preK > -1) m_pimpl->_cellFinish[preK] = i;
             preK = curK;
             m_pimpl->_cellStart[curK] = i;
         }
     }
+    if(preK > -1) m_pimpl->_cellFinish[preK] = i;
 }
 
 Int3 UniformGridHash::calculateCellCoord(const Vector3F &p) const
@@ -159,12 +166,15 @@ int UniformGridHash::calculateCellHash(const Int3 &c) const
     return c.z * 16384 + c.y * 128 + c.x;
 }
 
-int UniformGridHash::getCellStart(const Int3 &c) const
+Int2 UniformGridHash::getCellRange(const Int3 &c) const
 {
     int i = calculateCellHash(c);
-    if(i<0) return -1;
-    return m_pimpl->_cellStart[i];
+    if(i<0) return Int2(-1,-1);
+    return Int2(m_pimpl->_cellStart[i], m_pimpl->_cellFinish[i]);
 }
+
+const int &UniformGridHash::indirection(const int i) const
+{ return m_pimpl->_table[i]._ind; }
 
 }
   

@@ -7,9 +7,11 @@
  
 #include "UniformGridCollisionSolver.h"
 #include <sds/UniformGridHash.h>
+#include "SphereCollision.h"
 #include "ParticleSystem.h"
 #include <math/BoundingBox.h>
 #include <math/Int3.h>
+#include <math/Int2.h>
 #include <vector>
 
 namespace alo {
@@ -18,6 +20,7 @@ struct UniformGridCollisionSolver::Impl {
     
     std::vector<ParticleSystem *> _parts;
     sds::UniformGridHash _grid;
+    SphereCollision _sphereToSphere;
     
 };
 
@@ -48,10 +51,8 @@ void UniformGridCollisionSolver::resolveCollision()
     
     grid.findCellStarts();
     
-    offset = 0;
     for(int i=0;i<n;++i) {
-        collideParticles(i, offset);
-        offset += particles(i)->numParticles();
+        collideParticles(i);
     }
 }
 
@@ -68,8 +69,7 @@ void UniformGridCollisionSolver::mapParticles(const int isys,
     }
 }
 
-void UniformGridCollisionSolver::collideParticles(const int isys,
-                                const int offset)
+void UniformGridCollisionSolver::collideParticles(const int isys)
 {
     ParticleSystem *psys = m_pimpl->_parts[isys];
     if(!psys->isDynamic()) return;
@@ -79,21 +79,37 @@ void UniformGridCollisionSolver::collideParticles(const int isys,
     const Vector3F *vel = psys->velocities();
     const int &n = psys->numParticles();
     for(int i=0;i<n;++i) {
-        Vector3F collideForce(0.f, 0.f, 0.f);
+        const int ind = encodeParticle(isys, i);
+        Vector3F collisionForce(0.f, 0.f, 0.f);
         const Int3 c = grid.calculateCellCoord(pos[i]);
         for(int j=0;j<27;++j) {
             const Int3 nc = grid.getOffsetCellCoord(c, j);
-            const int cellStart = grid.getCellStart(nc);
-            if(cellStart < 0) continue;
-            collideParticlesInCell(collideForce, pos[i], vel[i], cellStart, offset + i);
+            const Int2 cellR = grid.getCellRange(nc);
+            if(cellR.x < 0) continue;
+            collideParticlesInCell(collisionForce, pos[i], vel[i], cellR, ind);
         }
+        
+        psys->setForce(collisionForce, i);
     }
 }
 
 void UniformGridCollisionSolver::collideParticlesInCell(Vector3F &force,
                     const Vector3F &pos, const Vector3F &vel,
-                    const int cellStart, const int tableIdx)
+                    const Int2 &cellRange, const int ind) const
 {
+    const sds::UniformGridHash &grid = m_pimpl->_grid;
+    Vector3F pos2, vel2;
+    int sys2, i2;
+    for(int i = cellRange.x;i < cellRange.y;++i) {
+        const int &idx = grid.indirection(i);
+        if(idx==ind) continue;
+        
+        decodeParticle(sys2, i2, idx);
+        
+        readParticle(pos2, vel2, sys2, i2);
+        
+        force += m_pimpl->_sphereToSphere.calculateForce(pos, pos2, vel, vel2);
+    }
 }
 
 int UniformGridCollisionSolver::totalNumParticles() const
@@ -112,13 +128,21 @@ int UniformGridCollisionSolver::numParticleSystems() const
 ParticleSystem *UniformGridCollisionSolver::particles(const int i)
 { return m_pimpl->_parts[i]; }
 
+void UniformGridCollisionSolver::readParticle(Vector3F &pos, Vector3F &vel,
+                    const int isys, const int i) const
+{
+    const ParticleSystem *psys = m_pimpl->_parts[isys];
+    pos = psys->positions()[i];
+    vel = psys->velocities()[i];
+}
+
 int UniformGridCollisionSolver::encodeParticle(const int sys, const int i)
-{ return (sys << 20) | i; }
+{ return (sys << 21) | i; }
 
 void UniformGridCollisionSolver::decodeParticle(int &sys, int &i, const int x)
 {
-    i = x & 1048575;
-    sys = x >> 20;
+    i = x & 2097151;
+    sys = x >> 21;
 }
     
 }

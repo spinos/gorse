@@ -12,6 +12,7 @@
 
 namespace alo {
     
+struct Int2;
 class Vector3F;
 class BoundingBox;
 class ParticleSystem;
@@ -37,13 +38,15 @@ protected:
 private:
 
     ParticleSystem *particles(const int i);
+    void readParticle(Vector3F &pos, Vector3F &vel,
+                    const int isys, const int i) const;
 
     void mapParticles(const int isys, const int offset);
                     
-    void collideParticles(const int isys, const int offset);
+    void collideParticles(const int isys);
     void collideParticlesInCell(Vector3F &force,
                     const Vector3F &pos, const Vector3F &vel,
-                    const int cellStart, const int tableIdx);
+                    const Int2 &cellRange, const int ind) const;
                     
     static int encodeParticle(const int sys, const int i);
     static void decodeParticle(int &sys, int &i, const int x);

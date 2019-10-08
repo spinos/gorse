@@ -18,6 +18,7 @@ struct ParticleSystem::Impl {
     SimpleBuffer<Vector3F> _pos;
     SimpleBuffer<Vector3F> _projPos;
     SimpleBuffer<Vector3F> _vel;
+    SimpleBuffer<Vector3F> _force;
     SimpleBuffer<float> _invMass;
     BoundingBox _bbox;
     bool _isDynamic;
@@ -73,6 +74,7 @@ void ParticleSystem::addParticle(const AParticle &x)
     m_pimpl->_pos << x._pos;
     m_pimpl->_projPos << x._pos;
     m_pimpl->_vel << x._vel;
+    m_pimpl->_force << Vector3F::Zero;
     m_pimpl->_invMass << (1.f / x._mass);
 }
 
@@ -120,6 +122,9 @@ void ParticleSystem::setProjectedPositions(const Vector3F *x)
 {
     m_pimpl->_projPos.copyFrom(x, numParticles());
 }
+
+void ParticleSystem::setForce(const Vector3F &x, const int i)
+{ m_pimpl->_force[i] = x; }
 
 void ParticleSystem::dampVelocity(const float damping)
 {
