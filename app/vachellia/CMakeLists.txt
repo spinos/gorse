@@ -1,4 +1,4 @@
-set (RELEASE_VER " 0.1.0 ") 
+set (RELEASE_VER " 0.1.1 ") 
 string(TIMESTAMP LINK_DATE_TIME "%Y-%m-%d %H:%M:%S")
 file(WRITE "mimes/linktimestamp.txt" ${RELEASE_VER} ${LINK_DATE_TIME})
 
