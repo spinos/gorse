@@ -12,7 +12,7 @@
 namespace alo {
 
 ShapeMatchingConstraint::ShapeMatchingConstraint() : 
-_stiffness(.5f)
+_stiffness(1.0f)
 {}
 
 void ShapeMatchingConstraint::setOffset(const int x)

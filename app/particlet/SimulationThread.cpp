@@ -9,7 +9,6 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <QTime>
-#include <pbd/ParticleSystem.h>
 #include <pbd/ShapeMatchingSolver.h>
 #include <pbd/UniformGridCollisionSolver.h>
 #include <math/BoundingBox.h>
@@ -64,22 +63,21 @@ void SimulationThread::run()
         const QTime t0 = QTime::currentTime();
 
         alo::ShapeMatchingSolver *smSolver = m_pimpl->_sms;
-        alo::ParticleSystem *particles = smSolver->particles();
         alo::UniformGridCollisionSolver *cls = m_pimpl->_coll;
-        cls->setGridBox(particles->aabb());
+        cls->setGridBox(smSolver->aabb());
         
         const float dt = 1.f / 60.f;
 		
-        particles->addGravity(alo::Vector3F(0.f, -98.f * dt, 0.f));
-        particles->dampVelocity(.002f);
+        smSolver->applyGravity(alo::Vector3F(0.f, -98.f * dt, 0.f));
+        smSolver->applyDamping(.002f);
 		
 		cls->resolveCollision();
 		
-		particles->projectPosition(dt);
+		smSolver->projectPosition(dt);
 		
         smSolver->applyPositionConstraint();
 		
-        particles->updateVelocityAndPosition(dt);
+        smSolver->integrate(dt);
 		
 		cls->resolveCollision(true);
         

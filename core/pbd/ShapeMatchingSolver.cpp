@@ -172,4 +172,19 @@ int ShapeMatchingSolver::systemDimension() const
 void ShapeMatchingSolver::setStiffness(const float &x)
 { m_pimpl->_sma.setStiffness(x); }
 
+void ShapeMatchingSolver::applyGravity(const Vector3F &x)
+{ m_pimpl->_particles->addGravity(x); }
+
+void ShapeMatchingSolver::applyDamping(const float &x)
+{ m_pimpl->_particles->dampVelocity(x); }
+
+void ShapeMatchingSolver::projectPosition(const float &dt)
+{ m_pimpl->_particles->projectPosition(dt); }
+
+void ShapeMatchingSolver::integrate(const float &dt)
+{ m_pimpl->_particles->updateVelocityAndPosition(dt); }
+
+const BoundingBox &ShapeMatchingSolver::aabb() const
+{ return m_pimpl->_particles->aabb(); }
+
 }

@@ -12,6 +12,8 @@
 
 namespace alo {
     
+class Vector3F;
+class BoundingBox;
 class RegionEmitter;
 class ParticleSystem;
     
@@ -29,10 +31,16 @@ public:
     void setStiffness(const float &x);
     
     void applyPositionConstraint();
+    void applyGravity(const Vector3F &x);
+    void applyDamping(const float &x);
+    void projectPosition(const float &dt);
+    void integrate(const float &dt);
     
-    ParticleSystem *particles();
+    const BoundingBox &aabb() const;
     
 protected:
+    
+    ParticleSystem *particles();
     
 private:
 

@@ -9,10 +9,14 @@
 #include <sds/UniformGridHash.h>
 #include "SphereCollision.h"
 #include "ParticleSystem.h"
+#include <math/SimpleBuffer.h>
 #include <math/BoundingBox.h>
 #include <math/Int3.h>
 #include <math/Int2.h>
+#include <math/Absolute.h>
 #include <vector>
+#include <boost/thread.hpp>
+#include <boost/chrono/include.hpp>
 
 namespace alo {
     
@@ -21,6 +25,8 @@ struct UniformGridCollisionSolver::Impl {
     std::vector<ParticleSystem *> _parts;
     sds::UniformGridHash _grid;
     SphereCollision _sphereToSphere;
+    SimpleBuffer<Vector3F> _pos;
+    SimpleBuffer<Vector3F> _vel;
     
 };
 
@@ -41,10 +47,25 @@ void UniformGridCollisionSolver::resolveCollision(const bool lazy)
 {
     sds::UniformGridHash &grid = m_pimpl->_grid;
 	const int n = numParticleSystems();
-	if(!lazy) {
-    grid.setTableSize(totalNumParticles());
+    const int np = totalNumParticles();
+    if(m_pimpl->_pos.capacity() < np) {
+        m_pimpl->_pos.resetBuffer(np);
+        m_pimpl->_vel.resetBuffer(np);
+    }
     
     int offset = 0;
+    for(int i=0;i<n;++i) {
+        const ParticleSystem *parti = particles(i);
+        const int &ni = parti->numParticles();
+        m_pimpl->_pos.copyFrom(parti->positions(), ni, offset);
+        m_pimpl->_vel.copyFrom(parti->velocities(), ni, offset);
+        offset += ni;
+    }
+    
+	if(!lazy) {
+    grid.setTableSize(np);
+    
+        offset = 0;
     
     for(int i=0;i<n;++i) {
         mapParticles(i, offset);
@@ -55,8 +76,10 @@ void UniformGridCollisionSolver::resolveCollision(const bool lazy)
 	
 	}
     
+    offset = 0;
     for(int i=0;i<n;++i) {
-        collideParticles(i);
+        collideParticles(i, offset);
+        offset += particles(i)->numParticles();
     }
 	
 	for(int i=0;i<n;++i) {
@@ -69,54 +92,53 @@ void UniformGridCollisionSolver::mapParticles(const int isys,
 {
     const ParticleSystem *psys = m_pimpl->_parts[isys];
     sds::UniformGridHash &grid = m_pimpl->_grid;
-    const Vector3F *pos = psys->positions();
     const int &n = psys->numParticles();
     for(int i=0;i<n;++i) {
-        const int ind = encodeParticle(isys, i);
-        grid.mapPosition(pos[i], ind, offset + i);
+        const int ind = offset + i;
+        grid.mapPosition(m_pimpl->_pos[ind], ind, ind);
     }
 }
 
-void UniformGridCollisionSolver::collideParticles(const int isys)
+void UniformGridCollisionSolver::collideParticles(const int isys,
+                                const int offset)
 {
     ParticleSystem *psys = m_pimpl->_parts[isys];
     if(!psys->isDynamic()) return;
     
     const sds::UniformGridHash &grid = m_pimpl->_grid;
-    const Vector3F *pos = psys->positions();
-    const Vector3F *vel = psys->velocities();
+    
+    Vector3F collisionForce;
+
     const int &n = psys->numParticles();
     for(int i=0;i<n;++i) {
-        const int ind = encodeParticle(isys, i);
-        Vector3F collisionForce(0.f, 0.f, 0.f);
-        const Int3 c = grid.calculateCellCoord(pos[i]);
-        for(int j=0;j<27;++j) {
-            const Int3 nc = grid.getOffsetCellCoord(c, j);
-            const Int2 cellR = grid.getCellRange(nc);
-            if(cellR.x < 0) continue;
-            collideParticlesInCell(collisionForce, pos[i], vel[i], cellR, ind);
-        }
-        
+        const int ind = offset + i;
+        collideParticlesInCells(collisionForce, m_pimpl->_pos[ind], m_pimpl->_vel[ind], ind);
         psys->setImpulse(collisionForce, i);
+
     }
 }
 
-void UniformGridCollisionSolver::collideParticlesInCell(Vector3F &force,
+void UniformGridCollisionSolver::collideParticlesInCells(Vector3F &force,
                     const Vector3F &pos, const Vector3F &vel,
-                    const Int2 &cellRange, const int ind) const
+                    const int ind) const
 {
+    force.setZero();
     const sds::UniformGridHash &grid = m_pimpl->_grid;
-    Vector3F pos2, vel2;
-    int sys2, i2;
-    for(int i = cellRange.x;i < cellRange.y;++i) {
-        const int &idx = grid.indirection(i);
-        if(idx==ind) continue;
+    
+    const Int3 c = grid.calculateCellCoord(pos);
+
+    for(int j=0;j<27;++j) {
+        const Int3 nc = grid.getOffsetCellCoord(c, j);
+        const Int2 cellRange = grid.getCellRange(nc);
+        if(cellRange.x < 0) continue;
         
-        decodeParticle(sys2, i2, idx);
-        
-        readParticle(pos2, vel2, sys2, i2);
-        
-        force += m_pimpl->_sphereToSphere.calculateForce(pos, pos2, vel, vel2);
+        for(int i = cellRange.x;i < cellRange.y;++i) {
+            const int &idx = grid.indirection(i);
+            if(Absolute<int>::f(idx - ind) < 2) continue;
+       
+            force += m_pimpl->_sphereToSphere.calculateForce(pos, m_pimpl->_pos[idx], 
+                                    vel, m_pimpl->_vel[idx]);
+        }
     }
 }
 
@@ -143,22 +165,5 @@ int UniformGridCollisionSolver::numParticleSystems() const
 
 ParticleSystem *UniformGridCollisionSolver::particles(const int i)
 { return m_pimpl->_parts[i]; }
-
-void UniformGridCollisionSolver::readParticle(Vector3F &pos, Vector3F &vel,
-                    const int isys, const int i) const
-{
-    const ParticleSystem *psys = m_pimpl->_parts[isys];
-    pos = psys->positions()[i];
-    vel = psys->velocities()[i];
-}
-
-int UniformGridCollisionSolver::encodeParticle(const int sys, const int i)
-{ return (sys << 21) | i; }
-
-void UniformGridCollisionSolver::decodeParticle(int &sys, int &i, const int x)
-{
-    i = x & 2097151;
-    sys = x >> 21;
-}
     
 }
