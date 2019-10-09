@@ -58,7 +58,7 @@ void CurveEmitter::coreUpdate()
             
     createParticles(n);
     
-    const float dm = .5f / (float)n;
+    const float dm = .7f / (float)n;
     for(int i=0;i<n;++i) {
         setPosition(m_pimpl->_pos[i], i);
         setVelocity(Vector3F::Zero, i);

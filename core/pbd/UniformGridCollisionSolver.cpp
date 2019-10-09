@@ -37,22 +37,30 @@ void UniformGridCollisionSolver::setCellSize(const float x)
 void UniformGridCollisionSolver::setGridBox(const BoundingBox &b)
 { m_pimpl->_grid.setGridBox(b); }
 
-void UniformGridCollisionSolver::resolveCollision()
+void UniformGridCollisionSolver::resolveCollision(const bool lazy)
 {
     sds::UniformGridHash &grid = m_pimpl->_grid;
+	const int n = numParticleSystems();
+	if(!lazy) {
     grid.setTableSize(totalNumParticles());
     
     int offset = 0;
-    const int n = numParticleSystems();
+    
     for(int i=0;i<n;++i) {
         mapParticles(i, offset);
         offset += particles(i)->numParticles();
     }
     
     grid.findCellStarts();
+	
+	}
     
     for(int i=0;i<n;++i) {
         collideParticles(i);
+    }
+	
+	for(int i=0;i<n;++i) {
+        updateVelocities(i);
     }
 }
 
@@ -89,7 +97,7 @@ void UniformGridCollisionSolver::collideParticles(const int isys)
             collideParticlesInCell(collisionForce, pos[i], vel[i], cellR, ind);
         }
         
-        psys->setForce(collisionForce, i);
+        psys->setImpulse(collisionForce, i);
     }
 }
 
@@ -110,6 +118,14 @@ void UniformGridCollisionSolver::collideParticlesInCell(Vector3F &force,
         
         force += m_pimpl->_sphereToSphere.calculateForce(pos, pos2, vel, vel2);
     }
+}
+
+void UniformGridCollisionSolver::updateVelocities(const int isys)
+{
+	ParticleSystem *psys = m_pimpl->_parts[isys];
+    if(!psys->isDynamic()) return;
+	
+	psys->applyImpulse();
 }
 
 int UniformGridCollisionSolver::totalNumParticles() const

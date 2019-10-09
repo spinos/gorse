@@ -32,8 +32,9 @@ public:
     void dampVelocity(const float damping);
     void updateAabb();
     void setProjectedPositions(const Vector3F *x);
-    void setForce(const Vector3F &x, const int i);
+    void setImpulse(const Vector3F &x, const int i);
     void setIsDynamic(const bool x);
+	void applyImpulse();
     
     const bool &isDynamic() const;
     const int &numParticles() const;

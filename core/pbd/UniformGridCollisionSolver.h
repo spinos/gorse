@@ -28,7 +28,7 @@ public:
     void setCellSize(const float x);
     void setGridBox(const BoundingBox &b);
     
-    void resolveCollision();
+    void resolveCollision(const bool lazy = false);
     
     int totalNumParticles() const;
     int numParticleSystems() const;
@@ -47,6 +47,7 @@ private:
     void collideParticlesInCell(Vector3F &force,
                     const Vector3F &pos, const Vector3F &vel,
                     const Int2 &cellRange, const int ind) const;
+	void updateVelocities(const int isys);
                     
     static int encodeParticle(const int sys, const int i);
     static void decodeParticle(int &sys, int &i, const int x);

@@ -49,8 +49,8 @@ void GLWidget::clientInit()
     SampleInterpTyp interp;
     
     alo::GeodesicSphere transient;
-    transient.scaleBy(11.f);
-    transient.translateBy(1.f, -5.f, -4.f);
+    transient.scaleBy(23.f);
+    transient.translateBy(1.f, -10.f, -11.f);
     
     alo::Uniform<alo::Lehmer> lmlcg(654123);
     
@@ -65,7 +65,7 @@ void GLWidget::clientInit()
     
     alo::SampleEmitter surf;
     surf.setSamples(&pnts);
-    surf.setSampleBox(shapeBox, 2.f);
+    surf.setSampleBox(shapeBox, 1.9f);
     surf.update();
     
     m_sphere->create(surf);
@@ -76,13 +76,14 @@ void GLWidget::clientInit()
 
     m_renderer->initializeGL();
     
+	m_solver->setStiffness(40000);
     m_solver->clearRegions();
     
     alo::CurveEmitter curve;
-    for(int j=0;j<20;++j) {
+    for(int j=0;j<32;++j) {
         curve.begin();
-        for(int i=0;i<40;++i) {
-            curve << alo::Vector3F(-1.5f + 2.f * i, 25.f + .57f * j, -1.35f * j - .5f * i);
+        for(int i=0;i<50;++i) {
+            curve << alo::Vector3F(-1.5f + 2.f * i, 25.f + 1.f * j, -1.f * j - 1.f * i);
         }
         curve.end();
         curve.update();

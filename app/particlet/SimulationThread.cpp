@@ -68,15 +68,20 @@ void SimulationThread::run()
         alo::UniformGridCollisionSolver *cls = m_pimpl->_coll;
         cls->setGridBox(particles->aabb());
         
-        const float dt = .016f;
+        const float dt = 1.f / 60.f;
+		
         particles->addGravity(alo::Vector3F(0.f, -98.f * dt, 0.f));
         particles->dampVelocity(.002f);
-        
-        cls->resolveCollision();
-        
-        particles->projectPosition(dt);
+		
+		cls->resolveCollision();
+		
+		particles->projectPosition(dt);
+		
         smSolver->applyPositionConstraint();
+		
         particles->updateVelocityAndPosition(dt);
+		
+		cls->resolveCollision(true);
         
         const QTime t1 = QTime::currentTime();
         const int elapsedMs = t1.msecsTo(t0);

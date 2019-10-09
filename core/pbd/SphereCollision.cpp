@@ -17,10 +17,9 @@ struct SphereCollision::Impl {
     float _damping;
     float _shear;
     
-    Impl() : _distance(1.f),
-    _spring(.5f),
-    _damping(.02f),
-    _shear(.1f)
+    Impl() : _distance(2.f),
+    _spring(20.f),
+    _damping(0.01f)
     {}
     
 };
@@ -38,11 +37,9 @@ Vector3F SphereCollision::calculateForce(const Vector3F &pos1, const Vector3F &p
     
     const Vector3F norm = relPos / d;
     const Vector3F relVel = vel2 - vel1;
-    const Vector3F tanVel = relVel - norm * relVel.dot(norm);
 
     Vector3F force = norm * (-m_pimpl->_spring * (m_pimpl->_distance - d));
     force += relVel * m_pimpl->_damping;
-    force += tanVel * m_pimpl->_shear;
     return force;
 }
     
